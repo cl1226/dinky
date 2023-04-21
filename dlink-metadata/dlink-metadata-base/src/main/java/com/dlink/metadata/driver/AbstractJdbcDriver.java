@@ -38,6 +38,7 @@ import com.dlink.result.SqlExplainResult;
 import com.dlink.utils.LogUtil;
 import com.dlink.utils.TextUtil;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -59,6 +60,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,8 +119,16 @@ public abstract class AbstractJdbcDriver extends AbstractDriver {
     public Driver setDriverConfig(DriverConfig config) {
         this.config = config;
         try {
+            if (config.getType().equals("Hive") && config.getUrl().contains("principal")) {
+                System.setProperty("java.security.krb5.conf", "/etc/krb5.conf");
+                Configuration configuration = new Configuration();
+                configuration.set("hadoop.security.authentication" , "Kerberos");
+                configuration.setBoolean("hadoop.security.authorization", true);
+                UserGroupInformation.setConfiguration(configuration);
+                UserGroupInformation.loginUserFromKeytab("svolt@SVOLT.COM" , "/opt/keytab/svolt.keytab");
+            }
             this.dataSource = createDataSource();
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
         return this;

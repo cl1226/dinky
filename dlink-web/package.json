@@ -63,6 +63,7 @@
     "@ant-design/pro-layout": "^6.18.0",
     "@ant-design/pro-list": "^1.10.3",
     "@ant-design/pro-table": "^2.36.0",
+    "@antv/xflow": "^1.0.55",
     "@types/lodash.isequal": "^4.5.5",
     "@umijs/openapi": "^1.1.14",
     "@umijs/plugin-openapi": "^1.2.0",

@@ -28,6 +28,8 @@ export default {
 
   'menu.dataStudio': '数据开发',
 
+  'menu.scheduler': '调度中心',
+
   'menu.devops': '运维中心',
   'menu.job': '作业实例',
 

@@ -29,6 +29,8 @@ export default {
 
   'menu.dataStudio': 'Data Studio',
 
+  'menu.scheduler': 'Scheduler',
+
   'menu.devops': 'Devops',
   'menu.job': 'Job Instance',
 

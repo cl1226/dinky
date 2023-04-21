@@ -166,6 +166,13 @@ export default {
   'pages.datastudio.sql.query': 'SQL 查询',
   'pages.datastudio.submit.job': '提交作业',
 
+  'pages.scheduler.workflow.develop': '流程开发',
+  'pages.scheduler.editor.fullScreen': '全屏',
+  'pages.scheduler.label.jobInfo': '流程信息',
+  'pages.Scheduler.label.jobInfo.id': '流程ID',
+  'pages.Scheduler.label.jobInfo.name': '流程名称',
+  'pages.Scheduler.label.jobInfo.versionId': '流程版本',
+
   'pages.devops.jobstatus.SUCCESS': '成功',
   'pages.devops.jobstatus.CREATED': '已创建',
   'pages.devops.jobstatus.INITIALIZING': '初始化',

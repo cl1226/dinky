@@ -57,6 +57,20 @@ export default [
     component: './DataStudio',
   },
   {
+    path: '/scheduler',
+    name: 'scheduler',
+    icon: 'nodeExpand',
+    footerRender: false,
+    component: './Scheduler',
+  },
+  // {
+  //   path: '/scheduler',
+  //   name: 'scheduler',
+  //   icon: 'nodeExpand',
+  //   footerRender: false,
+  //   component: './Scheduler',
+  // },
+  {
     path: '/devops',
     name: 'devops',
     icon: 'control',

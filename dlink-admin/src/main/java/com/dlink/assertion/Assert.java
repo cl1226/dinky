@@ -20,10 +20,7 @@
 package com.dlink.assertion;
 
 import com.dlink.exception.BusException;
-import com.dlink.model.Cluster;
-import com.dlink.model.Jar;
-import com.dlink.model.Statement;
-import com.dlink.model.Task;
+import com.dlink.model.*;
 
 /**
  * Assert
@@ -42,6 +39,12 @@ public interface Assert {
     static void check(Task task) {
         if (task == null) {
             throw new BusException("作业不存在");
+        }
+    }
+
+    static void check(WorkflowTask task) {
+        if (task == null) {
+            throw new BusException("工作流作业不存在");
         }
     }
 
