@@ -2,7 +2,7 @@ import type { NsGraphCmd } from '@antv/xflow'
 import { createCmdConfig, DisposableCollection, XFlowGraphCommands } from '@antv/xflow'
 import type { IApplication } from '@antv/xflow'
 import type { IGraphPipelineCommand } from '@antv/xflow'
-import { MockApi } from './service'
+import { XFlowApi } from './service'
 import { commandContributions } from './cmd-extensions'
 
 export const useCmdConfig = createCmdConfig(config => {
@@ -14,33 +14,33 @@ export const useCmdConfig = createCmdConfig(config => {
       hooks.graphMeta.registerHook({
         name: 'get graph meta from backend',
         handler: async args => {
-          args.graphMetaService = MockApi.queryGraphMeta
+          args.graphMetaService = XFlowApi.queryGraphMeta
         },
       }),
       hooks.saveGraphData.registerHook({
         name: 'save graph data',
         handler: async args => {
           if (!args.saveGraphDataService) {
-            args.saveGraphDataService = MockApi.saveGraphData
+            args.saveGraphDataService = XFlowApi.saveGraphData
           }
         },
       }),
       hooks.addNode.registerHook({
         name: 'get node config from backend api',
         handler: async args => {
-          args.createNodeService = MockApi.addNode
+          args.createNodeService = XFlowApi.addNode
         },
       }),
       hooks.delNode.registerHook({
         name: 'get edge config from backend api',
         handler: async args => {
-          args.deleteNodeService = MockApi.delNode
+          args.deleteNodeService = XFlowApi.delNode
         },
       }),
       hooks.addEdge.registerHook({
         name: 'get edge config from backend api',
         handler: async args => {
-          args.createEdgeService = MockApi.addEdge
+          args.createEdgeService = XFlowApi.addEdge
           args.edgeConfig = {
             ...args.edgeConfig,
             connector: { name: 'rounded' },
@@ -53,7 +53,7 @@ export const useCmdConfig = createCmdConfig(config => {
       hooks.delEdge.registerHook({
         name: 'get edge config from backend api',
         handler: async args => {
-          args.deleteEdgeService = MockApi.delEdge
+          args.deleteEdgeService = XFlowApi.delEdge
         },
       }),
     ]
@@ -72,7 +72,7 @@ export const initGraphCmds = (app: IApplication) => {
       getCommandOption: async () => {
         return {
           args: {
-            loadDataService: MockApi.loadGraphData,
+            loadDataService: XFlowApi.loadGraphData,
           },
         }
       },

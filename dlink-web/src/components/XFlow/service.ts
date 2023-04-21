@@ -4,8 +4,14 @@ import { uuidv4, NsGraph, NsGraphStatusCommand } from '@antv/xflow'
 import type { NsRenameNodeCmd } from './cmd-extensions/cmd-rename-node-modal'
 import type { NsNodeCmd, NsEdgeCmd, NsGraphCmd } from '@antv/xflow'
 import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
+import {
+  CODE,
+  getInfoById,
+  handleAddOrUpdate,
+} from "@/components/Common/crud";
+
 /** mock 后端接口调用 */
-export namespace MockApi {
+export namespace XFlowApi {
   export const NODE_COMMON_PROPS = {
     renderKey: DND_RENDER_ID,
     width: NODE_WIDTH,
@@ -19,23 +25,26 @@ export namespace MockApi {
   }
   /** 加载图数据的api */
   export const loadGraphData = async (meta: NsGraph.IGraphMeta) => {
-    const nodes: NsGraph.INodeConfig[] = [
-      
-    ]
-    const edges: NsGraph.IEdgeConfig[] = [
-      
-    ]
+    const result = await getInfoById('/api/workflow/task', 162)
+    let graphData = JSON.parse(result.datas.graphData)
+    const nodes: NsGraph.INodeConfig[] = graphData.nodes
+    const edges: NsGraph.IEdgeConfig[] = graphData.edges
+
     return { nodes, edges }
   }
+
   /** 保存图数据的api */
   export const saveGraphData: NsGraphCmd.SaveGraphData.IArgs['saveGraphDataService'] = async (
     meta: NsGraph.IGraphMeta,
     graphData: NsGraph.IGraphData,
   ) => {
-    console.log('saveGraphData api', meta, graphData)
+    let workflowTask = {
+      id: 162,
+      graphData: JSON.stringify(graphData)
+    }
+    const success = await handleAddOrUpdate('/api/workflow/task', workflowTask);
     return {
-      success: true,
-      data: graphData,
+      success: success
     }
   }
   /** 部署图数据的api */
@@ -60,16 +69,6 @@ export namespace MockApi {
         type: NsGraph.AnchorType.INPUT,
         group: NsGraph.AnchorGroup.TOP,
         tooltip: '输入桩1',
-      },
-      {
-        type: NsGraph.AnchorType.INPUT,
-        group: NsGraph.AnchorGroup.TOP,
-        tooltip: '输入桩2',
-      },
-      {
-        type: NsGraph.AnchorType.INPUT,
-        group: NsGraph.AnchorGroup.TOP,
-        tooltip: '输入桩3',
       },
       {
         type: NsGraph.AnchorType.OUTPUT,

@@ -19,7 +19,6 @@
 
 package com.dlink.dto;
 
-import com.dlink.config.Dialect;
 import lombok.Getter;
 import lombok.Setter;
 

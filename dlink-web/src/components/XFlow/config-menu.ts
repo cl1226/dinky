@@ -5,7 +5,7 @@ import { createCtxMenuConfig, MenuItemType } from '@antv/xflow'
 import { IconStore, XFlowNodeCommands, XFlowEdgeCommands } from '@antv/xflow'
 import { DeleteOutlined, EditOutlined, StopOutlined } from '@ant-design/icons'
 import { CustomCommands } from './cmd-extensions/constants'
-import { MockApi } from './service'
+import { XFlowApi } from './service'
 
 /** menuitem 配置 */
 export namespace NsMenuItemConfig {
@@ -52,7 +52,7 @@ export namespace NsMenuItemConfig {
       const nodeConfig = target.data as NsGraph.INodeConfig
       commandService.executeCommand<NsRenameNodeCmd.IArgs>(CustomCommands.SHOW_RENAME_MODAL.id, {
         nodeConfig,
-        updateNodeNameService: MockApi.renameNode,
+        updateNodeNameService: XFlowApi.renameNode,
       })
     },
   }

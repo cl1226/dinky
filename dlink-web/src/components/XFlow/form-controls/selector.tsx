@@ -1,13 +1,11 @@
-import type { NsJsonSchemaForm, NsGraphCmd } from '@antv/xflow'
-import { useXFlowApp, MODELS, XFlowGraphCommands } from '@antv/xflow'
+import type { NsJsonSchemaForm } from '@antv/xflow'
 import { DownOutlined } from "@ant-design/icons";
 import { FormItemWrapper } from '@antv/xflow'
 import { Form, TreeSelect } from 'antd'
 import React, {useState, useEffect} from 'react'
 import {convertToTreeData, TreeDataNode} from "@/components/Scheduler/SchedulerTree/Function";
 import {getCatalogueTreeData} from "@/pages/DataStudio/service";
-import {getIcon} from "@/components/Scheduler/icon";
-import style from "./index.less";
+import { useXFlowApp, MODELS, XFlowGraphCommands } from '@antv/xflow'
 
 export const SelectorShape: React.FC<NsJsonSchemaForm.IControlProps> = props => {
   const { controlSchema } = props
@@ -35,63 +33,43 @@ export const SelectorShape: React.FC<NsJsonSchemaForm.IControlProps> = props => 
   )
 }
 
-const Select: React.FC = () => {
+interface ISelectorProps extends NsJsonSchemaForm.IFormItemProps {
+  controlSchema: NsJsonSchemaForm.IControlSchema
+  placeholder?: string
+  disabled: boolean
+}
+
+const Select: React.FC<ISelectorProps> = props => {
   const [value, setValue] = useState<string>();
   const [treeData, setTreeData] = useState<TreeDataNode[]>();
-  const [searchValue, setSearchValue] = useState('');
+
+  const { placeholder, disabled } = props
+  const { commandService, modelService } = useXFlowApp()
+
+  React.useEffect(() => {
+    commandService.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
+      XFlowGraphCommands.SAVE_GRAPH_DATA.id,
+      {
+        saveGraphDataService: async (meta, graph) => {
+          /** 当前选中节点数据 */
+          const nodes = await MODELS.SELECTED_NODES.useValue(modelService)
+          console.log(graph)
+          /** 拿到数据，触发onChange*/
+          // onChange(JSON.stringify(graph))
+          return { err: null, data: graph, meta }
+        },
+      },
+    )
+  })
 
   useEffect(() => {
     getTreeData();
   }, []);
 
-  const loop = (data: any) =>
-    data?.map((item: any) => {
-      const index = item.title.indexOf(searchValue);
-      const beforeStr = item.title.substr(0, index);
-      const afterStr = item.title.substr(index + searchValue.length);
-      item.icon = getIcon(item.type);
-      const title =
-        index > -1 ? (
-          <span>
-            {beforeStr}
-            <span className={style['site-tree-search-value']}>{searchValue}</span>
-            {afterStr}
-            </span>
-        ) : (
-          <span>{item.title}</span>
-        );
-      if (item.children) {
-        return {
-          isLeaf: item.isLeaf,
-          name: item.name,
-          id: item.id,
-          taskId: item.taskId,
-          parentId: item.parentId,
-          path: item.path,
-          icon: item.isLeaf ? item.icon : '',
-          title: item.name,
-          value: item.taskId,
-          key: item.key,
-          children: loop(item.children)
-        };
-      }
-      return {
-        isLeaf: item.isLeaf,
-        name: item.name,
-        id: item.id,
-        taskId: item.taskId,
-        parentId: item.parentId,
-        path: item.path,
-        icon: item.isLeaf ? item.icon : '',
-        title: item.name,
-        value: item.taskId,
-        key: item.key,
-      };
-    });
-
   const onChange = (newValue: string) => {
     console.log(newValue);
     setValue(newValue);
+    React.JOB_ID = newValue;
   };
 
   const getTreeData = async () => {
@@ -108,7 +86,6 @@ const Select: React.FC = () => {
       placeholder="Please select"
       onChange={onChange}
       switcherIcon={<DownOutlined/>}
-      showSearch={true}
       treeLine={true}
     />
   ) 

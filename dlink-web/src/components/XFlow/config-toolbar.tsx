@@ -18,7 +18,7 @@ import {
   PlaySquareOutlined,
   StopOutlined,
 } from '@ant-design/icons'
-import { MockApi } from './service'
+import { XFlowApi } from './service'
 import { CustomCommands } from './cmd-extensions/constants'
 import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
 import type { NsGraphCmd, NsGroupCmd } from '@antv/xflow'
@@ -85,7 +85,7 @@ export namespace NSToolbarConfig {
       onClick: async ({ commandService }) => {
         commandService.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
           XFlowGraphCommands.SAVE_GRAPH_DATA.id,
-          { saveGraphDataService: (meta, graphData) => MockApi.saveGraphData(meta, graphData) },
+          { saveGraphDataService: (meta, graphData) => XFlowApi.saveGraphData(meta, graphData) },
         )
       },
     })
@@ -96,7 +96,7 @@ export namespace NSToolbarConfig {
       id: CustomCommands.DEPLOY_SERVICE.id,
       onClick: ({ commandService }) => {
         commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
-          deployDagService: (meta, graphData) => MockApi.deployDagService(meta, graphData),
+          deployDagService: (meta, graphData) => XFlowApi.deployDagService(meta, graphData),
         })
       },
     })
@@ -157,7 +157,7 @@ export namespace NSToolbarConfig {
         commandService.executeCommand<NsGraphStatusCommand.IArgs>(
           XFlowDagCommands.QUERY_GRAPH_STATUS.id,
           {
-            graphStatusService: MockApi.graphStatusService,
+            graphStatusService: XFlowApi.graphStatusService,
             loopInterval: 3000,
           },
         )
@@ -172,7 +172,7 @@ export namespace NSToolbarConfig {
         commandService.executeCommand<NsGraphStatusCommand.IArgs>(
           XFlowDagCommands.QUERY_GRAPH_STATUS.id,
           {
-            graphStatusService: MockApi.stopGraphStatusService,
+            graphStatusService: XFlowApi.stopGraphStatusService,
             loopInterval: 5000,
           },
         )

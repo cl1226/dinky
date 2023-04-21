@@ -48,14 +48,17 @@ public class WorkflowTask extends SuperEntity {
 
     private Integer step;
 
+    private String graphData;
+
     public WorkflowTask() {
     }
 
-    public WorkflowTask(String alias, Integer tenantId, String type, Integer versionId, Integer step) {
+    public WorkflowTask(String alias, Integer tenantId, String type, Integer versionId, Integer step, String graphData) {
         this.alias = alias;
         this.tenantId = tenantId;
         this.type = type;
         this.versionId = versionId;
         this.step = step;
+        this.graphData = graphData;
     }
 }

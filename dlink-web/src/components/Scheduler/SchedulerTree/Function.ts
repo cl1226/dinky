@@ -48,12 +48,14 @@ export function convertToTreeData(data:TreeDataNode[], pid:number,path?:string[]
       obj.title = obj.name;
       obj.key = obj.id;
       obj.value = obj.key;
-      obj.icon = getIcon(obj.type);
       obj.path = path.slice();
       obj.path.push(obj.name);
       temp = convertToTreeData(data, data[i].id,obj.path);
       if (temp.length > 0) {
         obj.children = temp
+        obj.selectable = false
+      } else {
+        obj.selectable = true
       }
       result.push(obj)
     }

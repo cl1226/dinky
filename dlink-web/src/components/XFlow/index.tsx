@@ -96,9 +96,9 @@ export const XFlowEditor: React.FC<IProps> = props => {
         className="xflow-workspace-toolbar-top"
         layout="horizontal"
         config={toolbarConfig}
-        position={{ top: 0, left: 230, right: 0, bottom: 0 }}
+        position={{ top: 0, left: 230, right: 290, bottom: 0 }}
       />
-      <XFlowCanvas position={{ top: 40, left: 230, right: 0, bottom: 0 }}>
+      <XFlowCanvas position={{ top: 40, left: 230, right: 290, bottom: 0 }}>
         <CanvasScaleToolbar position={{ top: 12, left: 12 }} />
         <CanvasContextMenu config={menuConfig} />
         <CanvasSnapline color="#faad14" />

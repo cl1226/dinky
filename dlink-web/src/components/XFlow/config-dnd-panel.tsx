@@ -34,6 +34,7 @@ export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta
           label: 'FlinkSQL',
           parentId: '1',
           renderKey: DND_RENDER_ID,
+          jobId: "0",
           popoverContent: <NodeDescription name="FlinkSQL" />,
         }
       ],
