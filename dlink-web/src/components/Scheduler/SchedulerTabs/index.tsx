@@ -19,22 +19,19 @@
 
 
 import {Dropdown, Menu, message, Tabs} from 'antd';
-import React from 'react';
 import {connect} from 'umi';
 import {StateType} from '@/pages/Scheduler/model';
 import styles from './index.less';
 import SchedulerEdit from '../SchedulerEdit';
-import {DIALECT} from '../conf';
 import SchedulerHome from "@/components/Scheduler/SchedulerHome";
 import {Dispatch} from "@@/plugin-dva/connect";
-import SchedulerKubernetes from "@/components/Scheduler/SchedulerKubernetes";
 import {l} from "@/utils/intl";
 
 const {TabPane} = Tabs;
 
 const EditorTabs = (props: any) => {
 
-  const {tabs, current, toolHeight, width, height} = props;
+  const {tabs, toolHeight, width, height} = props;
 
   const onChange = (activeKey: any) => {
     props.saveToolHeight(toolHeight);
@@ -46,9 +43,6 @@ const EditorTabs = (props: any) => {
       add();
     } else if (action === 'remove') {
       props.saveToolHeight(toolHeight - 0.0001);
-      // if (current.isModified) {
-      //   saveTask(current, dispatch);
-      // }
       remove(targetKey);
     }
   };
@@ -110,10 +104,8 @@ const EditorTabs = (props: any) => {
   const getTabPane = (pane, i) => {
     return (<TabPane tab={Tab(pane)} key={pane.key} closable={pane.closable}>
       <SchedulerEdit
-        tabsKey={pane.key}
-        sql={pane.value}
-        monaco={pane.monaco}
-        sqlMetaData={pane.sqlMetaData}
+        tabkey={pane.key}
+        tabName={pane.title}
         height={height ? height : (toolHeight - 32)}
         width={width}
       />
@@ -163,7 +155,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 
 export default connect(({Scheduler}: { Scheduler: StateType }) => ({
   current: Scheduler.current,
-  sql: Scheduler.sql,
   tabs: Scheduler.tabs,
   toolHeight: Scheduler.toolHeight,
 }), mapDispatchToProps)(EditorTabs);

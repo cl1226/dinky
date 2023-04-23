@@ -17,42 +17,16 @@
  *
  */
 
-
-import React, {useEffect, useImperativeHandle, useRef, useState, useCallback } from 'react';
 import * as _monaco from "monaco-editor";
-import style from "./index.less";
-import { Col, Divider, Row } from 'antd';
-import {connect, Dispatch} from "umi";
-import {DocumentStateType} from "@/pages/RegistrationCenter/Document/model";
 import {XFlowEditor} from "@/components/XFlow"
 
-export interface IProps {
-  meta: { flowId: string }
-}
-
-const WorkflowEditor = (props:any) => {
+const WorkflowEditor = (props: any) => {
+  const { tabkey, tabName } = props;
+  const meta  = {flowId: tabkey + '', flowName: tabName}
 
   return (
-    <XFlowEditor></XFlowEditor>
+    <XFlowEditor meta={meta}></XFlowEditor>
   )
 }
-
-const mapDispatchToProps = (dispatch:Dispatch)=>({
-  /*saveText:(tabs:any,tabIndex:any)=>dispatch({
-    type: "Scheduler/saveTask",
-    payload: tabs.panes[tabIndex].task,
-  }),*/
-  saveSql:(val: any)=>dispatch({
-    type: "Scheduler/saveSql",
-    payload: val,
-  }),saveSqlMetaData:(sqlMetaData: any,key: number)=>dispatch({
-    type: "Scheduler/saveSqlMetaData",
-    payload: {
-      activeKey:key,
-      sqlMetaData,
-      isModified: true,
-    }
-  }),
-})
 
 export default WorkflowEditor;

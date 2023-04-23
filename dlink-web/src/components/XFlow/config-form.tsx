@@ -11,31 +11,33 @@ export const formSchemaService: NsJsonSchemaForm.IFormSchemaService = async args
   const { targetData, modelService, targetType } = args
   /** 可以使用获取 graphMeta */
   const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
-  console.log('formSchemaService', graphMeta, args)
   
   if (targetType === 'canvas') {
     return {
       tabs: [
         {
-          name: '工作流信息',
+          name: '作业信息',
           groups: [
             {
               name: 'groupName',
               controls: [
                 {
-                  name: '工作流ID',
-                  label: '项目名',
-                  shape: 'Input',
-                  disabled: false,
-                  required: true,
-                  tooltip: '图的业务项目名',
-                  extra: '和图的ID对应',
-                  placeholder: 'please write something',
-                  value: '',
-                  defaultValue: '', // 可以认为是默认值
-                  hidden: false,
-                  options: [{ title: '', value: '' }],
-                  originData: {}, // 原始数据
+                  name: 'id',
+                  label: '作业ID',
+                  shape: ControlShapeEnum.SpanShape,
+                  value: graphMeta.meta.flowId
+                },
+                {
+                  name: 'name',
+                  label: '作业名称',
+                  shape: ControlShapeEnum.SpanShape,
+                  value: graphMeta.meta.flowName
+                },
+                {
+                  name: 'cron',
+                  label: '执行计划',
+                  shape: ControlShapeEnum.SpanShape,
+                  value: '123'
                 }
               ]
             }

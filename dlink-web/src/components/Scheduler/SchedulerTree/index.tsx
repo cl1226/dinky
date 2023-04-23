@@ -265,13 +265,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
             useSession: false,
             useRemote: true,
             ...result.datas,
-          },
-          console: {
-            result: {},
-            chart: {},
-          },
-          monaco: React.createRef(),
-          metaStore: []
+          }
         };
         newTabs!.activeKey = node.taskId;
         if (checkInPans(node)) {
@@ -283,7 +277,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
           type: "Scheduler/saveTabs",
           payload: newTabs,
         });
-        showMetaStoreCatalogs(result.datas, dispatch);
       })
     }
   };

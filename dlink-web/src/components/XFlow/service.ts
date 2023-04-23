@@ -20,17 +20,21 @@ export namespace XFlowApi {
 
   /** 查图的meta元信息 */
   export const queryGraphMeta: NsGraphCmd.GraphMeta.IArgs['graphMetaService'] = async args => {
-    console.log('queryMeta', args)
     return { ...args, flowId: args.meta.flowId }
   }
   /** 加载图数据的api */
   export const loadGraphData = async (meta: NsGraph.IGraphMeta) => {
-    const result = await getInfoById('/api/workflow/task', 162)
-    let graphData = JSON.parse(result.datas.graphData)
-    const nodes: NsGraph.INodeConfig[] = graphData.nodes
-    const edges: NsGraph.IEdgeConfig[] = graphData.edges
-
-    return { nodes, edges }
+    const result = await getInfoById('/api/workflow/task', meta.meta.flowId)
+    let nodes: NsGraph.INodeConfig[] = []
+    let edges: NsGraph.IEdgeConfig[] = []
+    if (!!result.datas.graphData) {
+      let graphData = JSON.parse(result.datas.graphData)
+      nodes = graphData.nodes
+      edges = graphData.edges
+      return { nodes, edges }
+    } else {
+      return { nodes, edges } 
+    }
   }
 
   /** 保存图数据的api */
@@ -39,7 +43,7 @@ export namespace XFlowApi {
     graphData: NsGraph.IGraphData,
   ) => {
     let workflowTask = {
-      id: 162,
+      id: meta.meta.flowId,
       graphData: JSON.stringify(graphData)
     }
     const success = await handleAddOrUpdate('/api/workflow/task', workflowTask);
