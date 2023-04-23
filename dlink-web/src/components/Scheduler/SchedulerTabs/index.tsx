@@ -123,7 +123,7 @@ const EditorTabs = (props: any) => {
           activeKey={tabs.activeKey + ''}
           onEdit={onEdit}
           className={styles['edit-tabs']}
-          style={{height: height ? height : toolHeight}}
+          style={{height: (height - 84)}}
         >
           {tabs.panes.map((pane, i) => getTabPane(pane, i))}
         </Tabs>}

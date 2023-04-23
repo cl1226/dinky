@@ -19,7 +19,7 @@
 
 
 import {Tabs} from "antd";
-import {AppstoreOutlined, BarsOutlined, InsertRowAboveOutlined, MessageOutlined} from "@ant-design/icons";
+import { BarsOutlined } from "@ant-design/icons";
 import {StateType} from "@/pages/Scheduler/model";
 import {connect} from "umi";
 import SchedulerTree from "../SchedulerTree";
@@ -29,10 +29,10 @@ const {TabPane} = Tabs;
 
 const SchedulerLeftTool = (props: any) => {
 
-  const {toolHeight} = props;
+  const {height} = props;
 
   return (
-    <Tabs defaultActiveKey="1" size="small" tabPosition="left" style={{height: toolHeight}}>
+    <Tabs defaultActiveKey="1" size="small" tabPosition="left" style={{height: (height - 84)}}>
       <TabPane tab={<span><BarsOutlined/> {l('pages.scheduler.workflow.develop')}</span>} key="SchedulerTree">
         <SchedulerTree/>
       </TabPane>

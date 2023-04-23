@@ -127,10 +127,10 @@ const Scheduler = (props: any) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-              }}/>
+              }} height={size.height} toolHeight={toolHeight}/>
             </Col>
             <Col>
-              {!isFullScreen ? <SchedulerTabs width={size.width - toolRightWidth - toolLeftWidth}/> : undefined}
+              {!isFullScreen ? <SchedulerTabs width={size.width - toolRightWidth - toolLeftWidth} height={size.height}/> : undefined}
             </Col>
           </DraggleLayout>
         </Row>

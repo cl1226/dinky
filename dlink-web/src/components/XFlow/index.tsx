@@ -38,11 +38,12 @@ import './index.less'
 import '@antv/xflow/dist/index.css'
 
 export interface IProps {
-  meta: { flowId: string }
+  meta: { flowId: string },
+  height: number
 }
 
 export const XFlowEditor: React.FC<IProps> = props => {
-  const { meta } = props
+  const { meta, height } = props
   const graphHooksConfig = useGraphHookConfig(props)
   const toolbarConfig = useToolbarConfig()
   const menuConfig = useMenuConfig()
@@ -81,6 +82,7 @@ export const XFlowEditor: React.FC<IProps> = props => {
       commandConfig={cmdConfig}
       onLoad={onLoad}
       meta={meta}
+      style={{height: (height - 124)}}
     >
       <DagGraphExtension />
       <NodeCollapsePanel
