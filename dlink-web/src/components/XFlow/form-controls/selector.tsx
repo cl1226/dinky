@@ -42,9 +42,7 @@ interface ISelectorProps extends NsJsonSchemaForm.IFormItemProps {
 const Select: React.FC<ISelectorProps> = props => {
   const [value, setValue] = useState<string>();
   const [treeData, setTreeData] = useState<TreeDataNode[]>();
-
-  const { placeholder, disabled } = props
-  const { commandService, modelService } = useXFlowApp()
+  const { commandService, modelService } = useXFlowApp();
 
   React.useEffect(() => {
     commandService.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
@@ -53,9 +51,7 @@ const Select: React.FC<ISelectorProps> = props => {
         saveGraphDataService: async (meta, graph) => {
           /** 当前选中节点数据 */
           const nodes = await MODELS.SELECTED_NODES.useValue(modelService)
-          console.log(graph)
-          /** 拿到数据，触发onChange*/
-          // onChange(JSON.stringify(graph))
+          nodes[0].data.jobId = value | ""
           return { err: null, data: graph, meta }
         },
       },
@@ -67,12 +63,12 @@ const Select: React.FC<ISelectorProps> = props => {
   }, []);
 
   const onChange = (newValue: string) => {
-    console.log(newValue);
     setValue(newValue);
-    React.JOB_ID = newValue;
   };
 
   const getTreeData = async () => {
+    const nodes = await MODELS.SELECTED_NODES.useValue(modelService);
+    setValue(nodes[0].data.jobId);
     const result = await getCatalogueTreeData();
     let data = result.datas;
     setTreeData(convertToTreeData(data, 0));

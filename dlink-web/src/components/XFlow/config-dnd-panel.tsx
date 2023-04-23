@@ -23,7 +23,6 @@ const NodeDescription = (props: { name: string }) => {
 }
 
 export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta, modelService) => {
-  console.log(meta, modelService)
   return [
     {
       id: '数据集成',
@@ -47,6 +46,5 @@ export const searchService: NsNodeCollapsePanel.ISearchService = async (
   keyword: string,
 ) => {
   const list = nodes.filter(node => node.label.includes(keyword))
-  console.log(list, keyword, nodes)
   return list
 }

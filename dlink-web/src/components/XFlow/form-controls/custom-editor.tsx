@@ -46,7 +46,6 @@ const Editor: React.FC<IEditorProps> = props => {
         saveGraphDataService: async (meta, graph) => {
           /** 当前选中节点数据 */
           const nodes = await MODELS.SELECTED_NODES.useValue(modelService)
-          console.log(graph)
           /** 拿到数据，触发onChange*/
           onChange(JSON.stringify(graph))
           return { err: null, data: graph, meta }

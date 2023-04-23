@@ -66,7 +66,6 @@ export namespace NsMenuItemConfig {
 export const useMenuConfig = createCtxMenuConfig(config => {
   config.setMenuModelService(async (target, model, modelService, toDispose) => {
     const { type, cell } = target
-    console.log(type)
     switch (type) {
       /** 节点菜单 */
       case 'node':

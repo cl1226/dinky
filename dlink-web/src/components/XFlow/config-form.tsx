@@ -87,7 +87,6 @@ export const formValueUpdateService: NsJsonSchemaForm.IFormValueUpdateService = 
       { nodeConfig: node },
     )
   }
-  console.log('formValueUpdateService  values:', values, args)
   const nodeConfig: NsGraph.INodeConfig = {
     ...targetData,
   }

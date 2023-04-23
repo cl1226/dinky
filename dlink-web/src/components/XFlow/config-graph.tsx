@@ -9,7 +9,6 @@ import { GroupNode } from './react-node/group'
 export const useGraphHookConfig = createHookConfig<IProps>((config, proxy) => {
   // 获取 Props
   const props = proxy.getValue()
-  console.log('get main props', props)
   config.setRegisterHook(hooks => {
     const disposableList = [
       // 注册增加 react Node Render

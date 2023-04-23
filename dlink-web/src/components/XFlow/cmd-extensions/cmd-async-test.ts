@@ -42,7 +42,6 @@ export class TestAsyncCommand implements ICommand {
       args,
       async handlerArgs => {
         const { commandService, modelService, graphMeta, test } = handlerArgs
-        console.log(graph, commandService, modelService, graphMeta, test)
         return { test: true }
       },
       runtimeHook,
