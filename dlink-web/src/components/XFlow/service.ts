@@ -4,13 +4,16 @@ import { uuidv4, NsGraph, NsGraphStatusCommand } from '@antv/xflow'
 import type { NsRenameNodeCmd } from './cmd-extensions/cmd-rename-node-modal'
 import type { NsNodeCmd, NsEdgeCmd, NsGraphCmd } from '@antv/xflow'
 import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
+import { message } from 'antd'
 import {
   CODE,
   getInfoById,
+  getData,
   handleAddOrUpdate,
 } from "@/components/Common/crud";
+import {l} from "@/utils/intl";
 
-/** mock 后端接口调用 */
+/** 后端接口调用 */
 export namespace XFlowApi {
   export const NODE_COMMON_PROPS = {
     renderKey: DND_RENDER_ID,
@@ -56,10 +59,45 @@ export namespace XFlowApi {
     meta: NsGraph.IGraphMeta,
     graphData: NsGraph.IGraphData,
   ) => {
-    console.log('deployService api', meta, graphData)
-    return {
-      success: true,
-      data: graphData,
+    const hide = message.loading(l('app.request.running') + "部署");
+    let id = meta.meta.flowId
+    const result = await getData('/api/workflow/task/releaseTask', {id});
+    hide();
+    if (result.code == 0) {
+      message.success(result.msg);
+    } else {
+      message.warn(result.msg);
+    }
+  }
+  /** 上线数据的api */
+  export const onlineDagService: NsDeployDagCmd.IDeployDagService = async (
+    meta: NsGraph.IGraphMeta,
+    graphData: NsGraph.IGraphData,
+  ) => {
+    const hide = message.loading(l('app.request.running') + "上线");
+    let id = meta.meta.flowId
+    const result = await getData('/api/workflow/task/onLineTask', {id});
+    hide();
+    if (result.code == 0) {
+      message.success(result.msg);
+    } else {
+      message.warn(result.msg);
+    }
+  }
+
+  /** 下线数据的api */
+  export const offlineDagService: NsDeployDagCmd.IDeployDagService = async (
+    meta: NsGraph.IGraphMeta,
+    graphData: NsGraph.IGraphData,
+  ) => {
+    const hide = message.loading(l('app.request.running') + "下线");
+    let id = meta.meta.flowId
+    const result = await getData('/api/workflow/task/offLineTask', {id});
+    hide();
+    if (result.code == 0) {
+      message.success(result.msg);
+    } else {
+      message.warn(result.msg);
     }
   }
 

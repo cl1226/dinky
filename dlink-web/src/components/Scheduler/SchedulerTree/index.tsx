@@ -251,7 +251,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
         let newPane: any = {
           title: node.name,
           key: node.taskId,
-          value: (result.datas.statement ? result.datas.statement : ''),
           icon: node.icon,
           closable: true,
           path: node.path,
@@ -428,7 +427,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
       okText: l('button.confirm'),
       cancelText: l('button.cancel'),
       onOk: async () => {
-        await handleRemoveById('/api/catalogue', node!.id);
+        await handleRemoveById('/api/workflow/catalogue', node!.id);
         if (node?.taskId) {
           dispatch({
             type: "Scheduler/deleteTabByKey",
@@ -631,21 +630,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
               onClick={offExpandAll}
             />
           </Tooltip>
-          <Tooltip title={l('right.menu.exportJson')}>
-            <Button
-              type="text"
-              icon={<DownloadOutlined/>}
-              onClick={toExportSelectedTaskJson}
-            />
-          </Tooltip>
-          <Upload {...uProps}>
-            <Tooltip title={l('right.menu.importJson')}>
-              <Button
-                type="text"
-                icon={<UploadOutlined/>}
-              />
-            </Tooltip>
-          </Upload>
         </Col>
       </Row>
       <Search style={{marginBottom: 8}} placeholder="Search" onChange={onChange} allowClear={true}/>

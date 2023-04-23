@@ -98,11 +98,11 @@ knife4j:
 
 dinky:
   dolphinscheduler:
-    enabled: false
+    enabled: true
     # dolphinscheduler 地址
-    url: http://127.0.0.1:5173/dolphinscheduler
+    url: http://sv-mdp-dev-data01:12345/dolphinscheduler
     # dolphinscheduler 生成的token
-    token: ad54eb8f57fadea95f52763517978b26
+    token: 353bcd41ba1fdfa66454807c60601a72
     # dolphinscheduler 中指定的项目名不区分大小写
     project-name: Dinky
     # Dolphinscheduler DinkyTask Address

@@ -17,6 +17,8 @@ import {
   GatewayOutlined,
   PlaySquareOutlined,
   StopOutlined,
+  CarryOutOutlined,
+  ApiOutlined
 } from '@ant-design/icons'
 import { XFlowApi } from './service'
 import { CustomCommands } from './cmd-extensions/constants'
@@ -30,6 +32,8 @@ export namespace NSToolbarConfig {
   /** 注册icon 类型 */
   IconStore.set('SaveOutlined', SaveOutlined)
   IconStore.set('CloudSyncOutlined', CloudSyncOutlined)
+  IconStore.set('CarryOutOutlined', CarryOutOutlined)
+  IconStore.set('ApiOutlined', ApiOutlined)
   IconStore.set('GatewayOutlined', GatewayOutlined)
   IconStore.set('GroupOutlined', GroupOutlined)
   IconStore.set('UngroupOutlined', UngroupOutlined)
@@ -97,6 +101,28 @@ export namespace NSToolbarConfig {
       onClick: ({ commandService }) => {
         commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
           deployDagService: (meta, graphData) => XFlowApi.deployDagService(meta, graphData),
+        })
+      },
+    })
+    /** 上线服务按钮 */
+    toolbarGroup1.push({
+      iconName: 'CarryOutOutlined',
+      tooltip: '上线服务',
+      id: CustomCommands.DEPLOY_SERVICE.id,
+      onClick: ({ commandService }) => {
+        commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
+          deployDagService: (meta, graphData) => XFlowApi.onlineDagService(meta, graphData),
+        })
+      },
+    })
+    /** 下线服务按钮 */
+    toolbarGroup1.push({
+      iconName: 'ApiOutlined',
+      tooltip: '下线服务',
+      id: CustomCommands.DEPLOY_SERVICE.id,
+      onClick: ({ commandService }) => {
+        commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
+          deployDagService: (meta, graphData) => XFlowApi.offlineDagService(meta, graphData),
         })
       },
     })

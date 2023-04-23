@@ -165,6 +165,15 @@ export default {
   'pages.datastudio.sql.query': 'SQL query',
   'pages.datastudio.submit.job': 'Submit job',
 
+  'pages.scheduler.workflow.develop': 'Develop workflow',
+  'pages.scheduler.editor.fullScreen': 'FullScreen',
+  'pages.scheduler.label.welcomeuse': 'Welcom use',
+  'pages.scheduler.label.scheduler': 'Scheduler info',
+  'pages.scheduler.label.jobInfo': 'Job info',
+  'pages.Scheduler.label.jobInfo.id': 'Job id',
+  'pages.Scheduler.label.jobInfo.name': 'Job name',
+  'pages.Scheduler.label.jobInfo.versionId': 'Job version',
+
   'pages.devops.jobstatus.SUCCESS': 'Success',
   'pages.devops.jobstatus.CREATED': 'Created',
   'pages.devops.jobstatus.INITIALIZING': 'Initialize',

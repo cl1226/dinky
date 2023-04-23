@@ -168,6 +168,8 @@ export default {
 
   'pages.scheduler.workflow.develop': '流程开发',
   'pages.scheduler.editor.fullScreen': '全屏',
+  'pages.scheduler.label.welcomeuse': '作业开发流程',
+  'pages.scheduler.label.scheduler': '作业开发功能',
   'pages.scheduler.label.jobInfo': '流程信息',
   'pages.Scheduler.label.jobInfo.id': '流程ID',
   'pages.Scheduler.label.jobInfo.name': '流程名称',

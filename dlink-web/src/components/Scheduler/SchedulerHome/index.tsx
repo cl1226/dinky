@@ -17,27 +17,29 @@
  *
  */
 
-import {Divider, Typography} from 'antd';
-import React from 'react';
+import {Image, Typography} from 'antd';
 import {connect} from 'umi';
 import {StateType} from '@/pages/Scheduler/model';
 import {Scrollbars} from 'react-custom-scrollbars';
 import {VERSION} from "@/components/Common/Version";
 import {l} from "@/utils/intl";
 
-const {Title, Paragraph, Text} = Typography;
+const {Title, Paragraph} = Typography;
 
 const SchedulerHome = (props: any) => {
 
 
-  const {toolHeight} = props;
+  const {height} = props;
 
   return (
-    <Scrollbars style={{height: toolHeight}}>
+    <Scrollbars style={{height: (height - 124)}}>
       <Typography style={{padding: '15px'}}>
-        <Title level={4}>{l('pages.Scheduler.label.welcomeuse', '', {version: VERSION})}</Title>
+        <Title level={4}>{l('pages.scheduler.label.welcomeuse', '', {version: VERSION})}</Title>
         <Paragraph>
-          <blockquote>{l('pages.Scheduler.label.dinkydescribe')}</blockquote>
+          <blockquote>{l('pages.scheduler.label.scheduler')}</blockquote>
+        </Paragraph>
+        <Paragraph>
+          <Image width={"100%"} src={"icons/job-develop.svg"} preview={false}></Image>
         </Paragraph>
       </Typography>
     </Scrollbars>

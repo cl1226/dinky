@@ -127,8 +127,8 @@ public class WorkflowTaskController {
      * 下线任务
      */
     @GetMapping(value = "/offLineTask")
-    public Result offLineTask(@RequestParam Integer id, @RequestParam String type) {
-        return taskService.offLineTask(id, type);
+    public Result offLineTask(@RequestParam Integer id) {
+        return taskService.offLineTask(id);
     }
 
     /**

@@ -109,6 +109,30 @@ public class ProcessClient {
     }
 
     /**
+     * 删除工作流
+     *
+     * @param projectCode 项目编号
+     * @param processCode 工作流编号
+     * @return {@link ProcessDefinition}
+     * @author cl1226
+     * @date 2023/04/23 15:54
+     */
+    public JSONObject deleteProcessDefinition(Long projectCode, Long processCode) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        map.put("processCode", processCode);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/process-definition/{processCode}", map);
+
+        String content = HttpRequest.delete(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
      * 根据编号获取
      *
      * @param projectCode 项目编号
@@ -166,6 +190,69 @@ public class ProcessClient {
             .execute().body();
 
         return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<ProcessDefinition>>() {
+        }));
+    }
+
+    /**
+     * 创建工作流定义V2
+     *
+     * @param projectCode 项目编号
+     * @param processName 工作流定义名称
+     * @return {@link ProcessDefinition}
+     * @author cl1226
+     * @date 2022/9/7 17:00
+     */
+    public ProcessDefinition createProcessDefinitionV2(Long projectCode, String processName, String taskDefinitionJson, String taskRelationJson) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/process-definition", map);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", processName);
+        params.put("description", "系统添加");
+        params.put("tenantCode", "default");
+        params.put("taskRelationJson", taskRelationJson);
+        params.put("taskDefinitionJson", taskDefinitionJson);
+        params.put("executionType", "PARALLEL");
+
+        String content = HttpRequest.post(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(params)
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<ProcessDefinition>>() {
+        }));
+    }
+
+    /**
+     * 上线工作流
+     *
+     * @param projectCode 项目编号
+     * @param processDefinition 工作流
+     * @return {@link ProcessDefinition}
+     * @author cl1226
+     * @date 2023/04/23 15:54
+     */
+    public JSONObject onlineProcessDefinition(Long projectCode, ProcessDefinition processDefinition, String status) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        map.put("processCode", processDefinition.getCode());
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/process-definition/{processCode}/release", map);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", processDefinition.getName());
+        params.put("code", processDefinition.getCode());
+        params.put("projectCode", processDefinition.getProjectCode());
+        params.put("releaseState", status);
+
+        String content = HttpRequest.post(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(params)
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
         }));
     }
 

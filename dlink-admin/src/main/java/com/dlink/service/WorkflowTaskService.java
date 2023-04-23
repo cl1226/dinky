@@ -45,7 +45,7 @@ public interface WorkflowTaskService extends ISuperService<WorkflowTask> {
 
     Result reOnLineTask(Integer id, String savePointPath);
 
-    Result offLineTask(Integer id, String type);
+    Result offLineTask(Integer id);
 
     Result cancelTask(Integer id);
 

@@ -17,50 +17,32 @@
  *
  */
 
-package com.dlink.model;
+package com.dlink.dto;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.dlink.db.model.SuperEntity;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * WorkflowTask
+ * WorkflowTaskDTO
  *
- * @author cl
- * @since 2023-04-20 11:17
+ * @author cl1226
+ * @since 2023/04/23 15:25
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@TableName("dlink_workflow_task")
-public class WorkflowTask extends SuperEntity {
-
-    @TableField(fill = FieldFill.INSERT)
-    private String alias;
-
+@Getter
+@Setter
+public class WorkflowTaskDTO {
+    private Integer id;
     private Integer tenantId;
-
+    private String name;
+    private String alias;
     private String type;
-
     private Integer versionId;
-
     private Integer step;
-
     private String graphData;
-
-    private String status;
-
-    public WorkflowTask() {
-    }
-
-    public WorkflowTask(String alias, Integer tenantId, String type, Integer versionId, Integer step, String graphData) {
-        this.alias = alias;
-        this.tenantId = tenantId;
-        this.type = type;
-        this.versionId = versionId;
-        this.step = step;
-        this.graphData = graphData;
-    }
+    private List<WorkflowNode> nodes;
+    private List<WorkflowEdge> edges;
 }

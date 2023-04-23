@@ -2,22 +2,39 @@ package com.dlink.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.dlink.assertion.Assert;
 import com.dlink.assertion.Asserts;
 import com.dlink.common.result.Result;
 import com.dlink.config.Dialect;
 import com.dlink.db.service.impl.SuperServiceImpl;
+import com.dlink.dto.WorkflowEdge;
+import com.dlink.dto.WorkflowTaskDTO;
 import com.dlink.exception.BusException;
 import com.dlink.function.compiler.CustomStringJavaCompiler;
 import com.dlink.function.pool.UdfCodePool;
 import com.dlink.function.util.UDFUtil;
+import com.dlink.init.SystemInit;
 import com.dlink.mapper.WorkflowTaskMapper;
 import com.dlink.model.*;
+import com.dlink.scheduler.client.ProcessClient;
+import com.dlink.scheduler.client.TaskClient;
+import com.dlink.scheduler.config.DolphinSchedulerProperties;
+import com.dlink.scheduler.enums.ReleaseState;
+import com.dlink.scheduler.model.*;
 import com.dlink.service.WorkflowTaskService;
 import com.dlink.utils.UDFUtils;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 任务 服务实现类
@@ -27,6 +44,14 @@ import java.util.Map;
  */
 @Service
 public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper, WorkflowTask> implements WorkflowTaskService {
+
+    @Autowired
+    private DolphinSchedulerProperties dolphinSchedulerProperties;
+    @Autowired
+    private ProcessClient processClient;
+    @Autowired
+    private TaskClient taskClient;
+
     @Override
     public WorkflowTask getTaskInfoById(Integer id) {
         WorkflowTask task = this.getById(id);
@@ -60,7 +85,73 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
 
     @Override
     public Result releaseTask(Integer id) {
-        return null;
+        WorkflowTask taskInfo = getById(id);
+        if (StringUtils.isBlank(taskInfo.getGraphData())) {
+            return Result.failed("工作流程中缺少节点");
+        }
+
+        Project dinkyProject = SystemInit.getProject();
+        long projectCode = dinkyProject.getCode();
+        ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
+
+        if (process != null) {
+            if (process.getReleaseState() == ReleaseState.ONLINE) {
+                return Result.failed("工作流定义 [" + taskInfo.getName() + "] 已经上线已经上线");
+            }
+            long processCode = process.getCode();
+            processClient.deleteProcessDefinition(projectCode, processCode);
+        }
+
+        // 生成任务及关系
+        String graphData = taskInfo.getGraphData();
+        WorkflowTaskDTO workflowTaskDTO = JSONUtil.toBean(graphData, WorkflowTaskDTO.class);
+        Map<String, Long> map = new HashMap<>();
+        List<TaskRequest> taskRequests = new ArrayList<>();
+        List<ProcessTaskRelation> taskRelations = new ArrayList<>();
+        workflowTaskDTO.getNodes().stream().forEach(x -> {
+            List<WorkflowEdge> filterEdges = workflowTaskDTO.getEdges().stream().
+                    filter(y -> y.getTarget().equals(x.getId())).collect(Collectors.toList());
+            // 每一个节点生成一个taskRequest
+            TaskRequest taskRequest = new TaskRequest();
+            DlinkTaskParams dlinkTaskParams = new DlinkTaskParams();
+            dlinkTaskParams.setTaskId(String.valueOf(x.getJobId()));
+            dlinkTaskParams.setAddress(dolphinSchedulerProperties.getAddress());
+            taskRequest.setTaskParams(JSONUtil.parseObj(dlinkTaskParams).toString());
+            taskRequest.setTaskType("DINKY");
+            taskRequest.setName(x.getLabel());
+            Long taskCode = taskClient.genTaskCode(projectCode);
+            map.put(x.getId(), taskCode);
+            taskRequest.setCode(taskCode);
+            taskRequests.add(taskRequest);
+            // 每一个节点生成一个relation
+            ProcessTaskRelation processTaskRelation = new ProcessTaskRelation();
+            if (filterEdges.size() > 0) {
+                Long dependenceCodes = 0L;
+                if (filterEdges.size() > 0) {
+                    dependenceCodes = map.get(filterEdges.get(0).getSource());
+                }
+                processTaskRelation.setPreTaskCode(dependenceCodes);
+                processTaskRelation.setPostTaskCode(taskCode);
+                processTaskRelation.setProjectCode(projectCode);
+            } else {
+                processTaskRelation.setPreTaskCode(0);
+                processTaskRelation.setPostTaskCode(taskCode);
+                processTaskRelation.setProjectCode(projectCode);
+            }
+            taskRelations.add(processTaskRelation);
+
+//            String taskDefinitionJsonObj = JSONUtil.toJsonStr(taskRequest);
+
+//            TaskDefinitionLog taskDefinition = taskClient.createTaskDefinition(projectCode, processDefinition.getCode(), dependenceCodes, taskDefinitionJsonObj);
+//            map.put(x.getId(), taskDefinition.getCode());
+        });
+        // 创建流程
+        ProcessDefinition processDefinition = processClient.createProcessDefinitionV2(
+                projectCode,
+                taskInfo.getName(),
+                JSONUtil.parseArray(taskRequests).toString(),
+                JSONUtil.parseArray(taskRelations).toString());
+        return Result.succeed("部署工作流成功");
     }
 
     @Override
@@ -70,7 +161,21 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
 
     @Override
     public Result onLineTask(Integer id) {
-        return null;
+        WorkflowTask taskInfo = getById(id);
+        taskInfo.setStatus("ONLINE");
+        this.updateById(taskInfo);
+        if (StringUtils.isBlank(taskInfo.getGraphData())) {
+            return Result.failed("工作流程中缺少节点");
+        }
+
+        Project dinkyProject = SystemInit.getProject();
+        long projectCode = dinkyProject.getCode();
+        ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
+        if (process == null) {
+            return Result.failed("工作流不存在：" + taskInfo.getName());
+        }
+        JSONObject entries = processClient.onlineProcessDefinition(projectCode, process, "ONLINE");
+        return Result.succeed("上线工作流成功");
     }
 
     @Override
@@ -79,8 +184,22 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     }
 
     @Override
-    public Result offLineTask(Integer id, String type) {
-        return null;
+    public Result offLineTask(Integer id) {
+        WorkflowTask taskInfo = getById(id);
+        taskInfo.setStatus("OFFLINE");
+        this.updateById(taskInfo);
+        if (StringUtils.isBlank(taskInfo.getGraphData())) {
+            return Result.failed("工作流程中缺少节点");
+        }
+
+        Project dinkyProject = SystemInit.getProject();
+        long projectCode = dinkyProject.getCode();
+        ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
+        if (process == null) {
+            return Result.failed("工作流不存在：" + taskInfo.getName());
+        }
+        JSONObject entries = processClient.onlineProcessDefinition(projectCode, process, "OFFLINE");
+        return Result.succeed("下线工作流成功");
     }
 
     @Override

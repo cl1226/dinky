@@ -114,7 +114,7 @@ const EditorTabs = (props: any) => {
 
   return (
     <>
-      {tabs.panes.length === 0 ? <SchedulerHome width={width}/> :
+      {tabs.panes.length === 0 ? <SchedulerHome width={width} height={height}/> :
         <Tabs
           hideAdd
           type="editable-card"
