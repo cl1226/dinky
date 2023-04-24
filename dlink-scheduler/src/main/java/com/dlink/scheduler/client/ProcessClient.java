@@ -256,4 +256,140 @@ public class ProcessClient {
         }));
     }
 
+    /**
+     * 创建调度
+     *
+     * @param projectCode 项目编号
+     * @param processDefinition 工作流
+     * @return {@link ProcessDefinition}
+     * @author cl1226
+     * @date 2023/04/23 15:54
+     */
+    public JSONObject schedulerProcessDefinition(Long projectCode, ProcessDefinition processDefinition, String scheduler) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedulers", map);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("schedule", scheduler);
+        params.put("projectCode", processDefinition.getProjectCode());
+        params.put("processDefinitionCode", processDefinition.getCode());
+
+        String content = HttpRequest.post(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(params)
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 更新调度
+     *
+     * @param projectCode 项目编号
+     * @param processDefinition 工作流
+     * @return {@link ProcessDefinition}
+     * @author cl1226
+     * @date 2023/04/23 15:54
+     */
+    public JSONObject updateSchedulerProcessDefinition(Long projectCode, ProcessDefinition processDefinition,
+                                                       String cron, Integer cronId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        map.put("id", cronId);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedulers/{id}", map);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", cronId);
+        params.put("schedule", cron);
+        params.put("projectCode", processDefinition.getProjectCode());
+
+        String content = HttpRequest.put(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(params)
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 删除调度
+     *
+     * @param projectCode 项目编号
+     * @param processDefinition 工作流
+     * @return {@link ProcessDefinition}
+     * @author cl1226
+     * @date 2023/04/23 15:54
+     */
+    public JSONObject deleteSchedulerProcessDefinition(Long projectCode, ProcessDefinition processDefinition,
+                                                       Integer cronId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        map.put("id", cronId);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedulers/{id}", map);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", cronId);
+        params.put("projectCode", processDefinition.getProjectCode());
+
+        String content = HttpRequest.delete(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(params)
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 调度上线
+     *
+     * @param projectCode 项目编号
+     * @return {@link ProcessDefinition}
+     * @author cl1226
+     * @date 2023/04/23 15:54
+     */
+    public JSONObject schedulerOnlineProcessDefinition(Long projectCode, Integer id) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        map.put("id", id);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedulers/{id}/online", map);
+
+        String content = HttpRequest.post(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 调度下线
+     *
+     * @param projectCode 项目编号
+     * @return {@link ProcessDefinition}
+     * @author cl1226
+     * @date 2023/04/23 15:54
+     */
+    public JSONObject schedulerOfflineProcessDefinition(Long projectCode, Integer id) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        map.put("id", id);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedulers/{id}/offline", map);
+
+        String content = HttpRequest.post(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
 }

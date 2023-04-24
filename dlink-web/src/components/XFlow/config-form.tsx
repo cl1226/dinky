@@ -37,7 +37,7 @@ export const formSchemaService: NsJsonSchemaForm.IFormSchemaService = async args
                   name: 'cron',
                   label: '执行计划',
                   shape: ControlShapeEnum.SpanShape,
-                  value: '123'
+                  value: graphMeta.meta.cron
                 }
               ]
             }

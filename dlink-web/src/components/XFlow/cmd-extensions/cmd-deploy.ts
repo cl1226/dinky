@@ -28,6 +28,12 @@ export namespace NsDeployDagCmd {
   export interface IDeployDagService {
     (meta: NsGraph.IGraphMeta, data: NsGraph.IGraphData): Promise<{ success: boolean }>
   }
+  export interface IOnlineDagService {
+    (meta: NsGraph.IGraphMeta, data: NsGraph.IGraphData): Promise<{ success: boolean }>
+  }
+  export interface IOfflineDagService {
+    (meta: NsGraph.IGraphMeta, data: NsGraph.IGraphData): Promise<{ success: boolean }>
+  }
   /** hook handler 返回类型 */
   export interface IResult {
     success: boolean

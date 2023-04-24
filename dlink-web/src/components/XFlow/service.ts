@@ -101,6 +101,22 @@ export namespace XFlowApi {
     }
   }
 
+  /** 配置调度的api */
+  export const schedulerDagService: NsDeployDagCmd.IDeployDagService = async (
+    meta: NsGraph.IGraphMeta,
+    graphData: NsGraph.IGraphData,
+  ) => {
+    const hide = message.loading(l('app.request.running') + "配置调度");
+    let id = meta.meta.flowId
+    const result = await getData('/api/workflow/task/schedulerTask', {id});
+    hide();
+    if (result.code == 0) {
+      message.success(result.msg);
+    } else {
+      message.warn(result.msg);
+    }
+  }
+
   /** 添加节点api */
   export const addNode: NsNodeCmd.AddNode.IArgs['createNodeService'] = async (
     args: NsNodeCmd.AddNode.IArgs,
@@ -201,4 +217,28 @@ export namespace XFlowApi {
         statusMap: statusMap,
       }
     }
+  export const saveGraphStatusService: NsGraphStatusCommand.IArgs['graphStatusService'] = async () => {
+    return {
+      graphStatus: NsGraphStatusCommand.StatusEnum.PROCESSING,
+      statusMap: statusMap,
+    }
+  }
+  export const deployGraphStatusService: NsGraphStatusCommand.IArgs['graphStatusService'] = async () => {
+    return {
+      graphStatus: NsGraphStatusCommand.StatusEnum.WARNING,
+      statusMap: statusMap,
+    }
+  }
+  export const onlineGraphStatusService: NsGraphStatusCommand.IArgs['graphStatusService'] = async () => {
+    return {
+      graphStatus: NsGraphStatusCommand.StatusEnum.SUCCESS,
+      statusMap: statusMap,
+    }
+  }
+  export const offlineGraphStatusService: NsGraphStatusCommand.IArgs['graphStatusService'] = async () => {
+    return {
+      graphStatus: NsGraphStatusCommand.StatusEnum.ERROR,
+      statusMap: statusMap,
+    }
+  }
 }

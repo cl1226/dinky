@@ -75,8 +75,10 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
                 throw new BusException("该作业已" + JobLifeCycle.get(taskInfo.getStep()).getLabel() + "，禁止修改！");
             }
             task.setStep(JobLifeCycle.DEVELOP.getValue());
+            task.setStatus(WorkflowLifeCycle.CREATE.getValue());
             this.updateById(task);
         } else {
+            task.setStatus(WorkflowLifeCycle.CREATE.getValue());
             task.setStep(JobLifeCycle.CREATE.getValue());
             this.save(task);
         }
@@ -86,6 +88,9 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     @Override
     public Result releaseTask(Integer id) {
         WorkflowTask taskInfo = getById(id);
+        taskInfo.setStatus(WorkflowLifeCycle.DEPLOY.getValue());
+        this.updateById(taskInfo);
+
         if (StringUtils.isBlank(taskInfo.getGraphData())) {
             return Result.failed("工作流程中缺少节点");
         }
@@ -96,7 +101,7 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
 
         if (process != null) {
             if (process.getReleaseState() == ReleaseState.ONLINE) {
-                return Result.failed("工作流定义 [" + taskInfo.getName() + "] 已经上线已经上线");
+                return Result.failed("工作流定义 [" + taskInfo.getName() + "] 已经上线");
             }
             long processCode = process.getCode();
             processClient.deleteProcessDefinition(projectCode, processCode);
@@ -162,7 +167,7 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     @Override
     public Result onLineTask(Integer id) {
         WorkflowTask taskInfo = getById(id);
-        taskInfo.setStatus("ONLINE");
+        taskInfo.setStatus(WorkflowLifeCycle.ONLINE.getValue());
         this.updateById(taskInfo);
         if (StringUtils.isBlank(taskInfo.getGraphData())) {
             return Result.failed("工作流程中缺少节点");
@@ -186,7 +191,7 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     @Override
     public Result offLineTask(Integer id) {
         WorkflowTask taskInfo = getById(id);
-        taskInfo.setStatus("OFFLINE");
+        taskInfo.setStatus(WorkflowLifeCycle.OFFLINE.getValue());
         this.updateById(taskInfo);
         if (StringUtils.isBlank(taskInfo.getGraphData())) {
             return Result.failed("工作流程中缺少节点");
@@ -200,6 +205,144 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         }
         JSONObject entries = processClient.onlineProcessDefinition(projectCode, process, "OFFLINE");
         return Result.succeed("下线工作流成功");
+    }
+
+    @Override
+    public Result schedulerTask(Integer id, String cron) {
+        WorkflowTask taskInfo = getById(id);
+
+        if (StringUtils.isBlank(taskInfo.getGraphData())) {
+            return Result.failed("工作流程中缺少节点");
+        }
+
+        Project dinkyProject = SystemInit.getProject();
+        long projectCode = dinkyProject.getCode();
+        ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
+
+        if (process == null) {
+            return Result.failed("工作流不存在：" + taskInfo.getName());
+        }
+
+        if (process != null) {
+            if (process.getReleaseState() != ReleaseState.ONLINE) {
+                return Result.failed("工作流定义 [" + taskInfo.getName() + "] 不是上线状态");
+            }
+        }
+        JSONObject entries = processClient.schedulerProcessDefinition(projectCode, process, cron);
+
+        taskInfo.setCron(cron);
+        taskInfo.setCronId(56);
+        this.updateById(taskInfo);
+        return Result.succeed("配置工作流调度成功");
+    }
+
+    @Override
+    public Result updateSchedulerTask(Integer id, String cron) {
+        WorkflowTask taskInfo = getById(id);
+
+        if (StringUtils.isBlank(taskInfo.getGraphData())) {
+            return Result.failed("工作流程中缺少节点");
+        }
+
+        Project dinkyProject = SystemInit.getProject();
+        long projectCode = dinkyProject.getCode();
+        ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
+
+        if (process == null) {
+            return Result.failed("工作流不存在：" + taskInfo.getName());
+        }
+
+        if (process != null) {
+            if (process.getReleaseState() != ReleaseState.ONLINE) {
+                return Result.failed("工作流定义 [" + taskInfo.getName() + "] 不是上线状态");
+            }
+        }
+        JSONObject entries = processClient.updateSchedulerProcessDefinition(projectCode, process, cron, taskInfo.getCronId());
+
+        taskInfo.setCron(cron);
+        this.updateById(taskInfo);
+        return Result.succeed("更新工作流调度成功");
+    }
+
+    @Override
+    public Result deleteSchedulerTask(Integer id) {
+        WorkflowTask taskInfo = getById(id);
+
+        if (StringUtils.isBlank(taskInfo.getGraphData())) {
+            return Result.failed("工作流程中缺少节点");
+        }
+
+        Project dinkyProject = SystemInit.getProject();
+        long projectCode = dinkyProject.getCode();
+        ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
+
+        if (process == null) {
+            return Result.failed("工作流不存在：" + taskInfo.getName());
+        }
+
+        if (process != null) {
+            if (process.getReleaseState() != ReleaseState.ONLINE) {
+                return Result.failed("工作流定义 [" + taskInfo.getName() + "] 不是上线状态");
+            }
+        }
+        JSONObject entries = processClient.deleteSchedulerProcessDefinition(projectCode, process, taskInfo.getCronId());
+
+        taskInfo.setCron("");
+        taskInfo.setCronId(-1);
+        this.updateById(taskInfo);
+        return Result.succeed("删除工作流调度成功");
+    }
+
+    @Override
+    public Result schedulerOnlineTask(Integer id) {
+        WorkflowTask taskInfo = getById(id);
+
+        if (StringUtils.isBlank(taskInfo.getGraphData())) {
+            return Result.failed("工作流程中缺少节点");
+        }
+
+        Project dinkyProject = SystemInit.getProject();
+        long projectCode = dinkyProject.getCode();
+        ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
+
+        if (process == null) {
+            return Result.failed("工作流不存在：" + taskInfo.getName());
+        }
+
+        if (process != null) {
+            if (process.getReleaseState() != ReleaseState.ONLINE) {
+                return Result.failed("工作流定义 [" + taskInfo.getName() + "] 不是上线状态");
+            }
+        }
+        JSONObject entries = processClient.schedulerOnlineProcessDefinition(projectCode, taskInfo.getCronId());
+
+        return Result.succeed("工作流调度上线成功");
+    }
+
+    @Override
+    public Result schedulerOfflineTask(Integer id) {
+        WorkflowTask taskInfo = getById(id);
+
+        if (StringUtils.isBlank(taskInfo.getGraphData())) {
+            return Result.failed("工作流程中缺少节点");
+        }
+
+        Project dinkyProject = SystemInit.getProject();
+        long projectCode = dinkyProject.getCode();
+        ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
+
+        if (process == null) {
+            return Result.failed("工作流不存在：" + taskInfo.getName());
+        }
+
+        if (process != null) {
+            if (process.getReleaseState() != ReleaseState.ONLINE) {
+                return Result.failed("工作流定义 [" + taskInfo.getName() + "] 不是上线状态");
+            }
+        }
+        JSONObject entries = processClient.schedulerOfflineProcessDefinition(projectCode, taskInfo.getCronId());
+
+        return Result.succeed("工作流调度下线成功");
     }
 
     @Override

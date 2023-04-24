@@ -38,7 +38,12 @@ import './index.less'
 import '@antv/xflow/dist/index.css'
 
 export interface IProps {
-  meta: { flowId: string },
+  meta: { 
+    flowId: string,
+    flowName: string,
+    status: string,
+    cron: string
+  },
   height: number
 }
 
@@ -69,6 +74,7 @@ export const XFlowEditor: React.FC<IProps> = props => {
 
   /** 父组件meta属性更新时,执行initGraphCmds */
   React.useEffect(() => {
+    console.log(meta)
     if (cache.app) {
       initGraphCmds(cache.app)
     }
@@ -120,7 +126,3 @@ export const XFlowEditor: React.FC<IProps> = props => {
 }
 
 export default XFlowEditor
-
-XFlowEditor.defaultProps = {
-  meta: { flowId: 'test-meta-flow-id' },
-}

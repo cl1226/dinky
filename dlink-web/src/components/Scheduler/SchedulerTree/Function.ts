@@ -37,6 +37,7 @@ export interface TreeDataNode extends DataNode {
   table:string;
   value:number;
   status:string;
+  cron:string;
 }
 
 export function convertToTreeData(data:TreeDataNode[], pid:number,path?:string[]) {
@@ -57,6 +58,9 @@ export function convertToTreeData(data:TreeDataNode[], pid:number,path?:string[]
         obj.selectable = false
       } else {
         obj.selectable = true
+        if (obj.status == "ONLINE") {
+          obj.icon = "<CarryOutOutlined />"
+        }
       }
       result.push(obj)
     }

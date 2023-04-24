@@ -21,4 +21,16 @@ export namespace CustomCommands {
     label: '部署服务',
     category,
   }
+  /** 上线服务 */
+  export const ONLINE_SERVICE: IGraphCommand = {
+    id: 'xflow:online-service',
+    label: '上线服务',
+    category,
+  }
+  /** 下线服务 */
+  export const OFFLINE_SERVICE: IGraphCommand = {
+    id: 'xflow:offline-service',
+    label: '下线服务',
+    category,
+  }
 }

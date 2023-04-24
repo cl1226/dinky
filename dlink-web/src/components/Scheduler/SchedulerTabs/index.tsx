@@ -106,6 +106,8 @@ const EditorTabs = (props: any) => {
       <SchedulerEdit
         tabkey={pane.key}
         tabName={pane.title}
+        status={pane.status}
+        cron={pane.cron}
         height={height ? height : (toolHeight - 32)}
         width={width}
       />

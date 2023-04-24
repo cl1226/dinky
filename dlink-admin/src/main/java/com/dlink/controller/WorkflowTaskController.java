@@ -132,6 +132,46 @@ public class WorkflowTaskController {
     }
 
     /**
+     * 配置调度任务
+     */
+    @GetMapping(value = "/schedulerTask")
+    public Result schedulerTask(@RequestParam Integer id, @RequestParam String cron) {
+        return taskService.schedulerTask(id, cron);
+    }
+
+    /**
+     * 更新调度任务
+     */
+    @GetMapping(value = "/updateSchedulerTask")
+    public Result updateSchedulerTask(@RequestParam Integer id, @RequestParam String cron) {
+        return taskService.updateSchedulerTask(id, cron);
+    }
+
+    /**
+     * 删除调度任务
+     */
+    @GetMapping(value = "/deleteSchedulerTask")
+    public Result deleteSchedulerTask(@RequestParam Integer id) {
+        return taskService.deleteSchedulerTask(id);
+    }
+
+    /**
+     * 上线调度任务
+     */
+    @GetMapping(value = "/onlineSchedulerTask")
+    public Result onlineSchedulerTask(@RequestParam Integer id) {
+        return taskService.schedulerOnlineTask(id);
+    }
+
+    /**
+     * 下线调度任务
+     */
+    @GetMapping(value = "/offlineSchedulerTask")
+    public Result offlineSchedulerTask(@RequestParam Integer id) {
+        return taskService.schedulerOfflineTask(id);
+    }
+
+    /**
      * 注销任务
      */
     @GetMapping(value = "/cancelTask")

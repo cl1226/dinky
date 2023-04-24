@@ -20,7 +20,7 @@
 
 import React, {Key, useEffect, useState} from "react";
 import {connect} from "umi";
-import {DownloadOutlined, DownOutlined, FolderAddOutlined, SwitcherOutlined, UploadOutlined} from "@ant-design/icons";
+import {CarryOutOutlined, DownOutlined, FolderAddOutlined, SwitcherOutlined, UploadOutlined} from "@ant-design/icons";
 import type {UploadProps} from 'antd';
 import {Button, Col, Empty, Input, Menu, message, Modal, Row, Tooltip, Tree, Upload} from 'antd';
 import {getWorkflowCatalogueTreeData} from "@/pages/Scheduler/service";
@@ -116,7 +116,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
   const [autoExpandParent, setAutoExpandParent] = useState(true);
   const [cutId, setCutId] = useState<number | undefined>(undefined);
   const [exportTaskIds, setExportTaskIds] = useState<any[]>([]);
-  const [showIcon, setShowIcon] = useState<boolean>(false);
 
   const [size, setSize] = useState({
     width: document.documentElement.clientWidth,
@@ -255,6 +254,8 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
           icon: node.icon,
           closable: true,
           path: node.path,
+          status: result.datas.status,
+          cron: result.datas.cron,
           task: {
             session: '',
             maxRowNum: 100,
@@ -640,6 +641,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
           onRightClick={handleContextMenu}
           onSelect={onSelect}
           switcherIcon={<DownOutlined/>}
+          // showIcon={true}
           treeData={loop(treeData)}
           onExpand={onExpand}
           autoExpandParent={autoExpandParent}

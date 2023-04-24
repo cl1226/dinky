@@ -52,15 +52,24 @@ public class WorkflowTask extends SuperEntity {
 
     private String status;
 
+    private String cron;
+
+    private Integer cronId;
+
     public WorkflowTask() {
     }
 
-    public WorkflowTask(String alias, Integer tenantId, String type, Integer versionId, Integer step, String graphData) {
+    public WorkflowTask(String alias, Integer tenantId, String type, Integer versionId,
+                        Integer step, String graphData, String status, String cron,
+                        Integer cronId) {
         this.alias = alias;
         this.tenantId = tenantId;
         this.type = type;
         this.versionId = versionId;
         this.step = step;
         this.graphData = graphData;
+        this.status = status;
+        this.cron = cron;
+        this.cronId = cronId;
     }
 }
