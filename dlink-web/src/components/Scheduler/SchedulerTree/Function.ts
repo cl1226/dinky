@@ -36,6 +36,7 @@ export interface TreeDataNode extends DataNode {
   schema:string;
   table:string;
   value:number;
+  status:string;
 }
 
 export function convertToTreeData(data:TreeDataNode[], pid:number,path?:string[]) {

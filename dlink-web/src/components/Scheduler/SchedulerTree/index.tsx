@@ -116,6 +116,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
   const [autoExpandParent, setAutoExpandParent] = useState(true);
   const [cutId, setCutId] = useState<number | undefined>(undefined);
   const [exportTaskIds, setExportTaskIds] = useState<any[]>([]);
+  const [showIcon, setShowIcon] = useState<boolean>(false);
 
   const [size, setSize] = useState({
     width: document.documentElement.clientWidth,
