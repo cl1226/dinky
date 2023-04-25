@@ -132,6 +132,22 @@ public class WorkflowTaskController {
     }
 
     /**
+     * 抢锁
+     */
+    @GetMapping(value = "/getLock")
+    public Result getLock(@RequestParam Integer id) {
+        return taskService.getLock(id);
+    }
+
+    /**
+     * 解锁
+     */
+    @GetMapping(value = "/releaseLock")
+    public Result releaseLock(@RequestParam Integer id) {
+        return taskService.releaseLock(id);
+    }
+
+    /**
      * 配置调度任务
      */
     @GetMapping(value = "/schedulerTask")

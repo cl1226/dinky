@@ -1,5 +1,6 @@
 package com.dlink.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONArray;
@@ -205,6 +206,39 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         }
         JSONObject entries = processClient.onlineProcessDefinition(projectCode, process, "OFFLINE");
         return Result.succeed("下线工作流成功");
+    }
+
+    @Override
+    public synchronized Result getLock(Integer id) {
+        WorkflowTask taskInfo = getById(id);
+        if (taskInfo == null) {
+            return Result.failed("抢锁失败，作业不存在");
+        }
+        if (!taskInfo.getLockUser().equals("")) {
+            return Result.failed("抢锁失败，该作业正被其他用户编辑");
+        }
+
+        taskInfo.setLockUser(StpUtil.getLoginIdAsString());
+        this.updateById(taskInfo);
+        return Result.succeed(taskInfo, "抢锁成功");
+    }
+
+    @Override
+    public synchronized Result releaseLock(Integer id) {
+        WorkflowTask taskInfo = getById(id);
+        if (taskInfo == null) {
+            return Result.failed("解锁失败，作业不存在");
+        }
+        if (taskInfo.getLockUser().equals("")) {
+            return Result.failed("解锁失败，该作业未被加锁");
+        }
+        String loginId = StpUtil.getLoginIdAsString();
+        if (!taskInfo.getLockUser().equals(loginId)) {
+            return Result.failed("解锁失败，该作业已被其他用户加锁");
+        }
+        taskInfo.setLockUser("");
+        this.updateById(taskInfo);
+        return Result.succeed(taskInfo, "解锁成功");
     }
 
     @Override
