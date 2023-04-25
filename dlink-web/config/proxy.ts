@@ -28,7 +28,7 @@
 export default {
   dev: {
     '/api': {
-      target: 'http://sv-mdp-dev-data01:8888',
+      target: 'http://localhost:8888',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },

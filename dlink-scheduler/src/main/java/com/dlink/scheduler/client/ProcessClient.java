@@ -268,7 +268,7 @@ public class ProcessClient {
     public JSONObject schedulerProcessDefinition(Long projectCode, ProcessDefinition processDefinition, String scheduler) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
-        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedulers", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedules", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("schedule", scheduler);
@@ -299,7 +299,7 @@ public class ProcessClient {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
         map.put("id", cronId);
-        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedulers/{id}", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedules/{id}", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("id", cronId);
@@ -330,7 +330,7 @@ public class ProcessClient {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
         map.put("id", cronId);
-        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedulers/{id}", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedules/{id}", map);
 
         Map<String, Object> params = new HashMap<>();
         params.put("id", cronId);
@@ -358,7 +358,7 @@ public class ProcessClient {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
         map.put("id", id);
-        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedulers/{id}/online", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedules/{id}/online", map);
 
         String content = HttpRequest.post(format)
                 .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
@@ -381,7 +381,7 @@ public class ProcessClient {
         Map<String, Object> map = new HashMap<>();
         map.put("projectCode", projectCode);
         map.put("id", id);
-        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedulers/{id}/offline", map);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/schedules/{id}/offline", map);
 
         String content = HttpRequest.post(format)
                 .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())

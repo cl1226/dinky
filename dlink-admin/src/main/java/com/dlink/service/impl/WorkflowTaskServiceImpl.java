@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -166,10 +167,10 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     }
 
     @Override
+    @Transactional
     public Result onLineTask(Integer id) {
         WorkflowTask taskInfo = getById(id);
-        taskInfo.setStatus(WorkflowLifeCycle.ONLINE.getValue());
-        this.updateById(taskInfo);
+
         if (StringUtils.isBlank(taskInfo.getGraphData())) {
             return Result.failed("工作流程中缺少节点");
         }
@@ -181,7 +182,23 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流不存在：" + taskInfo.getName());
         }
         JSONObject entries = processClient.onlineProcessDefinition(projectCode, process, "ONLINE");
-        return Result.succeed("上线工作流成功");
+
+        // 设置周期调度，且上线
+        if (StringUtils.isNotBlank(taskInfo.getCron())) {
+            // 创建周期调度
+            JSONObject res = processClient.schedulerProcessDefinition(projectCode, process, taskInfo.getCron());
+            // 上线周期调度
+            if (res != null && res.get("id", Integer.class) != null) {
+                processClient.schedulerOnlineProcessDefinition(projectCode, res.get("id", Integer.class));
+            } else {
+                return Result.failed("工作流上线失败");
+            }
+            taskInfo.setCronId(res.get("id", Integer.class));
+        }
+
+        taskInfo.setStatus(WorkflowLifeCycle.ONLINE.getValue());
+        this.updateById(taskInfo);
+        return Result.succeed("工作流上线成功");
     }
 
     @Override
@@ -190,10 +207,10 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     }
 
     @Override
+    @Transactional
     public Result offLineTask(Integer id) {
         WorkflowTask taskInfo = getById(id);
-        taskInfo.setStatus(WorkflowLifeCycle.OFFLINE.getValue());
-        this.updateById(taskInfo);
+
         if (StringUtils.isBlank(taskInfo.getGraphData())) {
             return Result.failed("工作流程中缺少节点");
         }
@@ -204,8 +221,20 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         if (process == null) {
             return Result.failed("工作流不存在：" + taskInfo.getName());
         }
-        JSONObject entries = processClient.onlineProcessDefinition(projectCode, process, "OFFLINE");
-        return Result.succeed("下线工作流成功");
+        processClient.onlineProcessDefinition(projectCode, process, "OFFLINE");
+
+        // 下线周期调度，且在海豚调度中删除
+        if (StringUtils.isNotBlank(taskInfo.getCron()) && taskInfo.getCronId() != null && taskInfo.getCronId() != -1) {
+            // 下线周期调度（下线工作流时同时已经下线了周期调度）
+//            processClient.schedulerOfflineProcessDefinition(projectCode, taskInfo.getCronId());
+            // 删除周期调度
+            processClient.deleteSchedulerProcessDefinition(projectCode, process, taskInfo.getCronId());
+            taskInfo.setCronId(-1);
+        }
+
+        taskInfo.setStatus(WorkflowLifeCycle.OFFLINE.getValue());
+        this.updateById(taskInfo);
+        return Result.succeed("工作流下线成功");
     }
 
     @Override
