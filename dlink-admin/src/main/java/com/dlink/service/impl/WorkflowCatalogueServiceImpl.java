@@ -1,14 +1,20 @@
 package com.dlink.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.dlink.common.result.Result;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.CatalogueTaskDTO;
 import com.dlink.dto.WorkflowCatalogueTaskDTO;
+import com.dlink.init.SystemInit;
 import com.dlink.mapper.WorkflowCatalogueMapper;
 import com.dlink.model.*;
+import com.dlink.scheduler.client.ProcessClient;
+import com.dlink.scheduler.model.ProcessDefinition;
+import com.dlink.scheduler.model.Project;
 import com.dlink.service.JobInstanceService;
 import com.dlink.service.WorkflowCatalogueService;
 import com.dlink.service.WorkflowTaskService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +41,8 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
     private WorkflowTaskService taskService;
     @Autowired
     private JobInstanceService jobInstanceService;
+    @Autowired
+    private ProcessClient processClient;
 
     @Override
     public List<WorkflowCatalogue> getAllData() {
@@ -88,6 +96,8 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
                         || JobStatus.FAILED.getValue().equals(job.getStatus())
                         || JobStatus.CANCELED.getValue().equals(job.getStatus())
                         || JobStatus.UNKNOWN.getValue().equals(job.getStatus()))) {
+                    // 删除作业同时将海豚调度上线的任务删除
+                    this.removeWorkflowInDSByTaskId(catalogue.getTaskId());
                     taskService.removeById(taskId);
                     this.removeById(id);
                 } else {
@@ -100,6 +110,8 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
                 List<String> actives = this.analysisActiveCatalogues(del);
                 if (actives.isEmpty()) {
                     for (WorkflowCatalogue c : del) {
+                        // 删除作业同时将海豚调度上线的任务删除
+                        this.removeWorkflowInDSByTaskId(c.getTaskId());
                         taskService.removeById(c.getTaskId());
                         this.removeById(c.getId());
                     }
@@ -110,6 +122,21 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
         }
 
         return errors;
+    }
+
+    private void removeWorkflowInDSByTaskId(Integer taskId) {
+        WorkflowTask taskInfo = taskService.getTaskInfoById(taskId);
+        if (taskInfo != null) {
+            Project dinkyProject = SystemInit.getProject();
+            long projectCode = dinkyProject.getCode();
+            ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
+            if (process != null) {
+                // 先下线
+                processClient.onlineProcessDefinition(projectCode, process, "OFFLINE");
+                // 再删除
+                processClient.deleteProcessDefinition(projectCode, process.getCode());
+            }
+        }
     }
 
     private List<String> analysisActiveCatalogues(Set<WorkflowCatalogue> del) {

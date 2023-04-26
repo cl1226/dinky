@@ -132,6 +132,14 @@ public class WorkflowTaskController {
     }
 
     /**
+     * 启动任务
+     */
+    @GetMapping(value = "/startTask")
+    public Result startTask(@RequestParam Integer id) {
+        return taskService.startTask(id);
+    }
+
+    /**
      * 抢锁
      */
     @GetMapping(value = "/getLock")

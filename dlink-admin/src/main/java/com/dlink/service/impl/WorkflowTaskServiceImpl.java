@@ -24,6 +24,7 @@ import com.dlink.model.*;
 import com.dlink.scheduler.client.ProcessClient;
 import com.dlink.scheduler.client.TaskClient;
 import com.dlink.scheduler.config.DolphinSchedulerProperties;
+import com.dlink.scheduler.enums.Flag;
 import com.dlink.scheduler.enums.ReleaseState;
 import com.dlink.scheduler.model.*;
 import com.dlink.service.WorkflowTaskService;
@@ -125,6 +126,7 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             dlinkTaskParams.setAddress(dolphinSchedulerProperties.getAddress());
             taskRequest.setTaskParams(JSONUtil.parseObj(dlinkTaskParams).toString());
             taskRequest.setTaskType("DINKY");
+            taskRequest.setFlag(Flag.YES);
             taskRequest.setName(x.getLabel());
             Long taskCode = taskClient.genTaskCode(projectCode);
             map.put(x.getId(), taskCode);
@@ -268,6 +270,22 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         taskInfo.setLockUser("");
         this.updateById(taskInfo);
         return Result.succeed(taskInfo, "解锁成功");
+    }
+
+    @Override
+    public Result startTask(Integer id) {
+        WorkflowTask taskInfo = getById(id);
+        if (taskInfo == null) {
+            return Result.failed("启动失败，作业不存在");
+        }
+        Project dinkyProject = SystemInit.getProject();
+        long projectCode = dinkyProject.getCode();
+        ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
+        if (process == null) {
+            return Result.failed("工作流不存在：" + taskInfo.getName());
+        }
+        processClient.startProcessDefinition(projectCode, process.getCode());
+        return Result.succeed("工作流启动成功");
     }
 
     @Override

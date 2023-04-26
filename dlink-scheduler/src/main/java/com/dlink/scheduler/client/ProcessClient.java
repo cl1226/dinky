@@ -19,6 +19,7 @@
 
 package com.dlink.scheduler.client;
 
+import cn.hutool.json.JSONUtil;
 import com.dlink.scheduler.config.DolphinSchedulerProperties;
 import com.dlink.scheduler.constant.Constants;
 import com.dlink.scheduler.model.DagData;
@@ -29,10 +30,9 @@ import com.dlink.scheduler.utils.MyJSONUtil;
 import com.dlink.scheduler.utils.ParamUtil;
 import com.dlink.scheduler.utils.ReadFileUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -385,6 +385,48 @@ public class ProcessClient {
 
         String content = HttpRequest.post(format)
                 .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 启动工作流
+     *
+     * @Param projectCode 项目编号
+     * @param processCode 工作流编号
+     * @return {@link ProcessDefinition}
+     * @author cl1226
+     * @date 2023/04/26 08:30
+     */
+    public JSONObject startProcessDefinition(Long projectCode, Long processCode) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", projectCode);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() + "/projects/{projectCode}/executors/start-process-instance", map);
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar instance = Calendar.getInstance();
+        instance.set(Calendar.HOUR, 0);
+        instance.set(Calendar.MINUTE, 0);
+        instance.set(Calendar.SECOND, 0);
+        String todayStr = dateFormat.format(instance.getTime());
+        Map<String, String> timeMap = new HashMap<>();
+        timeMap.put("complementStartDate", todayStr);
+        timeMap.put("complementEndDate", todayStr);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("failureStrategy", "CONTINUE");
+        params.put("processDefinitionCode", processCode);
+        params.put("processInstancePriority", "HIGH");
+        params.put("projectCode", processCode);
+        params.put("scheduleTime", JSONUtil.toJsonStr(timeMap));
+        params.put("warningType", "ALL");
+
+        String content = HttpRequest.post(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(params)
                 .timeout(5000)
                 .execute().body();
 

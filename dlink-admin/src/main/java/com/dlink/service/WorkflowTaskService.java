@@ -51,6 +51,8 @@ public interface WorkflowTaskService extends ISuperService<WorkflowTask> {
 
     Result releaseLock(Integer id);
 
+    Result startTask(Integer id);
+
     Result schedulerTask(Integer id, String cron);
 
     Result updateSchedulerTask(Integer id, String cron);
