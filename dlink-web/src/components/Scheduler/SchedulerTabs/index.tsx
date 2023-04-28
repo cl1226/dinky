@@ -1,4 +1,10 @@
 /*
+ * @Author: Rebecca Li
+ * @Date: 2023-04-25 08:23:53
+ * @LastEditors: Rebecca Li
+ * @LastEditTime: 2023-04-26 11:40:19
+ */
+/*
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -108,6 +114,7 @@ const EditorTabs = (props: any) => {
         tabName={pane.title}
         status={pane.status}
         cron={pane.cron}
+        task={pane.task}
         height={height ? height : (toolHeight - 32)}
         width={width}
       />

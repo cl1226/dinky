@@ -99,6 +99,35 @@ export namespace XFlowApi {
     } else {
       message.warn(result.msg);
     }
+    }
+    
+  /** 抢锁的api */
+  export const lockService:any = async (
+    meta: NsGraph.IGraphMeta
+  ) => {
+    const hide = message.loading(l('app.request.running') + "抢锁");
+    let id = meta.meta.flowId
+    const result = await getData('/api/workflow/task/getLock', {id});
+    hide();
+    if (result.code == 0) {
+        message.success(result.msg);
+    } else {
+        message.warn(result.msg);
+    }
+  }
+  /** 解锁的api */
+  export const unLockService:any = async (
+    meta: NsGraph.IGraphMeta
+  ) => {
+    const hide = message.loading(l('app.request.running') + "解锁");
+    let id = meta.meta.flowId
+    const result = await getData('/api/workflow/task/releaseLock', {id});
+    hide();
+    if (result.code == 0) {
+        message.success(result.msg);
+    } else {
+      message.warn(result.msg);
+    }
   }
 
   /** 配置调度的api */

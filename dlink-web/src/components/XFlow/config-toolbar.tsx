@@ -17,8 +17,11 @@ import {
   PlaySquareOutlined,
   StopOutlined,
   CarryOutOutlined,
-  ApiOutlined
+  ApiOutlined,
+  LockOutlined,
+  UnlockOutlined
 } from '@ant-design/icons'
+import {getStorageTenantId} from '../Common/crud'
 import { XFlowApi } from './service'
 import { CustomCommands } from './cmd-extensions/constants'
 import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
@@ -35,7 +38,8 @@ export namespace NSToolbarConfig {
   IconStore.set('UngroupOutlined', UngroupOutlined)
   IconStore.set('PlaySquareOutlined', PlaySquareOutlined)
   IconStore.set('StopOutlined', StopOutlined)
-
+  IconStore.set('LockOutlined', LockOutlined)
+  IconStore.set('UnlockOutlined', UnlockOutlined)
   /** toolbar依赖的状态 */
   export interface IToolbarState {
     isMultiSelectionActive: boolean
@@ -121,8 +125,35 @@ export namespace NSToolbarConfig {
             graphStatusService: XFlowApi.deployGraphStatusService
           },
         )
-      },
+        },
+        
     })
+      /** 抢锁按钮 */
+    toolbarGroup1.push({
+        iconName: 'LockOutlined',
+        text: '抢锁',
+        isEnabled:graphMeta.meta.lockUser!==getStorageTenantId(),
+        id: CustomCommands.LOCK_SERVICE.id,
+        onClick: async({commandService}) => {
+          commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
+            deployDagService: (meta) => XFlowApi.lockService(meta),
+          })
+            // let res = await XFlowApi.lockService(graphMeta)
+        }
+      })
+      /** 解锁按钮 */
+    toolbarGroup1.push({
+        iconName: 'UnlockOutlined',
+        text: '解锁',
+        isEnabled: graphMeta.meta.lockUser===getStorageTenantId(),
+        id: CustomCommands.UNLOCK_SERVICE.id,
+        onClick: async ({ commandService }) => {
+          commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
+            deployDagService: (meta) => XFlowApi.unLockService(meta),
+          })
+        // let res = await XFlowApi.unLockService(graphMeta)
+        },
+      })
     /** 上线服务按钮 */
     toolbarGroup2.push({
       iconName: 'CarryOutOutlined',

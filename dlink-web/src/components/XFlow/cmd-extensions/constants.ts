@@ -1,3 +1,9 @@
+/*
+ * @Author: Rebecca Li
+ * @Date: 2023-04-25 08:23:53
+ * @LastEditors: Rebecca Li
+ * @LastEditTime: 2023-04-25 15:44:55
+ */
 import type { IGraphCommand } from '@antv/xflow'
 
 /** 节点命令 */
@@ -18,6 +24,18 @@ export namespace CustomCommands {
   /** 部署服务 */
   export const DEPLOY_SERVICE: IGraphCommand = {
     id: 'xflow:deploy-service',
+    label: '部署服务',
+    category,
+  }
+  /** 抢锁，解锁服务 */
+  export const LOCK_SERVICE: IGraphCommand = {
+    id: 'xflow:lock-service',
+    label: '部署服务',
+    category,
+  }
+  /** 解锁服务 */
+  export const UNLOCK_SERVICE: IGraphCommand = {
+    id: 'xflow:unlock-service',
     label: '部署服务',
     category,
   }

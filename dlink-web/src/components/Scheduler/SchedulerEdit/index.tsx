@@ -21,12 +21,13 @@ import * as _monaco from "monaco-editor";
 import {XFlowEditor} from "@/components/XFlow"
 
 const WorkflowEditor = (props: any) => {
-  const { tabkey, tabName, status, cron, height } = props;
+  const { tabkey, tabName, status, cron, height,task } = props;
   const meta  = {
     flowId: tabkey + '', 
     flowName: tabName,
     status: status,
-    cron: cron
+    cron: cron,
+    lockUser:task&&task.lockUser
   }
 
   return (
