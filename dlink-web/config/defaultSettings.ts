@@ -34,9 +34,9 @@ const Settings: LayoutSettings & {
   fixedHeader: false,
   fixSiderbar: true,
   colorWeak: false,
-  title: 'Dinky Real-time Platform ',
+  title: 'Bigdata Develop Platform ',
   pwa: false,
-  logo: 'dinky.svg',
+  logo: 'svolt.png',
   iconfontUrl: '',
   menu: {
     locale: true

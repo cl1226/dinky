@@ -35,10 +35,10 @@ const StudioHome = (props: any) => {
   return (
     <Scrollbars style={{height: toolHeight}}>
       <Typography style={{padding: '15px'}}>
-        <Title level={4}>{l('pages.datastudio.label.welcomeuse', '', {version: VERSION})}</Title>
+        {/* <Title level={4}>{l('pages.datastudio.label.welcomeuse', '', {version: VERSION})}</Title>
         <Paragraph>
           <blockquote>{l('pages.datastudio.label.dinkydescribe')}</blockquote>
-        </Paragraph>
+        </Paragraph> */}
         <Title level={5}>{l('shortcut.title')}</Title>
         <Paragraph>
           <Text keyboard>Ctrl + s</Text> {l('shortcut.key.save')} <Divider type="vertical"/>

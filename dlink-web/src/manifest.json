@@ -1,21 +1,21 @@
 {
-  "name": "Dinky",
-  "short_name": "Dinky",
+  "name": "Svolt",
+  "short_name": "Svolt",
   "display": "standalone",
   "start_url": "./?utm_source=homescreen",
   "theme_color": "#002140",
   "background_color": "#001529",
   "icons": [
     {
-      "src": "dinky.svg",
+      "src": "svolt.png",
       "sizes": "192x192"
     },
     {
-      "src": "dinky.svg",
+      "src": "svolt.png",
       "sizes": "128x128"
     },
     {
-      "src": "dinky.svg",
+      "src": "svolt.png",
       "sizes": "512x512"
     }
   ]

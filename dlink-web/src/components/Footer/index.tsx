@@ -26,20 +26,14 @@ export default () => {
 
   return (
     <DefaultFooter
-      copyright={l('app.copyright.produced', 'Produced by Dinky Community')}
+      copyright={l('app.copyright.produced', 'Produced by Svolt Co.,Ltd.')}
       links={[
         {
-          key: 'Dinky',
-          title: 'Dinky',
+          key: 'Svolt',
+          title: 'Svolt',
           href: '',
           blankTarget: true,
-        },
-        {
-          key: 'github',
-          title: <GithubOutlined/>,
-          href: 'https://github.com/DataLinkDC/dlink',
-          blankTarget: true,
-        },
+        }
       ]}
     />
   );
