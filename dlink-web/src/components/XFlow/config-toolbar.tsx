@@ -115,6 +115,7 @@ export namespace NSToolbarConfig {
             deployDagService: (meta, graphData) => XFlowApi.deployDagService(meta, graphData),
           },
         )
+
         const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
         graphMetaModel.setValue({
           ...graphMeta,
@@ -133,20 +134,17 @@ export namespace NSToolbarConfig {
       isEnabled: state.lockStatus && (state.status == 'DEPLOY' || state.status === 'OFFLINE'),
       id: CustomCommands.ONLINE_SERVICE.id,
       onClick: async ({ commandService, modelService }) => {
-        await commandService.executeCommand<NsDeployDagCmd.IArgs>(
-          CustomCommands.DEPLOY_SERVICE.id,
-          {
-            deployDagService: (meta, graphData) => XFlowApi.onlineDagService(meta, graphData),
-          },
-        )
-        const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
-        graphMetaModel.setValue({
-          ...graphMeta,
-          meta: {
-            ...graphMeta.meta,
-            status: StatusEnum.ONLINE,
-          },
-        })
+        const result = await XFlowApi.onlineDagService(graphMeta)
+        if (result) {
+          const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
+          graphMetaModel.setValue({
+            ...graphMeta,
+            meta: {
+              ...graphMeta.meta,
+              status: StatusEnum.ONLINE,
+            },
+          })
+        }
       },
       render: (props) => {
         return (
@@ -169,18 +167,17 @@ export namespace NSToolbarConfig {
       isEnabled: state.lockStatus && state.status == 'ONLINE',
       id: CustomCommands.OFFLINE_SERVICE.id,
       onClick: async ({ commandService, modelService }) => {
-        commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
-          deployDagService: (meta, graphData) => XFlowApi.offlineDagService(meta, graphData),
-        })
-
-        const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
-        graphMetaModel.setValue({
-          ...graphMeta,
-          meta: {
-            ...graphMeta.meta,
-            status: StatusEnum.OFFLINE,
-          },
-        })
+        const result = await XFlowApi.offlineDagService(graphMeta)
+        if (result) {
+          const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
+          graphMetaModel.setValue({
+            ...graphMeta,
+            meta: {
+              ...graphMeta.meta,
+              status: StatusEnum.OFFLINE,
+            },
+          })
+        }
       },
     })
 

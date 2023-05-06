@@ -87,8 +87,10 @@ export namespace XFlowApi {
     hide()
     if (result.code == 0) {
       message.success(result.msg)
+      return true
     } else {
       message.warn(result.msg)
+      return false
     }
   }
 
@@ -100,8 +102,10 @@ export namespace XFlowApi {
     hide()
     if (result.code == 0) {
       message.success(result.msg)
+      return true
     } else {
       message.warn(result.msg)
+      return false
     }
   }
 

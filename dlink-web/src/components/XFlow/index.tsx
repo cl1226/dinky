@@ -16,6 +16,7 @@ import {
   DagGraphExtension,
 } from '@antv/xflow'
 
+import { CustomJsonForm } from './json-form'
 /** app 组件配置  */
 /** 配置画布 */
 import { useGraphHookConfig } from './config-graph'
@@ -126,6 +127,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
         controlMapService={controlMapService}
         formSchemaService={formSchemaService}
         formValueUpdateService={formValueUpdateService}
+
         bodyPosition={{ top: 0, bottom: 0, right: 0 }}
         position={{ width: 290, top: 0, bottom: 0, right: 0 }}
         footerPosition={{ height: 0 }}
