@@ -32,6 +32,8 @@ import com.dlink.model.Table;
 import com.dlink.utils.LogUtil;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.UserGroupInformation;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -207,6 +209,16 @@ public class HiveDriver extends AbstractJdbcDriver implements Driver {
 
     @Override
     public int executeUpdate(String sql) throws Exception {
+
+        if (config.getUrl().contains("principal")) {
+            System.setProperty("java.security.krb5.conf", "/etc/krb5.conf");
+            Configuration configuration = new Configuration();
+            configuration.set("hadoop.security.authentication" , "Kerberos");
+            configuration.setBoolean("hadoop.security.authorization", true);
+            UserGroupInformation.setConfiguration(configuration);
+            UserGroupInformation.loginUserFromKeytab("svolt@SVOLT.COM" , "/opt/keytab/svolt.keytab");
+        }
+
         Asserts.checkNullString(sql, "Sql 语句为空");
         String querySQL = sql.trim().replaceAll(";$", "");
         int res = 0;

@@ -21,6 +21,7 @@ package com.dlink.controller;
 
 import com.dlink.common.result.ProTableResult;
 import com.dlink.common.result.Result;
+import com.dlink.dto.WorkflowTaskDTO;
 import com.dlink.model.*;
 import com.dlink.service.WorkflowTaskService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -95,7 +96,7 @@ public class WorkflowTaskController {
      */
     @GetMapping
     public Result getOneById(@RequestParam Integer id) {
-        WorkflowTask task = taskService.getTaskInfoById(id);
+        WorkflowTaskDTO task = taskService.getTaskInfoById(id);
         return Result.succeed(task, "获取成功");
     }
 

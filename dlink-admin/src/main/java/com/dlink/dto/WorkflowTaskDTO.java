@@ -41,8 +41,12 @@ public class WorkflowTaskDTO {
     private String alias;
     private String type;
     private Integer versionId;
-    private Integer step;
     private String graphData;
     private List<WorkflowNode> nodes;
     private List<WorkflowEdge> edges;
+    private String cron;
+    private Integer cronId;
+    private String status;
+    private String lockUser;
+    private boolean lockStatus;
 }

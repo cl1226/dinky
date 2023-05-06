@@ -21,6 +21,7 @@ package com.dlink.service;
 
 import com.dlink.common.result.Result;
 import com.dlink.db.service.ISuperService;
+import com.dlink.dto.WorkflowTaskDTO;
 import com.dlink.model.*;
 
 /**
@@ -31,7 +32,7 @@ import com.dlink.model.*;
  */
 public interface WorkflowTaskService extends ISuperService<WorkflowTask> {
 
-    WorkflowTask getTaskInfoById(Integer id);
+    WorkflowTaskDTO getTaskInfoById(Integer id);
 
     void initTenantByTaskId(Integer id);
 

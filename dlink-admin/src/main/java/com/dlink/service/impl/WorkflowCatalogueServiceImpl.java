@@ -5,6 +5,7 @@ import com.dlink.common.result.Result;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.CatalogueTaskDTO;
 import com.dlink.dto.WorkflowCatalogueTaskDTO;
+import com.dlink.dto.WorkflowTaskDTO;
 import com.dlink.init.SystemInit;
 import com.dlink.mapper.WorkflowCatalogueMapper;
 import com.dlink.model.*;
@@ -125,7 +126,7 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
     }
 
     private void removeWorkflowInDSByTaskId(Integer taskId) {
-        WorkflowTask taskInfo = taskService.getTaskInfoById(taskId);
+        WorkflowTaskDTO taskInfo = taskService.getTaskInfoById(taskId);
         if (taskInfo != null) {
             Project dinkyProject = SystemInit.getProject();
             long projectCode = dinkyProject.getCode();

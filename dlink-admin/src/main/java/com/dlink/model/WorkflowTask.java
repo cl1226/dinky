@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.dlink.db.model.SuperEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.data.annotation.Transient;
 
 /**
  * WorkflowTask
@@ -46,8 +47,6 @@ public class WorkflowTask extends SuperEntity {
 
     private Integer versionId;
 
-    private Integer step;
-
     private String graphData;
 
     private String status;
@@ -62,13 +61,12 @@ public class WorkflowTask extends SuperEntity {
     }
 
     public WorkflowTask(String alias, Integer tenantId, String type, Integer versionId,
-                        Integer step, String graphData, String status, String cron,
+                        String graphData, String status, String cron,
                         Integer cronId, String lockUser) {
         this.alias = alias;
         this.tenantId = tenantId;
         this.type = type;
         this.versionId = versionId;
-        this.step = step;
         this.graphData = graphData;
         this.status = status;
         this.cron = cron;
