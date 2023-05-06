@@ -1,6 +1,6 @@
 import type { IToolbarItemOptions } from '@antv/xflow'
 import { createToolbarConfig } from '@antv/xflow'
-import type { IModelService } from '@antv/xflow'
+import type { IModelService, IGraphPipelineCommand } from '@antv/xflow'
 import {
   XFlowGraphCommands,
   XFlowDagCommands,
@@ -8,6 +8,7 @@ import {
   MODELS,
   IconStore,
 } from '@antv/xflow'
+
 import {
   UngroupOutlined,
   SaveOutlined,
@@ -19,13 +20,14 @@ import {
   CarryOutOutlined,
   ApiOutlined,
   LockOutlined,
-  UnlockOutlined
+  UnlockOutlined,
 } from '@ant-design/icons'
-import {getStorageTenantId} from '../Common/crud'
-import { XFlowApi } from './service'
+import { getStorageTenantId } from '../Common/crud'
+import { XFlowApi, StatusEnum } from './service'
 import { CustomCommands } from './cmd-extensions/constants'
 import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
 import type { NsGraphCmd, NsGraph } from '@antv/xflow'
+import { Popconfirm } from 'antd'
 
 export namespace NSToolbarConfig {
   /** 注册icon 类型 */
@@ -42,45 +44,23 @@ export namespace NSToolbarConfig {
   IconStore.set('UnlockOutlined', UnlockOutlined)
   /** toolbar依赖的状态 */
   export interface IToolbarState {
-    isMultiSelectionActive: boolean
-    isNodeSelected: boolean
-    isGroupSelected: boolean
-    isProcessing: boolean
     status: string
+    lockStatus: boolean
   }
 
   export const getDependencies = async (modelService: IModelService) => {
-    return [
-      await MODELS.SELECTED_CELLS.getModel(modelService),
-      await MODELS.GRAPH_ENABLE_MULTI_SELECT.getModel(modelService),
-      await NsGraphStatusCommand.MODEL.getModel(modelService)
-    ]
+    return [await MODELS.GRAPH_META.getModel(modelService)]
   }
 
   /** toolbar依赖的状态 */
-  export const getToolbarState = async (modelService: IModelService, graphMeta: NsGraph.IGraphMeta) => {
-    // isMultiSelectionActive
-    const { isEnable: isMultiSelectionActive } = await MODELS.GRAPH_ENABLE_MULTI_SELECT.useValue(
-      modelService,
-    )
-    // isGroupSelected
-    const isGroupSelected = await MODELS.IS_GROUP_SELECTED.useValue(modelService)
-    // isNormalNodesSelected: node不能是GroupNode
-    const isNormalNodesSelected = await MODELS.IS_NORMAL_NODES_SELECTED.useValue(modelService)
-    // statusInfo
-    const statusInfo = await NsGraphStatusCommand.MODEL.useValue(modelService)
-    
-    if (statusInfo.graphStatus == NsGraphStatusCommand.StatusEnum.DEFAULT) {
-      statusInfo.graphStatus = graphMeta.meta.status
-    }
-    // processing: 保存, success: 上线, error: 下线, warning: 部署
-    console.log("workflow status: " + statusInfo.graphStatus)
+  export const getToolbarState = async (
+    modelService: IModelService,
+    graphMeta: NsGraph.IGraphMeta,
+  ) => {
+    console.log('workflow status: ' + graphMeta.meta.status)
     return {
-      isNodeSelected: isNormalNodesSelected,
-      isGroupSelected,
-      isMultiSelectionActive,
-      isProcessing: statusInfo.graphStatus === NsGraphStatusCommand.StatusEnum.PROCESSING,
-      status: statusInfo.graphStatus
+      status: graphMeta.meta.status,
+      lockStatus: graphMeta.meta.lockStatus,
     } as NSToolbarConfig.IToolbarState
   }
 
@@ -88,87 +68,102 @@ export namespace NSToolbarConfig {
     const toolbarGroup1: IToolbarItemOptions[] = []
     const toolbarGroup2: IToolbarItemOptions[] = []
     const toolbarGroup3: IToolbarItemOptions[] = []
-    const toolbarGroup4: IToolbarItemOptions[] = []
 
-    /** 保存数据 */
+    /** 抢锁按钮 */
     toolbarGroup1.push({
-      id: XFlowGraphCommands.SAVE_GRAPH_DATA.id,
-      iconName: 'SaveOutlined',
-      text: '保存',
-      isEnabled: state.status == 'processing' || state.status == 'CREATE' || state.status == 'DEPLOY' || state.status == 'warning' || state.status == 'OFFLINE' || state.status == 'error',
-      onClick: async ({ commandService }) => {
-        commandService.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
-          XFlowGraphCommands.SAVE_GRAPH_DATA.id,
-          { saveGraphDataService: (meta, graphData) => XFlowApi.saveGraphData(meta, graphData) },
-        ),
-        commandService.executeCommand<NsGraphStatusCommand.IArgs>(
-          XFlowDagCommands.QUERY_GRAPH_STATUS.id,
-          {
-            graphStatusService: XFlowApi.saveGraphStatusService
-          },
-        )
+      id: CustomCommands.LOCK_SERVICE.id,
+      iconName: 'LockOutlined',
+      text: '抢锁',
+      isEnabled: !state.lockStatus,
+      onClick: async ({ commandService, modelService }) => {
+        const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
+        const result = await XFlowApi.lockService(graphMeta)
+        console.log('graphMeta', graphMeta)
+        const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
+        graphMetaModel.setValue({
+          ...graphMeta,
+          meta: result,
+        })
       },
     })
-    /** 部署服务按钮 */
+    /** 解锁按钮 */
     toolbarGroup1.push({
+      iconName: 'UnlockOutlined',
+      text: '解锁',
+      isEnabled: state.lockStatus,
+      id: CustomCommands.UNLOCK_SERVICE.id,
+      onClick: async ({ commandService, modelService }) => {
+        const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
+        const result = await XFlowApi.unLockService(graphMeta)
+        const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
+        graphMetaModel.setValue({
+          ...graphMeta,
+          meta: result,
+        })
+      },
+    })
+
+    /** 部署服务按钮 */
+    toolbarGroup2.push({
       iconName: 'CloudSyncOutlined',
       text: '部署',
-      isEnabled: state.status == 'processing' || state.status == 'CREATE' || state.status == 'DEPLOY' || state.status == 'warning' || state.status == 'OFFLINE' || state.status == 'error',
+      isEnabled:
+        state.lockStatus &&
+        (state.status === 'CREATE' || state.status === 'DEPLOY' || state.status === 'OFFLINE'),
       id: CustomCommands.DEPLOY_SERVICE.id,
-      onClick: ({ commandService }) => {
-        commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
-          deployDagService: (meta, graphData) => XFlowApi.deployDagService(meta, graphData),
-        }),
-        commandService.executeCommand<NsGraphStatusCommand.IArgs>(
-          XFlowDagCommands.QUERY_GRAPH_STATUS.id,
+      onClick: async ({ commandService, modelService }) => {
+        await commandService.executeCommand<NsDeployDagCmd.IArgs>(
+          CustomCommands.DEPLOY_SERVICE.id,
           {
-            graphStatusService: XFlowApi.deployGraphStatusService
+            deployDagService: (meta, graphData) => XFlowApi.deployDagService(meta, graphData),
           },
         )
-        },
-        
+        const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
+        const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
+        graphMetaModel.setValue({
+          ...graphMeta,
+          meta: {
+            ...graphMeta.meta,
+            status: StatusEnum.DEPLOY,
+          },
+        })
+      },
     })
-      /** 抢锁按钮 */
-    toolbarGroup1.push({
-        iconName: 'LockOutlined',
-        text: '抢锁',
-        isEnabled:graphMeta.meta.lockUser!==getStorageTenantId(),
-        id: CustomCommands.LOCK_SERVICE.id,
-        onClick: async({commandService}) => {
-          commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
-            deployDagService: (meta) => XFlowApi.lockService(meta),
-          })
-            // let res = await XFlowApi.lockService(graphMeta)
-        }
-      })
-      /** 解锁按钮 */
-    toolbarGroup1.push({
-        iconName: 'UnlockOutlined',
-        text: '解锁',
-        isEnabled: graphMeta.meta.lockUser===getStorageTenantId(),
-        id: CustomCommands.UNLOCK_SERVICE.id,
-        onClick: async ({ commandService }) => {
-          commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
-            deployDagService: (meta) => XFlowApi.unLockService(meta),
-          })
-        // let res = await XFlowApi.unLockService(graphMeta)
-        },
-      })
+
     /** 上线服务按钮 */
     toolbarGroup2.push({
       iconName: 'CarryOutOutlined',
       text: '上线',
-      isEnabled: state.status == 'DEPLOY' || state.status == 'warning' || state.status == 'OFFLINE' || state.status == 'error',
+      isEnabled: state.lockStatus && (state.status == 'DEPLOY' || state.status === 'OFFLINE'),
       id: CustomCommands.ONLINE_SERVICE.id,
-      onClick: ({ commandService }) => {
-        commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
-          deployDagService: (meta, graphData) => XFlowApi.onlineDagService(meta, graphData),
-        }),
-        commandService.executeCommand<NsGraphStatusCommand.IArgs>(
-          XFlowDagCommands.QUERY_GRAPH_STATUS.id,
+      onClick: async ({ commandService, modelService }) => {
+        await commandService.executeCommand<NsDeployDagCmd.IArgs>(
+          CustomCommands.DEPLOY_SERVICE.id,
           {
-            graphStatusService: XFlowApi.onlineGraphStatusService
+            deployDagService: (meta, graphData) => XFlowApi.onlineDagService(meta, graphData),
           },
+        )
+        const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
+        const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
+        graphMetaModel.setValue({
+          ...graphMeta,
+          meta: {
+            ...graphMeta.meta,
+            status: StatusEnum.ONLINE,
+          },
+        })
+      },
+      render: (props) => {
+        return (
+          <Popconfirm
+            title="请确认已部署后再点击上线！"
+            placement="bottom"
+            onConfirm={() => {
+              props.onClick()
+            }}
+          >
+            {props.children}
+          </Popconfirm>
         )
       },
     })
@@ -176,31 +171,22 @@ export namespace NSToolbarConfig {
     toolbarGroup2.push({
       iconName: 'ApiOutlined',
       text: '下线',
-      isEnabled: state.status == 'ONLINE' || state.status == 'success',
+      isEnabled: state.lockStatus && state.status == 'ONLINE',
       id: CustomCommands.OFFLINE_SERVICE.id,
-      onClick: ({ commandService }) => {
+      onClick: async ({ commandService, modelService }) => {
         commandService.executeCommand<NsDeployDagCmd.IArgs>(CustomCommands.DEPLOY_SERVICE.id, {
           deployDagService: (meta, graphData) => XFlowApi.offlineDagService(meta, graphData),
-        }),
-        commandService.executeCommand<NsGraphStatusCommand.IArgs>(
-          XFlowDagCommands.QUERY_GRAPH_STATUS.id,
-          {
-            graphStatusService: XFlowApi.offlineGraphStatusService
-          },
-        )
-      },
-    })
+        })
 
-    toolbarGroup3.push({
-      id: XFlowDagCommands.QUERY_GRAPH_STATUS.id + 'scheduler',
-      text: '配置调度',
-      iconName: 'GatewayOutlined',
-      isEnabled: state.status == 'ONLINE' || state.status == 'success',
-      onClick: ({ commandService }) => {
-        commandService.executeCommand<NsDeployDagCmd.IArgs>(XFlowDagCommands.QUERY_GRAPH_STATUS.id, {
-            deployDagService: (meta, graphData) => XFlowApi.schedulerDagService(meta, graphData)
-          }
-        )
+        const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
+        const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
+        graphMetaModel.setValue({
+          ...graphMeta,
+          meta: {
+            ...graphMeta.meta,
+            status: StatusEnum.OFFLINE,
+          },
+        })
       },
     })
 
@@ -208,27 +194,23 @@ export namespace NSToolbarConfig {
       id: XFlowDagCommands.QUERY_GRAPH_STATUS.id + 'play',
       text: '开始执行',
       iconName: 'PlaySquareOutlined',
-      isEnabled: state.status == 'ONLINE' || state.status == 'success',
+      isEnabled: state.status == 'ONLINE',
       onClick: async ({ commandService }) => {
-        commandService.executeCommand<NsGraphStatusCommand.IArgs>(
-          XFlowDagCommands.QUERY_GRAPH_STATUS.id,
-          {
-            graphStatusService: XFlowApi.graphStatusService
-          },
-        )
+        // commandService.executeCommand<NsGraphStatusCommand.IArgs>(
+        //   XFlowDagCommands.QUERY_GRAPH_STATUS.id,
+        //   {
+        //     graphStatusService: XFlowApi.graphStatusService,
+        //   },
+        // )
       },
     })
 
     return [
-      { name: 'graphData', items: toolbarGroup1 },
-      { name: 'groupOperations', items: toolbarGroup2 },
+      { name: 'lockCmd', items: toolbarGroup1 },
+      { name: 'statusCmd', items: toolbarGroup2 },
       {
         name: 'customCmd',
         items: toolbarGroup3,
-      },
-      {
-        name: 'customCmd',
-        items: toolbarGroup4,
       },
     ]
   }
@@ -239,14 +221,16 @@ export const useToolbarConfig = createToolbarConfig((toolbarConfig) => {
     const updateToolbarModel = async () => {
       const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
       const state = await NSToolbarConfig.getToolbarState(modelService, graphMeta)
-      console.log("graphMeta: " + JSON.stringify(graphMeta.meta))
+      console.log('graphMeta: ' + JSON.stringify(graphMeta.meta))
+
       const toolbarItems = await NSToolbarConfig.getToolbarItems(state, graphMeta)
-      toolbarModel.setValue(toolbar => {
+      toolbarModel.setValue((toolbar) => {
         toolbar.mainGroups = toolbarItems
       })
     }
     const models = await NSToolbarConfig.getDependencies(modelService)
-    const subscriptions = models.map(model => {
+
+    const subscriptions = models.map((model) => {
       return model.watch(async () => {
         updateToolbarModel()
       })
