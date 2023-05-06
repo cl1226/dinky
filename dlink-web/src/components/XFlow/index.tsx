@@ -71,8 +71,6 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
   )
 
   const handleMeta = (remainMeta) => {
-    console.log('remainMeta', remainMeta)
-
     setMeta(remainMeta)
   }
 
@@ -81,7 +79,6 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
    * @param extensionRegistry 当前XFlow配置项
    */
   const onLoad: IAppLoad = async (app) => {
-    console.log('onLoad', app)
     cache.app = app
     initGraphCmds(cache.app, handleMeta)
   }
@@ -90,7 +87,6 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
   React.useEffect(() => {
     if (cache.app && meta.flowId === activeKey) {
       initGraphCmds(cache.app, handleMeta)
-      console.log('useEffect', meta)
     }
   }, [cache.app, flowId])
 

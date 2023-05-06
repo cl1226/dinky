@@ -73,7 +73,6 @@ export namespace XFlowApi {
 
     const id = graphMeta.meta.flowId
     const result = await getData('/api/workflow/task/releaseTask', { id })
-    console.log('11223')
     if (result.code == 0) {
       message.success(result.msg)
     } else {
@@ -81,12 +80,9 @@ export namespace XFlowApi {
     }
   }
   /** 上线数据的api */
-  export const onlineDagService: NsDeployDagCmd.IDeployDagService = async (
-    meta: NsGraph.IGraphMeta,
-    graphData: NsGraph.IGraphData,
-  ) => {
+  export const onlineDagService: any = async (graphMeta: NsGraph.IGraphMeta) => {
     const hide = message.loading(l('app.request.running') + '上线')
-    let id = meta.meta.flowId
+    let id = graphMeta.meta.flowId
     const result = await getData('/api/workflow/task/onLineTask', { id })
     hide()
     if (result.code == 0) {
@@ -97,12 +93,9 @@ export namespace XFlowApi {
   }
 
   /** 下线数据的api */
-  export const offlineDagService: NsDeployDagCmd.IDeployDagService = async (
-    meta: NsGraph.IGraphMeta,
-    graphData: NsGraph.IGraphData,
-  ) => {
+  export const offlineDagService: any = async (graphMeta: NsGraph.IGraphMeta) => {
     const hide = message.loading(l('app.request.running') + '下线')
-    let id = meta.meta.flowId
+    let id = graphMeta.meta.flowId
     const result = await getData('/api/workflow/task/offLineTask', { id })
     hide()
     if (result.code == 0) {
@@ -114,7 +107,6 @@ export namespace XFlowApi {
 
   /** 抢锁的api */
   export const lockService: any = async (graphMeta: NsGraph.IGraphMeta) => {
-    console.log('meta', graphMeta)
     const hide = message.loading(l('app.request.running') + '抢锁')
     const id = graphMeta.meta.flowId
     const result = await getData('/api/workflow/task/getLock', { id })
@@ -149,6 +141,19 @@ export namespace XFlowApi {
     } else {
       message.warn(result.msg)
       return graphMeta.meta
+    }
+  }
+
+  /** 开始执行api */
+  export const startDagService: any = async (graphMeta: NsGraph.IGraphMeta) => {
+    const hide = message.loading(l('app.request.running') + '开始执行')
+    const id = graphMeta.meta.flowId
+    const result = await getData('/api/workflow/task/startTask', { id })
+    hide()
+    if (result.code == 0) {
+      message.success(result.msg)
+    } else {
+      message.warn(result.msg)
     }
   }
 

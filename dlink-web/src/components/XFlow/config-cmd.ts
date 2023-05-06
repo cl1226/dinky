@@ -68,7 +68,6 @@ export const initGraphCmds = async (
   app: IApplication,
   afterLoadGraph: (remainMeta: any) => void,
 ) => {
-  console.log('yyyyy')
   await app.executeCommandPipeline([
     /** 1. 从服务端获取数据 */
     {

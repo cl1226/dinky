@@ -76,9 +76,7 @@ export namespace NSToolbarConfig {
       text: '抢锁',
       isEnabled: !state.lockStatus,
       onClick: async ({ commandService, modelService }) => {
-        const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
         const result = await XFlowApi.lockService(graphMeta)
-        console.log('graphMeta', graphMeta)
         const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
         graphMetaModel.setValue({
           ...graphMeta,
@@ -93,7 +91,6 @@ export namespace NSToolbarConfig {
       isEnabled: state.lockStatus,
       id: CustomCommands.UNLOCK_SERVICE.id,
       onClick: async ({ commandService, modelService }) => {
-        const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
         const result = await XFlowApi.unLockService(graphMeta)
         const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
         graphMetaModel.setValue({
@@ -118,7 +115,6 @@ export namespace NSToolbarConfig {
             deployDagService: (meta, graphData) => XFlowApi.deployDagService(meta, graphData),
           },
         )
-        const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
         const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
         graphMetaModel.setValue({
           ...graphMeta,
@@ -143,7 +139,6 @@ export namespace NSToolbarConfig {
             deployDagService: (meta, graphData) => XFlowApi.onlineDagService(meta, graphData),
           },
         )
-        const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
         const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
         graphMetaModel.setValue({
           ...graphMeta,
@@ -178,7 +173,6 @@ export namespace NSToolbarConfig {
           deployDagService: (meta, graphData) => XFlowApi.offlineDagService(meta, graphData),
         })
 
-        const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
         const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
         graphMetaModel.setValue({
           ...graphMeta,
@@ -195,13 +189,8 @@ export namespace NSToolbarConfig {
       text: '开始执行',
       iconName: 'PlaySquareOutlined',
       isEnabled: state.status == 'ONLINE',
-      onClick: async ({ commandService }) => {
-        // commandService.executeCommand<NsGraphStatusCommand.IArgs>(
-        //   XFlowDagCommands.QUERY_GRAPH_STATUS.id,
-        //   {
-        //     graphStatusService: XFlowApi.graphStatusService,
-        //   },
-        // )
+      onClick: async ({ commandService, modelService }) => {
+        await XFlowApi.startDagService(graphMeta)
       },
     })
 
