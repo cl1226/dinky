@@ -18,7 +18,7 @@
  */
 
 export default {
-  'pages.layouts.userLayout.title': 'Dinky Real-time Computing Platform',
+  'pages.layouts.userLayout.title': 'Big-data Computing Platform',
 
   'pages.login.accountLogin.tab': 'Account Login',
   'pages.login.accountLogin.errorMessage': 'Incorrect UserName/Password（admin/ant.design)',

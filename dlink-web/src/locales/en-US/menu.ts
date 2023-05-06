@@ -31,6 +31,14 @@ export default {
 
   'menu.scheduler': 'Scheduler',
 
+  'menu.dataService': 'Data Service',
+  'menu.dataService.devApi': 'Develop API',
+  'menu.dataService.devApi.catalogue': 'API Catalogue',
+  'menu.dataService.devApi.management': 'API Management',
+  'menu.dataService.invokeApi': 'Invoke API',
+  'menu.dataService.invokeApi.catalogue': 'Service Catalogue',
+  'menu.dataService.invokeApi.overview': 'Service Overview',
+
   'menu.devops': 'Devops',
   'menu.job': 'Job Instance',
 

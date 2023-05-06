@@ -180,8 +180,8 @@ const Login: React.FC = () => {
         <div className={styles.top}>
           <div className={styles.header}>
             <Link to="/">
-              <img alt="logo" className={styles.logo} src="/dinky.svg"/>
-              <span className={styles.title}>Dinky</span>
+              <img alt="logo" className={styles.logo} src="/svolt.png"/>
+              {/* <span className={styles.title}>Svolt</span> */}
             </Link>
           </div>
           <div className={styles.desc}>

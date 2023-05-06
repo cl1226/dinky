@@ -63,13 +63,51 @@ export default [
     footerRender: false,
     component: './Scheduler',
   },
-  // {
-  //   path: '/scheduler',
-  //   name: 'scheduler',
-  //   icon: 'nodeExpand',
-  //   footerRender: false,
-  //   component: './Scheduler',
-  // },
+  {
+    path: '/dataService',
+    name: 'dataService',
+    icon: 'appstore',
+    routes: [
+      {
+        path: '/dataService',
+        redirect: '/dataService/devApi/catalogue',
+      },
+      {
+        path: '/dataService/devApi',
+        name: 'devApi',
+        icon: 'cluster',
+        routes: [
+          {
+            path: '/dataService/devApi/catalogue',
+            name: 'catalogue',
+            component: './DataService/ApiDev/Catalogue',
+          },
+          {
+            path: '/dataService/devApi/management',
+            name: 'management',
+            component: './DataService/ApiDev/Management',
+          },
+        ],
+      },
+      {
+        path: '/dataService/invokeApi',
+        name: 'invokeApi',
+        icon: 'cluster',
+        routes: [
+          {
+            path: '/dataService/invokeApi/catalogue',
+            name: 'catalogue',
+            component: './DataService/ApiInvoke/Catalogue',
+          },
+          {
+            path: '/dataService/invokeApi/overview',
+            name: 'overview',
+            component: './DataService/ApiInvoke/Overview',
+          },
+        ],
+      }
+    ],
+  },
   {
     path: '/devops',
     name: 'devops',
@@ -248,12 +286,12 @@ export default [
       },
     ],
   },
-  {
-    path: '/about',
-    name: 'about',
-    icon: 'smile',
-    component: './Welcome',
-  },
+  // {
+  //   path: '/about',
+  //   name: 'about',
+  //   icon: 'smile',
+  //   component: './Welcome',
+  // },
   {
     component: './404',
   },
