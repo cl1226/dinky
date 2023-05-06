@@ -108,11 +108,11 @@ export const handleAddOrUpdate = async (url: string, fields: any) => {
     const {code, msg} = await addOrUpdateData(url, {...fields});
     hide();
     if (code == CODE.SUCCESS) {
-      message.success(msg);
+      return true;
     } else {
       message.warn(msg);
+      return false
     }
-    return true;
   } catch (error) {
     hide();
     message.error(l('app.request.error'));

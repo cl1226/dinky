@@ -5,13 +5,18 @@ import type { NsRenameNodeCmd } from './cmd-extensions/cmd-rename-node-modal'
 import type { NsNodeCmd, NsEdgeCmd, NsGraphCmd } from '@antv/xflow'
 import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
 import { message } from 'antd'
-import {
-  CODE,
-  getInfoById,
-  getData,
-  handleAddOrUpdate,
-} from "@/components/Common/crud";
-import {l} from "@/utils/intl";
+import { CODE, getInfoById, getData, handleAddOrUpdate } from '@/components/Common/crud'
+import { l } from '@/utils/intl'
+
+/** 状态 类型 */
+enum GraphStatusEnum {
+  CREATE = 'CREATE',
+  DEPLOY = 'DEPLOY',
+  ONLINE = 'ONLINE',
+  OFFLINE = 'OFFLINE',
+}
+
+export const StatusEnum = { ...GraphStatusEnum, ...NsGraphStatusCommand.StatusEnum }
 
 /** 后端接口调用 */
 export namespace XFlowApi {
@@ -22,111 +27,137 @@ export namespace XFlowApi {
   } as const
 
   /** 查图的meta元信息 */
-  export const queryGraphMeta: NsGraphCmd.GraphMeta.IArgs['graphMetaService'] = async args => {
+  export const queryGraphMeta: NsGraphCmd.GraphMeta.IArgs['graphMetaService'] = async (args) => {
     return { ...args, flowId: args.meta.flowId }
   }
   /** 加载图数据的api */
-  export const loadGraphData = async (meta: NsGraph.IGraphMeta) => {
-    const result = await getInfoById('/api/workflow/task', meta.meta.flowId)
+  export const loadGraphData = async (graphMeta: NsGraph.IGraphMeta) => {
+    const result = await getInfoById('/api/workflow/task', graphMeta.meta.flowId)
     let nodes: NsGraph.INodeConfig[] = []
     let edges: NsGraph.IEdgeConfig[] = []
-    if (!!result.datas.graphData) {
-      let graphData = JSON.parse(result.datas.graphData)
-      nodes = graphData.nodes
-      edges = graphData.edges
-      return { nodes, edges }
-    } else {
-      return { nodes, edges } 
+    const { graphData, id, name, lockStatus, status } = result.datas
+    if (!!graphData) {
+      const graphDataObj = JSON.parse(graphData)
+      nodes = graphDataObj.nodes
+      edges = graphDataObj.edges
     }
+    return { nodes, edges, flowId: id, flowName: name, lockStatus, status }
   }
 
   /** 保存图数据的api */
   export const saveGraphData: NsGraphCmd.SaveGraphData.IArgs['saveGraphDataService'] = async (
-    meta: NsGraph.IGraphMeta,
+    graphMeta: NsGraph.IGraphMeta,
     graphData: NsGraph.IGraphData,
   ) => {
     let workflowTask = {
-      id: meta.meta.flowId,
-      graphData: JSON.stringify(graphData)
+      id: graphMeta.meta.flowId,
+      graphData: JSON.stringify(graphData),
     }
-    const success = await handleAddOrUpdate('/api/workflow/task', workflowTask);
+    const success = await handleAddOrUpdate('/api/workflow/task', workflowTask)
     return {
-      success: success
+      success: success,
     }
   }
   /** 部署图数据的api */
-  export const deployDagService: NsDeployDagCmd.IDeployDagService = async (
-    meta: NsGraph.IGraphMeta,
+  export const deployDagService: any = async (
+    graphMeta: NsGraph.IGraphMeta,
     graphData: NsGraph.IGraphData,
   ) => {
-    const hide = message.loading(l('app.request.running') + "部署");
-    let id = meta.meta.flowId
-    const result = await getData('/api/workflow/task/releaseTask', {id});
-    hide();
+    const workflowTask = {
+      id: graphMeta.meta.flowId,
+      graphData: JSON.stringify(graphData),
+    }
+    const saveResult = await handleAddOrUpdate('/api/workflow/task', workflowTask)
+
+    if (!saveResult) return
+
+    const id = graphMeta.meta.flowId
+    const result = await getData('/api/workflow/task/releaseTask', { id })
     if (result.code == 0) {
-      message.success(result.msg);
+      message.success(result.msg)
     } else {
-      message.warn(result.msg);
+      message.warn(result.msg)
     }
   }
   /** 上线数据的api */
-  export const onlineDagService: NsDeployDagCmd.IDeployDagService = async (
-    meta: NsGraph.IGraphMeta,
-    graphData: NsGraph.IGraphData,
-  ) => {
-    const hide = message.loading(l('app.request.running') + "上线");
-    let id = meta.meta.flowId
-    const result = await getData('/api/workflow/task/onLineTask', {id});
-    hide();
+  export const onlineDagService: any = async (graphMeta: NsGraph.IGraphMeta) => {
+    const hide = message.loading(l('app.request.running') + '上线')
+    let id = graphMeta.meta.flowId
+    const result = await getData('/api/workflow/task/onLineTask', { id })
+    hide()
     if (result.code == 0) {
-      message.success(result.msg);
+      message.success(result.msg)
+      return true
     } else {
-      message.warn(result.msg);
+      message.warn(result.msg)
+      return false
     }
   }
 
   /** 下线数据的api */
-  export const offlineDagService: NsDeployDagCmd.IDeployDagService = async (
-    meta: NsGraph.IGraphMeta,
-    graphData: NsGraph.IGraphData,
-  ) => {
-    const hide = message.loading(l('app.request.running') + "下线");
-    let id = meta.meta.flowId
-    const result = await getData('/api/workflow/task/offLineTask', {id});
-    hide();
+  export const offlineDagService: any = async (graphMeta: NsGraph.IGraphMeta) => {
+    const hide = message.loading(l('app.request.running') + '下线')
+    let id = graphMeta.meta.flowId
+    const result = await getData('/api/workflow/task/offLineTask', { id })
+    hide()
     if (result.code == 0) {
-      message.success(result.msg);
+      message.success(result.msg)
+      return true
     } else {
-      message.warn(result.msg);
+      message.warn(result.msg)
+      return false
     }
-    }
-    
+  }
+
   /** 抢锁的api */
-  export const lockService:any = async (
-    meta: NsGraph.IGraphMeta
-  ) => {
-    const hide = message.loading(l('app.request.running') + "抢锁");
-    let id = meta.meta.flowId
-    const result = await getData('/api/workflow/task/getLock', {id});
-    hide();
+  export const lockService: any = async (graphMeta: NsGraph.IGraphMeta) => {
+    const hide = message.loading(l('app.request.running') + '抢锁')
+    const id = graphMeta.meta.flowId
+    const result = await getData('/api/workflow/task/getLock', { id })
+    hide()
     if (result.code == 0) {
-        message.success(result.msg);
+      message.success(result.msg)
+      const { lockStatus, status } = result.datas
+      return {
+        ...graphMeta.meta,
+        lockStatus,
+        status,
+      }
     } else {
-        message.warn(result.msg);
+      message.warn(result.msg)
+      return graphMeta.meta
     }
   }
   /** 解锁的api */
-  export const unLockService:any = async (
-    meta: NsGraph.IGraphMeta
-  ) => {
-    const hide = message.loading(l('app.request.running') + "解锁");
-    let id = meta.meta.flowId
-    const result = await getData('/api/workflow/task/releaseLock', {id});
-    hide();
+  export const unLockService: any = async (graphMeta: NsGraph.IGraphMeta) => {
+    const hide = message.loading(l('app.request.running') + '解锁')
+    const id = graphMeta.meta.flowId
+    const result = await getData('/api/workflow/task/releaseLock', { id })
+    hide()
     if (result.code == 0) {
-        message.success(result.msg);
+      message.success(result.msg)
+      const { lockStatus, status } = result.datas
+      return {
+        ...graphMeta.meta,
+        lockStatus,
+        status,
+      }
     } else {
-      message.warn(result.msg);
+      message.warn(result.msg)
+      return graphMeta.meta
+    }
+  }
+
+  /** 开始执行api */
+  export const startDagService: any = async (graphMeta: NsGraph.IGraphMeta) => {
+    const hide = message.loading(l('app.request.running') + '开始执行')
+    const id = graphMeta.meta.flowId
+    const result = await getData('/api/workflow/task/startTask', { id })
+    hide()
+    if (result.code == 0) {
+      message.success(result.msg)
+    } else {
+      message.warn(result.msg)
     }
   }
 
@@ -135,14 +166,14 @@ export namespace XFlowApi {
     meta: NsGraph.IGraphMeta,
     graphData: NsGraph.IGraphData,
   ) => {
-    const hide = message.loading(l('app.request.running') + "配置调度");
+    const hide = message.loading(l('app.request.running') + '配置调度')
     let id = meta.meta.flowId
-    const result = await getData('/api/workflow/task/schedulerTask', {id});
-    hide();
+    const result = await getData('/api/workflow/task/schedulerTask', { id })
+    hide()
     if (result.code == 0) {
-      message.success(result.msg);
+      message.success(result.msg)
     } else {
-      message.warn(result.msg);
+      message.warn(result.msg)
     }
   }
 
@@ -171,7 +202,7 @@ export namespace XFlowApi {
       ...NODE_COMMON_PROPS,
       ...args.nodeConfig,
       id: nodeId,
-      ports: (ports as NsGraph.INodeAnchor[]).map(port => {
+      ports: (ports as NsGraph.INodeAnchor[]).map((port) => {
         return { ...port, id: uuidv4() }
       }),
     }
@@ -193,13 +224,13 @@ export namespace XFlowApi {
   }
 
   /** 删除节点的api */
-  export const delNode: NsNodeCmd.DelNode.IArgs['deleteNodeService'] = async args => {
+  export const delNode: NsNodeCmd.DelNode.IArgs['deleteNodeService'] = async (args) => {
     console.info('delNode service running, del node:', args.nodeConfig.id)
     return true
   }
 
   /** 添加边的api */
-  export const addEdge: NsEdgeCmd.AddEdge.IArgs['createEdgeService'] = async args => {
+  export const addEdge: NsEdgeCmd.AddEdge.IArgs['createEdgeService'] = async (args) => {
     console.info('addEdge service running, add edge:', args)
     const { edgeConfig } = args
     return {
@@ -209,7 +240,7 @@ export namespace XFlowApi {
   }
 
   /** 删除边的api */
-  export const delEdge: NsEdgeCmd.DelEdge.IArgs['deleteEdgeService'] = async args => {
+  export const delEdge: NsEdgeCmd.DelEdge.IArgs['deleteEdgeService'] = async (args) => {
     console.info('delEdge service running, del edge:', args)
     return true
   }
@@ -220,7 +251,9 @@ export namespace XFlowApi {
   export const graphStatusService: NsGraphStatusCommand.IArgs['graphStatusService'] = async () => {
     if (runningNodeId < 4) {
       statusMap[`node${runningNodeId}`] = { status: NsGraphStatusCommand.StatusEnum.SUCCESS }
-      statusMap[`node${runningNodeId + 1}`] = { status: NsGraphStatusCommand.StatusEnum.PROCESSING }
+      statusMap[`node${runningNodeId + 1}`] = {
+        status: NsGraphStatusCommand.StatusEnum.PROCESSING,
+      }
       runningNodeId += 1
       graphStatus = NsGraphStatusCommand.StatusEnum.PROCESSING
     } else {
@@ -230,43 +263,6 @@ export namespace XFlowApi {
     }
     return {
       graphStatus: graphStatus,
-      statusMap: statusMap,
-    }
-  }
-  export const stopGraphStatusService: NsGraphStatusCommand.IArgs['graphStatusService'] =
-    async () => {
-      Object.entries(statusMap).forEach(([, val]) => {
-        const { status } = val as { status: NsGraphStatusCommand.StatusEnum }
-        if (status === NsGraphStatusCommand.StatusEnum.PROCESSING) {
-          val.status = NsGraphStatusCommand.StatusEnum.ERROR
-        }
-      })
-      return {
-        graphStatus: NsGraphStatusCommand.StatusEnum.ERROR,
-        statusMap: statusMap,
-      }
-    }
-  export const saveGraphStatusService: NsGraphStatusCommand.IArgs['graphStatusService'] = async () => {
-    return {
-      graphStatus: NsGraphStatusCommand.StatusEnum.PROCESSING,
-      statusMap: statusMap,
-    }
-  }
-  export const deployGraphStatusService: NsGraphStatusCommand.IArgs['graphStatusService'] = async () => {
-    return {
-      graphStatus: NsGraphStatusCommand.StatusEnum.WARNING,
-      statusMap: statusMap,
-    }
-  }
-  export const onlineGraphStatusService: NsGraphStatusCommand.IArgs['graphStatusService'] = async () => {
-    return {
-      graphStatus: NsGraphStatusCommand.StatusEnum.SUCCESS,
-      statusMap: statusMap,
-    }
-  }
-  export const offlineGraphStatusService: NsGraphStatusCommand.IArgs['graphStatusService'] = async () => {
-    return {
-      graphStatus: NsGraphStatusCommand.StatusEnum.ERROR,
       statusMap: statusMap,
     }
   }

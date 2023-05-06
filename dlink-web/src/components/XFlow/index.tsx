@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 /** app 核心组件 */
 import { XFlow, XFlowCanvas, KeyBindings } from '@antv/xflow'
 import type { IApplication, IAppLoad } from '@antv/xflow'
@@ -16,6 +16,7 @@ import {
   DagGraphExtension,
 } from '@antv/xflow'
 
+import { CustomJsonForm } from './json-form'
 /** app 组件配置  */
 /** 配置画布 */
 import { useGraphHookConfig } from './config-graph'
@@ -38,17 +39,24 @@ import './index.less'
 import '@antv/xflow/dist/index.css'
 
 export interface IProps {
-  meta: { 
-    flowId: string,
-    flowName: string,
-    status: string,
-    cron: string
-  },
+  activeKey: string
+  flowId: string
+  meta: {
+    flowId: string
+    flowName: string
+  }
   height: number
 }
-
-export const XFlowEditor: React.FC<IProps> = props => {
-  const { meta, height } = props
+export interface IMeta {
+  flowId: string
+  flowName?: string
+  lockStatus?: boolean
+  status?: string
+}
+export const XFlowEditor: React.FC<IProps> = (props) => {
+  const { height, activeKey, flowId } = props
+  console.log('chushixxx', flowId)
+  const [meta, setMeta] = useState<IMeta>({ flowId: flowId })
   const graphHooksConfig = useGraphHookConfig(props)
   const toolbarConfig = useToolbarConfig()
   const menuConfig = useMenuConfig()
@@ -62,23 +70,26 @@ export const XFlowEditor: React.FC<IProps> = props => {
     }),
     [],
   )
+
+  const handleMeta = (remainMeta) => {
+    setMeta(remainMeta)
+  }
+
   /**
    * @param app 当前XFlow工作空间
    * @param extensionRegistry 当前XFlow配置项
    */
-
-  const onLoad: IAppLoad = async app => {
+  const onLoad: IAppLoad = async (app) => {
     cache.app = app
-    initGraphCmds(cache.app)
+    initGraphCmds(cache.app, handleMeta)
   }
 
   /** 父组件meta属性更新时,执行initGraphCmds */
   React.useEffect(() => {
-    console.log(meta)
-    if (cache.app) {
-      initGraphCmds(cache.app)
+    if (cache.app && meta.flowId === activeKey) {
+      initGraphCmds(cache.app, handleMeta)
     }
-  }, [cache.app, meta])
+  }, [cache.app, flowId])
 
   return (
     <XFlow
@@ -88,7 +99,7 @@ export const XFlowEditor: React.FC<IProps> = props => {
       commandConfig={cmdConfig}
       onLoad={onLoad}
       meta={meta}
-      style={{height: (height - 124)}}
+      style={{ height: height - 124 }}
     >
       <DagGraphExtension />
       <NodeCollapsePanel
@@ -116,6 +127,7 @@ export const XFlowEditor: React.FC<IProps> = props => {
         controlMapService={controlMapService}
         formSchemaService={formSchemaService}
         formValueUpdateService={formValueUpdateService}
+
         bodyPosition={{ top: 0, bottom: 0, right: 0 }}
         position={{ width: 290, top: 0, bottom: 0, right: 0 }}
         footerPosition={{ height: 0 }}

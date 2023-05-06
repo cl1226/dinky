@@ -30,13 +30,13 @@ export namespace CustomCommands {
   /** 抢锁，解锁服务 */
   export const LOCK_SERVICE: IGraphCommand = {
     id: 'xflow:lock-service',
-    label: '部署服务',
+    label: '抢锁服务',
     category,
   }
   /** 解锁服务 */
   export const UNLOCK_SERVICE: IGraphCommand = {
     id: 'xflow:unlock-service',
-    label: '部署服务',
+    label: '解锁服务',
     category,
   }
   /** 上线服务 */
