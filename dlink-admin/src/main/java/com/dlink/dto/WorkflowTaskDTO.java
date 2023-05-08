@@ -44,6 +44,7 @@ public class WorkflowTaskDTO {
     private String graphData;
     private List<WorkflowNode> nodes;
     private List<WorkflowEdge> edges;
+    private String schedulerType;
     private String cron;
     private Integer cronId;
     private String status;

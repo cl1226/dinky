@@ -51,6 +51,8 @@ public class WorkflowTask extends SuperEntity {
 
     private String status;
 
+    private String schedulerType;
+
     private String cron;
 
     private Integer cronId;
@@ -61,7 +63,7 @@ public class WorkflowTask extends SuperEntity {
     }
 
     public WorkflowTask(String alias, Integer tenantId, String type, Integer versionId,
-                        String graphData, String status, String cron,
+                        String graphData, String status, String schedulerType, String cron,
                         Integer cronId, String lockUser) {
         this.alias = alias;
         this.tenantId = tenantId;
@@ -69,6 +71,7 @@ public class WorkflowTask extends SuperEntity {
         this.versionId = versionId;
         this.graphData = graphData;
         this.status = status;
+        this.schedulerType = schedulerType;
         this.cron = cron;
         this.cronId = cronId;
         this.lockUser = lockUser;

@@ -32,11 +32,16 @@ import com.dlink.utils.UDFUtils;
 import com.google.common.collect.Lists;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.TriggerUtils;
+import org.quartz.impl.triggers.CronTriggerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -207,7 +212,7 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         JSONObject entries = processClient.onlineProcessDefinition(projectCode, process, "ONLINE");
 
         // 设置周期调度，且上线
-        if (StringUtils.isNotBlank(taskInfo.getCron())) {
+        if (taskInfo.getSchedulerType() == "CYCLE" && StringUtils.isNotBlank(taskInfo.getCron())) {
             // 创建周期调度
             JSONObject res = processClient.schedulerProcessDefinition(projectCode, process, taskInfo.getCron());
             // 上线周期调度
@@ -482,5 +487,23 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     @Override
     public boolean recoveryTask(Integer id) {
         return false;
+    }
+
+    @Override
+    public List<String> previewSchedule(String schedule) {
+        CronTriggerImpl cronTriggerImpl = new CronTriggerImpl();
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        List<String> dates = new ArrayList<>();
+        try {
+            cronTriggerImpl.setCronExpression(schedule);
+            List<Date> computeFireTimes = TriggerUtils.computeFireTimes(cronTriggerImpl, null, 5);
+            computeFireTimes.stream().forEach(x -> {
+                dates.add(format.format(x));
+            });
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return dates;
     }
 }

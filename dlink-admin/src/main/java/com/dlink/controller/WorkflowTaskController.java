@@ -30,7 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 工作流任务 Controller
@@ -210,6 +212,12 @@ public class WorkflowTaskController {
     @GetMapping(value = "/recoveryTask")
     public Result recoveryTask(@RequestParam Integer id) {
         return Result.succeed(taskService.recoveryTask(id), "操作成功");
+    }
+
+    @GetMapping(value = "/previewSchedule")
+    public Result previewSchedule(@RequestParam String schedule) {
+        List<String> result = taskService.previewSchedule(schedule);
+        return Result.succeed(result, "生成执行时间成功");
     }
 
 }
