@@ -24,6 +24,9 @@ import com.dlink.db.service.ISuperService;
 import com.dlink.dto.WorkflowTaskDTO;
 import com.dlink.model.*;
 
+import java.util.Date;
+import java.util.List;
+
 /**
  * WorkflowTaskService
  *
@@ -67,5 +70,7 @@ public interface WorkflowTaskService extends ISuperService<WorkflowTask> {
     Result cancelTask(Integer id);
 
     boolean recoveryTask(Integer id);
+
+    List<String> previewSchedule(String schedule);
 
 }
