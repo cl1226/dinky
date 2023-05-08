@@ -1,13 +1,14 @@
 import type { NsJsonSchemaForm } from '@antv/xflow'
-import { DownOutlined } from "@ant-design/icons";
+import { DownOutlined } from '@ant-design/icons'
 import { FormItemWrapper } from '@antv/xflow'
 import { Form, TreeSelect } from 'antd'
-import React, {useState, useEffect} from 'react'
-import {convertToTreeData, TreeDataNode} from "@/components/Scheduler/SchedulerTree/Function";
-import {getCatalogueTreeData} from "@/pages/DataStudio/service";
+import type { TreeNode } from 'antd/es/tree-select'
+import React, { useState, useEffect } from 'react'
+import { convertToTreeData, TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
+import { getCatalogueTreeData } from '@/pages/DataStudio/service'
 import { useXFlowApp, MODELS, XFlowGraphCommands } from '@antv/xflow'
 
-export const SelectorShape: React.FC<NsJsonSchemaForm.IControlProps> = props => {
+export const SelectorShape: React.FC<NsJsonSchemaForm.IControlProps> = (props) => {
   const { controlSchema } = props
   const { required, tooltip, extra, name, label, placeholder } = controlSchema
 
@@ -39,10 +40,10 @@ interface ISelectorProps extends NsJsonSchemaForm.IFormItemProps {
   disabled: boolean
 }
 
-const Select: React.FC<ISelectorProps> = props => {
-  const [value, setValue] = useState<string>();
-  const [treeData, setTreeData] = useState<TreeDataNode[]>();
-  const { commandService, modelService } = useXFlowApp();
+const Select: React.FC<ISelectorProps> = (props) => {
+  const [value, setValue] = useState<string>()
+  const [treeData, setTreeData] = useState<TreeDataNode[]>()
+  const { commandService, modelService } = useXFlowApp()
 
   React.useEffect(() => {
     commandService.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
@@ -51,7 +52,7 @@ const Select: React.FC<ISelectorProps> = props => {
         saveGraphDataService: async (meta, graph) => {
           /** 当前选中节点数据 */
           const nodes = await MODELS.SELECTED_NODES.useValue(modelService)
-          nodes[0].data.jobId = value | ""
+          nodes[0].data.jobId = value | ''
           return { err: null, data: graph, meta }
         },
       },
@@ -59,31 +60,34 @@ const Select: React.FC<ISelectorProps> = props => {
   })
 
   useEffect(() => {
-    getTreeData();
-  }, []);
+    getTreeData()
+  }, [])
 
   const onChange = (newValue: string) => {
-    setValue(newValue);
-  };
+    setValue(newValue)
+  }
 
   const getTreeData = async () => {
-    const nodes = await MODELS.SELECTED_NODES.useValue(modelService);
-    setValue(nodes[0].data.jobId);
-    const result = await getCatalogueTreeData();
-    let data = result.datas;
-    setTreeData(convertToTreeData(data, 0));
-  };
+    const nodes = await MODELS.SELECTED_NODES.useValue(modelService)
+    setValue(nodes[0].data.jobId)
+    const result = await getCatalogueTreeData()
+    let data = result.datas
+    setTreeData(convertToTreeData(data, 0))
+  }
 
   return (
     <TreeSelect
-    showSearch
+      showSearch
       value={value}
       dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
       treeData={treeData}
       placeholder="Please select"
       onChange={onChange}
-      switcherIcon={<DownOutlined/>}
+      switcherIcon={<DownOutlined />}
+      filterTreeNode={(inputValue: string, treeNode: any) => {
+        return treeNode.title.includes(inputValue)
+      }}
       treeLine={true}
     />
-  ) 
+  )
 }

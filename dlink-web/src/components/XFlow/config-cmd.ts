@@ -1,5 +1,5 @@
 import type {} from '@antv/xflow'
-import { createCmdConfig, DisposableCollection, XFlowGraphCommands, MODELS } from '@antv/xflow'
+import { createCmdConfig, DisposableCollection, XFlowGraphCommands } from '@antv/xflow'
 
 import type { IGraphPipelineCommand, NsGraphCmd, IApplication } from '@antv/xflow'
 import { XFlowApi } from './service'

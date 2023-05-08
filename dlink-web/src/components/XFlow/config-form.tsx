@@ -58,7 +58,7 @@ export const formSchemaService: NsJsonSchemaForm.IFormSchemaService = async args
                   name: 'label',
                   label: '节点名称',
                   shape: 'Input',
-                  value: targetData.label,
+                  value: targetData!.label,
                   required: true,
                   defaultValue: 'FlinkSQL'
                 },
@@ -66,7 +66,7 @@ export const formSchemaService: NsJsonSchemaForm.IFormSchemaService = async args
                   name: 'jobId',
                   label: '节点作业',
                   shape: ControlShapeEnum.SelectorShape,
-                  value: targetData.jobId,
+                  value: targetData!.jobId,
                   required: true,
                 }
               ],
@@ -88,7 +88,7 @@ export const formValueUpdateService: NsJsonSchemaForm.IFormValueUpdateService = 
     )
   }
   const nodeConfig: NsGraph.INodeConfig = {
-    ...targetData,
+    ...(targetData as NsGraph.INodeConfig) ,
   }
   values.forEach(val => {
     set(nodeConfig, val.name, val.value)

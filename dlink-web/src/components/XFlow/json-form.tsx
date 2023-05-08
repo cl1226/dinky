@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
-import { NsJsonSchemaForm, MODELS, useXFlowApp } from '@antv/xflow'
-import { IMeta } from './service'
-import { Descriptions, Radio, DatePicker, Input, Button } from 'antd'
+import { NsJsonSchemaForm, MODELS } from '@antv/xflow'
 import moment from 'moment'
-import { Cron } from '@/components/Cron'
+import { Descriptions, Radio, DatePicker, Input, Form } from 'antd'
 import type { RadioChangeEvent } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
-const { RangePicker } = DatePicker
+import { Cron } from '@/components/Cron'
+
+import { IMeta } from './service'
+
+const RangePicker: any = DatePicker.RangePicker
 
 enum ESchedulerType {
   'SINGLE' = 'SINGLE',
@@ -29,41 +31,34 @@ export namespace CustomJsonForm {
 
   export const CanvasCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (props) => {
     const { modelService } = props
+    const [form] = Form.useForm()
     const [baseInfo, setBaseInfo] = useState<IMeta>({ flowId: '' })
     const [schedulerType, setSchedulerType] = useState<ESchedulerType>()
-    const [timeRange, setTimeRange] = useState<any>([])
 
-    const app = useXFlowApp()
+    const [cycleForm, setCycleForm] = useState<any>({})
 
     const onSchedulerTypeChange = (e: RadioChangeEvent) => {
-      console.log('radio checked', e.target.value)
-      setSchedulerType(e.target.value)
-      refreshGrapMeta({ schedulerType: e.target.value })
-    }
-
-    const onRangeChange: RangePickerProps['onChange'] = (date, dateString) => {
-      console.log(date, dateString)
-      setTimeRange(date)
-      refreshGrapMeta({ timeRange: dateString })
+      setSchedulerType(e.target.value), console.log('e.target.value', e.target.value)
     }
 
     // 将当前组件的meta转换为传参的meta
     const getJsonMeta = (meta) => {
-      const { schedulerType: tempSchedulerType, timeRange, cron, ...reaminMeta } = meta
-
+      const { schedulerType: scheduler, timerange, crontab, timezoneId, ...reaminMeta } = meta
+      console.log('getJsonMeta', scheduler)
       let tempCron: any = null
-      if (tempSchedulerType === ESchedulerType.CYCLE) {
+      if (scheduler === ESchedulerType.CYCLE) {
         tempCron = {}
-        tempCron.timezoneId = 'Asia/Shanghai'
-        const [startTime, endTime] = timeRange || []
+        tempCron.timezoneId = timezoneId
+        tempCron.crontab = crontab
+        const [startTime, endTime] = timerange || []
         if (startTime && endTime) {
-          tempCron.startTime = startTime
-          tempCron.endTime = endTime
+          tempCron.startTime = moment(startTime).format('YYYY-MM-DD HH:mm:ss')
+          tempCron.endTime = moment(endTime).format('YYYY-MM-DD HH:mm:ss')
         }
       }
       return {
         ...reaminMeta,
-        schedulerType: tempSchedulerType,
+        schedulerType: scheduler,
         cron: JSON.stringify(tempCron),
       }
     }
@@ -71,13 +66,33 @@ export namespace CustomJsonForm {
     const refreshGrapMeta = async (newResult = {} as any) => {
       const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
       const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
+
       const result = {
         ...graphMeta.meta,
         ...newResult,
       }
+      console.log(newResult, result)
       graphMetaModel.setValue({
         ...graphMeta,
         meta: getJsonMeta(result),
+      })
+    }
+
+    const onFieldChange = (fields) => {
+      const formData = {}
+      fields.forEach((item) => {
+        formData[item.name[0]] = item.value
+      })
+
+      setCycleForm(formData)
+    }
+
+    const getCycleFormField = (formObj) => {
+      return Object.keys(formObj).map((key) => {
+        return {
+          name: [key],
+          value: formObj[key],
+        }
       })
     }
 
@@ -85,18 +100,26 @@ export namespace CustomJsonForm {
       ~(async () => {
         const model = await MODELS.GRAPH_META.getModel(modelService)
         model.watch(async (value) => {
-          const { schedulerType, cron, ...remainMeta } = value.meta
+          const { schedulerType: scheduler, cron, ...remainMeta } = value.meta
+          console.log('watch', scheduler)
           setBaseInfo(remainMeta)
-          setSchedulerType(schedulerType)
-          if (schedulerType === ESchedulerType.CYCLE) {
+          setSchedulerType(scheduler)
+          if (scheduler === ESchedulerType.CYCLE) {
             if (cron) {
-              const { startTime, endTime } = JSON.parse(cron)
+              let timerange: any = []
+              const { startTime, endTime, timezoneId, crontab } = JSON.parse(cron)
               if (startTime && endTime) {
-                setTimeRange([moment(startTime), moment(endTime)])
+                timerange = [moment(startTime), moment(endTime)]
               }
+
+              setCycleForm({
+                timerange,
+                timezoneId,
+                crontab,
+              })
             }
           } else {
-            setTimeRange([])
+            setCycleForm({})
           }
         })
       })()
@@ -112,32 +135,54 @@ export namespace CustomJsonForm {
               <Descriptions.Item label="作业名称">{baseInfo.flowName}</Descriptions.Item>
               <Descriptions.Item label="作业状态">{baseInfo.status}</Descriptions.Item>
             </Descriptions>
-            <Descriptions title="调度配置" column={1} layout="vertical">
-              <Descriptions.Item label="调度方式">
-                <Radio.Group onChange={onSchedulerTypeChange} value={schedulerType}>
-                  <Radio value={ESchedulerType.SINGLE}>单次调度</Radio>
-                  <Radio value={ESchedulerType.CYCLE}>周期调度</Radio>
-                </Radio.Group>
-              </Descriptions.Item>
-              {schedulerType === ESchedulerType.CYCLE ? (
-                <>
-                  <Descriptions.Item key="time" label="起止时间">
-                    <RangePicker
-                      format={'YYYY-MM-DD HH:mm:ss'}
-                      showTime
-                      value={timeRange}
-                      onChange={onRangeChange}
-                    />
-                  </Descriptions.Item>
-                  <Descriptions.Item key="crontab" label="定时">
-                    <Cron />
-                  </Descriptions.Item>
-                  <Descriptions.Item key="timezone" label="时区">
-                    <Input value="Asia/Shanghai" readOnly />
-                  </Descriptions.Item>
-                </>
-              ) : null}
-            </Descriptions>
+            <Form
+              name="basic"
+              form={form}
+              fields={getCycleFormField(cycleForm)}
+              onFieldsChange={(_, allFields) => {
+                onFieldChange(allFields)
+              }}
+            >
+              <Descriptions title="调度配置" column={1} layout="vertical">
+                <Descriptions.Item label="调度方式">
+                  <Radio.Group onChange={onSchedulerTypeChange} value={schedulerType}>
+                    <Radio value={ESchedulerType.SINGLE}>单次调度</Radio>
+                    <Radio value={ESchedulerType.CYCLE}>周期调度</Radio>
+                  </Radio.Group>
+                </Descriptions.Item>
+                {schedulerType === ESchedulerType.CYCLE ? (
+                  <>
+                    <Descriptions.Item key="timerange" label="起止时间">
+                      <Form.Item
+                        name="timerange"
+                        rules={[{ required: true, message: '请选择起止时间！' }]}
+                        style={{ width: '100%' }}
+                      >
+                        <RangePicker showTime />
+                      </Form.Item>
+                    </Descriptions.Item>
+                    <Descriptions.Item key="crontab" label="定时">
+                      <Form.Item
+                        name="crontab"
+                        rules={[{ required: true, message: '请选择定时！' }]}
+                        style={{ width: '100%' }}
+                      >
+                        <Cron />
+                      </Form.Item>
+                    </Descriptions.Item>
+                    <Descriptions.Item key="timezoneId" label="时区">
+                      <Form.Item
+                        name="timezoneId"
+                        rules={[{ required: true, message: '请选择时区！' }]}
+                        style={{ width: '100%' }}
+                      >
+                        <Input readOnly />
+                      </Form.Item>
+                    </Descriptions.Item>
+                  </>
+                ) : null}
+              </Descriptions>
+            </Form>
           </div>
         </div>
       </div>

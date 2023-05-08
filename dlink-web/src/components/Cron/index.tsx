@@ -1,16 +1,19 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import QnnCron from 'qnn-react-cron'
 import { Button, Space, Input, Popover } from 'antd'
 import './index.less'
 export const Cron: React.FC<any> = (props) => {
-  const { placement = 'bottom', value } = props
-  const [cronValue, setCronValue] = React.useState<string>(value)
+  const { placement = 'bottom', value, onChange } = props
   let cronFns
   const [popVisible, setPopVisible] = useState(false)
 
   const handleOpenChange = (newOpen: boolean) => {
     setPopVisible(newOpen)
   }
+
+  useEffect(() => {
+    onChange && onChange(value)
+  }, [value])
 
   const handleCreateTime = () => {}
   return (
@@ -20,7 +23,7 @@ export const Cron: React.FC<any> = (props) => {
           content={
             <div style={{ width: '520px' }}>
               <QnnCron
-                value={cronValue}
+                value={value}
                 getCronFns={(_cronFns) => {
                   cronFns = _cronFns
                 }}
@@ -29,7 +32,7 @@ export const Cron: React.FC<any> = (props) => {
                     key="cencel"
                     style={{ marginRight: 10 }}
                     onClick={() => {
-                      setCronValue('')
+                      onChange && onChange('')
                     }}
                   >
                     重置
@@ -38,7 +41,7 @@ export const Cron: React.FC<any> = (props) => {
                     key="getValue"
                     type="primary"
                     onClick={() => {
-                      setCronValue(cronFns.getValue())
+                      onChange && onChange(cronFns.getValue())
                     }}
                   >
                     生成
@@ -53,7 +56,7 @@ export const Cron: React.FC<any> = (props) => {
           placement={placement}
           overlayClassName="cron-pop-wrap"
         >
-          <Input placeholder="请选择" value={cronValue} />
+          <Input placeholder="请选择" value={value} />
         </Popover>
 
         <Button onClick={handleCreateTime}>生成时间</Button>
