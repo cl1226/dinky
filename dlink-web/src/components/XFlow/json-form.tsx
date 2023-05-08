@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { NsJsonSchemaForm, MODELS } from '@antv/xflow'
 import moment from 'moment'
-import { Descriptions, Radio, DatePicker, Input, Form } from 'antd'
+import { Descriptions, Radio, DatePicker, Input, Form, Button } from 'antd'
 import type { RadioChangeEvent } from 'antd'
-import type { RangePickerProps } from 'antd/es/date-picker'
 import { Cron } from '@/components/Cron'
 
 import { IMeta } from './service'
@@ -37,14 +36,10 @@ export namespace CustomJsonForm {
 
     const [cycleForm, setCycleForm] = useState<any>({})
 
-    const onSchedulerTypeChange = (e: RadioChangeEvent) => {
-      setSchedulerType(e.target.value), console.log('e.target.value', e.target.value)
-    }
-
     // 将当前组件的meta转换为传参的meta
     const getJsonMeta = (meta) => {
       const { schedulerType: scheduler, timerange, crontab, timezoneId, ...reaminMeta } = meta
-      console.log('getJsonMeta', scheduler)
+
       let tempCron: any = null
       if (scheduler === ESchedulerType.CYCLE) {
         tempCron = {}
@@ -101,7 +96,6 @@ export namespace CustomJsonForm {
         const model = await MODELS.GRAPH_META.getModel(modelService)
         model.watch(async (value) => {
           const { schedulerType: scheduler, cron, ...remainMeta } = value.meta
-          console.log('watch', scheduler)
           setBaseInfo(remainMeta)
           setSchedulerType(scheduler)
           if (scheduler === ESchedulerType.CYCLE) {
@@ -145,7 +139,12 @@ export namespace CustomJsonForm {
             >
               <Descriptions title="调度配置" column={1} layout="vertical">
                 <Descriptions.Item label="调度方式">
-                  <Radio.Group onChange={onSchedulerTypeChange} value={schedulerType}>
+                  <Radio.Group
+                    onChange={(e: RadioChangeEvent) => {
+                      setSchedulerType(e.target.value)
+                    }}
+                    value={schedulerType}
+                  >
                     <Radio value={ESchedulerType.SINGLE}>单次调度</Radio>
                     <Radio value={ESchedulerType.CYCLE}>周期调度</Radio>
                   </Radio.Group>
