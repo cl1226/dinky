@@ -76,6 +76,7 @@ const Select: React.FC<ISelectorProps> = props => {
 
   return (
     <TreeSelect
+    showSearch
       value={value}
       dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
       treeData={treeData}

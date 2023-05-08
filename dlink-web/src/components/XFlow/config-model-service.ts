@@ -8,8 +8,8 @@ export namespace NS_LOADING_STATE {
   }
 }
 
-export const useModelServiceConfig = createModelServiceConfig(config => {
-  config.registerModel(registry => {
+export const useModelServiceConfig = createModelServiceConfig((config) => {
+  config.registerModel((registry) => {
     return registry.registerModel({
       id: NS_LOADING_STATE.id,
       getInitialValue: () => {

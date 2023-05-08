@@ -29,7 +29,7 @@ export default {
   dev: {
     '/api': {
       // target: 'http://localhost:8888',
-      // target: 'http://10.46.100.161:8888',
+      // target: 'http://OLWX-JXPTP93.Svolt.cn:8888',
       target: 'http://10.36.30.14:8888',
       changeOrigin: true,
       pathRewrite: { '^': '' },

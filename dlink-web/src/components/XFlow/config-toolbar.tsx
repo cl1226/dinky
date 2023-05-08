@@ -1,13 +1,5 @@
-import type { IToolbarItemOptions } from '@antv/xflow'
-import { createToolbarConfig } from '@antv/xflow'
-import type { IModelService, IGraphPipelineCommand } from '@antv/xflow'
-import {
-  XFlowGraphCommands,
-  XFlowDagCommands,
-  NsGraphStatusCommand,
-  MODELS,
-  IconStore,
-} from '@antv/xflow'
+import type { IToolbarItemOptions, IModelService, NsGraph } from '@antv/xflow'
+import { createToolbarConfig, XFlowDagCommands, MODELS, IconStore } from '@antv/xflow'
 
 import {
   UngroupOutlined,
@@ -22,13 +14,10 @@ import {
   LockOutlined,
   UnlockOutlined,
 } from '@ant-design/icons'
-import { getStorageTenantId } from '../Common/crud'
 import { XFlowApi, StatusEnum } from './service'
 import { CustomCommands } from './cmd-extensions/constants'
 import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
-import type { NsGraphCmd, NsGraph } from '@antv/xflow'
 import { Popconfirm } from 'antd'
-
 export namespace NSToolbarConfig {
   /** 注册icon 类型 */
   IconStore.set('SaveOutlined', SaveOutlined)
@@ -54,8 +43,8 @@ export namespace NSToolbarConfig {
 
   /** toolbar依赖的状态 */
   export const getToolbarState = async (
-    modelService: IModelService,
     graphMeta: NsGraph.IGraphMeta,
+    modelService: IModelService,
   ) => {
     console.log('workflow status: ' + graphMeta.meta.status)
     return {
@@ -64,10 +53,21 @@ export namespace NSToolbarConfig {
     } as NSToolbarConfig.IToolbarState
   }
 
-  export const getToolbarItems = async (state: IToolbarState, graphMeta: NsGraph.IGraphMeta) => {
+  export const getToolbarItems = async (
+    state: IToolbarState,
+    graphMeta: NsGraph.IGraphMeta,
+    modelService: IModelService,
+  ) => {
     const toolbarGroup1: IToolbarItemOptions[] = []
     const toolbarGroup2: IToolbarItemOptions[] = []
     const toolbarGroup3: IToolbarItemOptions[] = []
+    const setGraphMeta = async (value) => {
+      const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
+      graphMetaModel.setValue({
+        ...graphMeta,
+        meta: value,
+      })
+    }
 
     /** 抢锁按钮 */
     toolbarGroup1.push({
@@ -75,13 +75,9 @@ export namespace NSToolbarConfig {
       iconName: 'LockOutlined',
       text: '抢锁',
       isEnabled: !state.lockStatus,
-      onClick: async ({ commandService, modelService }) => {
+      onClick: async () => {
         const result = await XFlowApi.lockService(graphMeta)
-        const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
-        graphMetaModel.setValue({
-          ...graphMeta,
-          meta: result,
-        })
+        setGraphMeta(result)
       },
     })
     /** 解锁按钮 */
@@ -90,13 +86,9 @@ export namespace NSToolbarConfig {
       text: '解锁',
       isEnabled: state.lockStatus,
       id: CustomCommands.UNLOCK_SERVICE.id,
-      onClick: async ({ commandService, modelService }) => {
+      onClick: async () => {
         const result = await XFlowApi.unLockService(graphMeta)
-        const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
-        graphMetaModel.setValue({
-          ...graphMeta,
-          meta: result,
-        })
+        setGraphMeta(result)
       },
     })
 
@@ -108,21 +100,16 @@ export namespace NSToolbarConfig {
         state.lockStatus &&
         (state.status === 'CREATE' || state.status === 'DEPLOY' || state.status === 'OFFLINE'),
       id: CustomCommands.DEPLOY_SERVICE.id,
-      onClick: async ({ commandService, modelService }) => {
+      onClick: async ({ commandService }) => {
         await commandService.executeCommand<NsDeployDagCmd.IArgs>(
           CustomCommands.DEPLOY_SERVICE.id,
           {
             deployDagService: (meta, graphData) => XFlowApi.deployDagService(meta, graphData),
           },
         )
-
-        const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
-        graphMetaModel.setValue({
-          ...graphMeta,
-          meta: {
-            ...graphMeta.meta,
-            status: StatusEnum.DEPLOY,
-          },
+        setGraphMeta({
+          ...graphMeta.meta,
+          status: StatusEnum.DEPLOY,
         })
       },
     })
@@ -133,16 +120,12 @@ export namespace NSToolbarConfig {
       text: '上线',
       isEnabled: state.lockStatus && (state.status == 'DEPLOY' || state.status === 'OFFLINE'),
       id: CustomCommands.ONLINE_SERVICE.id,
-      onClick: async ({ commandService, modelService }) => {
+      onClick: async () => {
         const result = await XFlowApi.onlineDagService(graphMeta)
         if (result) {
-          const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
-          graphMetaModel.setValue({
-            ...graphMeta,
-            meta: {
-              ...graphMeta.meta,
-              status: StatusEnum.ONLINE,
-            },
+          setGraphMeta({
+            ...graphMeta.meta,
+            status: StatusEnum.ONLINE,
           })
         }
       },
@@ -166,16 +149,12 @@ export namespace NSToolbarConfig {
       text: '下线',
       isEnabled: state.lockStatus && state.status == 'ONLINE',
       id: CustomCommands.OFFLINE_SERVICE.id,
-      onClick: async ({ commandService, modelService }) => {
+      onClick: async () => {
         const result = await XFlowApi.offlineDagService(graphMeta)
         if (result) {
-          const graphMetaModel = await MODELS.GRAPH_META.getModel(modelService)
-          graphMetaModel.setValue({
-            ...graphMeta,
-            meta: {
-              ...graphMeta.meta,
-              status: StatusEnum.OFFLINE,
-            },
+          setGraphMeta({
+            ...graphMeta.meta,
+            status: StatusEnum.OFFLINE,
           })
         }
       },
@@ -206,10 +185,9 @@ export const useToolbarConfig = createToolbarConfig((toolbarConfig) => {
   toolbarConfig.setToolbarModelService(async (toolbarModel, modelService, toDispose) => {
     const updateToolbarModel = async () => {
       const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
-      const state = await NSToolbarConfig.getToolbarState(modelService, graphMeta)
+      const state = await NSToolbarConfig.getToolbarState(graphMeta, modelService)
       console.log('graphMeta: ' + JSON.stringify(graphMeta.meta))
-
-      const toolbarItems = await NSToolbarConfig.getToolbarItems(state, graphMeta)
+      const toolbarItems = await NSToolbarConfig.getToolbarItems(state, graphMeta, modelService)
       toolbarModel.setValue((toolbar) => {
         toolbar.mainGroups = toolbarItems
       })

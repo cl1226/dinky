@@ -5,8 +5,16 @@ import type { NsRenameNodeCmd } from './cmd-extensions/cmd-rename-node-modal'
 import type { NsNodeCmd, NsEdgeCmd, NsGraphCmd } from '@antv/xflow'
 import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
 import { message } from 'antd'
-import { CODE, getInfoById, getData, handleAddOrUpdate } from '@/components/Common/crud'
+import { getInfoById, getData, handleAddOrUpdate } from '@/components/Common/crud'
 import { l } from '@/utils/intl'
+export interface IMeta {
+  flowId: string
+  flowName?: string
+  lockStatus?: boolean
+  status?: string
+  schedulerType?: boolean
+  cron?: string
+}
 
 /** 状态 类型 */
 enum GraphStatusEnum {
@@ -27,7 +35,9 @@ export namespace XFlowApi {
   } as const
 
   /** 查图的meta元信息 */
-  export const queryGraphMeta: NsGraphCmd.GraphMeta.IArgs['graphMetaService'] = async (args) => {
+  export const queryGraphMeta: NsGraphCmd.GraphMeta.IArgs['graphMetaService'] = async (
+    args: any,
+  ) => {
     return { ...args, flowId: args.meta.flowId }
   }
   /** 加载图数据的api */
@@ -35,13 +45,23 @@ export namespace XFlowApi {
     const result = await getInfoById('/api/workflow/task', graphMeta.meta.flowId)
     let nodes: NsGraph.INodeConfig[] = []
     let edges: NsGraph.IEdgeConfig[] = []
-    const { graphData, id, name, lockStatus, status } = result.datas
+    const { graphData, id, name, lockStatus, status, schedulerType, cron } = result.datas
     if (!!graphData) {
       const graphDataObj = JSON.parse(graphData)
       nodes = graphDataObj.nodes
       edges = graphDataObj.edges
     }
-    return { nodes, edges, flowId: id, flowName: name, lockStatus, status }
+
+    return {
+      nodes,
+      edges,
+      flowId: id,
+      flowName: name,
+      lockStatus,
+      status,
+      schedulerType,
+      cron,
+    }
   }
 
   /** 保存图数据的api */
@@ -52,6 +72,8 @@ export namespace XFlowApi {
     let workflowTask = {
       id: graphMeta.meta.flowId,
       graphData: JSON.stringify(graphData),
+      schedulerType: graphMeta.schedulerType,
+      cron: graphMeta.cron,
     }
     const success = await handleAddOrUpdate('/api/workflow/task', workflowTask)
     return {
@@ -66,17 +88,21 @@ export namespace XFlowApi {
     const workflowTask = {
       id: graphMeta.meta.flowId,
       graphData: JSON.stringify(graphData),
+      schedulerType: graphMeta.meta.schedulerType,
+      cron: graphMeta.meta.cron,
     }
     const saveResult = await handleAddOrUpdate('/api/workflow/task', workflowTask)
 
-    if (!saveResult) return
+    if (!saveResult) return false
 
     const id = graphMeta.meta.flowId
     const result = await getData('/api/workflow/task/releaseTask', { id })
     if (result.code == 0) {
       message.success(result.msg)
+      return true
     } else {
       message.warn(result.msg)
+      return false
     }
   }
   /** 上线数据的api */
@@ -153,22 +179,6 @@ export namespace XFlowApi {
     const hide = message.loading(l('app.request.running') + '开始执行')
     const id = graphMeta.meta.flowId
     const result = await getData('/api/workflow/task/startTask', { id })
-    hide()
-    if (result.code == 0) {
-      message.success(result.msg)
-    } else {
-      message.warn(result.msg)
-    }
-  }
-
-  /** 配置调度的api */
-  export const schedulerDagService: NsDeployDagCmd.IDeployDagService = async (
-    meta: NsGraph.IGraphMeta,
-    graphData: NsGraph.IGraphData,
-  ) => {
-    const hide = message.loading(l('app.request.running') + '配置调度')
-    let id = meta.meta.flowId
-    const result = await getData('/api/workflow/task/schedulerTask', { id })
     hide()
     if (result.code == 0) {
       message.success(result.msg)

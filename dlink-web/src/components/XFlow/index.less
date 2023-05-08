@@ -107,3 +107,30 @@
     }
   }
 }
+
+.custom-form-component {
+  height: 100%;
+  .info-title {
+    height: 40px;
+    color: #595959;
+    line-height: 40px;
+    text-align: center;
+    background-image: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+    border-bottom: 1px solid #d9d9d9;
+  }
+  .info-wrap {
+    height: calc(100% - 40px);
+    overflow-y: auto;
+    .info-content {
+      padding: 0 10px;
+      .ant-descriptions-header {
+        margin-bottom: 10px;
+        margin-top: 10px;
+      }
+      .ant-descriptions-row > th,
+      .ant-descriptions-row > td {
+        padding-bottom: 6px;
+      }
+    }
+  }
+}

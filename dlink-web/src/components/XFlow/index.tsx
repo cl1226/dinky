@@ -34,28 +34,17 @@ import { useKeybindingConfig } from './config-keybinding'
 import * as dndPanelConfig from './config-dnd-panel'
 /** 配置JsonConfigForm */
 import { formSchemaService, formValueUpdateService, controlMapService } from './config-form'
-
+import { IMeta } from './service'
 import './index.less'
 import '@antv/xflow/dist/index.css'
-
 export interface IProps {
   activeKey: string
   flowId: string
-  meta: {
-    flowId: string
-    flowName: string
-  }
   height: number
 }
-export interface IMeta {
-  flowId: string
-  flowName?: string
-  lockStatus?: boolean
-  status?: string
-}
+
 export const XFlowEditor: React.FC<IProps> = (props) => {
   const { height, activeKey, flowId } = props
-  console.log('chushixxx', flowId)
   const [meta, setMeta] = useState<IMeta>({ flowId: flowId })
   const graphHooksConfig = useGraphHookConfig(props)
   const toolbarConfig = useToolbarConfig()
@@ -64,14 +53,14 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
   const modelServiceConfig = useModelServiceConfig()
   const keybindingConfig = useKeybindingConfig()
 
-  const cache = React.useMemo<{ app: IApplication } | null>(
+  const cache = React.useMemo<{ app: IApplication | null }>(
     () => ({
       app: null,
     }),
     [],
   )
 
-  const handleMeta = (remainMeta) => {
+  const handleMeta = async (remainMeta) => {
     setMeta(remainMeta)
   }
 
@@ -86,7 +75,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
 
   /** 父组件meta属性更新时,执行initGraphCmds */
   React.useEffect(() => {
-    if (cache.app && meta.flowId === activeKey) {
+    if (cache.app && meta.flowId !== activeKey) {
       initGraphCmds(cache.app, handleMeta)
     }
   }, [cache.app, flowId])
@@ -115,9 +104,9 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
         className="xflow-workspace-toolbar-top"
         layout="horizontal"
         config={toolbarConfig}
-        position={{ top: 0, left: 230, right: 290, bottom: 0 }}
+        position={{ top: 0, left: 230, right: 320, bottom: 0 }}
       />
-      <XFlowCanvas position={{ top: 40, left: 230, right: 290, bottom: 0 }}>
+      <XFlowCanvas position={{ top: 40, left: 230, right: 320, bottom: 0 }}>
         <CanvasScaleToolbar position={{ top: 12, left: 12 }} />
         <CanvasContextMenu config={menuConfig} />
         <CanvasSnapline color="#faad14" />
@@ -127,9 +116,9 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
         controlMapService={controlMapService}
         formSchemaService={formSchemaService}
         formValueUpdateService={formValueUpdateService}
-
+        getCustomRenderComponent={CustomJsonForm.getCustomRenderComponent}
         bodyPosition={{ top: 0, bottom: 0, right: 0 }}
-        position={{ width: 290, top: 0, bottom: 0, right: 0 }}
+        position={{ width: 320, top: 0, bottom: 0, right: 0 }}
         footerPosition={{ height: 0 }}
       />
       <KeyBindings config={keybindingConfig} />
