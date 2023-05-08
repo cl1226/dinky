@@ -30,11 +30,13 @@ import com.dlink.scheduler.model.*;
 import com.dlink.service.WorkflowTaskService;
 import com.dlink.utils.UDFUtils;
 import com.google.common.collect.Lists;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,9 +58,24 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     private TaskClient taskClient;
 
     @Override
-    public WorkflowTask getTaskInfoById(Integer id) {
+    public WorkflowTaskDTO getTaskInfoById(Integer id) {
         WorkflowTask task = this.getById(id);
-        return task;
+        WorkflowTaskDTO taskDTO = new WorkflowTaskDTO();
+        try {
+            BeanUtils.copyProperties(taskDTO, task);
+            String loginId = StpUtil.getLoginIdAsString();
+            if (loginId.equals(task.getLockUser())) {
+                taskDTO.setLockStatus(true);
+            } else {
+                taskDTO.setLockStatus(false);
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        return taskDTO;
     }
 
     @Override
@@ -72,17 +89,14 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         if (task.getId() != null) {
             WorkflowTask taskInfo = getById(task.getId());
             Assert.check(taskInfo);
-            if (JobLifeCycle.RELEASE.equalsValue(taskInfo.getStep())
-                    || JobLifeCycle.ONLINE.equalsValue(taskInfo.getStep())
-                    || JobLifeCycle.CANCEL.equalsValue(taskInfo.getStep())) {
-                throw new BusException("该作业已" + JobLifeCycle.get(taskInfo.getStep()).getLabel() + "，禁止修改！");
+            if (WorkflowLifeCycle.ONLINE.getValue().equals(taskInfo.getStatus())
+                    || WorkflowLifeCycle.CANCEL.getValue().equals(taskInfo.getStatus())) {
+                throw new BusException("该作业已" + WorkflowLifeCycle.get(taskInfo.getStatus()).getLabel() + "，禁止修改！");
             }
-            task.setStep(JobLifeCycle.DEVELOP.getValue());
             task.setStatus(WorkflowLifeCycle.CREATE.getValue());
             this.updateById(task);
         } else {
             task.setStatus(WorkflowLifeCycle.CREATE.getValue());
-            task.setStep(JobLifeCycle.CREATE.getValue());
             this.save(task);
         }
         return true;
@@ -91,8 +105,6 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     @Override
     public Result releaseTask(Integer id) {
         WorkflowTask taskInfo = getById(id);
-        taskInfo.setStatus(WorkflowLifeCycle.DEPLOY.getValue());
-        this.updateById(taskInfo);
 
         if (StringUtils.isBlank(taskInfo.getGraphData())) {
             return Result.failed("工作流程中缺少节点");
@@ -116,9 +128,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         Map<String, Long> map = new HashMap<>();
         List<TaskRequest> taskRequests = new ArrayList<>();
         List<ProcessTaskRelation> taskRelations = new ArrayList<>();
+        // 1. 生成节点，每一个节点生成一个taskRequest
         workflowTaskDTO.getNodes().stream().forEach(x -> {
-            List<WorkflowEdge> filterEdges = workflowTaskDTO.getEdges().stream().
-                    filter(y -> y.getTarget().equals(x.getId())).collect(Collectors.toList());
             // 每一个节点生成一个taskRequest
             TaskRequest taskRequest = new TaskRequest();
             DlinkTaskParams dlinkTaskParams = new DlinkTaskParams();
@@ -132,6 +143,10 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             map.put(x.getId(), taskCode);
             taskRequest.setCode(taskCode);
             taskRequests.add(taskRequest);
+        });
+        workflowTaskDTO.getNodes().stream().forEach(x -> {
+            List<WorkflowEdge> filterEdges = workflowTaskDTO.getEdges().stream().
+                    filter(y -> y.getTarget().equals(x.getId())).collect(Collectors.toList());
             // 每一个节点生成一个relation
             ProcessTaskRelation processTaskRelation = new ProcessTaskRelation();
             if (filterEdges.size() > 0) {
@@ -140,11 +155,11 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
                     dependenceCodes = map.get(filterEdges.get(0).getSource());
                 }
                 processTaskRelation.setPreTaskCode(dependenceCodes);
-                processTaskRelation.setPostTaskCode(taskCode);
+                processTaskRelation.setPostTaskCode(map.get(x.getId()));
                 processTaskRelation.setProjectCode(projectCode);
             } else {
                 processTaskRelation.setPreTaskCode(0);
-                processTaskRelation.setPostTaskCode(taskCode);
+                processTaskRelation.setPostTaskCode(map.get(x.getId()));
                 processTaskRelation.setProjectCode(projectCode);
             }
             taskRelations.add(processTaskRelation);
@@ -160,6 +175,12 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
                 taskInfo.getName(),
                 JSONUtil.parseArray(taskRequests).toString(),
                 JSONUtil.parseArray(taskRelations).toString());
+
+        if (processDefinition != null) {
+            taskInfo.setStatus(WorkflowLifeCycle.DEPLOY.getValue());
+            this.updateById(taskInfo);
+        }
+
         return Result.succeed("部署工作流成功");
     }
 
@@ -245,13 +266,27 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         if (taskInfo == null) {
             return Result.failed("抢锁失败，作业不存在");
         }
-        if (!taskInfo.getLockUser().equals("")) {
+        if (taskInfo.getLockUser() != null && !taskInfo.getLockUser().equals("")) {
             return Result.failed("抢锁失败，该作业正被其他用户编辑");
         }
 
         taskInfo.setLockUser(StpUtil.getLoginIdAsString());
         this.updateById(taskInfo);
-        return Result.succeed(taskInfo, "抢锁成功");
+        WorkflowTaskDTO taskDTO = new WorkflowTaskDTO();
+        try {
+            BeanUtils.copyProperties(taskDTO, taskInfo);
+            String loginId = StpUtil.getLoginIdAsString();
+            if (loginId.equals(taskInfo.getLockUser())) {
+                taskDTO.setLockStatus(true);
+            } else {
+                taskDTO.setLockStatus(false);
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return Result.succeed(taskDTO, "抢锁成功");
     }
 
     @Override
@@ -260,16 +295,29 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         if (taskInfo == null) {
             return Result.failed("解锁失败，作业不存在");
         }
-        if (taskInfo.getLockUser().equals("")) {
+        if (taskInfo.getLockUser() == null && taskInfo.getLockUser().equals("")) {
             return Result.failed("解锁失败，该作业未被加锁");
         }
         String loginId = StpUtil.getLoginIdAsString();
-        if (!taskInfo.getLockUser().equals(loginId)) {
+        if (taskInfo.getLockUser() != null && !taskInfo.getLockUser().equals(loginId)) {
             return Result.failed("解锁失败，该作业已被其他用户加锁");
         }
         taskInfo.setLockUser("");
         this.updateById(taskInfo);
-        return Result.succeed(taskInfo, "解锁成功");
+        WorkflowTaskDTO taskDTO = new WorkflowTaskDTO();
+        try {
+            BeanUtils.copyProperties(taskDTO, taskInfo);
+            if (loginId.equals(taskInfo.getLockUser())) {
+                taskDTO.setLockStatus(true);
+            } else {
+                taskDTO.setLockStatus(false);
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return Result.succeed(taskDTO, "解锁成功");
     }
 
     @Override
