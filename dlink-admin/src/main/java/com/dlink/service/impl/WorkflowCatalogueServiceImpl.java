@@ -1,7 +1,8 @@
 package com.dlink.service.impl;
 
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.dlink.common.result.Result;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.CatalogueTaskDTO;
 import com.dlink.dto.WorkflowCatalogueTaskDTO;
@@ -10,6 +11,7 @@ import com.dlink.init.SystemInit;
 import com.dlink.mapper.WorkflowCatalogueMapper;
 import com.dlink.model.*;
 import com.dlink.scheduler.client.ProcessClient;
+import com.dlink.scheduler.client.ProjectClient;
 import com.dlink.scheduler.model.ProcessDefinition;
 import com.dlink.scheduler.model.Project;
 import com.dlink.service.JobInstanceService;
@@ -44,6 +46,8 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
     private JobInstanceService jobInstanceService;
     @Autowired
     private ProcessClient processClient;
+    @Autowired
+    private ProjectClient projectClient;
 
     @Override
     public List<WorkflowCatalogue> getAllData() {
@@ -53,6 +57,29 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
     @Override
     public WorkflowCatalogue findByParentIdAndName(Integer parentId, String name) {
         return baseMapper.selectOne(Wrappers.<WorkflowCatalogue>query().eq("parent_id", parentId).eq("name", name));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean createCatalogue(WorkflowCatalogue catalogue) {
+        // 创建dolphinscheduler的项目, 只有根目录才会去创建项目
+        if (catalogue.getParentId() == null) {
+            Project project = null;
+            if (StringUtils.isBlank(catalogue.getProjectCode())) {
+                project = projectClient.createProjectByName(catalogue.getName());
+            } else {
+                project = projectClient.updateProjectByName(catalogue.getProjectCode(), catalogue.getName());
+            }
+            if (project != null) {
+                catalogue.setProjectCode(String.valueOf(project.getCode()));
+                this.saveOrUpdate(catalogue);
+                return true;
+            }
+        } else {
+            this.saveOrUpdate(catalogue);
+            return true;
+        }
+        return false;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -79,7 +106,7 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
 
     @Override
     public boolean toRename(WorkflowCatalogue catalogue) {
-        return false;
+        return this.createCatalogue(catalogue);
     }
 
     @Override
@@ -100,7 +127,15 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
                     // 删除作业同时将海豚调度上线的任务删除
                     this.removeWorkflowInDSByTaskId(catalogue.getTaskId());
                     taskService.removeById(taskId);
-                    this.removeById(id);
+                    if (StringUtils.isNotBlank(catalogue.getProjectCode())) {
+                        // 删除dolphinscheduler的项目
+                        JSONObject result = projectClient.deleteProjectByName(catalogue.getProjectCode());
+                        if (result.getBool("success")) {
+                            this.removeById(id);
+                        }
+                    } else {
+                        this.removeById(id);
+                    }
                 } else {
                     errors.add(job.getName());
                 }
