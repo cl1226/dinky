@@ -24,6 +24,7 @@ export type CatalogueTableListItem = {
   name: string,
   isLeaf: string,
   parentId: number,
+  projectCode: string,
 };
 
 export type TaskTableListItem = {
@@ -33,4 +34,5 @@ export type TaskTableListItem = {
   dialect: string,
   config: Object<string, object>,
   parentId: number,
+  projectCode: string,
 };

@@ -50,4 +50,5 @@ public class WorkflowTaskDTO {
     private String status;
     private String lockUser;
     private boolean lockStatus;
+    private String projectCode;
 }

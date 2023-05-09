@@ -335,6 +335,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
       id: node?.id,
       taskId: node?.taskId,
       name: node?.name,
+      projectCode: node?.projectCode
     })
   }
 
@@ -619,6 +620,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
           icon: item.isLeaf ? item.icon : '',
           title,
           key: item.key,
+          projectCode: item.projectCode,
           children: loop(item.children),
         }
       }
@@ -631,6 +633,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
         path: item.path,
         icon: item.isLeaf ? item.icon : '',
         title,
+        projectCode: item.projectCode,
         key: item.key,
       }
     })

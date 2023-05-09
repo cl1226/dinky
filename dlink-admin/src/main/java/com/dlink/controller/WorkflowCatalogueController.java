@@ -153,7 +153,7 @@ public class WorkflowCatalogueController {
      */
     @PutMapping
     public Result saveOrUpdate(@RequestBody WorkflowCatalogue catalogue) throws Exception {
-        if (catalogueService.saveOrUpdate(catalogue)) {
+        if (catalogueService.createCatalogue(catalogue)) {
             return Result.succeed("创建成功");
         } else {
             return Result.failed("创建失败");

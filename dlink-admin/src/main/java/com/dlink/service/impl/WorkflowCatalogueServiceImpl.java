@@ -76,6 +76,7 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
                 return true;
             }
         } else {
+            catalogue.setProjectCode("");
             this.saveOrUpdate(catalogue);
             return true;
         }
@@ -95,6 +96,7 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
         catalogue.setIsLeaf(true);
         catalogue.setTaskId(task.getId());
         catalogue.setParentId(catalogueTaskDTO.getParentId());
+        catalogue.setProjectCode("");
         this.save(catalogue);
         return catalogue;
     }
