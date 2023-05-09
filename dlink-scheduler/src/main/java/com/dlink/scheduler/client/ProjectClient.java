@@ -95,16 +95,13 @@ public class ProjectClient {
      * @author cl1226
      * @date 2023/5/9 14:31
      */
-    public JSONObject deleteProjectByName(String code) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("code", code);
-        String content = HttpRequest.delete(dolphinSchedulerProperties.getUrl() + "/projects")
+    public Result<JSONObject> deleteProjectByCode(String code) {
+        String content = HttpRequest.delete(dolphinSchedulerProperties.getUrl() + "/projects/" + code)
                 .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
-                .form(map)
                 .timeout(5000)
                 .execute().body();
-        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
-        }));
+        return MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        });
     }
 
 
