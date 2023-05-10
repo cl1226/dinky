@@ -21,13 +21,9 @@ import * as _monaco from 'monaco-editor'
 import { XFlowEditor } from '@/components/XFlow'
 
 const WorkflowEditor = (props: any) => {
-  const { tabkey, tabName, height, activeKey } = props
-  const meta = {
-    flowId: tabkey,
-    flowName: tabName,
-  }
+  const { tabkey, activeKey } = props
 
-  return <XFlowEditor activeKey={activeKey} flowId={tabkey} meta={meta} height={height}></XFlowEditor>
+  return <XFlowEditor activeKey={activeKey} flowId={tabkey}></XFlowEditor>
 }
 
 export default WorkflowEditor
