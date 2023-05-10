@@ -3,7 +3,6 @@ import { DND_RENDER_ID, NODE_WIDTH, NODE_HEIGHT } from './constant'
 import { uuidv4, NsGraph, NsGraphStatusCommand } from '@antv/xflow'
 import type { NsRenameNodeCmd } from './cmd-extensions/cmd-rename-node-modal'
 import type { NsNodeCmd, NsEdgeCmd, NsGraphCmd } from '@antv/xflow'
-import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
 import { message } from 'antd'
 import { getInfoById, getData, handleAddOrUpdate } from '@/components/Common/crud'
 import { l } from '@/utils/intl'
@@ -89,7 +88,7 @@ export namespace XFlowApi {
   export const deployDagService: any = async (
     graphMeta: NsGraph.IGraphMeta,
     graphData: NsGraph.IGraphData,
-    otherForm: any = {},
+    otherForm = {},
   ) => {
     const workflowTask = {
       id: graphMeta.meta.flowId,

@@ -40,11 +40,10 @@ import '@antv/xflow/dist/index.css'
 export interface IProps {
   activeKey: string
   flowId: string
-  height: number
 }
 
 export const XFlowEditor: React.FC<IProps> = (props) => {
-  const { height, activeKey, flowId } = props
+  const { activeKey, flowId } = props
   const [meta, setMeta] = useState<IMeta>({ flowId: flowId })
   const graphHooksConfig = useGraphHookConfig(props)
   const toolbarConfig = useToolbarConfig()
@@ -88,7 +87,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
       commandConfig={cmdConfig}
       onLoad={onLoad}
       meta={meta}
-      style={{ height: height - 124 }}
+      style={{ height: 'calc(100vh - 82px - 32px)' }}
     >
       <DagGraphExtension />
       <NodeCollapsePanel

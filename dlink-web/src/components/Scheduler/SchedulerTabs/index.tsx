@@ -23,7 +23,7 @@
  *
  */
 
-import { Dropdown, Menu, message, Tabs } from 'antd'
+import { Dropdown, Menu, Tabs } from 'antd'
 import { connect } from 'umi'
 import { StateType } from '@/pages/Scheduler/model'
 import styles from './index.less'
@@ -35,24 +35,15 @@ import { l } from '@/utils/intl'
 const { TabPane } = Tabs
 
 const EditorTabs = (props: any) => {
-  const { tabs, toolHeight, width, height, current } = props
-
+  const { tabs, current } = props
   const onChange = (activeKey: any) => {
-    props.saveToolHeight(toolHeight)
     props.changeActiveKey(activeKey)
   }
 
   const onEdit = (targetKey: any, action: any) => {
-    if (action === 'add') {
-      add()
-    } else if (action === 'remove') {
-      props.saveToolHeight(toolHeight - 0.0001)
+    if (action === 'remove') {
       remove(targetKey)
     }
-  }
-
-  const add = () => {
-    message.warn(l('global.stay.tuned'))
   }
 
   const remove = (targetKey: any) => {
@@ -110,16 +101,9 @@ const EditorTabs = (props: any) => {
 
   // as different dialet return different Panle
   const getTabPane = (pane, i) => {
-    console.log('pane', pane)
     return (
       <TabPane tab={Tab(pane)} key={pane.key} closable={pane.closable}>
-        <SchedulerEdit
-          tabkey={pane.key}
-          tabName={pane.title}
-          activeKey={current.key}
-          height={height ? height : toolHeight - 32}
-          width={width}
-        />
+        <SchedulerEdit tabkey={pane.key} tabName={pane.title} activeKey={current.key} />
       </TabPane>
     )
   }
@@ -127,7 +111,7 @@ const EditorTabs = (props: any) => {
   return (
     <>
       {tabs.panes.length === 0 ? (
-        <SchedulerHome width={width} height={height} />
+        <SchedulerHome />
       ) : (
         <Tabs
           hideAdd
@@ -137,7 +121,6 @@ const EditorTabs = (props: any) => {
           activeKey={tabs.activeKey + ''}
           onEdit={onEdit}
           className={styles['edit-tabs']}
-          style={{ height: height - 84 }}
         >
           {tabs.panes.map((pane, i) => getTabPane(pane, i))}
         </Tabs>
@@ -163,11 +146,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
         panes: newPanes,
       },
     }),
-  saveToolHeight: (toolHeight: number) =>
-    dispatch({
-      type: 'Scheduler/saveToolHeight',
-      payload: toolHeight - 0.0001,
-    }),
   changeActiveKey: (activeKey: number) =>
     dispatch({
       type: 'Scheduler/changeActiveKey',
@@ -179,7 +157,6 @@ export default connect(
   ({ Scheduler }: { Scheduler: StateType }) => ({
     current: Scheduler.current,
     tabs: Scheduler.tabs,
-    toolHeight: Scheduler.toolHeight,
     activeKey: Scheduler.tabs,
   }),
   mapDispatchToProps,

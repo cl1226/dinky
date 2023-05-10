@@ -17,30 +17,33 @@
  *
  */
 
+import { Tabs } from 'antd'
+import { BarsOutlined } from '@ant-design/icons'
+import { StateType } from '@/pages/Scheduler/model'
+import { connect } from 'umi'
+import SchedulerTree from '../SchedulerTree'
+import { l } from '@/utils/intl'
 
-import {Tabs} from "antd";
-import { BarsOutlined } from "@ant-design/icons";
-import {StateType} from "@/pages/Scheduler/model";
-import {connect} from "umi";
-import SchedulerTree from "../SchedulerTree";
-import {l} from "@/utils/intl";
-
-const {TabPane} = Tabs;
+const { TabPane } = Tabs
 
 const SchedulerLeftTool = (props: any) => {
-
-  const {height} = props;
-
   return (
-    <Tabs defaultActiveKey="1" size="small" tabPosition="left" style={{height: (height - 84)}}>
-      <TabPane tab={<span><BarsOutlined/> {l('pages.scheduler.workflow.develop')}</span>} key="SchedulerTree">
-        <SchedulerTree/>
+    <Tabs defaultActiveKey="1" size="small" tabPosition="left" style={{ height: '100%' }}>
+      <TabPane
+        tab={
+          <span>
+            <BarsOutlined /> {l('pages.scheduler.workflow.develop')}
+          </span>
+        }
+        key="SchedulerTree"
+      >
+        <SchedulerTree />
       </TabPane>
     </Tabs>
-  );
-};
+  )
+}
 
-export default connect(({Scheduler}: { Scheduler: StateType }) => ({
+export default connect(({ Scheduler }: { Scheduler: StateType }) => ({
   sql: Scheduler.sql,
-  toolHeight: Scheduler.toolHeight,
-}))(SchedulerLeftTool);
+  toolHeight: Scheduler.toolHeight
+}))(SchedulerLeftTool)

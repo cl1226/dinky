@@ -17,16 +17,14 @@
  *
  */
 
-
-import React, {useCallback, useEffect, useState} from "react";
-import {connect} from "umi";
-import styles from './index.less';
-import SchedulerMenu from "./SchedulerMenu";
-import {Card, Col, Form, Row} from "antd";
-import SchedulerTabs from "./SchedulerTabs";
-import {StateType} from "@/pages/Scheduler/model";
-import SchedulerLeftTool from "./SchedulerLeftTool";
-import SchedulerRightTool from "./SchedulerRightTool";
+import React, { useCallback, useEffect, useState } from 'react'
+import { connect } from 'umi'
+import styles from './index.less'
+import SchedulerMenu from './SchedulerMenu'
+import { Card, Col, Form, Row } from 'antd'
+import SchedulerTabs from './SchedulerTabs'
+import { StateType } from '@/pages/Scheduler/model'
+import SchedulerLeftTool from './SchedulerLeftTool'
 import {
   getFillAllByVersion,
   listSession,
@@ -37,17 +35,13 @@ import {
   showDataBase,
   showEnv,
   showJars,
-  showSessionCluster
-} from "@/components/Scheduler/SchedulerEvent/DDL";
-import DraggleLayout from "@/components/DraggleLayout";
-import DraggleVerticalLayout from "@/components/DraggleLayout/DraggleVerticalLayout";
-import {loadSettings} from "@/pages/SettingCenter/FlinkSettings/function";
-import {l} from "@/utils/intl";
+  showSessionCluster,
+} from '@/components/Scheduler/SchedulerEvent/DDL'
+import { loadSettings } from '@/pages/SettingCenter/FlinkSettings/function'
 
 const Scheduler = (props: any) => {
+  const { rightClickMenu, dispatch } = props
 
-  const {isFullScreen, rightClickMenu, toolHeight, toolLeftWidth, toolRightWidth, dispatch} = props;
-  const [form] = Form.useForm();
   const VIEW = {
     leftToolWidth: 300,
     marginTop: 84,
@@ -56,93 +50,68 @@ const Scheduler = (props: any) => {
     rightMargin: 32,
     leftMargin: 36,
     midMargin: 46,
-  };
+  }
   const [size, setSize] = useState({
     width: document.documentElement.clientWidth,
     height: document.documentElement.clientHeight,
-  });
+  })
   const onResize = useCallback(() => {
     setSize({
       width: document.documentElement.clientWidth,
       height: document.documentElement.clientHeight,
     })
-  }, []);
+  }, [])
 
   useEffect(() => {
-    window.addEventListener('resize', onResize);
-    onResize();
+    window.addEventListener('resize', onResize)
+    onResize()
     return () => {
-      window.removeEventListener('resize', onResize);
-    };
-  }, [onResize]);
+      window.removeEventListener('resize', onResize)
+    }
+  }, [onResize])
 
   useEffect(() => {
-    loadSettings(dispatch);
-    getFillAllByVersion('', dispatch);
-    showCluster(dispatch);
-    showSessionCluster(dispatch);
-    showClusterConfiguration(dispatch);
-    showDataBase(dispatch);
-    listSession(dispatch);
-    showJars(dispatch);
-    showAlertInstance(dispatch);
-    showAlertGroup(dispatch);
-    showEnv(dispatch);
-    onResize();
-  }, []);
+    loadSettings(dispatch)
+    getFillAllByVersion('', dispatch)
+    showCluster(dispatch)
+    showSessionCluster(dispatch)
+    showClusterConfiguration(dispatch)
+    showDataBase(dispatch)
+    listSession(dispatch)
+    showJars(dispatch)
+    showAlertInstance(dispatch)
+    showAlertGroup(dispatch)
+    showEnv(dispatch)
+    onResize()
+  }, [])
 
   const onClick = () => {
     if (rightClickMenu) {
-      dispatch && dispatch({
-        type: "Scheduler/showRightClickMenu",
-        payload: false,
-      });
+      dispatch &&
+        dispatch({
+          type: 'Scheduler/showRightClickMenu',
+          payload: false,
+        })
     }
-  };
+  }
 
   return (
-    <div onClick={onClick} style={{'margin': '-24px'}}>
-      <SchedulerMenu form={form} width={size.width} height={size.height}/>
-      <Card bordered={false} className={styles.card} size="small" id="Scheduler_card" style={{marginBottom: 0}}>
-        <Row>
-        <DraggleLayout
-            containerWidth={size.width}
-            containerHeight={size.height - VIEW.marginTop}
-            min={VIEW.leftMargin}
-            max={size.width - VIEW.rightMargin - VIEW.midMargin}
-            initLeftWidth={toolLeftWidth}
-            isLeft={true}
-            handler={
-              <div
-                style={{
-                  width: 4,
-                  height: '100%',
-                  background: 'rgb(240, 240, 240)',
-                }}
-              />
-            }
-          >
-            <Col className={styles["vertical-tabs"]}>
-              <SchedulerLeftTool style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }} height={size.height} toolHeight={toolHeight}/>
-            </Col>
-            <Col>
-              {!isFullScreen ? <SchedulerTabs width={size.width - toolRightWidth - toolLeftWidth} height={size.height}/> : undefined}
-            </Col>
-          </DraggleLayout>
-        </Row>
+    <div onClick={onClick} style={{ margin: '-24px', marginBottom: 0 }}>
+      <SchedulerMenu />
+      <Card bordered={false} className={styles.card}>
+        <div className="guide-content">
+          <Col className={styles['vertical-tabs']} style={{ width: VIEW.leftToolWidth }}>
+            <SchedulerLeftTool />
+          </Col>
+          <Col style={{ width: `calc(100vw - ${VIEW.leftToolWidth}px)` }}>
+            <SchedulerTabs />
+          </Col>
+        </div>
       </Card>
     </div>
   )
-};
+}
 
-export default connect(({Scheduler}: { Scheduler: StateType }) => ({
-  isFullScreen: Scheduler.isFullScreen,
+export default connect(({ Scheduler }: { Scheduler: StateType }) => ({
   rightClickMenu: Scheduler.rightClickMenu,
-  toolHeight: Scheduler.toolHeight,
-  toolLeftWidth: Scheduler.toolLeftWidth,
-  toolRightWidth: Scheduler.toolRightWidth,
-}))(Scheduler);
+}))(Scheduler)
