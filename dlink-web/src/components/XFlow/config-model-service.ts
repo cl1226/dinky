@@ -8,6 +8,13 @@ export namespace NS_LOADING_STATE {
   }
 }
 
+export namespace NS_CANVAS_FORM {
+  export const id = 'canvas_form'
+  export interface ICanvasForm {
+    canvasForm: any
+  }
+}
+
 export const useModelServiceConfig = createModelServiceConfig((config) => {
   config.registerModel((registry) => {
     return registry.registerModel({

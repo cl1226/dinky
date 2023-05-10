@@ -26,6 +26,11 @@ enum GraphStatusEnum {
 
 export const StatusEnum = { ...GraphStatusEnum, ...NsGraphStatusCommand.StatusEnum }
 
+export enum ESchedulerType {
+  'SINGLE' = 'SINGLE',
+  'CYCLE' = 'CYCLE',
+}
+
 /** 后端接口调用 */
 export namespace XFlowApi {
   export const NODE_COMMON_PROPS = {
@@ -84,12 +89,12 @@ export namespace XFlowApi {
   export const deployDagService: any = async (
     graphMeta: NsGraph.IGraphMeta,
     graphData: NsGraph.IGraphData,
+    otherForm: any = {},
   ) => {
     const workflowTask = {
       id: graphMeta.meta.flowId,
       graphData: JSON.stringify(graphData),
-      schedulerType: graphMeta.meta.schedulerType,
-      cron: graphMeta.meta.cron,
+      ...otherForm,
     }
     const saveResult = await handleAddOrUpdate('/api/workflow/task', workflowTask)
 

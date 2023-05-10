@@ -14,10 +14,12 @@ import {
   LockOutlined,
   UnlockOutlined,
 } from '@ant-design/icons'
-import { XFlowApi, StatusEnum } from './service'
+import { XFlowApi, StatusEnum, ESchedulerType } from './service'
 import { CustomCommands } from './cmd-extensions/constants'
 import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
-import { Popconfirm } from 'antd'
+import { message, Popconfirm } from 'antd'
+import { NS_CANVAS_FORM } from './config-model-service'
+import moment from 'moment'
 export namespace NSToolbarConfig {
   /** 注册icon 类型 */
   IconStore.set('SaveOutlined', SaveOutlined)
@@ -35,6 +37,22 @@ export namespace NSToolbarConfig {
   export interface IToolbarState {
     status: string
     lockStatus: boolean
+  }
+
+  // 将当前组件的form转换为传参的meta
+  const getJsonCron = (formValues) => {
+    const { timerange, crontab, timezoneId } = formValues
+
+    const tempCron: any = {}
+    tempCron.timezoneId = timezoneId
+    tempCron.crontab = crontab
+    const [startTime, endTime] = timerange || []
+    if (startTime && endTime) {
+      tempCron.startTime = moment(startTime).format('YYYY-MM-DD HH:mm:ss')
+      tempCron.endTime = moment(endTime).format('YYYY-MM-DD HH:mm:ss')
+    }
+
+    return JSON.stringify(tempCron)
   }
 
   export const getDependencies = async (modelService: IModelService) => {
@@ -101,16 +119,42 @@ export namespace NSToolbarConfig {
         (state.status === 'CREATE' || state.status === 'DEPLOY' || state.status === 'OFFLINE'),
       id: CustomCommands.DEPLOY_SERVICE.id,
       onClick: async ({ commandService }) => {
-        await commandService.executeCommand<NsDeployDagCmd.IArgs>(
-          CustomCommands.DEPLOY_SERVICE.id,
-          {
-            deployDagService: (meta, graphData) => XFlowApi.deployDagService(meta, graphData),
-          },
-        )
-        setGraphMeta({
-          ...graphMeta.meta,
-          status: StatusEnum.DEPLOY,
-        })
+        const ctx = await modelService.awaitModel<NS_CANVAS_FORM.ICanvasForm>(NS_CANVAS_FORM.id)
+
+        const { canvasForm } = await ctx.getValidValue()
+
+        canvasForm
+          .validateFields()
+          .then(async (values) => {
+            const { schedulerType } = values
+            let cron: any = null
+            if (schedulerType === ESchedulerType.CYCLE) {
+              cron = getJsonCron(values)
+            }
+            const canvasForm = {
+              schedulerType,
+              cron,
+            }
+
+            await commandService.executeCommand<NsDeployDagCmd.IArgs>(
+              CustomCommands.DEPLOY_SERVICE.id,
+              {
+                deployDagService: (meta, graphData) =>
+                  XFlowApi.deployDagService(meta, graphData, canvasForm),
+              },
+            )
+            setGraphMeta({
+              ...graphMeta.meta,
+              status: StatusEnum.DEPLOY,
+              ...canvasForm
+            })
+          })
+          .catch(({ errorFields }) => {
+            const msg = errorFields?.[0]?.['errors']?.[0] || '操作失败'
+            message.warn(msg)
+          })
+
+        return
       },
     })
 
