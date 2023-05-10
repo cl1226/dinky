@@ -19,14 +19,7 @@
 
 import React, { Key, useEffect, useState } from 'react'
 import { connect } from 'umi'
-import {
-  CarryOutOutlined,
-  DownOutlined,
-  FolderAddOutlined,
-  SwitcherOutlined,
-  UploadOutlined,
-} from '@ant-design/icons'
-import type { UploadProps } from 'antd'
+import { DownOutlined, FolderAddOutlined, SwitcherOutlined } from '@ant-design/icons'
 import { Button, Col, Empty, Input, Menu, message, Modal, Row, Tooltip, Tree, Upload } from 'antd'
 import { getWorkflowCatalogueTreeData } from '@/pages/Scheduler/service'
 import {
@@ -38,21 +31,15 @@ import style from './index.less'
 import { StateType } from '@/pages/Scheduler/model'
 import {
   CODE,
-  getInfoById,
   handleAddOrUpdate,
   handleAddOrUpdateWithResult,
-  handleData,
-  handleOption,
   handleRemoveById,
-  handleSubmit,
-  postAll,
 } from '@/components/Common/crud'
 import UpdateCatalogueForm from './components/UpdateCatalogueForm'
 import SimpleTaskForm from '@/components/Scheduler/SchedulerTree/components/SimpleTaskForm'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { getIcon } from '@/components/Scheduler/icon'
-import { showEnv, showMetaStoreCatalogs } from '@/components/Scheduler/SchedulerEvent/DDL'
-import UploadModal from '@/components/Scheduler/SchedulerTree/components/UploadModal'
+import { showEnv } from '@/components/Scheduler/SchedulerEvent/DDL'
 import { l } from '@/utils/intl'
 
 type SchedulerTreeProps = {
@@ -60,7 +47,6 @@ type SchedulerTreeProps = {
   dispatch: any
   tabs: StateType['tabs']
   current: StateType['current']
-  toolHeight: number
   refs: any
 }
 
@@ -104,7 +90,7 @@ const { DirectoryTree } = Tree
 const { Search } = Input
 
 const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
-  const { rightClickMenu, dispatch, tabs, refs, toolHeight } = props
+  const { rightClickMenu, dispatch, tabs } = props
   const [treeData, setTreeData] = useState<TreeDataNode[]>()
   const [expandedKeys, setExpandedKeys] = useState<Key[]>()
   const [defaultExpandedKeys, setDefaultExpandedKeys] = useState<any[]>([])
@@ -114,21 +100,12 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
   const [isCreate, setIsCreate] = useState<boolean>(true)
   const [catalogueFormValues, setCatalogueFormValues] = useState({})
   const [taskFormValues, setTaskFormValues] = useState({})
-  const [activeNode, setActiveNode] = useState({})
+  const [activeNode, setActiveNode] = useState<any>({})
   const [rightClickNode, setRightClickNode] = useState<TreeDataNode>()
   const [available, setAvailable] = useState<boolean>(true)
-  const [isUploadModalVisible, setIsUploadModalVisible] = useState(false)
-  const [uploadNodeId, setUploadNodeId] = useState(0)
   const sref: any = React.createRef<Scrollbars>()
   const [searchValue, setSearchValue] = useState('')
   const [autoExpandParent, setAutoExpandParent] = useState(true)
-  const [cutId, setCutId] = useState<number | undefined>(undefined)
-  const [exportTaskIds, setExportTaskIds] = useState<any[]>([])
-
-  const [size, setSize] = useState({
-    width: document.documentElement.clientWidth,
-    height: document.documentElement.clientHeight,
-  })
 
   const getTreeData = async () => {
     const result = await getWorkflowCatalogueTreeData()
@@ -137,7 +114,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
     //默认展开所有
     setExpandedKeys([])
     setDefaultExpandedKeys([])
-    setExportTaskIds([])
   }
 
   const onChange = (e: any) => {
@@ -186,43 +162,20 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
   const handleMenuClick = (key: string) => {
     if (key == 'Open') {
       toOpen(rightClickNode)
-    } else if (key == 'Submit') {
-      toSubmit(rightClickNode)
     } else if (key == 'CreateCatalogue') {
       createCatalogue(rightClickNode)
     } else if (key == 'CreateRootCatalogue') {
       createRootCatalogue()
-    } else if (key == 'ShowUploadModal') {
-      showUploadModal(rightClickNode)
     } else if (key == 'CreateTask') {
       createTask(rightClickNode)
     } else if (key == 'Rename') {
       toRename(rightClickNode)
     } else if (key == 'Delete') {
       toDelete(rightClickNode)
-    } else if (key == 'Cut') {
-      toCut(rightClickNode)
-    } else if (key == 'Paste') {
-      toPaste(rightClickNode)
-    } else if (key == 'Copy') {
-      toCopy(rightClickNode)
-    } else if (key == 'ExportJson') {
-      toExportJson(rightClickNode)
     }
   }
 
-  const showUploadModal = (node: TreeDataNode | undefined) => {
-    if (node == undefined) return
-    setUploadNodeId(node.id)
-    setIsUploadModalVisible(true)
-  }
-
   const activeTabCall = (node: TreeDataNode) => {
-    dispatch &&
-      dispatch({
-        type: 'Scheduler/saveToolHeight',
-        payload: toolHeight - 0.0001,
-      })
     dispatch &&
       dispatch({
         type: 'Scheduler/changeActiveKey',
@@ -309,25 +262,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
     })
   }
 
-  const toSubmit = (node: TreeDataNode | undefined) => {
-    Modal.confirm({
-      title: '提交作业',
-      content: '确定提交该作业到其配置的集群吗？',
-      okText: l('button.confirm'),
-      cancelText: l('button.cancel'),
-      onOk: async () => {
-        let task = {
-          id: node?.taskId,
-        }
-        setTimeout(() => {
-          refs?.history?.current?.reload()
-        }, 2000)
-        handleSubmit('/api/task/submit', '作业', [task])
-      },
-    })
-  }
-
-  const toRename = (node: TreeDataNode) => {
+  const toRename = (node: TreeDataNode | undefined) => {
     handleUpdateCatalogueModalVisible(true)
     setIsCreate(false)
     setActiveNode(node)
@@ -335,104 +270,8 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
       id: node?.id,
       taskId: node?.taskId,
       name: node?.name,
-      projectCode: node?.projectCode
+      projectCode: node?.projectCode,
     })
-  }
-
-  const toCut = (node: TreeDataNode | undefined) => {
-    setCutId(node?.id)
-    message.success('剪切成功')
-  }
-
-  const toPaste = async (node: TreeDataNode | undefined) => {
-    if (cutId == 0) {
-      return
-    }
-    const datas = await handleAddOrUpdateWithResult('/api/catalogue/moveCatalogue', {
-      id: cutId,
-      parentId: node?.id,
-    })
-    if (datas) {
-      setCutId(undefined)
-      getTreeData()
-    }
-  }
-
-  const toCopy = async (node: TreeDataNode | undefined) => {
-    let catalogues = {
-      taskId: node?.taskId,
-      parentId: node?.id,
-    }
-    const datas = await handleOption('/api/catalogue/copyTask', '复制作业', catalogues)
-
-    if (datas) {
-      getTreeData()
-    }
-  }
-
-  const toExportJson = async (node: TreeDataNode | undefined) => {
-    let taskId = node?.taskId
-    const datas = await handleData('/api/task/exportJsonByTaskId', { id: taskId })
-    if (datas) {
-      let data = JSON.parse(datas)
-      saveJSON(data, data.alias)
-      message.success('导出json成功')
-    }
-  }
-
-  const toExportSelectedTaskJson = async () => {
-    if (exportTaskIds.length <= 0) {
-      message.warn('请先选择要导出的作业')
-    } else {
-      try {
-        const { code, datas, msg } = await postAll('/api/task/exportJsonByTaskIds', {
-          taskIds: exportTaskIds,
-        })
-        if (code == CODE.SUCCESS) {
-          saveJSON(datas)
-          message.success('导出json成功')
-        } else {
-          message.warn(msg)
-        }
-      } catch (error) {
-        message.error('获取失败，请重试')
-      }
-    }
-  }
-
-  const saveJSON = (data: any, filename?: any) => {
-    if (!data) {
-      message.error('保存的json数据为空')
-      return
-    }
-    if (!filename) filename = new Date().toLocaleDateString().replaceAll('/', '-')
-    if (typeof data === 'object') {
-      data = JSON.stringify(data, undefined, 4)
-    }
-    let blob = new Blob([data], { type: 'text/json' }),
-      e = document.createEvent('MouseEvents'),
-      a = document.createElement('a')
-    a.download = filename + '.json'
-    a.href = window.URL.createObjectURL(blob)
-    a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
-    e.initMouseEvent(
-      'click',
-      true,
-      false,
-      window,
-      0,
-      0,
-      0,
-      0,
-      0,
-      false,
-      false,
-      false,
-      false,
-      0,
-      null,
-    )
-    a.dispatchEvent(e)
   }
 
   const createTask = (node: TreeDataNode | undefined) => {
@@ -479,12 +318,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
       menuItems = (
         <>
           <Menu.Item key="Open">{l('right.menu.open')}</Menu.Item>
-          <Menu.Item key="Submit">{l('right.menu.submit')}</Menu.Item>
-          <Menu.Item key="ExportJson">{l('right.menu.exportJson')}</Menu.Item>
           <Menu.Item key="Rename">{l('right.menu.rename')}</Menu.Item>
-          <Menu.Item key="Copy">{l('right.menu.copy')}</Menu.Item>
-          <Menu.Item key="Cut">{l('right.menu.cut')}</Menu.Item>
-          {cutId && <Menu.Item key="Paste">{l('right.menu.paste')}</Menu.Item>}
           <Menu.Item key="Delete">{l('right.menu.delete')}</Menu.Item>
         </>
       )
@@ -493,12 +327,8 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
         <>
           <Menu.Item key="CreateCatalogue">{l('right.menu.createCatalogue')}</Menu.Item>
           <Menu.Item key="CreateRootCatalogue">{l('right.menu.createRootCatalogue')}</Menu.Item>
-          <Menu.Item key="ShowUploadModal">{l('right.menu.uploadZipToCreate')}</Menu.Item>
           <Menu.Item key="CreateTask">{l('right.menu.createTask')}</Menu.Item>
           <Menu.Item key="Rename">{l('right.menu.rename')}</Menu.Item>
-          <Menu.Item key="Copy">{l('right.menu.copy')}</Menu.Item>
-          <Menu.Item key="Cut">{l('right.menu.cut')}</Menu.Item>
-          {cutId && <Menu.Item key="Paste">{l('right.menu.paste')}</Menu.Item>}
           <Menu.Item key="Delete">{l('right.menu.delete')}</Menu.Item>
         </>
       )
@@ -508,9 +338,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
           <Menu.Item key="CreateCatalogue">{l('right.menu.createCatalogue')}</Menu.Item>
           <Menu.Item key="CreateTask">{l('right.menu.createTask')}</Menu.Item>
           <Menu.Item key="Rename">{l('right.menu.rename')}</Menu.Item>
-          <Menu.Item key="Copy">{l('right.menu.copy')}</Menu.Item>
-          <Menu.Item key="Cut">{l('right.menu.cut')}</Menu.Item>
-          {cutId && <Menu.Item key="Paste">{l('right.menu.paste')}</Menu.Item>}
           <Menu.Item key="Delete">{l('right.menu.delete')}</Menu.Item>
         </>
       )
@@ -572,15 +399,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
       })
       toOpen(e.node)
     }
-
-    let taskIds = []
-    for (let i = 0; i < e.selectedNodes?.length; i++) {
-      if (e.selectedNodes[i].isLeaf) {
-        taskIds.push(e.selectedNodes[i].taskId)
-      }
-    }
-
-    setExportTaskIds(taskIds)
   }
 
   const offExpandAll = () => {
@@ -638,28 +456,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
       }
     })
 
-  const uProps: UploadProps = {
-    name: 'file',
-    action: '/api/task/uploadTaskJson',
-    accept: 'application/json',
-    headers: {
-      authorization: 'authorization-text',
-    },
-    showUploadList: false,
-    onChange(info) {
-      if (info.file.status === 'done') {
-        if (info.file.response.code == CODE.SUCCESS) {
-          message.success(info.file.response.msg)
-        } else {
-          message.warn(info.file.response.msg)
-        }
-        getTreeData()
-      } else if (info.file.status === 'error') {
-        message.error(`${info.file.name}` + l('app.request.upload.failed'))
-      }
-    },
-  }
-
   return (
     <div className={style.tree_div}>
       <Row>
@@ -678,7 +474,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
         onChange={onChange}
         allowClear={true}
       />
-      <Scrollbars style={{ height: size.height - 84 - 72 }} ref={sref}>
+      <Scrollbars style={{ height: 'calc(100vh - 82px - 72px)' }} ref={sref}>
         <DirectoryTree
           multiple
           onRightClick={handleContextMenu}
@@ -688,7 +484,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
           treeData={loop(treeData)}
           onExpand={onExpand}
           autoExpandParent={autoExpandParent}
-          // defaultExpandAll
+          defaultExpandAll
           expandedKeys={expandedKeys}
         />
         {getNodeTreeRightClickMenu()}
@@ -749,19 +545,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
           />
         ) : null}
       </Scrollbars>
-      <UploadModal
-        visible={isUploadModalVisible}
-        action={`/api/workflow/catalogue/upload/${uploadNodeId}`}
-        handleOk={() => {
-          setIsUploadModalVisible(false)
-          setExpandedKeys(defaultExpandedKeys)
-          getTreeData()
-        }}
-        onCancel={() => {
-          setIsUploadModalVisible(false)
-        }}
-        buttonTitle={l('right.menu.uploadZipToCreate')}
-      />
     </div>
   )
 }
@@ -771,5 +554,4 @@ export default connect(({ Scheduler }: { Scheduler: StateType }) => ({
   tabs: Scheduler.tabs,
   rightClickMenu: Scheduler.rightClickMenu,
   refs: Scheduler.refs,
-  toolHeight: Scheduler.toolHeight,
 }))(SchedulerTree)

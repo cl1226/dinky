@@ -19,14 +19,12 @@
 
 import { Tabs } from 'antd'
 import { BarsOutlined } from '@ant-design/icons'
-import { StateType } from '@/pages/Scheduler/model'
-import { connect } from 'umi'
-import SchedulerTree from '../SchedulerTree'
 import { l } from '@/utils/intl'
+import SchedulerTree from '../SchedulerTree'
 
 const { TabPane } = Tabs
 
-const SchedulerLeftTool = (props: any) => {
+const SchedulerLeftTool = () => {
   return (
     <Tabs defaultActiveKey="1" size="small" tabPosition="left" style={{ height: '100%' }}>
       <TabPane
@@ -43,7 +41,4 @@ const SchedulerLeftTool = (props: any) => {
   )
 }
 
-export default connect(({ Scheduler }: { Scheduler: StateType }) => ({
-  sql: Scheduler.sql,
-  toolHeight: Scheduler.toolHeight
-}))(SchedulerLeftTool)
+export default SchedulerLeftTool

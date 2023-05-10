@@ -17,73 +17,21 @@
  *
  */
 
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { connect } from 'umi'
 import styles from './index.less'
-import SchedulerMenu from './SchedulerMenu'
-import { Card, Col, Form, Row } from 'antd'
-import SchedulerTabs from './SchedulerTabs'
+import { Card, Col } from 'antd'
 import { StateType } from '@/pages/Scheduler/model'
+import SchedulerTabs from './SchedulerTabs'
+import SchedulerMenu from './SchedulerMenu'
 import SchedulerLeftTool from './SchedulerLeftTool'
-import {
-  getFillAllByVersion,
-  listSession,
-  showAlertGroup,
-  showAlertInstance,
-  showCluster,
-  showClusterConfiguration,
-  showDataBase,
-  showEnv,
-  showJars,
-  showSessionCluster,
-} from '@/components/Scheduler/SchedulerEvent/DDL'
-import { loadSettings } from '@/pages/SettingCenter/FlinkSettings/function'
 
 const Scheduler = (props: any) => {
   const { rightClickMenu, dispatch } = props
 
   const VIEW = {
     leftToolWidth: 300,
-    marginTop: 84,
-    topHeight: 35.6,
-    bottomHeight: 127,
-    rightMargin: 32,
-    leftMargin: 36,
-    midMargin: 46,
   }
-  const [size, setSize] = useState({
-    width: document.documentElement.clientWidth,
-    height: document.documentElement.clientHeight,
-  })
-  const onResize = useCallback(() => {
-    setSize({
-      width: document.documentElement.clientWidth,
-      height: document.documentElement.clientHeight,
-    })
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener('resize', onResize)
-    onResize()
-    return () => {
-      window.removeEventListener('resize', onResize)
-    }
-  }, [onResize])
-
-  useEffect(() => {
-    loadSettings(dispatch)
-    getFillAllByVersion('', dispatch)
-    showCluster(dispatch)
-    showSessionCluster(dispatch)
-    showClusterConfiguration(dispatch)
-    showDataBase(dispatch)
-    listSession(dispatch)
-    showJars(dispatch)
-    showAlertInstance(dispatch)
-    showAlertGroup(dispatch)
-    showEnv(dispatch)
-    onResize()
-  }, [])
 
   const onClick = () => {
     if (rightClickMenu) {

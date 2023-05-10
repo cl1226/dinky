@@ -17,60 +17,35 @@
  *
  */
 
+import React, { useState } from 'react'
+import { Button, Form, Input, Modal } from 'antd'
 
-import React, {useEffect, useState} from 'react';
-import {Button, Cascader, Form, Input, Modal, Select} from 'antd';
-
-import type {TaskTableListItem} from '../data.d';
-import {DIALECT} from "@/components/Scheduler/conf";
-import {l} from "@/utils/intl";
-import {postAll} from "@/components/Common/crud";
-
-const {Option} = Select;
+import type { TaskTableListItem } from '../data.d'
+import { l } from '@/utils/intl'
 
 export type UpdateFormProps = {
-  onCancel: (flag?: boolean, formVals?: Partial<TaskTableListItem>) => void;
-  onSubmit: (values: Partial<TaskTableListItem>) => void;
-  updateModalVisible: boolean;
-  isCreate: boolean;
-  dialect: string;
-  values: Partial<TaskTableListItem>;
-};
-
+  onCancel: (flag?: boolean, formVals?: Partial<TaskTableListItem>) => void
+  onSubmit: (values: Partial<TaskTableListItem>) => void
+  updateModalVisible: boolean
+  isCreate: boolean
+  values: Partial<TaskTableListItem>
+}
 
 const formLayout = {
-  labelCol: {span: 7},
-  wrapperCol: {span: 13},
-};
-const isUDF = (dialect: string) => {
-  return (dialect == DIALECT.SCALA || dialect == DIALECT.PYTHON || dialect == DIALECT.JAVA)
+  labelCol: { span: 7 },
+  wrapperCol: { span: 13 },
 }
 
 const SimpleTaskForm: React.FC<UpdateFormProps> = (props) => {
-
-
   const [formVals, setFormVals] = useState<Partial<TaskTableListItem>>({
     id: props.values.id,
     name: props.values.name,
     alias: props.values.alias,
     parentId: props.values.parentId,
     config: props.values.config,
-  });
+  })
 
-  const [dialect, setDialect] = useState<string>('')
-  const [isShowUDFClassName, setShowUDFClassName] = useState<boolean>(true)
-  const [templateTree, setTemplateTree] = useState<Object[]>([])
-  const [templateData, setTemplateData] = useState<Object[]>([])
-  const [form] = Form.useForm();
-
-
-  const getTemplateTreeData = async () => {
-    const resp = await postAll("/api/udf/template/tree")
-    return resp.datas
-  }
-  useEffect(() => {
-    getTemplateTreeData().then(r => setTemplateTree(r))
-  }, [])
+  const [form] = Form.useForm()
 
   const {
     onSubmit: handleUpdate,
@@ -78,43 +53,19 @@ const SimpleTaskForm: React.FC<UpdateFormProps> = (props) => {
     updateModalVisible,
     values,
     isCreate,
-  } = props;
-
+  } = props
 
   const submitForm = async () => {
-    const fieldsValue = await form.validateFields();
-    const data = {...formVals, ...fieldsValue};
+    const fieldsValue = await form.validateFields()
+    const data = { ...formVals, ...fieldsValue }
     try {
       data.config = {
         templateId: String(data['config.templateId'].lastItem),
         className: data['config.className'],
       }
-    } catch (e) {
-    }
-    setFormVals(data);
-    handleUpdate(data);
-  };
-  const handlerChangeUdf = (value: any[]) => {
-    if (value[1] == 0) {
-      setShowUDFClassName(false)
-    }else{
-      setShowUDFClassName(true)
-    }
-  }
-
-  const handlerSetDialect = (value: string) => {
-    setDialect(value)
-    if (isUDF(value)) {
-      templateTree.map(x => {
-        if (x.label == value) {
-          const data = x.children
-          data.splice(data.length, 0, {label: "Empty", value: "Empty", children: [{label: "Empty", value: 0}]})
-          setTemplateData(data)
-          setShowUDFClassName(true)
-          form.setFieldsValue({"config.templateId": [x.children[0].label, x.children[0].children[0].label, x.children[0].children[0].value]})
-        }
-      })
-    }
+    } catch (e) {}
+    setFormVals(data)
+    handleUpdate(data)
   }
 
   const renderContent = () => {
@@ -123,54 +74,36 @@ const SimpleTaskForm: React.FC<UpdateFormProps> = (props) => {
         <Form.Item
           name="name"
           label="名称"
-          rules={[{required: true, message: '请输入唯一名称！'}]}>
-          <Input placeholder="请输入"/>
+          rules={[{ required: true, message: '请输入唯一名称！' }]}
+        >
+          <Input placeholder="请输入" />
         </Form.Item>
-        <Form.Item
-          name="alias"
-          label="别名"
-          rules={[{required: true, message: '请输入别名！'}]}>
-          <Input placeholder="请输入"/>
+        <Form.Item name="alias" label="别名" rules={[{ required: true, message: '请输入别名！' }]}>
+          <Input placeholder="请输入" />
         </Form.Item>
-        {isUDF(dialect) ? (<>
-          <Form.Item
-            name="config.templateId"
-            label="udf 模板"
-            rules={[{required: true, message: '请选择udf模板!'}]}>
-            {<Cascader
-              displayRender={(label: string[]) => label.slice(0, 2).join(" / ")}
-              options={templateData}
-              onChange={handlerChangeUdf}
-            />}
-          </Form.Item>
-          <Form.Item
-            hidden={!isShowUDFClassName}
-            name="config.className"
-            label="类名或方法名">
-            <Input placeholder="请输入"/>
-          </Form.Item>
-        </>) : undefined}
       </>
-    );
-  };
+    )
+  }
 
   const renderFooter = () => {
     return (
       <>
-        <Button onClick={() => handleUpdateModalVisible(false, values)}>{l('button.cancel')}</Button>
+        <Button onClick={() => handleUpdateModalVisible(false, values)}>
+          {l('button.cancel')}
+        </Button>
         <Button type="primary" onClick={() => submitForm()}>
           {l('button.finish')}
         </Button>
       </>
-    );
-  };
+    )
+  }
 
   return (
     <Modal
       width={640}
-      bodyStyle={{padding: '32px 40px 48px'}}
+      bodyStyle={{ padding: '32px 40px 48px' }}
       destroyOnClose
-      title={isCreate ? '创建新作业' : ('重命名作业-' + formVals.name)}
+      title={isCreate ? '创建新作业' : '重命名作业-' + formVals.name}
       visible={updateModalVisible}
       footer={renderFooter()}
       onCancel={() => handleUpdateModalVisible()}
@@ -188,7 +121,7 @@ const SimpleTaskForm: React.FC<UpdateFormProps> = (props) => {
         {renderContent()}
       </Form>
     </Modal>
-  );
-};
+  )
+}
 
-export default SimpleTaskForm;
+export default SimpleTaskForm
