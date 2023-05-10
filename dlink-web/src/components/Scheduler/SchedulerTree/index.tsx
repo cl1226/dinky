@@ -20,7 +20,7 @@
 import React, { Key, useEffect, useState } from 'react'
 import { connect } from 'umi'
 import { DownOutlined, FolderAddOutlined, SwitcherOutlined } from '@ant-design/icons'
-import { Button, Col, Empty, Input, Menu, message, Modal, Row, Tooltip, Tree, Upload } from 'antd'
+import { Button, Col, Empty, Input, Menu, message, Modal, Row, Tooltip, Tree } from 'antd'
 import { getWorkflowCatalogueTreeData } from '@/pages/Scheduler/service'
 import {
   convertToTreeData,
@@ -315,7 +315,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
       menuItems = (
         <>
           <Menu.Item key="Open">{l('right.menu.open')}</Menu.Item>
-          <Menu.Item key="Rename">{l('right.menu.rename')}</Menu.Item>
           <Menu.Item key="Delete">{l('right.menu.delete')}</Menu.Item>
         </>
       )

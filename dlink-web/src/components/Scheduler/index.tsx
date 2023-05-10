@@ -17,7 +17,6 @@
  *
  */
 
-import { useCallback, useEffect, useState } from 'react'
 import { connect } from 'umi'
 import styles from './index.less'
 import { Card, Col } from 'antd'

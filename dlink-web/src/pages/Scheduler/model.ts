@@ -17,62 +17,8 @@
  *
  */
 
-import type { Effect, Reducer } from 'umi'
-import { handleAddOrUpdate } from '@/components/Common/crud'
+import type { Reducer } from 'umi'
 import type { SqlMetaData } from '@/components/Studio/StudioEvent/data'
-
-export type ClusterType = {
-  id: number
-  name: string
-  alias: string
-  type: string
-  hosts: string
-  jobManagerHost: string
-  status: number
-  note: string
-  enabled: boolean
-  createTime: Date
-  updateTime: Date
-}
-
-export type ClusterConfigurationType = {
-  id: number
-  name: string
-  alias: string
-  type: string
-  config: any
-  available: boolean
-  note: string
-  enabled: boolean
-  createTime: Date
-  updateTime: Date
-}
-
-export type DataBaseType = {
-  id: number
-  name: string
-  alias: string
-  groupName: string
-  type: string
-  url: string
-  username: string
-  password: string
-  note: string
-  dbVersion: string
-  status: boolean
-  healthTime: Date
-  heartbeatTime: Date
-  enabled: boolean
-  createTime: Date
-  updateTime: Date
-}
-
-export type EnvType = {
-  id?: number
-  name?: string
-  alias?: string
-  fragment?: boolean
-}
 
 export type TaskType = {
   id?: number
@@ -112,11 +58,6 @@ export type TaskType = {
   useSession: boolean
 }
 
-export type ConsoleType = {
-  result: {}
-  chart: {}
-}
-
 export type TabsItemType = {
   title: string
   key: number
@@ -125,7 +66,6 @@ export type TabsItemType = {
   closable: boolean
   path: string[]
   task?: TaskType
-  console: ConsoleType
   monaco?: any
   isModified: boolean
   sqlMetaData?: SqlMetaData
@@ -179,188 +119,47 @@ export type MetaStoreColumnType = {
 }
 
 export type StateType = {
-  cluster?: ClusterType[]
-  sessionCluster?: ClusterType[]
-  clusterConfiguration?: ClusterConfigurationType[]
-  database?: DataBaseType[]
-  env?: EnvType[]
-  currentSession?: SessionType
   current?: TabsItemType
-  sql?: string
-  // monaco?: any;
   currentPath?: string[]
   tabs?: TabsType
-  session?: SessionType[]
-  result?: {}
+
   rightClickMenu?: boolean
-  refs?: {
-    history: any
-  }
 }
 
 export type ModelType = {
   namespace: string
   state: StateType
-  effects: {
-    saveTask: Effect
-  }
+  effects: {}
   reducers: {
-    saveSql: Reducer<StateType>
     saveCurrentPath: Reducer<StateType>
-    // saveMonaco: Reducer<StateType>;
-    saveSqlMetaData: Reducer<StateType>
-    saveMetaStore: Reducer<StateType>
-    saveMetaStoreTable: Reducer<StateType>
+
     saveTabs: Reducer<StateType>
     closeTabs: Reducer<StateType>
     changeActiveKey: Reducer<StateType>
-    saveTaskData: Reducer<StateType>
-    saveSession: Reducer<StateType>
     showRightClickMenu: Reducer<StateType>
-    refreshCurrentSession: Reducer<StateType>
-    quitCurrentSession: Reducer<StateType>
-    saveResult: Reducer<StateType>
-    saveCluster: Reducer<StateType>
-    saveSessionCluster: Reducer<StateType>
-    saveClusterConfiguration: Reducer<StateType>
-    saveDataBase: Reducer<StateType>
-    saveEnv: Reducer<StateType>
-    saveChart: Reducer<StateType>
-    changeTaskStep: Reducer<StateType>
-    changeTaskJobInstance: Reducer<StateType>
+
     renameTab: Reducer<StateType>
   }
 }
 const Model: ModelType = {
   namespace: 'Scheduler',
   state: {
-    cluster: [],
-    sessionCluster: [],
-    clusterConfiguration: [],
-    database: [],
-    env: [],
-    currentSession: {
-      connectors: [],
-    },
     current: undefined,
-    sql: '',
-    // monaco: {},
     currentPath: ['Guide Page'],
     tabs: {
       activeKey: 0,
       panes: [],
     },
-    session: [],
-    result: {},
     rightClickMenu: false,
-    refs: {
-      history: {},
-    },
   },
 
-  effects: {
-    *saveTask({ payload }, { call, put }) {
-      const para = payload
-      para.configJson = JSON.stringify(payload.config)
-      yield call(handleAddOrUpdate, 'api/task', para)
-      yield put({
-        type: 'saveTaskData',
-        payload,
-      })
-    },
-  },
+  effects: {},
 
   reducers: {
-    saveSql(state, { payload }) {
-      const newTabs = state.tabs
-      let newCurrent = state.current
-      newCurrent.value = payload
-      for (let i = 0; i < newTabs.panes.length; i++) {
-        if (newTabs.panes[i].key == newTabs.activeKey) {
-          newTabs.panes[i].value = payload
-          newTabs.panes[i].task && (newTabs.panes[i].task.statement = payload)
-        }
-      }
-      return {
-        ...state,
-        current: { ...newCurrent },
-        tabs: { ...newTabs },
-      }
-    },
     saveCurrentPath(state, { payload }) {
       return {
         ...state,
         currentPath: payload,
-      }
-    },
-    /*saveMonaco(state, {payload}) {
-      return {
-        ...state,
-        monaco:payload,
-      };
-    },*/
-    saveSqlMetaData(state, { payload }) {
-      let newCurrent = state.current
-      const newTabs = state.tabs
-      if (newCurrent.key == payload.activeKey) {
-        newCurrent.sqlMetaData = { ...payload.sqlMetaData }
-        newCurrent.isModified = payload.isModified
-      }
-      for (let i = 0; i < newTabs.panes.length; i++) {
-        if (newTabs.panes[i].key == payload.activeKey) {
-          newTabs.panes[i].sqlMetaData = { ...payload.sqlMetaData }
-          newTabs.panes[i].isModified = payload.isModified
-          break
-        }
-      }
-      return {
-        ...state,
-        current: { ...newCurrent },
-        tabs: { ...newTabs },
-      }
-    },
-    saveMetaStore(state, { payload }) {
-      let newCurrent = state.current
-      const newTabs = state.tabs
-      if (newCurrent.key == payload.activeKey) {
-        newCurrent.metaStore = [...payload.metaStore]
-      }
-      for (let i = 0; i < newTabs.panes.length; i++) {
-        if (newTabs.panes[i].key == payload.activeKey) {
-          newTabs.panes[i].metaStore = [...payload.metaStore]
-          break
-        }
-      }
-      return {
-        ...state,
-        current: { ...newCurrent },
-        tabs: { ...newTabs },
-      }
-    },
-    saveMetaStoreTable(state, { payload }) {
-      let newCurrent = state.current
-      const newTabs = state.tabs
-      if (newCurrent.key == payload.activeKey) {
-        for (let i = 0; i < newCurrent.metaStore.length; i++) {
-          if (newCurrent.metaStore[i].name === payload.catalog) {
-            for (let j = 0; j < newCurrent.metaStore[i].databases.length; j++) {
-              if (newCurrent.metaStore[i].databases[j].name === payload.database) {
-                newCurrent.metaStore[i].databases[j].tables = [...payload.tables]
-              }
-            }
-          }
-        }
-      }
-      for (let i = 0; i < newTabs.panes.length; i++) {
-        if (newTabs.panes[i].key == payload.activeKey) {
-          newTabs.panes[i] = { ...newCurrent }
-          break
-        }
-      }
-      return {
-        ...state,
-        current: { ...newCurrent },
-        tabs: { ...newTabs },
       }
     },
     saveTabs(state, { payload }) {
@@ -385,7 +184,7 @@ const Model: ModelType = {
           isModified: false,
         },
         tabs: { ...payload },
-        currentPath: newCurrent.path,
+        currentPath: newCurrent?.path,
       }
     },
     deleteTabByKey(state, { payload }) {
@@ -449,151 +248,13 @@ const Model: ModelType = {
         currentPath: newCurrent.path,
       }
     },
-    saveTaskData(state, { payload }) {
-      const newTabs = state.tabs
-      let newCurrent = state.current
-      for (let i = 0; i < newTabs.panes.length; i++) {
-        if (newTabs.panes[i].key == payload.key) {
-          newTabs.panes[i].task = payload
-          newTabs.panes[i].isModified = false
-          if (newCurrent.key == payload.key) {
-            newCurrent = newTabs.panes[i]
-          }
-        }
-      }
-      return {
-        ...state,
-        current: { ...newCurrent },
-        tabs: { ...newTabs },
-      }
-    },
-    saveSession(state, { payload }) {
-      return {
-        ...state,
-        session: [...payload],
-      }
-    },
     showRightClickMenu(state, { payload }) {
       return {
         ...state,
         rightClickMenu: payload,
       }
     },
-    refreshCurrentSession(state, { payload }) {
-      return {
-        ...state,
-        currentSession: {
-          ...state?.currentSession,
-          ...payload,
-        },
-      }
-    },
-    quitCurrentSession(state) {
-      return {
-        ...state,
-        currentSession: {
-          connectors: [],
-        },
-      }
-    },
-    saveResult(state, { payload }) {
-      const newTabs = state?.tabs
-      let newCurrent = state?.current
-      for (let i = 0; i < newTabs.panes.length; i++) {
-        if (newTabs.panes[i].key == payload.key) {
-          newTabs.panes[i].console.result.result = payload.datas
-          if (newCurrent.key == payload.key) {
-            newCurrent.console = newTabs.panes[i].console
-          }
-          break
-        }
-      }
-      return {
-        ...state,
-        current: { ...newCurrent },
-        tabs: { ...newTabs },
-      }
-    },
-    saveCluster(state, { payload }) {
-      return {
-        ...state,
-        cluster: [...payload],
-      }
-    },
-    saveSessionCluster(state, { payload }) {
-      return {
-        ...state,
-        sessionCluster: [...payload],
-      }
-    },
-    saveClusterConfiguration(state, { payload }) {
-      return {
-        ...state,
-        clusterConfiguration: [...payload],
-      }
-    },
-    saveDataBase(state, { payload }) {
-      return {
-        ...state,
-        database: [...payload],
-      }
-    },
-    saveEnv(state, { payload }) {
-      return {
-        ...state,
-        env: [...payload],
-      }
-    },
-    saveChart(state, { payload }) {
-      let newTabs = state?.tabs
-      let newCurrent = state?.current
-      for (let i = 0; i < newTabs.panes.length; i++) {
-        if (newTabs.panes[i].key == newTabs.activeKey) {
-          newTabs.panes[i].console.chart = payload
-          newCurrent = newTabs.panes[i]
-          break
-        }
-      }
-      return {
-        ...state,
-        current: { ...newCurrent },
-        tabs: { ...newTabs },
-      }
-    },
-    changeTaskStep(state, { payload }) {
-      const newTabs = state.tabs
-      let newCurrent = state.current
-      for (let i = 0; i < newTabs.panes.length; i++) {
-        if (newTabs.panes[i].task.id == payload.id) {
-          newTabs.panes[i].task.step = payload.step
-          if (newCurrent.key == newTabs.panes[i].key) {
-            newCurrent = newTabs.panes[i]
-          }
-        }
-      }
-      return {
-        ...state,
-        current: { ...newCurrent },
-        tabs: { ...newTabs },
-      }
-    },
-    changeTaskJobInstance(state, { payload }) {
-      const newTabs = state.tabs
-      let newCurrent = state.current
-      for (let i = 0; i < newTabs.panes.length; i++) {
-        if (newTabs.panes[i].task.id == payload.id) {
-          newTabs.panes[i].task.jobInstanceId = payload.jobInstanceId
-          if (newCurrent.key == newTabs.panes[i].key) {
-            newCurrent = newTabs.panes[i]
-          }
-        }
-      }
-      return {
-        ...state,
-        current: { ...newCurrent },
-        tabs: { ...newTabs },
-      }
-    },
+
     renameTab(state, { payload }) {
       const newTabs = state.tabs
       let newCurrent = state.current
