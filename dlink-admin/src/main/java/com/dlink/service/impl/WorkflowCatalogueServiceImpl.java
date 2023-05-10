@@ -93,6 +93,8 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
         WorkflowTask task = new WorkflowTask();
         task.setName(catalogueTaskDTO.getName());
         task.setAlias(catalogueTaskDTO.getAlias());
+        task.setSchedulerType("SINGLE");
+        task.setStatus("CREATE");
         taskService.saveOrUpdateTask(task);
         WorkflowCatalogue catalogue = new WorkflowCatalogue();
         catalogue.setTenantId(catalogueTaskDTO.getTenantId());
