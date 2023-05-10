@@ -30,16 +30,17 @@ import {
 import style from './index.less'
 import { StateType } from '@/pages/Scheduler/model'
 import {
-  CODE,
   handleAddOrUpdate,
   handleAddOrUpdateWithResult,
   handleRemoveById,
 } from '@/components/Common/crud'
-import UpdateCatalogueForm from './components/UpdateCatalogueForm'
-import SimpleTaskForm from '@/components/Scheduler/SchedulerTree/components/SimpleTaskForm'
+
 import { Scrollbars } from 'react-custom-scrollbars'
 import { getIcon } from '@/components/Scheduler/icon'
-import { showEnv } from '@/components/Scheduler/SchedulerEvent/DDL'
+
+import UpdateCatalogueForm from '@/components/Scheduler/SchedulerTree/components/UpdateCatalogueForm'
+import SimpleTaskForm from '@/components/Scheduler/SchedulerTree/components/SimpleTaskForm'
+
 import { l } from '@/utils/intl'
 
 type SchedulerTreeProps = {
@@ -47,7 +48,6 @@ type SchedulerTreeProps = {
   dispatch: any
   tabs: StateType['tabs']
   current: StateType['current']
-  refs: any
 }
 
 type RightClickMenu = {
@@ -93,7 +93,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
   const { rightClickMenu, dispatch, tabs } = props
   const [treeData, setTreeData] = useState<TreeDataNode[]>()
   const [expandedKeys, setExpandedKeys] = useState<Key[]>()
-  const [defaultExpandedKeys, setDefaultExpandedKeys] = useState<any[]>([])
   const [rightClickNodeTreeItem, setRightClickNodeTreeItem] = useState<RightClickMenu>()
   const [updateCatalogueModalVisible, handleUpdateCatalogueModalVisible] = useState<boolean>(false)
   const [updateTaskModalVisible, handleUpdateTaskModalVisible] = useState<boolean>(false)
@@ -113,13 +112,11 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
     setTreeData(convertToTreeData(data, 0))
     //默认展开所有
     setExpandedKeys([])
-    setDefaultExpandedKeys([])
   }
 
   const onChange = (e: any) => {
     let { value } = e.target
     if (!value) {
-      setExpandedKeys(defaultExpandedKeys)
       setSearchValue(value)
       return
     }
@@ -532,7 +529,6 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
                 handleUpdateTaskModalVisible(false)
                 setTaskFormValues({})
                 openByKey(datas.id)
-                showEnv(dispatch)
               }
             }}
             onCancel={() => {
@@ -553,5 +549,4 @@ export default connect(({ Scheduler }: { Scheduler: StateType }) => ({
   currentPath: Scheduler.currentPath,
   tabs: Scheduler.tabs,
   rightClickMenu: Scheduler.rightClickMenu,
-  refs: Scheduler.refs,
 }))(SchedulerTree)
