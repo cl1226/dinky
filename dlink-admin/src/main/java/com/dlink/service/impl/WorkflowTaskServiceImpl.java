@@ -18,6 +18,7 @@ import com.dlink.scheduler.config.DolphinSchedulerProperties;
 import com.dlink.scheduler.enums.Flag;
 import com.dlink.scheduler.enums.ReleaseState;
 import com.dlink.scheduler.model.*;
+import com.dlink.service.CatalogueService;
 import com.dlink.service.WorkflowCatalogueService;
 import com.dlink.service.WorkflowTaskService;
 import org.apache.commons.beanutils.BeanUtils;
@@ -52,6 +53,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     private TaskClient taskClient;
     @Autowired
     private WorkflowCatalogueService catalogueService;
+    @Autowired
+    private CatalogueService service;
 
     @Override
     public WorkflowTaskDTO getTaskInfoById(Integer id) {
@@ -144,7 +147,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             // 每一个节点生成一个taskRequest
             TaskRequest taskRequest = new TaskRequest();
             DlinkTaskParams dlinkTaskParams = new DlinkTaskParams();
-            dlinkTaskParams.setTaskId(String.valueOf(x.getJobId()));
+            Catalogue catalogue1 = service.getById(x.getJobId());
+            dlinkTaskParams.setTaskId(String.valueOf(catalogue1.getTaskId()));
             dlinkTaskParams.setAddress(dolphinSchedulerProperties.getAddress());
             taskRequest.setTaskParams(JSONUtil.parseObj(dlinkTaskParams).toString());
             taskRequest.setTaskType("DINKY");
@@ -226,7 +230,7 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         JSONObject entries = processClient.onlineProcessDefinition(projectCode, process, "ONLINE");
 
         // 设置周期调度，且上线
-        if (taskInfo.getSchedulerType() == "CYCLE" && StringUtils.isNotBlank(taskInfo.getCron())) {
+        if (taskInfo.getSchedulerType().equals("CYCLE") && StringUtils.isNotBlank(taskInfo.getCron())) {
             // 创建周期调度
             JSONObject res = processClient.schedulerProcessDefinition(projectCode, process, taskInfo.getCron());
             // 上线周期调度
