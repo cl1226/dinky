@@ -21,6 +21,8 @@ public interface WorkflowCatalogueService extends ISuperService<WorkflowCatalogu
 
     WorkflowCatalogue findByParentIdAndName(Integer parentId, String name);
 
+    boolean createCatalogue(WorkflowCatalogue catalogue);
+
     WorkflowCatalogue createCatalogueAndTask(WorkflowCatalogueTaskDTO catalogueTaskDTO);
 
     WorkflowCatalogue createCatalogAndFileTask(CatalogueTaskDTO catalogueTaskDTO, String ment);

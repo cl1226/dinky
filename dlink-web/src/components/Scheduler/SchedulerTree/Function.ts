@@ -38,6 +38,7 @@ export interface TreeDataNode extends DataNode {
   value:number;
   status:string;
   cron:string;
+  projectCode: string;
 }
 
 export function convertToTreeData(data:TreeDataNode[], pid:number,path?:string[]) {

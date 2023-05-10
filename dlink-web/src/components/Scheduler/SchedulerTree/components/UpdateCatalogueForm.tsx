@@ -46,6 +46,7 @@ const UpdateCatalogueForm: React.FC<UpdateFormProps> = (props) => {
     name: props.values.name,
     isLeaf: props.values.isLeaf,
     parentId: props.values.parentId,
+    projectCode: props.values.projectCode
   });
 
   const [form] = Form.useForm();

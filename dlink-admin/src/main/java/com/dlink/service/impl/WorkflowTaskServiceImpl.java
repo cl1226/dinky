@@ -1,24 +1,15 @@
 package com.dlink.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
-import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.dlink.assertion.Assert;
-import com.dlink.assertion.Asserts;
 import com.dlink.common.result.Result;
-import com.dlink.config.Dialect;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.WorkflowEdge;
 import com.dlink.dto.WorkflowTaskDTO;
 import com.dlink.exception.BusException;
-import com.dlink.function.compiler.CustomStringJavaCompiler;
-import com.dlink.function.pool.UdfCodePool;
-import com.dlink.function.util.UDFUtil;
-import com.dlink.init.SystemInit;
 import com.dlink.mapper.WorkflowTaskMapper;
 import com.dlink.model.*;
 import com.dlink.scheduler.client.ProcessClient;
@@ -27,9 +18,8 @@ import com.dlink.scheduler.config.DolphinSchedulerProperties;
 import com.dlink.scheduler.enums.Flag;
 import com.dlink.scheduler.enums.ReleaseState;
 import com.dlink.scheduler.model.*;
+import com.dlink.service.WorkflowCatalogueService;
 import com.dlink.service.WorkflowTaskService;
-import com.dlink.utils.UDFUtils;
-import com.google.common.collect.Lists;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.TriggerUtils;
@@ -44,7 +34,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 任务 服务实现类
@@ -61,6 +50,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     private ProcessClient processClient;
     @Autowired
     private TaskClient taskClient;
+    @Autowired
+    private WorkflowCatalogueService catalogueService;
 
     @Override
     public WorkflowTaskDTO getTaskInfoById(Integer id) {
@@ -107,6 +98,14 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         return true;
     }
 
+    private WorkflowCatalogue getRootCatalogueByCatalogue(WorkflowCatalogue catalogue) {
+        if (catalogue.getParentId() != null && catalogue.getParentId() > 0) {
+            catalogue = catalogueService.getById(catalogue.getParentId());
+            return getRootCatalogueByCatalogue(catalogue);
+        }
+        return catalogue;
+    }
+
     @Override
     public Result releaseTask(Integer id) {
         WorkflowTask taskInfo = getById(id);
@@ -114,9 +113,16 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         if (StringUtils.isBlank(taskInfo.getGraphData())) {
             return Result.failed("工作流程中缺少节点");
         }
-
-        Project dinkyProject = SystemInit.getProject();
-        long projectCode = dinkyProject.getCode();
+        // 获取根目录
+        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
+        if (catalogue == null) {
+            return Result.failed("节点获取失败");
+        }
+        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
+        if (root == null) {
+            return Result.failed("根节点获取失败");
+        }
+        long projectCode = Long.valueOf(root.getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process != null) {
@@ -203,8 +209,16 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        Project dinkyProject = SystemInit.getProject();
-        long projectCode = dinkyProject.getCode();
+        // 获取根目录
+        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
+        if (catalogue == null) {
+            return Result.failed("节点获取失败");
+        }
+        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
+        if (root == null) {
+            return Result.failed("根节点获取失败");
+        }
+        long projectCode = Long.valueOf(root.getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
         if (process == null) {
             return Result.failed("工作流不存在：" + taskInfo.getName());
@@ -243,8 +257,16 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        Project dinkyProject = SystemInit.getProject();
-        long projectCode = dinkyProject.getCode();
+        // 获取根目录
+        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
+        if (catalogue == null) {
+            return Result.failed("节点获取失败");
+        }
+        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
+        if (root == null) {
+            return Result.failed("根节点获取失败");
+        }
+        long projectCode = Long.valueOf(root.getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
         if (process == null) {
             return Result.failed("工作流不存在：" + taskInfo.getName());
@@ -331,8 +353,16 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         if (taskInfo == null) {
             return Result.failed("启动失败，作业不存在");
         }
-        Project dinkyProject = SystemInit.getProject();
-        long projectCode = dinkyProject.getCode();
+        // 获取根目录
+        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
+        if (catalogue == null) {
+            return Result.failed("节点获取失败");
+        }
+        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
+        if (root == null) {
+            return Result.failed("根节点获取失败");
+        }
+        long projectCode = Long.valueOf(root.getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
         if (process == null) {
             return Result.failed("工作流不存在：" + taskInfo.getName());
@@ -349,8 +379,16 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        Project dinkyProject = SystemInit.getProject();
-        long projectCode = dinkyProject.getCode();
+        // 获取根目录
+        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
+        if (catalogue == null) {
+            return Result.failed("节点获取失败");
+        }
+        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
+        if (root == null) {
+            return Result.failed("根节点获取失败");
+        }
+        long projectCode = Long.valueOf(root.getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process == null) {
@@ -378,8 +416,16 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        Project dinkyProject = SystemInit.getProject();
-        long projectCode = dinkyProject.getCode();
+        // 获取根目录
+        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
+        if (catalogue == null) {
+            return Result.failed("节点获取失败");
+        }
+        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
+        if (root == null) {
+            return Result.failed("根节点获取失败");
+        }
+        long projectCode = Long.valueOf(root.getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process == null) {
@@ -406,8 +452,16 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        Project dinkyProject = SystemInit.getProject();
-        long projectCode = dinkyProject.getCode();
+        // 获取根目录
+        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
+        if (catalogue == null) {
+            return Result.failed("节点获取失败");
+        }
+        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
+        if (root == null) {
+            return Result.failed("根节点获取失败");
+        }
+        long projectCode = Long.valueOf(root.getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process == null) {
@@ -435,8 +489,16 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        Project dinkyProject = SystemInit.getProject();
-        long projectCode = dinkyProject.getCode();
+        // 获取根目录
+        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
+        if (catalogue == null) {
+            return Result.failed("节点获取失败");
+        }
+        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
+        if (root == null) {
+            return Result.failed("根节点获取失败");
+        }
+        long projectCode = Long.valueOf(root.getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process == null) {
@@ -461,8 +523,16 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        Project dinkyProject = SystemInit.getProject();
-        long projectCode = dinkyProject.getCode();
+        // 获取根目录
+        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
+        if (catalogue == null) {
+            return Result.failed("节点获取失败");
+        }
+        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
+        if (root == null) {
+            return Result.failed("根节点获取失败");
+        }
+        long projectCode = Long.valueOf(root.getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process == null) {

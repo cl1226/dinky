@@ -19,6 +19,8 @@
 
 package com.dlink.scheduler.client;
 
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONObject;
 import com.dlink.scheduler.config.DolphinSchedulerProperties;
 import com.dlink.scheduler.constant.Constants;
 import com.dlink.scheduler.model.Project;
@@ -49,6 +51,59 @@ public class ProjectClient {
 
     @Autowired
     private DolphinSchedulerProperties dolphinSchedulerProperties;
+
+    /**
+     * 根据名称创建项目
+     * @author cl1226
+     * @date 2023/5/9 13:54
+     */
+    public Project createProjectByName(String name) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectName", name + "_dinky");
+        map.put("description", "自动创建");
+
+        String content = HttpRequest.post(dolphinSchedulerProperties.getUrl() + "/projects")
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(map)
+                .timeout(5000)
+                .execute().body();
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<Project>>() {
+        }));
+    }
+
+    /**
+     * 根据code更新项目
+     * @author cl1226
+     * @date 2023/5/9 14:40
+     */
+    public Project updateProjectByName(String code, String name) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectName", name + "_dinky");
+        map.put("userName", "admin");
+
+        String content = HttpRequest.put(dolphinSchedulerProperties.getUrl() + "/projects/" + code)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(map)
+                .timeout(5000)
+                .execute().body();
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<Project>>() {
+        }));
+    }
+
+    /**
+     * 根据code删除项目
+     * @author cl1226
+     * @date 2023/5/9 14:31
+     */
+    public Result<JSONObject> deleteProjectByCode(String code) {
+        String content = HttpRequest.delete(dolphinSchedulerProperties.getUrl() + "/projects/" + code)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .timeout(5000)
+                .execute().body();
+        return MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        });
+    }
+
 
     /**
      * 创建项目
