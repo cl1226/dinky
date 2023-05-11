@@ -17,37 +17,36 @@
  *
  */
 
-
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react'
 import {
   LogoutOutlined,
   SafetyOutlined,
   SecurityScanOutlined,
   SettingOutlined,
-  UserSwitchOutlined
-} from '@ant-design/icons';
-import { Avatar, Menu, Modal, Spin } from 'antd';
-import { handleOption } from "@/components/Common/crud";
-import { history, useModel } from 'umi';
-import { stringify } from 'querystring';
-import HeaderDropdown from '../HeaderDropdown';
-import styles from './index.less';
-import { outLogin } from '@/services/ant-design-pro/api';
-import { ActionType } from "@ant-design/pro-table";
-import { l } from "@/utils/intl";
-import PasswordForm from "@/pages/AuthenticationCenter/UserManager/components/PasswordForm";
+  UserSwitchOutlined,
+} from '@ant-design/icons'
+import { Avatar, Menu, Modal, Spin } from 'antd'
+import { handleOption } from '@/components/Common/crud'
+import { history, useModel } from 'umi'
+import { stringify } from 'querystring'
+import HeaderDropdown from '../HeaderDropdown'
+import styles from './index.less'
+import { outLogin } from '@/services/ant-design-pro/api'
+import { ActionType } from '@ant-design/pro-table'
+import { l } from '@/utils/intl'
+import PasswordForm from '@/pages/AuthenticationCenter/UserManager/components/PasswordForm'
 
 export type GlobalHeaderRightProps = {
-  menu?: boolean;
-};
+  menu?: boolean
+}
 
 /**
  * 退出登录，并且将当前的 url 保存
  */
 const loginOut = async () => {
-  await outLogin();
-  const { query = {}, pathname } = history.location;
-  const { redirect } = query;
+  await outLogin()
+  const { query = {}, pathname } = history.location
+  const { redirect } = query
   // Note: There may be security issues, please note
   if (window.location.pathname !== '/user/login' && !redirect) {
     history.replace({
@@ -55,43 +54,41 @@ const loginOut = async () => {
       search: stringify({
         redirect: pathname,
       }),
-    });
+    })
   }
-};
+}
 
+const requestUrl = '/api/tenant/switchTenant'
 
-const requestUrl = '/api/tenant/switchTenant';
-
-const url = '/api/user';
+const url = '/api/user'
 const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
-  const { initialState, setInitialState } = useModel('@@initialState');
-  const actionRef = useRef<ActionType>();
+  const { initialState, setInitialState } = useModel('@@initialState')
+  const actionRef = useRef<ActionType>()
 
-  const [formValues, setFormValues] = useState({});
-  const [passwordModalVisible, handlePasswordModalVisible] = useState<boolean>(false);
+  const [formValues, setFormValues] = useState({})
+  const [passwordModalVisible, handlePasswordModalVisible] = useState<boolean>(false)
 
   const onMenuClick = useCallback(
     (event: {
-      key: React.Key;
-      keyPath: React.Key[];
-      item: React.ReactInstance;
-      domEvent: React.MouseEvent<HTMLElement>;
+      key: React.Key
+      keyPath: React.Key[]
+      item: React.ReactInstance
+      domEvent: React.MouseEvent<HTMLElement>
     }) => {
-      const { key } = event;
+      const { key } = event
       if (key === 'logout' && initialState) {
-        setInitialState({ ...initialState, currentUser: undefined });
-        loginOut();
-        return;
+        setInitialState({ ...initialState, currentUser: undefined })
+        loginOut()
+        return
       } else if (key === 'changePassWord') {
-        handlePasswordModalVisible(true);
+        handlePasswordModalVisible(true)
         setFormValues({ username: initialState?.currentUser?.username })
       } else {
-
       }
       // history.push(`/account/${key}`);
     },
     [initialState, setInitialState],
-  );
+  )
 
   const loading = (
     <span className={`${styles.action} ${styles.account}`}>
@@ -103,78 +100,75 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
         }}
       />
     </span>
-  );
+  )
 
   if (!initialState) {
-    return loading;
+    return loading
   }
 
-  const { currentUser } = initialState;
+  const { currentUser } = initialState
 
   if (!currentUser || !currentUser.username) {
-    return loading;
+    return loading
   }
 
   const getChooseTenantListForm = () => {
-    let chooseTenantList: JSX.Element[] = [];
+    let chooseTenantList: JSX.Element[] = []
     currentUser.tenantList?.map((item) => {
       chooseTenantList.push(
-        <>
-          <Menu.Item
-            // If the current key (tenant id) is equal to the tenant the current user chooses to log in, this item is not optional
-            disabled={item.id === currentUser.currentTenant?.id}
-            key={item.id}
-            title={item.tenantCode}
-            icon={<SecurityScanOutlined />}
-            onClick={(e) => {
-              // get choose tenant title
-              let title: string = e.domEvent.target.textContent;
-              // get choose tenantId
-              let tenantInfoId = e.key;
-              Modal.confirm({
-                title: l('menu.account.checkTenant'),
-                content: l('menu.account.checkTenantConfirm', '', { tenantCode: title }),
-                okText: l('button.confirm'),
-                cancelText: l('button.cancel'),
-                onOk: async () => {
-                  // 目前先直接退出登录 重新选择租户登录
-                  loginOut();
-                  // todo 切换租户需要将租户id 传入后端 以及本地存储中
-                  // const {code, msg} = await postAll(requestUrl, {tenantId: tenantInfoId});
-                  // localStorage.clear() // clear local storage
-                  // localStorage.setItem('dlink-tenantId',tenantInfoId) // set tenant to localStorage
-                  // code == 0 ? message.success(msg) : message.error(msg);
-                  // todo
-                  //  1.切换租户后 需要重新调用 /api/current接口获取用户的信息  (目前此接口从cookie直接取数 ,达不到预期效果)
-                  //  2.同步刷新所有页面 获取该租户id下的数据
-                  //actionRef.current?.reload()
-                  // actionRef.current?.reloadAndRest?.();
-                }
-              });
-            }}
-          >
-            {item.tenantCode}
-          </Menu.Item>
-        </>
+        <Menu.Item
+          // If the current key (tenant id) is equal to the tenant the current user chooses to log in, this item is not optional
+          disabled={item.id === currentUser.currentTenant?.id}
+          key={item.id}
+          title={item.tenantCode}
+          icon={<SecurityScanOutlined />}
+          onClick={(e: any) => {
+            // get choose tenant title
+            let title: string = e.domEvent.target.textContent
+            // get choose tenantId
+            let tenantInfoId = e.key
+            Modal.confirm({
+              title: l('menu.account.checkTenant'),
+              content: l('menu.account.checkTenantConfirm', '', { tenantCode: title }),
+              okText: l('button.confirm'),
+              cancelText: l('button.cancel'),
+              onOk: async () => {
+                // 目前先直接退出登录 重新选择租户登录
+                loginOut()
+                // todo 切换租户需要将租户id 传入后端 以及本地存储中
+                // const {code, msg} = await postAll(requestUrl, {tenantId: tenantInfoId});
+                // localStorage.clear() // clear local storage
+                // localStorage.setItem('dlink-tenantId',tenantInfoId) // set tenant to localStorage
+                // code == 0 ? message.success(msg) : message.error(msg);
+                // todo
+                //  1.切换租户后 需要重新调用 /api/current接口获取用户的信息  (目前此接口从cookie直接取数 ,达不到预期效果)
+                //  2.同步刷新所有页面 获取该租户id下的数据
+                //actionRef.current?.reload()
+                // actionRef.current?.reloadAndRest?.();
+              },
+            })
+          }}
+        >
+          {item.tenantCode}
+        </Menu.Item>,
       )
     })
-    return <>
-      <Menu.SubMenu
-        key="chooseTenantList"
-        title={l('menu.account.checkTenant')}
-        icon={<UserSwitchOutlined />}
-      >
-        {chooseTenantList}
-      </Menu.SubMenu>
-    </>;
+    return (
+      <>
+        <Menu.SubMenu
+          key="chooseTenantList"
+          title={l('menu.account.checkTenant')}
+          icon={<UserSwitchOutlined />}
+        >
+          {chooseTenantList}
+        </Menu.SubMenu>
+      </>
+    )
   }
-
 
   const menuHeaderDropdown = (
     <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
-      {menu && (
-        getChooseTenantListForm()
-      )}
+      {menu && getChooseTenantListForm()}
       {menu && (
         <Menu.Item key="personSettings" disabled>
           <SettingOutlined />
@@ -193,7 +187,7 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
         {l('menu.account.logout')}
       </Menu.Item>
     </Menu>
-  );
+  )
   return (
     <div>
       <HeaderDropdown overlay={menuHeaderDropdown}>
@@ -205,21 +199,25 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
       {formValues && Object.keys(formValues).length ? (
         <PasswordForm
           onSubmit={async (value) => {
-            const success = await handleOption(url + "/modifyPassword", l('button.changePassword'), value);
+            const success = await handleOption(
+              url + '/modifyPassword',
+              l('button.changePassword'),
+              value,
+            )
             if (success) {
-              handlePasswordModalVisible(false);
-              setFormValues({});
+              handlePasswordModalVisible(false)
+              setFormValues({})
             }
           }}
           onCancel={() => {
-            handlePasswordModalVisible(false);
+            handlePasswordModalVisible(false)
           }}
           modalVisible={passwordModalVisible}
           values={formValues}
         />
       ) : null}
     </div>
-  );
-};
+  )
+}
 
-export default AvatarDropdown;
+export default AvatarDropdown

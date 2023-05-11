@@ -43,9 +43,9 @@ const Scheduler = (props: any) => {
   }
 
   return (
-    <div onClick={onClick} style={{ margin: '-24px', marginBottom: 0 }}>
+    <div onClick={onClick} style={{ margin: '-24px', marginBottom: 0, overflow: 'hidden' }}>
       <SchedulerMenu />
-      <Card bordered={false} className={styles.card}>
+      <div className={styles.card}>
         <div className="guide-content">
           <Col className={styles['vertical-tabs']} style={{ width: VIEW.leftToolWidth }}>
             <SchedulerLeftTool />
@@ -54,7 +54,7 @@ const Scheduler = (props: any) => {
             <SchedulerTabs />
           </Col>
         </div>
-      </Card>
+      </div>
     </div>
   )
 }

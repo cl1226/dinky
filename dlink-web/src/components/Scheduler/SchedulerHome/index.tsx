@@ -17,19 +17,132 @@
  *
  */
 
-import type { StepsProps } from 'antd'
-import { Image, Typography, Card, Steps, Row, Col, Popover } from 'antd'
-import { connect } from 'umi'
-import { StateType } from '@/pages/Scheduler/model'
-import { Scrollbars } from 'react-custom-scrollbars'
-import { VERSION } from '@/components/Common/Version'
-import { l } from '@/utils/intl'
+import { useEffect, useRef, useState, useMemo } from 'react'
+import { Image, Card, Steps, Row, Col } from 'antd'
+import { ReloadOutlined } from '@ant-design/icons'
+import styles from './index.less'
+import * as echarts from 'echarts'
+
+const CardChart = (props) => {
+  const { chartName, chartData } = props
+  const chartsRef = useRef<HTMLDivElement | null>(null)
+
+  const initChart = () => {
+    const chartDom = chartsRef.current
+    if (!chartDom) return
+    const tempChart = echarts.init(chartDom)
+    const options = {
+      tooltip: {
+        trigger: 'item',
+      },
+      legend: {
+        top: '30%',
+        right: '10%',
+        orient: 'vertical',
+        icon: 'circle',
+        itemWidth: 8,
+        show: chartData && chartData.length,
+      },
+      series: [
+        {
+          name: chartName,
+          type: 'pie',
+          center: ['35%', '45%'],
+          radius: ['70%', '80%'],
+          avoidLabelOverlap: false,
+          label: {
+            show: false,
+            position: 'center',
+          },
+          emphasis: {
+            label: {
+              show: false,
+            },
+          },
+          labelLine: {
+            show: false,
+          },
+          left: '0',
+          data: chartData,
+        },
+      ],
+    }
+    tempChart.setOption(options)
+  }
+
+  useEffect(() => {
+    initChart()
+  }, [chartData])
+  return <div style={{ width: '100%', height: '100%' }} ref={chartsRef}></div>
+}
 
 const SchedulerHome = (props: any) => {
-  const customDot: StepsProps['progressDot'] = (dot, { status, index }) => <Popover>{dot}</Popover>
+  const getChartCard = () => {
+    const [chartList, setChartList] = useState([
+      {
+        key: 'develop',
+        title: '数据开发',
+        data: [
+          { value: 1048, name: '脚本数' },
+          { value: 735, name: '作业数' },
+          { value: 580, name: '资源数' },
+        ],
+      },
+      {
+        key: 'script',
+        title: '脚本监控',
+        data: [
+          { value: 1048, name: '脚本数' },
+          { value: 735, name: '作业数' },
+          { value: 580, name: '资源数' },
+        ],
+      },
+      {
+        key: 'dispatch',
+        title: '调度监控',
+        data: [
+          { value: 1048, name: '脚本数' },
+          { value: 735, name: '作业数' },
+          { value: 580, name: '资源数' },
+        ],
+      },
+    ])
 
+    const refreshChart = async (key) => {
+      const tempList = chartList.map((item) => {
+        if (item.key === key) {
+          return {
+            ...item,
+            data: [],
+          }
+        }
+        return item
+      })
+      setChartList(tempList)
+    }
+
+    return chartList.map((chartItem) => {
+      return useMemo(() => {
+        return (
+          <Card
+            key={chartItem.key}
+            className={styles['chart-card']}
+            title={chartItem.title}
+            extra={
+              <ReloadOutlined
+                onClick={() => refreshChart(chartItem.key)}
+                style={{ cursor: 'pointer' }}
+              />
+            }
+          >
+            <CardChart chartName={chartItem.key} chartData={chartItem.data} />
+          </Card>
+        )
+      }, [chartItem.data])
+    })
+  }
   return (
-    <Scrollbars style={{ height: '100%' }}>
+    <div style={{ height: '100%', background: '#eee', paddingLeft: 5, paddingRight: 5 }}>
       <Card title="快速入门" bordered={false}>
         <Row justify="space-between">
           <Col span={3}>
@@ -47,7 +160,7 @@ const SchedulerHome = (props: any) => {
         </Row>
         <Steps
           current={4}
-          progressDot={customDot}
+          progressDot={(dot, { status, index }) => <>{dot}</>}
           items={[
             {
               title: '项目管理',
@@ -68,28 +181,9 @@ const SchedulerHome = (props: any) => {
           ]}
         />
       </Card>
-      <Row gutter={16}>
-        <Col span={7}>
-          <Card title="数据开发"></Card>
-        </Col>
-        <Col span={7}>
-          <Card title="脚本监控"></Card>
-        </Col>
-        <Col span={7}>
-          <Card title="调度监控"></Card>
-        </Col>
-      </Row>
-      {/* <Typography style={{padding: '15px'}}>
-        <Title level={4}>{l('pages.scheduler.label.welcomeuse', '', {version: VERSION})}</Title>
-        <Paragraph>
-          <blockquote>{l('pages.scheduler.label.scheduler')}</blockquote>
-        </Paragraph>
-        <Paragraph>
-          <Image width={"100%"} src={"icons/job-develop.svg"} preview={false}></Image>
-        </Paragraph>
-      </Typography> */}
-    </Scrollbars>
+      <Row justify={'space-between'}>{getChartCard()}</Row>
+    </div>
   )
 }
 
-export default connect(({ Scheduler }: { Scheduler: StateType }) => ({}))(SchedulerHome)
+export default SchedulerHome
