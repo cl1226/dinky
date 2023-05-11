@@ -17,37 +17,36 @@
  *
  */
 
+import type { Settings as LayoutSettings } from '@ant-design/pro-layout'
+import { PageLoading } from '@ant-design/pro-layout'
+import { notification } from 'antd'
+import type { RequestConfig, RunTimeLayoutConfig } from 'umi'
+import { getIntl, getLocale, history, Link } from 'umi'
+import RightContent from '@/components/RightContent'
+import Footer from '@/components/Footer'
+import type { ResponseError } from 'umi-request'
+import { currentUser as queryCurrentUser } from './services/ant-design-pro/api'
+import { BookOutlined, LinkOutlined } from '@ant-design/icons'
 
-import type {Settings as LayoutSettings} from '@ant-design/pro-layout';
-import {PageLoading} from '@ant-design/pro-layout';
-import {notification} from 'antd';
-import type {RequestConfig, RunTimeLayoutConfig} from 'umi';
-import {getIntl, getLocale, history, Link} from 'umi';
-import RightContent from '@/components/RightContent';
-import Footer from '@/components/Footer';
-import type {ResponseError} from 'umi-request';
-import {currentUser as queryCurrentUser} from './services/ant-design-pro/api';
-import {BookOutlined, LinkOutlined} from '@ant-design/icons';
-
-const isDev = process.env.NODE_ENV === 'development';
-const loginPath = '/user/login';
+const isDev = process.env.NODE_ENV === 'development'
+const loginPath = '/user/login'
 
 /** 获取用户信息比较慢的时候会展示一个 loading */
 export const initialStateConfig = {
-  loading: <PageLoading/>,
-};
+  loading: <PageLoading />,
+}
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
  * */
 export async function getInitialState(): Promise<{
-  settings?: Partial<LayoutSettings>;
-  currentUser?: API.CurrentUser;
-  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+  settings?: Partial<LayoutSettings>
+  currentUser?: API.CurrentUser
+  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>
 }> {
   const fetchUserInfo = async () => {
     try {
-      const result = await queryCurrentUser();
+      const result = await queryCurrentUser()
       const currentUser: API.CurrentUser = {
         id: result.datas.user.id,
         username: result.datas.user.username,
@@ -64,26 +63,26 @@ export async function getInitialState(): Promise<{
         roleList: result.datas.roleList,
         tenantList: result.datas.tenantList,
         currentTenant: result.datas.currentTenant,
-      };
-      return currentUser;
+      }
+      return currentUser
     } catch (error) {
-      history.push(loginPath);
+      history.push(loginPath)
     }
-    return undefined;
-  };
+    return undefined
+  }
   // 如果是登录页面，不执行
   if (history.location.pathname !== loginPath) {
-    const currentUser = await fetchUserInfo();
+    const currentUser = await fetchUserInfo()
     return {
       fetchUserInfo,
       currentUser,
       settings: {},
-    };
+    }
   }
   return {
     fetchUserInfo,
     settings: {},
-  };
+  }
 }
 
 /**
@@ -110,68 +109,65 @@ export async function getInitialState(): Promise<{
  */
 export const request: RequestConfig = {
   errorHandler: (error: ResponseError) => {
-    const {messages} = getIntl(getLocale());
-    const {request, response} = error;
-    const writeUrl = ['/api/current'];
+    const { messages } = getIntl(getLocale())
+    const { request, response } = error
+    const writeUrl = ['/api/current']
     if (writeUrl.indexOf(request.originUrl) > -1) {
-      return;
+      return
     } else {
       if (response && response.status) {
-        const {status, statusText, url} = response;
-        const requestErrorMessage = messages['app.request.error'];
-        const errorMessage = `${requestErrorMessage} ${status}: ${url}`;
-        const errorDescription = messages[`app.request.${status}`] || statusText;
+        const { status, statusText, url } = response
+        const requestErrorMessage = messages['app.request.error']
+        const errorMessage = `${requestErrorMessage} ${status}: ${url}`
+        const errorDescription = messages[`app.request.${status}`] || statusText
         notification.error({
           message: errorMessage,
           description: errorDescription,
-        });
+        })
       }
 
       if (!response) {
         notification.error({
           description: '您的网络发生异常，无法连接服务器',
           message: '网络异常',
-        });
+        })
       }
-      throw error;
+      throw error
     }
   },
-
-};
+}
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
-export const layout: RunTimeLayoutConfig = ({initialState}) => {
-
-
+export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
-    rightContentRender: () => <RightContent/>,
+    rightContentRender: () => <RightContent />,
     disableContentMargin: false,
     /*waterMarkProps: {
       content: initialState?.currentUser?.name,
     },*/
-    footerRender: () => <Footer/>,
+    footerRender: () => <Footer />,
     onPageChange: () => {
-      const {location} = history;
+      const { location } = history
       // 如果没有登录，重定向到 login
       if (!initialState?.currentUser && location.pathname !== loginPath) {
-        history.push(loginPath);
+        history.push(loginPath)
       }
     },
     links: isDev
       ? [
-        <Link to="/umi/plugin/openapi" target="_blank">
-          <LinkOutlined/>
-          <span>OpenAPI Document</span>
-        </Link>,
-        <Link to="/~docs">
-          <BookOutlined/>
-          <span>Business Component Document</span>
-        </Link>,
-      ]
+          <Link to="/umi/plugin/openapi" target="_blank">
+            <LinkOutlined />
+            <span>OpenAPI Document</span>
+          </Link>,
+          <Link to="/~docs">
+            <BookOutlined />
+            <span>Business Component Document</span>
+          </Link>,
+        ]
       : [],
     menuHeaderRender: undefined,
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
     ...initialState?.settings,
-  };
-};
+  }
+}

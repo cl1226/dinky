@@ -17,7 +17,6 @@
  *
  */
 
-import * as _monaco from 'monaco-editor'
 import { XFlowEditor } from '@/components/XFlow'
 
 const WorkflowEditor = (props: any) => {

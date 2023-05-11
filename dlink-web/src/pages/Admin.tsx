@@ -17,23 +17,19 @@
  *
  */
 
-
-import React from 'react';
-import {HeartTwoTone, SmileTwoTone} from '@ant-design/icons';
-import {Alert, Card, Typography} from 'antd';
-import {PageHeaderWrapper} from '@ant-design/pro-layout';
-import {l} from "@/utils/intl";
-import {VERSION} from "@/components/Common/Version";
+import React from 'react'
+import { HeartTwoTone, SmileTwoTone } from '@ant-design/icons'
+import { Alert, Card, Typography } from 'antd'
+import { PageHeaderWrapper } from '@ant-design/pro-layout'
+import { l } from '@/utils/intl'
+import { VERSION } from '@/components/Common/Version'
 
 export default (): React.ReactNode => {
-
   return (
-    <PageHeaderWrapper
-      content={l('pages.admin.subPage.title')}
-    >
+    <PageHeaderWrapper content={l('pages.admin.subPage.title')}>
       <Card>
         <Alert
-          message={l('pages.welcome.alertMessage', '', {version: VERSION})}
+          message={l('pages.welcome.alertMessage', '', { version: VERSION })}
           type="success"
           showIcon
           banner
@@ -42,11 +38,11 @@ export default (): React.ReactNode => {
             marginBottom: 48,
           }}
         />
-        <Typography.Title level={2} style={{textAlign: 'center'}}>
-          <SmileTwoTone/> Ant Design Pro <HeartTwoTone twoToneColor="#eb2f96"/> You
+        <Typography.Title level={2} style={{ textAlign: 'center' }}>
+          <SmileTwoTone /> Ant Design Pro <HeartTwoTone twoToneColor="#eb2f96" /> You
         </Typography.Title>
       </Card>
-      <p style={{textAlign: 'center', marginTop: 24}}>
+      <p style={{ textAlign: 'center', marginTop: 24 }}>
         Want to add more pages? Please refer to{' '}
         <a href="https://pro.ant.design/docs/block-cn" target="_blank" rel="noopener noreferrer">
           use block
@@ -54,5 +50,5 @@ export default (): React.ReactNode => {
         。
       </p>
     </PageHeaderWrapper>
-  );
-};
+  )
+}

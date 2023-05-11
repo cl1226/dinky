@@ -17,14 +17,11 @@
  *
  */
 
-
-import {Button, Result} from 'antd';
-import React from 'react';
-import {history} from 'umi';
-import {l} from "@/utils/intl";
+import { Button, Result } from 'antd'
+import React from 'react'
+import { history } from 'umi'
 
 const NoFoundPage: React.FC = () => {
-
   return (
     <Result
       status="404"
@@ -37,6 +34,6 @@ const NoFoundPage: React.FC = () => {
       }
     />
   )
-};
+}
 
-export default NoFoundPage;
+export default NoFoundPage

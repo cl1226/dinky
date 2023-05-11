@@ -17,16 +17,15 @@
  *
  */
 
-
 // https://umijs.org/config/
-import {defineConfig} from 'umi';
-import {join} from 'path';
+import { defineConfig } from 'umi'
+import { join } from 'path'
 
-import defaultSettings from './defaultSettings';
-import proxy from './proxy';
-import routes from './routes';
+import defaultSettings from './defaultSettings'
+import proxy from './proxy'
+import routes from './routes'
 
-const {REACT_APP_ENV} = process.env;
+const { REACT_APP_ENV } = process.env
 
 export default defineConfig({
   hash: true,
@@ -72,7 +71,7 @@ export default defineConfig({
     basePath: '/',
   },
   history: {
-    type: 'hash'
+    type: 'hash',
   },
   // Fast Refresh 热更新
   fastRefresh: {},
@@ -90,4 +89,4 @@ export default defineConfig({
       projectName: 'swagger',
     },
   ],
-});
+})

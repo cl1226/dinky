@@ -18,12 +18,20 @@
  */
 
 import { useEffect, useRef, useState, useMemo } from 'react'
+import styles from './index.less'
 import { Image, Card, Steps, Row, Col } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
-import styles from './index.less'
 import * as echarts from 'echarts'
 
-const CardChart = (props) => {
+export interface IChartData {
+  value: string | number
+  name: string
+}
+export interface ICardChartProps {
+  chartName: string
+  chartData: IChartData[]
+}
+const CardChart: React.FC<ICardChartProps> = (props: ICardChartProps) => {
   const { chartName, chartData } = props
   const chartsRef = useRef<HTMLDivElement | null>(null)
 
@@ -76,7 +84,7 @@ const CardChart = (props) => {
   return <div style={{ width: '100%', height: '100%' }} ref={chartsRef}></div>
 }
 
-const SchedulerHome = (props: any) => {
+const SchedulerHome: React.FC = () => {
   const getChartCard = () => {
     const [chartList, setChartList] = useState([
       {

@@ -17,14 +17,11 @@
  *
  */
 
-
-import {Settings as LayoutSettings} from '@ant-design/pro-layout';
+import { Settings as LayoutSettings } from '@ant-design/pro-layout'
 
 const Settings: LayoutSettings & {
-
-
-  pwa?: boolean;
-  logo?: string;
+  pwa?: boolean
+  logo?: string
 } = {
   navTheme: 'light',
   // 拂晓蓝
@@ -34,15 +31,15 @@ const Settings: LayoutSettings & {
   fixedHeader: false,
   fixSiderbar: true,
   colorWeak: false,
-  title: 'Bigdata Develop Platform ',
+  title: 'Bigdata Develop Platform',
   pwa: false,
   logo: 'svolt.png',
   iconfontUrl: '',
   menu: {
-    locale: true
+    locale: true,
   },
   headerHeight: 48,
-  splitMenus: true
-};
+  splitMenus: true,
+}
 
-export default Settings;
+export default Settings
