@@ -19,7 +19,7 @@
 
 import { connect } from 'umi'
 import styles from './index.less'
-import { Card, Col } from 'antd'
+import {  Col } from 'antd'
 import { StateType } from '@/pages/Scheduler/model'
 import SchedulerTabs from './SchedulerTabs'
 import SchedulerMenu from './SchedulerMenu'

@@ -39,17 +39,25 @@ const CardChart: React.FC<ICardChartProps> = (props: ICardChartProps) => {
     const chartDom = chartsRef.current
     if (!chartDom) return
     const tempChart = echarts.init(chartDom)
+
+    const getValueByName = (name) => {
+      return chartData.find((item) => item.name === name)?.value
+    }
     const options = {
       tooltip: {
         trigger: 'item',
       },
       legend: {
         top: '30%',
-        right: '10%',
+        right: '12%',
         orient: 'vertical',
         icon: 'circle',
         itemWidth: 8,
         show: chartData && chartData.length,
+        // 使用回调函数
+        formatter: (name) => {
+          return `${name} ${getValueByName(name)}`
+        },
       },
       series: [
         {
@@ -91,27 +99,27 @@ const SchedulerHome: React.FC = () => {
         key: 'develop',
         title: '数据开发',
         data: [
-          { value: 1048, name: '脚本数' },
-          { value: 735, name: '作业数' },
-          { value: 580, name: '资源数' },
+          { value: 127, name: '数据源' },
+          { value: 36, name: '脚本数' },
+          { value: 41, name: 'UDF数' },
         ],
       },
       {
         key: 'script',
-        title: '脚本监控',
+        title: '流程监控',
         data: [
-          { value: 1048, name: '脚本数' },
-          { value: 735, name: '作业数' },
-          { value: 580, name: '资源数' },
+          { value: 131, name: '总个数' },
+          { value: 73, name: '已发布' },
+          { value: 58, name: '已上线' },
         ],
       },
       {
         key: 'dispatch',
         title: '调度监控',
         data: [
-          { value: 1048, name: '脚本数' },
-          { value: 735, name: '作业数' },
-          { value: 580, name: '资源数' },
+          { value: 17, name: '已完成' },
+          { value: 97, name: '正在运行' },
+          { value: 24, name: '已失败' },
         ],
       },
     ])
@@ -136,12 +144,13 @@ const SchedulerHome: React.FC = () => {
             key={chartItem.key}
             className={styles['chart-card']}
             title={chartItem.title}
-            extra={
-              <ReloadOutlined
-                onClick={() => refreshChart(chartItem.key)}
-                style={{ cursor: 'pointer' }}
-              />
-            }
+            bordered={false}
+            // extra={
+            //   <ReloadOutlined
+            //     onClick={() => refreshChart(chartItem.key)}
+            //     style={{ cursor: 'pointer' }}
+            //   />
+            // }
           >
             <CardChart chartName={chartItem.key} chartData={chartItem.data} />
           </Card>
@@ -150,44 +159,36 @@ const SchedulerHome: React.FC = () => {
     })
   }
   return (
-    <div style={{ height: '100%', background: '#eee', paddingLeft: 5, paddingRight: 5 }}>
-      <Card title="快速入门" bordered={false}>
-        <Row justify="space-between">
-          <Col span={3}>
-            <Image style={{ width: '150px' }} src={'schedule/project.png'} preview={false}></Image>
-          </Col>
-          <Col span={3}>
-            <Image style={{ width: '150px' }} src={'schedule/develop.png'} preview={false}></Image>
-          </Col>
-          <Col span={3}>
-            <Image style={{ width: '150px' }} src={'schedule/workflow.png'} preview={false}></Image>
-          </Col>
-          <Col span={3}>
-            <Image style={{ width: '150px' }} src={'schedule/devops.png'} preview={false}></Image>
-          </Col>
-        </Row>
-        <Steps
-          current={4}
-          progressDot={(dot, { status, index }) => <>{dot}</>}
-          items={[
-            {
-              title: '项目管理',
-              subTitle: '根目录与项目一一对应，实现工作流的快速分类。',
-            },
-            {
-              title: '数据开发',
-              subTitle: '在线脚本编辑调试、支持多种语法，轻松实现数据开发工作。',
-            },
-            {
-              title: '流程开发',
-              subTitle: '拖拽式作业开发，轻松实现工作流开发工作。',
-            },
-            {
-              title: '运维调度',
-              subTitle: '强大的作业调度与灵活的作业监控告警，轻松管理数据作业运维。',
-            },
-          ]}
-        />
+    <div
+      style={{ height: '100%', background: '#eee', paddingLeft: 5, paddingRight: 5, minWidth: 960 }}
+    >
+      <Card title="快速入门" bordered={false} style={{ minHeight: 400 }}>
+        <Steps progressDot={true} current={4} style={{ paddingTop: 150 }}>
+          <Steps.Step
+            className={styles['step-box']}
+            title="项目管理"
+            subTitle="根目录与项目一一对应，实现工作流的快速分类。"
+            description={<Image src={'schedule/project.png'} preview={false}></Image>}
+          />
+          <Steps.Step
+            className={styles['step-box']}
+            title="数据开发"
+            subTitle="在线脚本编辑调试、支持多种语法，轻松实现数据开发工作。"
+            description={<Image src={'schedule/develop.png'} preview={false}></Image>}
+          />
+          <Steps.Step
+            className={styles['step-box']}
+            title="流程开发"
+            subTitle="拖拽式作业开发，轻松实现工作流开发工作。"
+            description={<Image src={'schedule/workflow.png'} preview={false}></Image>}
+          />
+          <Steps.Step
+            className={styles['step-box']}
+            title="运维调度"
+            subTitle="强大的作业调度与灵活的作业监控告警，轻松管理数据作业运维。"
+            description={<Image src={'schedule/devops.png'} preview={false}></Image>}
+          />
+        </Steps>
       </Card>
       <Row justify={'space-between'}>{getChartCard()}</Row>
     </div>

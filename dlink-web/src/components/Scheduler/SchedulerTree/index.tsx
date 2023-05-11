@@ -27,7 +27,7 @@ import {
   getTreeNodeByKey,
   TreeDataNode,
 } from '@/components/Scheduler/SchedulerTree/Function'
-import style from './index.less'
+import styles from './index.less'
 import { StateType } from '@/pages/Scheduler/model'
 import {
   handleAddOrUpdate,
@@ -342,7 +342,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
       <Menu
         onClick={({ key }) => handleMenuClick(key)}
         style={tmpStyle}
-        className={style.right_click_menu}
+        className={styles.right_click_menu}
       >
         {menuItems}
       </Menu>
@@ -417,7 +417,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
         index > -1 ? (
           <span>
             {beforeStr}
-            <span className={style['site-tree-search-value']}>{searchValue}</span>
+            <span className={styles['site-tree-search-value']}>{searchValue}</span>
             {afterStr}
           </span>
         ) : (
@@ -453,7 +453,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
     })
 
   return (
-    <div className={style.tree_div}>
+    <div className={styles.tree_div}>
       <Row>
         <Col span={24}>
           <Tooltip title={l('right.menu.createRootCatalogue')}>
