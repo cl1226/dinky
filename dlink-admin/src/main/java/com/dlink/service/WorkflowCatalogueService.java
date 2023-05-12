@@ -1,5 +1,7 @@
 package com.dlink.service;
 
+import cn.hutool.json.JSONObject;
+import com.dlink.common.result.Result;
 import com.dlink.db.service.ISuperService;
 import com.dlink.dto.CatalogueTaskDTO;
 import com.dlink.dto.WorkflowCatalogueTaskDTO;
@@ -36,5 +38,7 @@ public interface WorkflowCatalogueService extends ISuperService<WorkflowCatalogu
     boolean copyTask(WorkflowCatalogue catalogue);
 
     Integer addDependCatalogue(String[] catalogueNames);
+
+    JSONObject dataStatistics(String key);
 
 }
