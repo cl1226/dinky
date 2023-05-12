@@ -255,3 +255,12 @@ export const previewCronSchedule = async (url: string, schedule: number) => {
     },
   })
 }
+
+export const getSchedulerStatistics = async (key) => {
+  return request2('/api/workflow/catalogue/dataStatistics', {
+    method: 'GET',
+    params: {
+      key,
+    },
+  })
+}

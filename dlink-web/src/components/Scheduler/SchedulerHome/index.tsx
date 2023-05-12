@@ -17,12 +17,13 @@
  *
  */
 
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import styles from './index.less'
 import { Image, Card, Steps, Row, Col } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import * as echarts from 'echarts'
-
+import { debounce } from 'lodash'
+import { getSchedulerStatistics } from '@/components/Common/crud'
 export interface IChartData {
   value: string | number
   name: string
@@ -30,9 +31,22 @@ export interface IChartData {
 export interface ICardChartProps {
   chartName: string
   chartData: IChartData[]
+  setChart: (key, chart) => void
 }
-const CardChart: React.FC<ICardChartProps> = (props: ICardChartProps) => {
-  const { chartName, chartData } = props
+
+export enum EChartLabel {
+  'sourceNum' = '数据源数',
+  'jobNum' = '作业数',
+  'flowNum' = '流程数',
+  'finished' = '完成',
+  'failed' = '失败',
+  'processing' = '调度中',
+  'success' = '成功',
+  'fail' = '失败',
+}
+
+const CardChart = (props: ICardChartProps) => {
+  const { chartName, chartData, setChart } = props
   const chartsRef = useRef<HTMLDivElement | null>(null)
 
   const initChart = () => {
@@ -49,7 +63,7 @@ const CardChart: React.FC<ICardChartProps> = (props: ICardChartProps) => {
       },
       legend: {
         top: '30%',
-        right: '12%',
+        left: '70%',
         orient: 'vertical',
         icon: 'circle',
         itemWidth: 8,
@@ -64,7 +78,7 @@ const CardChart: React.FC<ICardChartProps> = (props: ICardChartProps) => {
           name: chartName,
           type: 'pie',
           center: ['35%', '45%'],
-          radius: ['70%', '80%'],
+          radius: ['60%', '70%'],
           avoidLabelOverlap: false,
           label: {
             show: false,
@@ -84,6 +98,7 @@ const CardChart: React.FC<ICardChartProps> = (props: ICardChartProps) => {
       ],
     }
     tempChart.setOption(options)
+    setChart && setChart(chartName, tempChart)
   }
 
   useEffect(() => {
@@ -93,50 +108,42 @@ const CardChart: React.FC<ICardChartProps> = (props: ICardChartProps) => {
 }
 
 const SchedulerHome: React.FC = () => {
+  const [chartList, setChartList] = useState<any>([
+    {
+      key: 'develop',
+      title: '数据开发',
+      data: [],
+    },
+    {
+      key: 'devops',
+      title: '作业监控',
+      data: [],
+    },
+    {
+      key: 'alert',
+      title: '告警监控',
+      data: [],
+    },
+  ])
+
+  const cacheChart = useMemo<{ [key: string]: echarts.ECharts }>(() => ({}), [])
+
+  const handleCacheChart = (key, chart) => {
+    cacheChart[key] = chart
+  }
+
+  const refreshChart = async (key) => {
+    const { datas: currentChartData } = await getSchedulerStatistics(key)
+    const option: any = cacheChart[key].getOption()
+    option.series[0].data = Object.keys(currentChartData).map((item) => {
+      return {
+        value: currentChartData[item],
+        name: EChartLabel[item],
+      }
+    })
+  }
+
   const getChartCard = () => {
-    const [chartList, setChartList] = useState([
-      {
-        key: 'develop',
-        title: '数据开发',
-        data: [
-          { value: 127, name: '数据源' },
-          { value: 36, name: '脚本数' },
-          { value: 41, name: 'UDF数' },
-        ],
-      },
-      {
-        key: 'script',
-        title: '流程监控',
-        data: [
-          { value: 131, name: '总个数' },
-          { value: 73, name: '已发布' },
-          { value: 58, name: '已上线' },
-        ],
-      },
-      {
-        key: 'dispatch',
-        title: '调度监控',
-        data: [
-          { value: 17, name: '已完成' },
-          { value: 97, name: '正在运行' },
-          { value: 24, name: '已失败' },
-        ],
-      },
-    ])
-
-    const refreshChart = async (key) => {
-      const tempList = chartList.map((item) => {
-        if (item.key === key) {
-          return {
-            ...item,
-            data: [],
-          }
-        }
-        return item
-      })
-      setChartList(tempList)
-    }
-
     return chartList.map((chartItem) => {
       return useMemo(() => {
         return (
@@ -145,22 +152,75 @@ const SchedulerHome: React.FC = () => {
             className={styles['chart-card']}
             title={chartItem.title}
             bordered={false}
-            // extra={
-            //   <ReloadOutlined
-            //     onClick={() => refreshChart(chartItem.key)}
-            //     style={{ cursor: 'pointer' }}
-            //   />
-            // }
+            extra={
+              <ReloadOutlined
+                onClick={() => refreshChart(chartItem.key)}
+                style={{ cursor: 'pointer' }}
+              />
+            }
           >
-            <CardChart chartName={chartItem.key} chartData={chartItem.data} />
+            <CardChart
+              chartName={chartItem.key}
+              chartData={chartItem.data}
+              setChart={handleCacheChart}
+            />
           </Card>
         )
       }, [chartItem.data])
     })
   }
+
+  const onResize = useCallback(
+    debounce(() => {
+      Object.keys(cacheChart).map((key) => {
+        cacheChart[key].resize()
+      })
+    }, 200),
+    [],
+  )
+
+  useEffect(() => {
+    window.addEventListener('resize', onResize)
+    onResize()
+    return () => {
+      window.removeEventListener('resize', onResize)
+    }
+  }, [onResize])
+  useEffect(() => {
+    ~(async () => {
+      const chartMaps = {
+        develop: '数据开发',
+        devops: '作业监控',
+        alert: '告警监控',
+      }
+      const keyList = Object.keys(chartMaps)
+      const res = await Promise.all(keyList.map((key) => getSchedulerStatistics(key)))
+      const tempList = keyList.map((key, index) => {
+        const tempData = res[index]['datas']
+        return {
+          key,
+          title: chartMaps[key],
+          data: Object.keys(tempData).map((item) => {
+            return {
+              value: tempData[item],
+              name: EChartLabel[item],
+            }
+          }),
+        }
+      })
+      setChartList(tempList)
+    })()
+  }, [])
   return (
     <div
-      style={{ height: '100%', background: '#eee', paddingLeft: 5, paddingRight: 5, minWidth: 960 }}
+      style={{
+        height: '100%',
+        overflow: 'hidden',
+        background: '#eee',
+        paddingLeft: 5,
+        paddingRight: 5,
+        minWidth: 960,
+      }}
     >
       <Card title="快速入门" bordered={false} className={styles['fast-card']}>
         <Steps progressDot={true} current={4} style={{ paddingTop: 150 }}>

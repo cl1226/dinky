@@ -5,7 +5,6 @@ import { DND_RENDER_ID } from './constant'
 import type { NsNodeCmd } from '@antv/xflow'
 import type { NsNodeCollapsePanel } from '@antv/xflow'
 import { Card } from 'antd'
-import React from 'react'
 
 export const onNodeDrop: NsNodeCollapsePanel.IOnNodeDrop = async (node, commands, modelService) => {
   const args: NsNodeCmd.AddNode.IArgs = {
@@ -14,10 +13,10 @@ export const onNodeDrop: NsNodeCollapsePanel.IOnNodeDrop = async (node, commands
   commands.executeCommand(XFlowNodeCommands.ADD_NODE.id, args)
 }
 
-const NodeDescription = (props: { name: string }) => {
+const NodeDescription = (props) => {
   return (
-    <Card size="small" title="" style={{ width: '200px' }} bordered={false}>
-      此节点用于执行一个指定的{props.name}作业。
+    <Card size="small" title="" style={{ width: '150px' }} bordered={false}>
+      此节点用于执行一个指定的作业节点。
     </Card>
   )
 }
@@ -30,14 +29,14 @@ export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta
       children: [
         {
           id: '1',
-          label: 'FlinkSQL',
+          label: '作业节点',
           parentId: '1',
           renderKey: DND_RENDER_ID,
-          jobId: "0",
-          popoverContent: <NodeDescription name="FlinkSQL" />,
-        }
+          jobId: '0',
+          popoverContent: <NodeDescription />,
+        },
       ],
-    }
+    },
   ]
 }
 
@@ -45,6 +44,6 @@ export const searchService: NsNodeCollapsePanel.ISearchService = async (
   nodes: NsNodeCollapsePanel.IPanelNode[] = [],
   keyword: string,
 ) => {
-  const list = nodes.filter(node => node.label.includes(keyword))
+  const list = nodes.filter((node) => node?.label?.includes(keyword))
   return list
 }
