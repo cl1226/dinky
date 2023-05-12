@@ -138,13 +138,11 @@ const SchedulerHome: React.FC = () => {
       ...cacheLoading,
       [key]: true,
     })
-    console.log('qianqian', cacheLoading)
     const { datas: currentChartData } = await getSchedulerStatistics(key)
     setCacheLoading({
       ...cacheLoading,
       [key]: false,
     })
-    console.log('cacheLoading', cacheLoading, cacheLoading[key])
     const option: any = cacheChart[key].getOption()
     option.series[0].data = Object.keys(currentChartData).map((item) => {
       return {
@@ -156,30 +154,33 @@ const SchedulerHome: React.FC = () => {
 
   const getChartCard = () => {
     return chartList.map((chartItem) => {
-      return useMemo(() => {
-        return (
-          <Card
-            key={chartItem.key}
-            className={styles['chart-card']}
-            title={chartItem.title}
-            bordered={false}
-            extra={
-              <ReloadOutlined
-                onClick={() => refreshChart(chartItem.key)}
-                style={{ cursor: 'pointer' }}
-              />
-            }
-          >
-            <Spin spinning={!!cacheLoading[chartItem.key]}>
-              <CardChart
-                chartName={chartItem.key}
-                chartData={chartItem.data}
-                setChart={handleCacheChart}
-              />
-            </Spin>
-          </Card>
-        )
-      }, [chartItem.data, cacheLoading[chartItem.key]])
+      return (
+        <Card
+          key={chartItem.key}
+          className={styles['chart-card']}
+          title={chartItem.title}
+          bordered={false}
+          extra={
+            <ReloadOutlined
+              onClick={() => refreshChart(chartItem.key)}
+              style={{ cursor: 'pointer' }}
+            />
+          }
+        >
+          <Spin spinning={!!cacheLoading[chartItem.key]}>
+            {useMemo(
+              () => (
+                <CardChart
+                  chartName={chartItem.key}
+                  chartData={chartItem.data}
+                  setChart={handleCacheChart}
+                />
+              ),
+              [chartItem.data],
+            )}
+          </Spin>
+        </Card>
+      )
     })
   }
 
