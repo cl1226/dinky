@@ -6,6 +6,7 @@ import type { NsNodeCmd, NsEdgeCmd, NsGraphCmd } from '@antv/xflow'
 import { message } from 'antd'
 import { getInfoById, getData, handleAddOrUpdate } from '@/components/Common/crud'
 import { l } from '@/utils/intl'
+import moment from 'moment'
 export interface IMeta {
   flowId: string
   flowName?: string
@@ -280,4 +281,20 @@ export namespace XFlowApi {
       statusMap: statusMap,
     }
   }
+}
+
+// 将当前组件的form转换为传参的meta
+export const getJsonCron = (formValues) => {
+  const { timerange, crontab, timezoneId } = formValues
+
+  const tempCron: any = {}
+  tempCron.timezoneId = timezoneId
+  tempCron.crontab = crontab
+  const [startTime, endTime] = timerange || []
+  if (startTime && endTime) {
+    tempCron.startTime = moment(startTime).format('YYYY-MM-DD HH:mm:ss')
+    tempCron.endTime = moment(endTime).format('YYYY-MM-DD HH:mm:ss')
+  }
+
+  return JSON.stringify(tempCron)
 }

@@ -14,12 +14,11 @@ import {
   LockOutlined,
   UnlockOutlined,
 } from '@ant-design/icons'
-import { XFlowApi, StatusEnum, ESchedulerType } from './service'
+import { XFlowApi, StatusEnum, ESchedulerType, getJsonCron } from './service'
 import { CustomCommands } from './cmd-extensions/constants'
 import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
 import { message, Popconfirm } from 'antd'
 import { NS_CANVAS_FORM } from './config-model-service'
-import moment from 'moment'
 export namespace NSToolbarConfig {
   /** 注册icon 类型 */
   IconStore.set('SaveOutlined', SaveOutlined)
@@ -37,22 +36,6 @@ export namespace NSToolbarConfig {
   export interface IToolbarState {
     status: string
     lockStatus: boolean
-  }
-
-  // 将当前组件的form转换为传参的meta
-  const getJsonCron = (formValues) => {
-    const { timerange, crontab, timezoneId } = formValues
-
-    const tempCron: any = {}
-    tempCron.timezoneId = timezoneId
-    tempCron.crontab = crontab
-    const [startTime, endTime] = timerange || []
-    if (startTime && endTime) {
-      tempCron.startTime = moment(startTime).format('YYYY-MM-DD HH:mm:ss')
-      tempCron.endTime = moment(endTime).format('YYYY-MM-DD HH:mm:ss')
-    }
-
-    return JSON.stringify(tempCron)
   }
 
   export const getDependencies = async (modelService: IModelService) => {
@@ -147,7 +130,7 @@ export namespace NSToolbarConfig {
             setGraphMeta({
               ...graphMeta.meta,
               status: StatusEnum.DEPLOY,
-              ...canvasForm
+              ...canvasForm,
             })
           })
           .catch(({ errorFields }) => {

@@ -5,7 +5,7 @@ import { Descriptions, Radio, DatePicker, Input, Form } from 'antd'
 import type { RadioChangeEvent } from 'antd'
 import { Cron } from '@/components/Cron'
 import { NS_CANVAS_FORM } from './config-model-service'
-import { IMeta, ESchedulerType } from './service'
+import { IMeta, ESchedulerType, getJsonCron } from './service'
 
 const RangePicker: any = DatePicker.RangePicker
 
@@ -48,13 +48,25 @@ export namespace CustomJsonForm {
         })
       }
     }
+
+    const compareMeta = (meta: any) => {
+      const { schedulerType, cron } = meta
+      if (!schedulerType) return true
+      const fieldValues = canvasForm.getFieldsValue(true)
+
+      if (schedulerType === ESchedulerType.SINGLE) {
+        return schedulerType === fieldValues.schedulerType
+      } else if (schedulerType === ESchedulerType.CYCLE) {
+        return cron === getJsonCron(fieldValues)
+      }
+      return false
+    }
     React.useEffect(() => {
       ~(async () => {
         const model = await MODELS.GRAPH_META.getModel(modelService)
         model.watch(async (value) => {
-          console.log('watch', value.meta)
+          if (compareMeta(value.meta)) return
           const { schedulerType, cron, ...remainMeta } = value.meta
-          if (!schedulerType) return
           setBaseInfo(remainMeta)
           if (schedulerType === ESchedulerType.CYCLE) {
             if (cron) {
@@ -65,10 +77,10 @@ export namespace CustomJsonForm {
               }
 
               canvasForm.setFieldsValue({
+                schedulerType,
                 timerange,
                 timezoneId,
                 crontab,
-                schedulerType,
               })
               setCycleVisible(true)
               return
@@ -100,6 +112,7 @@ export namespace CustomJsonForm {
               initialValues={{
                 timezoneId: 'Asia/Shanghai',
                 timerange: [moment(), moment().add(100, 'y')],
+                schedulerType: ESchedulerType.SINGLE,
               }}
             >
               <Descriptions title="调度配置" column={1} layout="vertical">
