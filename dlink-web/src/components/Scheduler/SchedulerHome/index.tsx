@@ -19,7 +19,7 @@
 
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import styles from './index.less'
-import { Image, Card, Steps, Row, Col } from 'antd'
+import { Image, Card, Steps, Row, Spin } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import * as echarts from 'echarts'
 import { debounce } from 'lodash'
@@ -104,7 +104,7 @@ const CardChart = (props: ICardChartProps) => {
   useEffect(() => {
     initChart()
   }, [chartData])
-  return <div style={{ width: '100%', height: '100%' }} ref={chartsRef}></div>
+  return <div style={{ width: '100%', height: '28vh' }} ref={chartsRef}></div>
 }
 
 const SchedulerHome: React.FC = () => {
@@ -127,13 +127,24 @@ const SchedulerHome: React.FC = () => {
   ])
 
   const cacheChart = useMemo<{ [key: string]: echarts.ECharts }>(() => ({}), [])
+  const [cacheLoading, setCacheLoading] = useState<{ [key: string]: boolean }>(() => ({}))
 
   const handleCacheChart = (key, chart) => {
     cacheChart[key] = chart
   }
 
   const refreshChart = async (key) => {
+    setCacheLoading({
+      ...cacheLoading,
+      [key]: true,
+    })
+    console.log('qianqian', cacheLoading)
     const { datas: currentChartData } = await getSchedulerStatistics(key)
+    setCacheLoading({
+      ...cacheLoading,
+      [key]: false,
+    })
+    console.log('cacheLoading', cacheLoading, cacheLoading[key])
     const option: any = cacheChart[key].getOption()
     option.series[0].data = Object.keys(currentChartData).map((item) => {
       return {
@@ -159,14 +170,16 @@ const SchedulerHome: React.FC = () => {
               />
             }
           >
-            <CardChart
-              chartName={chartItem.key}
-              chartData={chartItem.data}
-              setChart={handleCacheChart}
-            />
+            <Spin spinning={!!cacheLoading[chartItem.key]}>
+              <CardChart
+                chartName={chartItem.key}
+                chartData={chartItem.data}
+                setChart={handleCacheChart}
+              />
+            </Spin>
           </Card>
         )
-      }, [chartItem.data])
+      }, [chartItem.data, cacheLoading[chartItem.key]])
     })
   }
 
