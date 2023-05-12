@@ -1,6 +1,5 @@
 package com.dlink.service.impl;
 
-import cn.hutool.json.JSON;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -8,7 +7,6 @@ import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.CatalogueTaskDTO;
 import com.dlink.dto.WorkflowCatalogueTaskDTO;
 import com.dlink.dto.WorkflowTaskDTO;
-import com.dlink.init.SystemInit;
 import com.dlink.mapper.WorkflowCatalogueMapper;
 import com.dlink.model.*;
 import com.dlink.scheduler.client.ProcessClient;
@@ -16,9 +14,7 @@ import com.dlink.scheduler.client.ProjectClient;
 import com.dlink.scheduler.model.ProcessDefinition;
 import com.dlink.scheduler.model.Project;
 import com.dlink.scheduler.result.Result;
-import com.dlink.service.JobInstanceService;
-import com.dlink.service.WorkflowCatalogueService;
-import com.dlink.service.WorkflowTaskService;
+import com.dlink.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +48,12 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
     private ProjectClient projectClient;
     @Autowired
     private WorkflowCatalogueService catalogueService;
+    @Autowired
+    private DataBaseService databaseService;
+    @Autowired
+    private TaskService taskService2;
+    @Autowired
+    private AlertHistoryService alertHistoryService;
 
     @Override
     public List<WorkflowCatalogue> getAllData() {
@@ -98,7 +100,7 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
         taskService.saveOrUpdateTask(task);
         WorkflowCatalogue catalogue = new WorkflowCatalogue();
         catalogue.setTenantId(catalogueTaskDTO.getTenantId());
-        catalogue.setName(catalogueTaskDTO.getAlias());
+        catalogue.setName(catalogueTaskDTO.getName());
         catalogue.setIsLeaf(true);
         catalogue.setTaskId(task.getId());
         catalogue.setParentId(catalogueTaskDTO.getParentId());
@@ -242,5 +244,38 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
     @Override
     public Integer addDependCatalogue(String[] catalogueNames) {
         return null;
+    }
+
+    @Override
+    public JSONObject dataStatistics(String key) {
+        if ("develop".equals(key)) {
+            long sourceNum = databaseService.count();
+            long jobNum = taskService2.count();
+            long flowNum = taskService.count();
+            JSONObject json = new JSONObject();
+            json.set("sourceNum", sourceNum);
+            json.set("jobNum", jobNum);
+            json.set("flowNum", flowNum);
+            return json;
+        } else if ("devops".equals(key)) {
+            JobInstanceStatus jobInstanceStatus = jobInstanceService.getStatusCount(false);
+            long finished = jobInstanceStatus.getFinished();
+            long failed = jobInstanceStatus.getFailed();
+            long processing = jobInstanceStatus.getRunning();
+            JSONObject json = new JSONObject();
+            json.set("finished", finished);
+            json.set("failed", failed);
+            json.set("processing", processing);
+            return json;
+        } else if ("alert".equals(key)) {
+            long success = alertHistoryService.count(new LambdaQueryWrapper<AlertHistory>().eq(AlertHistory::getStatus, 1));
+            long fail = alertHistoryService.count(new LambdaQueryWrapper<AlertHistory>().eq(AlertHistory::getStatus, 2));
+            JSONObject json = new JSONObject();
+            json.set("success", success);
+            json.set("fail", fail);
+            return json;
+        } else {
+            return new JSONObject();
+        }
     }
 }

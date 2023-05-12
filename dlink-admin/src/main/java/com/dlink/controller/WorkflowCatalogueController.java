@@ -21,6 +21,7 @@ package com.dlink.controller;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ZipUtil;
+import cn.hutool.json.JSONObject;
 import com.dlink.common.result.ProTableResult;
 import com.dlink.common.result.Result;
 import com.dlink.dto.CatalogueTaskDTO;
@@ -256,5 +257,11 @@ public class WorkflowCatalogueController {
         } else {
             return Result.failed("复制作业失败");
         }
+    }
+
+    @GetMapping("/dataStatistics")
+    public Result dataStatistics(@RequestParam String key) {
+        JSONObject entries = catalogueService.dataStatistics(key);
+        return Result.succeed(entries, "获取成功");
     }
 }
