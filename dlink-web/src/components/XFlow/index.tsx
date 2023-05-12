@@ -44,6 +44,13 @@ export interface IProps {
 
 export const XFlowEditor: React.FC<IProps> = (props) => {
   const { activeKey, flowId } = props
+  const cache = React.useMemo<{ app: IApplication | null }>(
+    () => ({
+      app: null,
+    }),
+    [],
+  )
+
   const [meta, setMeta] = useState<IMeta>({ flowId: flowId })
   const graphHooksConfig = useGraphHookConfig(props)
   const toolbarConfig = useToolbarConfig()
@@ -51,13 +58,6 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
   const cmdConfig = useCmdConfig()
   const modelServiceConfig = useModelServiceConfig()
   const keybindingConfig = useKeybindingConfig()
-
-  const cache = React.useMemo<{ app: IApplication | null }>(
-    () => ({
-      app: null,
-    }),
-    [],
-  )
 
   const handleMeta = async (remainMeta) => {
     setMeta(remainMeta)

@@ -65,9 +65,10 @@ export namespace CustomJsonForm {
       ~(async () => {
         const model = await MODELS.GRAPH_META.getModel(modelService)
         model.watch(async (value) => {
-          if (compareMeta(value.meta)) return
           const { schedulerType, cron, ...remainMeta } = value.meta
           setBaseInfo(remainMeta)
+          if (compareMeta(value.meta)) return
+
           if (schedulerType === ESchedulerType.CYCLE) {
             if (cron) {
               let timerange: any = []
