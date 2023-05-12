@@ -17,7 +17,7 @@
  *
  */
 
-import React, { Key, useEffect, useState } from 'react'
+import React, { Key, useEffect, useMemo, useState } from 'react'
 import { connect } from 'umi'
 import { DownOutlined, FolderAddOutlined, SwitcherOutlined } from '@ant-design/icons'
 import { Button, Col, Empty, Input, Menu, message, Modal, Row, Tooltip, Tree } from 'antd'
@@ -90,7 +90,7 @@ const { DirectoryTree } = Tree
 const { Search } = Input
 
 const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
-  const { rightClickMenu, dispatch, tabs } = props
+  const { rightClickMenu, dispatch, tabs, current } = props
   const [treeData, setTreeData] = useState<TreeDataNode[]>()
   const [expandedKeys, setExpandedKeys] = useState<Key[]>()
   const [rightClickNodeTreeItem, setRightClickNodeTreeItem] = useState<RightClickMenu>()
@@ -105,13 +105,19 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
   const sref: any = React.createRef<Scrollbars>()
   const [searchValue, setSearchValue] = useState('')
   const [autoExpandParent, setAutoExpandParent] = useState(true)
+  const [selectedKeys, setSelectedKeys] = useState<(number | string)[]>([])
 
   const getTreeData = async () => {
     const result = await getWorkflowCatalogueTreeData()
     let data = result.datas
-    setTreeData(convertToTreeData(data, 0))
+    const tempTreeData = convertToTreeData(data, 0)
+    setTreeData(tempTreeData)
+    const expandList: any[] = generateList(tempTreeData, []).map((item) => item.key)
+
     //默认展开所有
-    setExpandedKeys([])
+    setExpandedKeys(expandList)
+
+    current && setSelectedKeys([current.treeId])
   }
 
   const onChange = (e: any) => {
@@ -212,6 +218,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
         icon: node.icon,
         closable: true,
         path: node.path,
+        treeId: node.id,
         task: {
           session: '',
           maxRowNum: 100,
@@ -389,6 +396,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
   //选中节点时触发
   const onSelect = (selectedKeys: Key[], e: any) => {
     if (e.node && e.node.isLeaf) {
+      setSelectedKeys([e.node.key])
       dispatch({
         type: 'Scheduler/saveCurrentPath',
         payload: e.node.path,
@@ -471,18 +479,21 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
         allowClear={true}
       />
       <Scrollbars style={{ height: 'calc(100vh - 82px - 72px)' }} ref={sref}>
-        <DirectoryTree
-          multiple
-          onRightClick={handleContextMenu}
-          onSelect={onSelect}
-          switcherIcon={<DownOutlined />}
-          // showIcon={true}
-          treeData={loop(treeData)}
-          onExpand={onExpand}
-          autoExpandParent={autoExpandParent}
-          defaultExpandAll
-          expandedKeys={expandedKeys}
-        />
+        {treeData?.length && (
+          <DirectoryTree
+            multiple
+            onRightClick={handleContextMenu}
+            onSelect={onSelect}
+            switcherIcon={<DownOutlined />}
+            // showIcon={true}
+            treeData={loop(treeData)}
+            onExpand={onExpand}
+            autoExpandParent={autoExpandParent}
+            expandedKeys={expandedKeys}
+            selectedKeys={selectedKeys}
+          />
+        )}
+
         {getNodeTreeRightClickMenu()}
         {getEmpty()}
         {updateCatalogueModalVisible ? (
@@ -545,6 +556,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
 }
 
 export default connect(({ Scheduler }: { Scheduler: StateType }) => ({
+  current: Scheduler.current,
   currentPath: Scheduler.currentPath,
   tabs: Scheduler.tabs,
   rightClickMenu: Scheduler.rightClickMenu,
