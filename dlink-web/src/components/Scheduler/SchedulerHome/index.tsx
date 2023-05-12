@@ -162,7 +162,7 @@ const SchedulerHome: React.FC = () => {
     <div
       style={{ height: '100%', background: '#eee', paddingLeft: 5, paddingRight: 5, minWidth: 960 }}
     >
-      <Card title="快速入门" bordered={false} style={{ minHeight: 400 }}>
+      <Card title="快速入门" bordered={false} className={styles['fast-card']}>
         <Steps progressDot={true} current={4} style={{ paddingTop: 150 }}>
           <Steps.Step
             className={styles['step-box']}

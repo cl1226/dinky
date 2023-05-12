@@ -30,14 +30,23 @@ export namespace CustomJsonForm {
     const [cycleVisible, setCycleVisible] = useState<boolean>(false)
 
     const registerModel = async () => {
-      modelService.registerModel({
-        id: NS_CANVAS_FORM.id,
-        getInitialValue: () => {
-          return {
-            canvasForm: canvasForm,
-          }
-        },
-      })
+      if (!modelService.findDeferredModel(NS_CANVAS_FORM.id)) {
+        modelService.registerModel({
+          id: NS_CANVAS_FORM.id,
+          getInitialValue: () => {
+            return {
+              canvasForm: canvasForm,
+            }
+          },
+        })
+        return
+      } else {
+        const ctx = await modelService.awaitModel<NS_CANVAS_FORM.ICanvasForm>(NS_CANVAS_FORM.id)
+
+        ctx.setValue({
+          canvasForm: canvasForm,
+        })
+      }
     }
     React.useEffect(() => {
       ~(async () => {

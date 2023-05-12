@@ -126,6 +126,7 @@ export namespace NSToolbarConfig {
         canvasForm
           .validateFields()
           .then(async (values) => {
+            console.log('values', values)
             const { schedulerType } = values
             let cron: any = null
             if (schedulerType === ESchedulerType.CYCLE) {
