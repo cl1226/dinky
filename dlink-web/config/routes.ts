@@ -50,6 +50,10 @@ export default [
     ],
   },
   {
+    path: '/',
+    redirect: '/dataStudio',
+  },
+  {
     path: '/dataStudio',
     name: 'dataStudio',
     icon: 'consoleSql',
@@ -67,10 +71,23 @@ export default [
     path: '/dataService',
     name: 'dataService',
     icon: 'appstore',
+    footerRender: false,
     routes: [
       {
         path: '/dataService',
-        redirect: '/dataService/devApi/catalogue',
+        redirect: '/dataService/serviceHome',
+      },
+      {
+        path: '/dataService/serviceHome',
+        name: 'serviceHome',
+        icon: 'windows',
+        component: './DataService/ServiceHome',
+      },
+      {
+        path: '/dataService/serviceDashboard',
+        name: 'serviceDashboard',
+        icon: 'database',
+        component: './DataService/ServiceDashboard',
       },
       {
         path: '/dataService/devApi',
@@ -86,6 +103,12 @@ export default [
             path: '/dataService/devApi/management',
             name: 'management',
             component: './DataService/ApiDev/Management',
+          },
+          {
+            path: '/dataService/devApi/create',
+            name: 'create',
+            component: './DataService/ApiDev/Create',
+            hideInMenu: true,
           },
         ],
       },
@@ -105,7 +128,7 @@ export default [
             component: './DataService/ApiInvoke/Overview',
           },
         ],
-      }
+      },
     ],
   },
   {
@@ -192,24 +215,26 @@ export default [
             component: './RegistrationCenter/AlertManage/AlertGroup',
           },
         ],
-      }, {
+      },
+      {
         path: '/registration/document',
         name: 'document',
         icon: 'container',
         component: './RegistrationCenter/Document',
-      },{
+      },
+      {
         path: '/registration/fragment',
         name: 'fragment',
-        icon: "cloud",
+        icon: 'cloud',
         component: './RegistrationCenter/FragmentVariable',
-      }
+      },
     ],
   },
   {
     name: 'authenticationCenter',
     icon: 'SafetyCertificateOutlined',
     path: '/authenticationCenter',
-    access: "canAdmin",
+    access: 'canAdmin',
     routes: [
       {
         path: '/authenticationCenter',
@@ -246,10 +271,6 @@ export default [
         component: './AuthenticationCenter/TenantManager',
       },
     ],
-  },
-  {
-    path: '/',
-    redirect: '/dataStudio',
   },
   {
     name: 'settings',
@@ -289,4 +310,4 @@ export default [
   {
     component: './404',
   },
-];
+]

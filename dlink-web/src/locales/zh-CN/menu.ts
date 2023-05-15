@@ -31,9 +31,12 @@ export default {
   'menu.scheduler': '调度中心',
 
   'menu.dataService': '数据服务',
+  'menu.dataService.serviceHome': '首页',
+  'menu.dataService.serviceDashboard': '数据总览',
   'menu.dataService.devApi': '开发API',
   'menu.dataService.devApi.catalogue': 'API目录',
   'menu.dataService.devApi.management': 'API管理',
+  'menu.dataService.devApi.create': 'API创建',
   'menu.dataService.invokeApi': '调用API',
   'menu.dataService.invokeApi.catalogue': '服务目录',
   'menu.dataService.invokeApi.overview': '服务概览',
