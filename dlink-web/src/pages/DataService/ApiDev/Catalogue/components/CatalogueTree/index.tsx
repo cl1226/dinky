@@ -14,6 +14,10 @@ import { StateType } from '@/pages/DataService/ApiDev/Catalogue/model'
 import { l } from '@/utils/intl'
 
 import UpdateCatalogueForm from './UpdateCatalogueForm'
+import {
+  handleAddOrUpdate,
+  getAllCatalogueTreeData,
+} from '@/pages/DataService/ApiDev/Catalogue/service'
 
 const { Search } = Input
 const { DirectoryTree } = Tree
@@ -41,7 +45,7 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
 
   //   获取目录
   const getTreeData = async () => {
-    const result = await getWorkflowCatalogueTreeData()
+    const result = await getAllCatalogueTreeData()
     let data = result.datas
     const tempTreeData = convertToTreeData(data, 0)
     setTreeData(tempTreeData)
@@ -252,6 +256,10 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
     return parentKey
   }
 
+  useEffect(() => {
+    getTreeData()
+  }, [])
+
   return (
     <div className={styles['catalogue-tree']}>
       <Row>
@@ -271,7 +279,7 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
         allowClear={true}
       />
       <Scrollbars style={{ height: 'calc(100% - 72px)' }} ref={sref}>
-        {treeData?.length && (
+        {treeData?.length ? (
           <DirectoryTree
             multiple
             onRightClick={handleContextMenu}
@@ -283,14 +291,16 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
             autoExpandParent={autoExpandParent}
             expandedKeys={expandedKeys}
           />
-        )}
+        ) : null}
         {getNodeTreeRightClickMenu()}
         {getEmpty()}
         {catalogueModalVisible ? (
           <UpdateCatalogueForm
             onSubmit={async (value) => {
               const success = await handleAddOrUpdate(
-                isCreateCatalogue ? '/api/workflow/catalogue' : '/api/workflow/catalogue/toRename',
+                isCreateCatalogue
+                  ? '/api/dataservice/catalogue'
+                  : '/api/dataservice/catalogue/toRename',
                 value,
               )
               if (success) {

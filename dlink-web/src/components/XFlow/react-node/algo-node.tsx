@@ -10,13 +10,14 @@ import {
 import type { NsGraph } from '@antv/xflow'
 import { NsGraphStatusCommand } from '@antv/xflow'
 import './algo-node.less'
+import { getIcon } from '@/components/Studio/icon'
 
 const fontStyle = { fontSize: '16px', color: '#3057e3' }
 interface IProps {
   status: NsGraphStatusCommand.StatusEnum
   hide: boolean
 }
-export const AlgoIcon: React.FC<IProps> = props => {
+export const AlgoIcon: React.FC<IProps> = (props) => {
   if (props.hide) {
     return null
   }
@@ -36,11 +37,12 @@ export const AlgoIcon: React.FC<IProps> = props => {
   }
 }
 
-export const AlgoNode: NsGraph.INodeRender = props => {
+export const AlgoNode: NsGraph.INodeRender = (props) => {
+  const { params } = props.data
   return (
     <div className={`xflow-algo-node ${props.isNodeTreePanel ? 'panel-node' : ''}`}>
       <span className="icon">
-        <DatabaseOutlined style={fontStyle} />
+        {params?.type ? getIcon(params.type) : <DatabaseOutlined style={fontStyle} />}
       </span>
       <span className="label">{props.data.label}</span>
       <span className="status">

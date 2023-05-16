@@ -11,7 +11,7 @@ export const formSchemaService: NsJsonSchemaForm.IFormSchemaService = async (arg
   const { targetData, modelService, targetType } = args
   /** 可以使用获取 graphMeta */
   const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
-
+  console.log('args', args)
   if (targetType === 'canvas') {
     return {
       tabs: [],
