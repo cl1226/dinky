@@ -18,35 +18,21 @@
  */
 
 
-/**
- * 在生产环境 代理是无法生效的，所以这里没有生产环境的配置
- * The agent cannot take effect in the production environment
- * so there is no configuration of the production environment
- * For details, please see
- * https://pro.ant.design/docs/deploy
- */
-export default {
-  dev: {
-    '/api': {
-      // target: 'http://localhost:8888',
-      target: 'http://OLWX-JXPTP93.Svolt.cn:8888',
-      // target: 'http://10.36.30.14:8888',
-      changeOrigin: true,
-      pathRewrite: { '^': '' },
-    },
-  },
-  test: {
-    '/api/': {
-      target: 'https://preview.pro.ant.design',
-      changeOrigin: true,
-      pathRewrite: { '^': '' },
-    },
-  },
-  pre: {
-    '/api/': {
-      target: 'your pre url',
-      changeOrigin: true,
-      pathRewrite: { '^': '' },
-    },
-  },
+export type CatalogueTableListItem = {
+  id: number,
+  taskId: number,
+  name: string,
+  isLeaf: string,
+  parentId: number,
+  projectCode: string,
+};
+
+export type TaskTableListItem = {
+  id: number,
+  name: string,
+  alias: string,
+  dialect: string,
+  config: Object<string, object>,
+  parentId: number,
+  projectCode: string,
 };

@@ -56,10 +56,7 @@ export function convertToTreeData(data: TreeDataNode[], pid: number, path?: stri
         obj.children = temp
         obj.selectable = false
       } else {
-        obj.selectable = true
-        if (obj.status == 'ONLINE') {
-          obj.icon = '<CarryOutOutlined />'
-        }
+        obj.selectable = obj.isLeaf
       }
       result.push(obj)
     }

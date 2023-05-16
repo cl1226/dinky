@@ -5,6 +5,7 @@ import { DND_RENDER_ID } from './constant'
 import type { NsNodeCmd } from '@antv/xflow'
 import type { NsNodeCollapsePanel } from '@antv/xflow'
 import { Card } from 'antd'
+import { getFlowTaskEnum } from './service'
 
 export const onNodeDrop: NsNodeCollapsePanel.IOnNodeDrop = async (node, commands, modelService) => {
   const args: NsNodeCmd.AddNode.IArgs = {
@@ -14,30 +15,29 @@ export const onNodeDrop: NsNodeCollapsePanel.IOnNodeDrop = async (node, commands
 }
 
 const NodeDescription = (props) => {
+  const { name } = props
   return (
-    <Card size="small" title="" style={{ width: '150px' }} bordered={false}>
-      此节点用于执行一个指定的作业节点。
+    <Card size="small" title={false} style={{ width: '150px' }} bordered={false}>
+      此节点用于执行一个指定的{name}作业节点。
     </Card>
   )
 }
 
 export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta, modelService) => {
-  return [
-    {
-      id: '数据集成',
-      header: '数据集成',
-      children: [
-        {
-          id: '1',
-          label: '作业节点',
-          parentId: '1',
-          renderKey: DND_RENDER_ID,
-          jobId: '0',
-          popoverContent: <NodeDescription />,
-        },
-      ],
-    },
-  ]
+  const allTaskEnum = await getFlowTaskEnum()
+  return allTaskEnum.map((item) => ({
+    id: item.key,
+    header: item.title,
+    children: item.res.map((jtem) => ({
+      id: jtem,
+      label: jtem,
+      parentId: '1',
+      renderKey: DND_RENDER_ID,
+      jobId: '0',
+      popoverContent: <NodeDescription name={jtem} />,
+      params: { type: jtem },
+    })),
+  }))
 }
 
 export const searchService: NsNodeCollapsePanel.ISearchService = async (

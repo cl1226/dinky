@@ -15,6 +15,13 @@ export namespace NS_CANVAS_FORM {
   }
 }
 
+export namespace NS_FLOW_TASK_ENUM {
+  export const id = 'flow_task_enum'
+  export interface ITASK {
+    canvasForm: any
+  }
+}
+
 export const useModelServiceConfig = createModelServiceConfig((config) => {
   config.registerModel((registry) => {
     return registry.registerModel({

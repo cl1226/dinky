@@ -61,6 +61,7 @@ export type TaskType = {
 export type TabsItemType = {
   title: string
   key: number
+  treeId: string | number
   value: string
   icon: any
   closable: boolean

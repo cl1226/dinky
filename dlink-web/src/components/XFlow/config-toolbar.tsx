@@ -1,5 +1,5 @@
 import type { IToolbarItemOptions, IModelService, NsGraph } from '@antv/xflow'
-import { createToolbarConfig, XFlowDagCommands, MODELS, IconStore } from '@antv/xflow'
+import { createToolbarConfig, XFlowDagCommands, MODELS, IconStore, useXFlowApp } from '@antv/xflow'
 
 import {
   UngroupOutlined,
@@ -127,6 +127,7 @@ export namespace NSToolbarConfig {
                   XFlowApi.deployDagService(meta, graphData, canvasForm),
               },
             )
+
             setGraphMeta({
               ...graphMeta.meta,
               status: StatusEnum.DEPLOY,
@@ -137,8 +138,6 @@ export namespace NSToolbarConfig {
             const msg = errorFields?.[0]?.['errors']?.[0] || '操作失败'
             message.warn(msg)
           })
-
-        return
       },
     })
 

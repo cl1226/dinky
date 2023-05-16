@@ -50,7 +50,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
     }),
     [],
   )
-
+  const [inited, setInited] = useState(false)
   const [meta, setMeta] = useState<IMeta>({ flowId: flowId })
   const graphHooksConfig = useGraphHookConfig(props)
   const toolbarConfig = useToolbarConfig()
@@ -61,6 +61,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
 
   const handleMeta = async (remainMeta) => {
     setMeta(remainMeta)
+    setInited(true)
   }
 
   /**

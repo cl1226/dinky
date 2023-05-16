@@ -6,6 +6,7 @@ import type { TreeNode } from 'antd/es/tree-select'
 import React, { useState, useEffect } from 'react'
 import { convertToTreeData, TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { getCatalogueTreeData } from '@/pages/DataStudio/service'
+import { getFlowCatalogueTreeByType } from '@/components/XFlow/service'
 import { useXFlowApp, MODELS, XFlowGraphCommands } from '@antv/xflow'
 
 export const SelectorShape: React.FC<NsJsonSchemaForm.IControlProps> = (props) => {
@@ -70,9 +71,10 @@ const Select: React.FC<ISelectorProps> = (props) => {
   const getTreeData = async () => {
     const nodes = await MODELS.SELECTED_NODES.useValue(modelService)
     setValue(nodes[0].data.jobId)
-    const result = await getCatalogueTreeData()
-    let data = result.datas
-    setTreeData(convertToTreeData(data, 0))
+    const { params } = nodes[0].data
+
+    const result = await getFlowCatalogueTreeByType(params?.type)
+    setTreeData(convertToTreeData(result, 0))
   }
 
   return (

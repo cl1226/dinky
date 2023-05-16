@@ -4,7 +4,13 @@ import { uuidv4, NsGraph, NsGraphStatusCommand } from '@antv/xflow'
 import type { NsRenameNodeCmd } from './cmd-extensions/cmd-rename-node-modal'
 import type { NsNodeCmd, NsEdgeCmd, NsGraphCmd } from '@antv/xflow'
 import { message } from 'antd'
-import { getInfoById, getData, handleAddOrUpdate } from '@/components/Common/crud'
+import {
+  getInfoById,
+  getData,
+  handleAddOrUpdate,
+  getTaskEnum,
+  getCatalogueTreeDataByType,
+} from '@/components/Common/crud'
 import { l } from '@/utils/intl'
 import moment from 'moment'
 export interface IMeta {
@@ -297,4 +303,23 @@ export const getJsonCron = (formValues) => {
   }
 
   return JSON.stringify(tempCron)
+}
+
+/** 枚举的数据类型api */
+export const getFlowTaskEnum: any = async () => {
+  const result = await getTaskEnum()
+  if (result.code == 0) {
+    return result.datas
+  } else {
+    return []
+  }
+}
+/** 枚举的数据类型api */
+export const getFlowCatalogueTreeByType: any = async (type: string) => {
+  const result = await getCatalogueTreeDataByType(type)
+  if (result.code == 0) {
+    return result.datas
+  } else {
+    return []
+  }
 }
