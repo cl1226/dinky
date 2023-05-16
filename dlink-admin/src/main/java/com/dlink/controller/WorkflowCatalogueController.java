@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -263,5 +264,11 @@ public class WorkflowCatalogueController {
     public Result dataStatistics(@RequestParam String key) {
         JSONObject entries = catalogueService.dataStatistics(key);
         return Result.succeed(entries, "获取成功");
+    }
+
+    @GetMapping("/getTaskEnum")
+    public Result getTaskEnum() {
+        LinkedList<JSONObject> taskEnum = catalogueService.getTaskEnum();
+        return Result.succeed(taskEnum, "获取成功");
     }
 }

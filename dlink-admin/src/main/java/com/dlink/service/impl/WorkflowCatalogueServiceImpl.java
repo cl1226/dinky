@@ -3,6 +3,7 @@ package com.dlink.service.impl;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.dlink.config.Dialect;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.CatalogueTaskDTO;
 import com.dlink.dto.WorkflowCatalogueTaskDTO;
@@ -20,10 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.dlink.assertion.Asserts.isNotNull;
@@ -134,43 +132,38 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
                 } else {
                     // 删除作业同时将海豚调度上的任务删除
                     this.removeWorkflowInDSByTaskId(catalogue.getTaskId());
-                    taskService.removeById(taskId);
-                    if (StringUtils.isNotBlank(catalogue.getProjectCode())) {
-                        // 删除dolphinscheduler的项目
-                        Result<JSONObject> result = projectClient.deleteProjectByCode(catalogue.getProjectCode());
-                        if (result.getSuccess()) {
-                            this.removeById(id);
-                        }
-                    } else {
-                        this.removeById(id);
-                    }
+                    this.removeById(id);
                 }
             } else {
-                List<WorkflowCatalogue> all = this.getAllData();
-                Set<WorkflowCatalogue> del = new HashSet<>();
-                this.findAllCatalogueInDir(id, all, del);
-                List<String> actives = this.analysisActiveCatalogues(del);
-                if (actives.isEmpty()) {
-                    for (WorkflowCatalogue c : del) {
-                        // 删除作业同时将海豚调度上的任务删除
-                        if (c.getTaskId() != null) {
-                            this.removeWorkflowInDSByTaskId(c.getTaskId());
-                            taskService.removeById(c.getTaskId());
-                        }
+                long count = catalogueService.count(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getParentId, catalogue.getId()));
+                if (count > 0) {
+                    errors.add("该目录下存在子目录或者作业，不允许删除");
+                } else {
+                    List<WorkflowCatalogue> all = this.getAllData();
+                    Set<WorkflowCatalogue> del = new HashSet<>();
+                    this.findAllCatalogueInDir(id, all, del);
+                    List<String> actives = this.analysisActiveCatalogues(del);
+                    if (actives.isEmpty()) {
+                        for (WorkflowCatalogue c : del) {
+                            // 删除作业同时将海豚调度上的任务删除
+                            if (c.getTaskId() != null) {
+                                this.removeWorkflowInDSByTaskId(c.getTaskId());
+                            }
 
-                        if (StringUtils.isNotBlank(catalogue.getProjectCode())) {
-                            // 删除dolphinscheduler的项目
-                            Result<JSONObject> result = projectClient.deleteProjectByCode(catalogue.getProjectCode());
-                            if (result.getSuccess()) {
+                            if (StringUtils.isNotBlank(catalogue.getProjectCode())) {
+                                // 删除dolphinscheduler的项目
+                                Result<JSONObject> result = projectClient.deleteProjectByCode(catalogue.getProjectCode());
+                                if (result.getSuccess()) {
+                                    this.removeById(id);
+                                }
+                            } else {
                                 this.removeById(id);
                             }
-                        } else {
-                            this.removeById(id);
+                            this.removeById(c.getId());
                         }
-                        this.removeById(c.getId());
+                    } else {
+                        errors.addAll(actives);
                     }
-                } else {
-                    errors.addAll(actives);
                 }
             }
         }
@@ -195,11 +188,10 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
             long projectCode = Long.valueOf(root.getProjectCode());
             ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
             if (process != null) {
-                // 先下线
-//                processClient.onlineProcessDefinition(projectCode, process, "OFFLINE");
-                // 再删除
                 processClient.deleteProcessDefinition(projectCode, process.getCode());
             }
+            // 删除成功后再删除任务
+            taskService.removeById(taskId);
         }
     }
 
@@ -210,7 +202,7 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
         List<String> result = new ArrayList<>();
         for (WorkflowCatalogue catalogue : activeCatalogue) {
             WorkflowTask workflowTask = taskService.getById(catalogue.getTaskId());
-            if (workflowTask.getStatus().equals(WorkflowLifeCycle.ONLINE)) {
+            if (workflowTask.getStatus().equals(WorkflowLifeCycle.ONLINE.getValue())) {
                 result.add(workflowTask.getName());
             }
         }
@@ -221,9 +213,7 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
         List<WorkflowCatalogue> relatedList =
                 all.stream().filter(catalogue -> id.equals(catalogue.getId()) || id.equals(catalogue.getParentId()))
                         .collect(Collectors.toList());
-        List<WorkflowCatalogue> subDirCatalogue =
-                relatedList.stream().filter(catalogue -> catalogue.getType() == null).collect(Collectors.toList());
-        subDirCatalogue.forEach(catalogue -> {
+        relatedList.forEach(catalogue -> {
             if (id != catalogue.getId()) {
                 findAllCatalogueInDir(catalogue.getId(), all, del);
             }
@@ -277,5 +267,57 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
         } else {
             return new JSONObject();
         }
+    }
+
+    @Override
+    public LinkedList<JSONObject> getTaskEnum() {
+        LinkedList<String> list1 = new LinkedList<>();
+        list1.add("FlinkSql");
+        list1.add("FlinkJar");
+
+        LinkedList<String> list2 = new LinkedList<>();
+        list2.add("FlinkSql");
+        list2.add("Hive");
+        list2.add("StarRocks");
+        list2.add("ClickHouse");
+        list2.add("Doris");
+        list2.add("Presto");
+        list2.add("Sql");
+
+        LinkedList<String> list3 = new LinkedList<>();
+        list3.add("Data Quality");
+        LinkedList<String> list4 = new LinkedList<>();
+        list4.add("Python");
+
+        LinkedList<JSONObject> result = new LinkedList<>();
+        JSONObject jsonObject1 = new JSONObject();
+        jsonObject1.set("key", "data integration");
+        jsonObject1.set("title", "数据集成");
+        jsonObject1.set("order", "1");
+        jsonObject1.set("res", list1);
+        result.add(jsonObject1);
+
+        JSONObject jsonObject2 = new JSONObject();
+        jsonObject2.set("key", "data compute");
+        jsonObject2.set("title", "计算&分析");
+        jsonObject2.set("order", "2");
+        jsonObject2.set("res", list2);
+        result.add(jsonObject2);
+
+        JSONObject jsonObject3 = new JSONObject();
+        jsonObject3.set("key", "data quality");
+        jsonObject3.set("title", "数据监控");
+        jsonObject3.set("order", "3");
+        jsonObject3.set("res", list3);
+        result.add(jsonObject3);
+
+        JSONObject jsonObject4 = new JSONObject();
+        jsonObject4.set("key", "other");
+        jsonObject4.set("title", "其他");
+        jsonObject4.set("order", "4");
+        jsonObject4.set("res", list4);
+        result.add(jsonObject4);
+
+        return result;
     }
 }

@@ -35,6 +35,8 @@ public interface CatalogueService extends ISuperService<Catalogue> {
 
     List<Catalogue> getAllData();
 
+    List<Catalogue> getAllDataByType(String type);
+
     Catalogue findByParentIdAndName(Integer parentId, String name);
 
     Catalogue createCatalogueAndTask(CatalogueTaskDTO catalogueTaskDTO);

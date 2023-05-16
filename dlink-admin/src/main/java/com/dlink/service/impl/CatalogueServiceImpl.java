@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,6 +75,36 @@ public class CatalogueServiceImpl extends SuperServiceImpl<CatalogueMapper, Cata
     @Override
     public List<Catalogue> getAllData() {
         return this.list();
+    }
+
+    @Override
+    public List<Catalogue> getAllDataByType(String type) {
+        QueryWrapper<Catalogue> queryWrapper = new QueryWrapper<Catalogue>().isNull("task_id");
+        queryWrapper.or().isNotNull("task_id").and(qr -> qr.eq("type", type));
+        List<Catalogue> list = this.list(queryWrapper);
+//        list.stream().forEach(x -> {
+//            List<Catalogue> children = new ArrayList<>();
+//            this.findAllChildren(children, x);
+//            long count = children.stream().filter(y -> y.getIsLeaf()).count();
+//            if (count <= 0) {
+//                list.remove(x);
+//            }
+//        });
+        return list;
+    }
+
+    private void findAllChildren(List<Catalogue> children, Catalogue catalogue) {
+        QueryWrapper<Catalogue> wrapper = new QueryWrapper<>();
+        wrapper.eq("parent_id", catalogue.getId());
+        List<Catalogue> list = this.list(wrapper);
+        children.addAll(list);
+        if (list != null && list.size() > 0) {
+            for (Catalogue c: list) {
+                if (!c.getIsLeaf()) {
+                    this.findAllChildren(children, c);
+                }
+            }
+        }
     }
 
     @Override
@@ -185,7 +216,7 @@ public class CatalogueServiceImpl extends SuperServiceImpl<CatalogueMapper, Cata
         List<Catalogue> subDirCatalogue =
                 relatedList.stream().filter(catalogue -> catalogue.getType() == null).collect(Collectors.toList());
         subDirCatalogue.forEach(catalogue -> {
-            if (id != catalogue.getId()) {
+            if (!id.equals(catalogue.getId())) {
                 findAllCatalogueInDir(catalogue.getId(), all, del);
             }
         });
