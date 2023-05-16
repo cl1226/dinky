@@ -79,31 +79,35 @@ public class CatalogueServiceImpl extends SuperServiceImpl<CatalogueMapper, Cata
 
     @Override
     public List<Catalogue> getAllDataByType(String type) {
-        QueryWrapper<Catalogue> queryWrapper = new QueryWrapper<Catalogue>().isNull("task_id");
-        queryWrapper.or().isNotNull("task_id").and(qr -> qr.eq("type", type));
-        List<Catalogue> list = this.list(queryWrapper);
-//        list.stream().forEach(x -> {
-//            List<Catalogue> children = new ArrayList<>();
-//            this.findAllChildren(children, x);
-//            long count = children.stream().filter(y -> y.getIsLeaf()).count();
-//            if (count <= 0) {
-//                list.remove(x);
-//            }
-//        });
+        QueryWrapper<Catalogue> queryWrapper = new QueryWrapper<Catalogue>().eq("type", type);
+        List<Catalogue> leaves = this.list(queryWrapper);
+        Set<Integer> nodeIds = new HashSet<>();
+        this.findParentNodes(nodeIds, leaves);
+        List<Catalogue> list = new ArrayList<>();
+        List<Catalogue> nodes = new ArrayList<>();
+        if (nodeIds.size() > 0) {
+            QueryWrapper<Catalogue> queryWrapper2 = new QueryWrapper<Catalogue>().in("id", nodeIds);
+            nodes = this.list(queryWrapper2);
+        }
+        list.addAll(nodes);
+        list.addAll(leaves);
         return list;
     }
 
-    private void findAllChildren(List<Catalogue> children, Catalogue catalogue) {
-        QueryWrapper<Catalogue> wrapper = new QueryWrapper<>();
-        wrapper.eq("parent_id", catalogue.getId());
-        List<Catalogue> list = this.list(wrapper);
-        children.addAll(list);
-        if (list != null && list.size() > 0) {
-            for (Catalogue c: list) {
-                if (!c.getIsLeaf()) {
-                    this.findAllChildren(children, c);
-                }
+    private void findParentNodes(Set<Integer> nodeIds, List<Catalogue> leaves) {
+        Set<Integer> parentIds = new HashSet<>();
+        for(Catalogue c : leaves) {
+            if (c.getParentId() != null && c.getParentId() > 0) {
+                parentIds.add(c.getParentId());
             }
+        }
+        if (parentIds.size() > 0) {
+            QueryWrapper<Catalogue> queryWrapper = new QueryWrapper<Catalogue>().in("id", parentIds);
+            List<Catalogue> list = this.list(queryWrapper);
+            list.stream().forEach(x -> {
+                nodeIds.add(x.getId());
+            });
+            this.findParentNodes(nodeIds, list);
         }
     }
 
