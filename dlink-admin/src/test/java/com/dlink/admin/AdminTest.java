@@ -19,9 +19,19 @@
 
 package com.dlink.admin;
 
+import com.dlink.model.Catalogue;
+import com.dlink.service.CatalogueService;
+import com.dlink.service.impl.CatalogueServiceImpl;
 import org.junit.Test;
 
 import cn.dev33.satoken.secure.SaSecureUtil;
+import org.junit.runner.RunWith;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.List;
 
 /**
  * SqlParserTest
@@ -29,11 +39,22 @@ import cn.dev33.satoken.secure.SaSecureUtil;
  * @author wenmo
  * @since 2021/6/14 17:03
  */
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@MapperScan("com.dlink.mapper")
 public class AdminTest {
+
+    @Autowired
+    private CatalogueService catalogueService;
 
     @Test
     public void adminTest() {
         String admin = SaSecureUtil.md5("admin");
     }
 
+    @Test
+    public void getTreeData() {
+        List<Catalogue> list = catalogueService.getAllDataByType("StarRocks");
+        list.stream().forEach(System.out::println);
+    }
 }

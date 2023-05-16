@@ -8,6 +8,7 @@ import com.dlink.dto.WorkflowCatalogueTaskDTO;
 import com.dlink.model.WorkflowCatalogue;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -16,7 +17,6 @@ import java.util.List;
  * @author cl1226
  * @since 2023/4/20 08:27
  **/
-@Service
 public interface WorkflowCatalogueService extends ISuperService<WorkflowCatalogue> {
 
     List<WorkflowCatalogue> getAllData();
@@ -40,5 +40,7 @@ public interface WorkflowCatalogueService extends ISuperService<WorkflowCatalogu
     Integer addDependCatalogue(String[] catalogueNames);
 
     JSONObject dataStatistics(String key);
+
+    LinkedList<JSONObject> getTaskEnum();
 
 }
