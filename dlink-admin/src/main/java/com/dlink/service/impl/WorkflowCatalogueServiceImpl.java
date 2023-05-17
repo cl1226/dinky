@@ -278,6 +278,8 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
         LinkedList<String> list2 = new LinkedList<>();
         list2.add("FlinkSql");
         list2.add("Hive");
+        list2.add("Mysql");
+        list2.add("Sqlserver");
         list2.add("StarRocks");
         list2.add("ClickHouse");
         list2.add("Doris");
