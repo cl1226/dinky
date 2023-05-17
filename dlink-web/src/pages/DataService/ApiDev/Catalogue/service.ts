@@ -1,5 +1,4 @@
 import { request2, CODE } from '@/components/Common/crud'
-import { request } from 'umi'
 import { message } from 'antd'
 import { l } from '@/utils/intl'
 
@@ -35,4 +34,24 @@ export const getAllCatalogueTreeData = () => {
   return request2('/api/dataservice/catalogue/getCatalogueTreeData', {
     method: 'GET',
   })
+}
+
+export const removeCatalogueById = async (id: number) => {
+  const hide = message.loading(l('app.request.delete'))
+  try {
+    const { code, msg } = await request2(`/api/dataservice/catalogue?id=${id}`, {
+      method: 'DELETE',
+    })
+    hide()
+    if (code == CODE.SUCCESS) {
+      message.success(msg)
+    } else {
+      message.warn(msg)
+    }
+    return true
+  } catch (error) {
+    hide()
+    message.error(l('app.request.delete.error'))
+    return false
+  }
 }
