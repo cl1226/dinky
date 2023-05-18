@@ -4,10 +4,16 @@ import { Card, Button, Steps } from 'antd'
 import { PageContainer } from '@ant-design/pro-layout'
 import { history } from 'umi'
 import { Scrollbars } from 'react-custom-scrollbars'
-
+import BasicSetting from './components/BasicSetting'
 const ApiCatalogue: React.FC<{}> = (props: any) => {
   const sref: any = React.createRef<Scrollbars>()
   const [pageStep, setPageStep] = useState(0)
+
+  const getCurrentPage = () => {
+    if (pageStep === 0) {
+      return <BasicSetting />
+    }
+  }
   return (
     <PageContainer
       className={styles['create-page']}
@@ -33,16 +39,18 @@ const ApiCatalogue: React.FC<{}> = (props: any) => {
             下一步
           </Button>
         ) : null,
-        <Button key="submit" type="primary">
-          提交
-        </Button>,
+        pageStep === 2 ? (
+          <Button key="submit" type="primary">
+            提交
+          </Button>
+        ) : null,
         <Button
           key="back"
           onClick={() => {
             history.goBack()
           }}
         >
-          返回
+          取消
         </Button>,
       ]}
     >
@@ -63,11 +71,8 @@ const ApiCatalogue: React.FC<{}> = (props: any) => {
         ]}
       />
       <Card title={false} bordered={false} className={styles['page-card']}>
-        <Scrollbars
-          style={{ height: `calc(100vh - 48px - 50px - 72px - 24px - 80px)` }}
-          ref={sref}
-        >
-          <div style={{ width: '100%', padding: 10, paddingBottom: 0 }}>222</div>
+        <Scrollbars style={{ height: `calc(100vh - 48px - 50px - 72px - 24px - 80px)` }} ref={sref}>
+          <div style={{ width: '100%', padding: 10, paddingBottom: 0 }}>{getCurrentPage()}</div>
         </Scrollbars>
       </Card>
     </PageContainer>
