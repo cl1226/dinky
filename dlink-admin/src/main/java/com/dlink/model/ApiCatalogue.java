@@ -20,11 +20,14 @@ public class ApiCatalogue extends SuperEntity {
 
     private Integer parentId;
 
+    private Boolean isLeaf;
+
     public ApiCatalogue() {
     }
 
-    public ApiCatalogue(Integer tenantId, Integer parentId) {
+    public ApiCatalogue(Integer tenantId, Integer parentId, Boolean isLeaf) {
         this.tenantId = tenantId;
         this.parentId = parentId;
+        this.isLeaf = isLeaf;
     }
 }
