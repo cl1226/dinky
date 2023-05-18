@@ -1,12 +1,8 @@
-import React, { Key, useCallback, useEffect, useState } from 'react'
+import React, { Key, useEffect, useState } from 'react'
 import styles from './index.less'
-import { Button, Col, Empty, Input, Menu, message, Modal, Row, Tooltip, Tree } from 'antd'
+import { Button, Col, Empty, Input, Menu, Modal, Row, Tooltip, Tree } from 'antd'
 import { DownOutlined, FolderAddOutlined, SwitcherOutlined, FileOutlined } from '@ant-design/icons'
-import {
-  convertToTreeData,
-  getTreeNodeByKey,
-  TreeDataNode,
-} from '@/components/Scheduler/SchedulerTree/Function'
+import { convertToTreeData, TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { Scrollbars } from 'react-custom-scrollbars'
 
 import { connect } from 'umi'
@@ -15,10 +11,11 @@ import { l } from '@/utils/intl'
 
 import UpdateCatalogueForm from './UpdateCatalogueForm'
 import {
-  handleAddOrUpdate,
+  handleAddOrUpdateCatalogue,
   getAllCatalogueTreeData,
+  removeCatalogueById,
 } from '@/pages/DataService/ApiDev/Catalogue/service'
-
+import { useOutsideClick } from '@/hooks'
 const { Search } = Input
 const { DirectoryTree } = Tree
 
@@ -29,9 +26,13 @@ type RightClickMenu = {
   categoryName: string
 }
 
-const CatalogueTree: React.FC<{}> = (props: any) => {
-  const { rightClickMenu, dispatch } = props
+export type ICatalogueTreeProps = {
+  getCurrentCatalogue: (node: TreeDataNode) => void
+  dispatch: any
+}
 
+const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps) => {
+  const { getCurrentCatalogue } = props
   const [expandedKeys, setExpandedKeys] = useState<Key[]>()
   const [searchValue, setSearchValue] = useState('')
   const [treeData, setTreeData] = useState<TreeDataNode[]>()
@@ -41,7 +42,12 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
   const [isCreateCatalogue, setIsCreateCatalogue] = useState<boolean>(true)
   const [rootCatalogueFormValues, setRootCatalogueFormValues] = useState({})
   const [rightClickNode, setRightClickNode] = useState<TreeDataNode>()
+  const [rightClickMenuVisible, setRightClickMenuVisible] = useState<boolean>(false)
   const [rightClickNodeTreeItem, setRightClickNodeTreeItem] = useState<RightClickMenu>()
+
+  const outsideRef: any = useOutsideClick(() => {
+    setRightClickMenuVisible(false)
+  })
 
   //   获取目录
   const getTreeData = async () => {
@@ -55,8 +61,6 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
     setExpandedKeys(expandList)
   }
 
-  // 创建根目录
-  const createRootCatalogue = () => {}
   //   折叠树状目录
   const offExpandAll = () => {
     setExpandedKeys([])
@@ -92,11 +96,7 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
       id: e.node.id,
       categoryName: e.node.name,
     })
-    dispatch &&
-      dispatch({
-        type: 'Scheduler/showRightClickMenu',
-        payload: true,
-      })
+    setRightClickMenuVisible(true)
   }
 
   const getNodeTreeRightClickMenu = () => {
@@ -107,11 +107,10 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
       top: pageY,
     }
     let menuItems
-    if (rightClickNode && rightClickNode.isLeaf) {
+    if (rightClickNode) {
       menuItems = (
         <>
           <Menu.Item key="CreateCatalogue">{l('right.menu.createCatalogue')}</Menu.Item>
-          <Menu.Item key="CreateTask">{l('right.menu.createTask')}</Menu.Item>
           <Menu.Item key="Rename">{l('right.menu.rename')}</Menu.Item>
           <Menu.Item key="Delete">{l('right.menu.delete')}</Menu.Item>
         </>
@@ -126,13 +125,11 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
         {menuItems}
       </Menu>
     )
-    return rightClickMenu ? menu : ''
+    return rightClickMenuVisible ? menu : ''
   }
 
   const handleMenuClick = (key: string) => {
-    if (key == 'Open') {
-      toOpen(rightClickNode)
-    } else if (key == 'CreateCatalogue') {
+    if (key == 'CreateCatalogue') {
       createCatalogue(rightClickNode)
     } else if (key == 'Rename') {
       toRename(rightClickNode)
@@ -140,18 +137,40 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
       toDelete(rightClickNode)
     }
   }
-  const toOpen = (node: TreeDataNode | undefined) => {}
-  const createCatalogue = (node: TreeDataNode | undefined) => {}
-  const toRename = (node: TreeDataNode | undefined) => {}
-  const toDelete = (node: TreeDataNode | undefined) => {}
+  const createCatalogue = (node?: TreeDataNode | undefined) => {
+    setCatalogueModalVisible(true)
+    setIsCreateCatalogue(true)
+    let defaultFormVal = {
+      isLeaf: false,
+      parentId: node && !node.isLeaf ? node.id : 0,
+    }
+    setRootCatalogueFormValues(defaultFormVal)
+  }
+  const toRename = (node: TreeDataNode | undefined) => {
+    setCatalogueModalVisible(true)
+    setIsCreateCatalogue(true)
+    setRootCatalogueFormValues({
+      id: node?.id,
+      name: node?.name,
+    })
+  }
+  const toDelete = (node: TreeDataNode | undefined) => {
+    Modal.confirm({
+      title: `删除目录`,
+      content: `确定删除该目录【${node?.name}】吗？`,
+      okText: l('button.confirm'),
+      cancelText: l('button.cancel'),
+      onOk: async () => {
+        await removeCatalogueById(node!.id)
+        getTreeData()
+      },
+    })
+  }
   //选中节点时触发
   const onSelect = (selectedKeys: Key[], e: any) => {
-    if (e.node && e.node.isLeaf) {
-      dispatch({
-        type: 'Scheduler/saveCurrentPath',
-        payload: e.node.path,
-      })
-      toOpen(e.node)
+    if (e.node) {
+      console.log(e.node)
+      getCurrentCatalogue(e.node)
     }
   }
 
@@ -210,17 +229,7 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
   const getEmpty = () => {
     const empty = (
       <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}>
-        <Button
-          type="primary"
-          onClick={() => {
-            setCatalogueModalVisible(true)
-            setIsCreateCatalogue(true)
-            setRootCatalogueFormValues({
-              isLeaf: false,
-              parentId: 0,
-            })
-          }}
-        >
+        <Button type="primary" onClick={() => createCatalogue()}>
           {l('button.createDir')}
         </Button>
       </Empty>
@@ -261,11 +270,17 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
   }, [])
 
   return (
-    <div className={styles['catalogue-tree']}>
+    <div
+      className={[styles['catalogue-tree']].join(' ')}
+      ref={outsideRef}
+      onClick={() => {
+        setRightClickMenuVisible(false)
+      }}
+    >
       <Row>
         <Col span={24}>
-          <Tooltip title={l('right.menu.createRootCatalogue')}>
-            <Button type="text" icon={<FolderAddOutlined />} onClick={createRootCatalogue} />
+          <Tooltip title={l('right.menu.createCatalogue')}>
+            <Button type="text" icon={<FolderAddOutlined />} onClick={() => createCatalogue()} />
           </Tooltip>
           <Tooltip title={l('button.collapseDir')}>
             <Button type="text" icon={<SwitcherOutlined />} onClick={offExpandAll} />
@@ -297,7 +312,7 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
         {catalogueModalVisible ? (
           <UpdateCatalogueForm
             onSubmit={async (value) => {
-              const success = await handleAddOrUpdate(
+              const success = await handleAddOrUpdateCatalogue(
                 isCreateCatalogue
                   ? '/api/dataservice/catalogue'
                   : '/api/dataservice/catalogue/toRename',
@@ -307,15 +322,6 @@ const CatalogueTree: React.FC<{}> = (props: any) => {
                 setCatalogueModalVisible(false)
                 setRootCatalogueFormValues({})
                 getTreeData()
-                if (value.taskId) {
-                  dispatch({
-                    type: 'Catalogue/renameTab',
-                    payload: {
-                      key: value.taskId,
-                      title: value.name,
-                    },
-                  })
-                }
               }
             }}
             onCancel={() => {

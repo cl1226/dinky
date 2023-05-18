@@ -16,7 +16,7 @@ export const StepGuide: React.FC<{ steps: IStepItem[] }> = (props) => {
     <ul className={styles['step-guide']}>
       {steps.map((step, index) => {
         return (
-          <li style={{ width: `${100 / steps.length}%` }}>
+          <li key={index} style={{ width: `${100 / steps.length}%` }}>
             <div
               className="guide-desc"
               onClick={() => {
