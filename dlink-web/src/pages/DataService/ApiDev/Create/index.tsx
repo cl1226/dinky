@@ -64,7 +64,7 @@ const ApiCatalogue: React.FC<{}> = (props: any) => {
       />
       <Card title={false} bordered={false} className={styles['page-card']}>
         <Scrollbars
-          style={{ height: `calc(100vh - 48px - 50px - 72px - 100px - 24px)` }}
+          style={{ height: `calc(100vh - 48px - 50px - 72px - 24px - 80px)` }}
           ref={sref}
         >
           <div style={{ width: '100%', padding: 10, paddingBottom: 0 }}>222</div>

@@ -11,7 +11,7 @@ import { l } from '@/utils/intl'
 
 import UpdateCatalogueForm from './UpdateCatalogueForm'
 import {
-  handleAddOrUpdate,
+  handleAddOrUpdateCatalogue,
   getAllCatalogueTreeData,
   removeCatalogueById,
 } from '@/pages/DataService/ApiDev/Catalogue/service'
@@ -312,7 +312,7 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
         {catalogueModalVisible ? (
           <UpdateCatalogueForm
             onSubmit={async (value) => {
-              const success = await handleAddOrUpdate(
+              const success = await handleAddOrUpdateCatalogue(
                 isCreateCatalogue
                   ? '/api/dataservice/catalogue'
                   : '/api/dataservice/catalogue/toRename',
