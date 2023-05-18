@@ -19,6 +19,8 @@
 
 package com.dlink.configure;
 
+import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.dlink.context.TenantContextHolder;
 
 import java.util.List;
@@ -47,7 +49,7 @@ public class MybatisPlusConfig {
 
     private static final List<String> IGNORE_TABLE_NAMES = Lists.newArrayList(
             "dlink_namespace", "dlink_alert_group", "dlink_alert_history", "dlink_alert_instance", "dlink_catalogue",
-            "dlink_cluster", "dlink_cluster_configuration", "dlink_database"
+            "dlink_cluster", "dlink_cluster_configuration"
              ,"dlink_fragment"
             , "dlink_history", "dlink_jar", "dlink_job_history", "dlink_job_instance", "dlink_role", "dlink_savepoints",
             "dlink_task", "dlink_task_statement", "dlink_task_version");
@@ -56,6 +58,7 @@ public class MybatisPlusConfig {
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         log.info("mybatis plus interceptor execute");
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
 
             @Override
