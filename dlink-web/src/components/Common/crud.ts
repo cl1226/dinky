@@ -279,3 +279,23 @@ export const getCatalogueTreeDataByType = async (type) => {
     },
   })
 }
+
+export const getCommonSelectOptions = async (menuCode, params?: any) => {
+  try {
+    const { code, datas } = await request2(`/api/dataservice/config/getMenu/${menuCode}`, {
+      method: 'GET',
+      params: {
+        ...(params || {}),
+      },
+    })
+
+    if (code == CODE.SUCCESS) {
+      return datas
+    } else {
+      return []
+    }
+  } catch (error) {
+    console.log('getCommonSelectOptions error:', error)
+    return []
+  }
+}

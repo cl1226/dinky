@@ -1,0 +1,52 @@
+.segment_item {
+  :global {
+    .ant-form-item-control {
+      flex: unset;
+      width: 100%;
+    }
+  }
+}
+.test-sql {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 500px;
+  overflow: auto;
+  border: 1px solid #dddddd;
+  :global {
+    .testsql-left {
+      width: 300px;
+      height: 100%;
+      border-right: 1px solid #dddddd;
+      .testsql-params {
+        width: 100%;
+        height: 448px;
+        border-bottom: 1px solid #dddddd;
+        .ant-pro-card-body {
+          padding: 0;
+          .ant-table-body {
+            overflow-y: auto !important;
+            .ant-table-placeholder {
+              display: none;
+            }
+          }
+        }
+      }
+      .testsql-btn {
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+      }
+    }
+    .testsql-right {
+      width: 600px;
+      height: 100%;
+      .ant-tabs-tabpane {
+        height: 410px;
+        padding-top: 10px;
+        padding-right: 10px;
+        overflow-y: auto;
+      }
+    }
+  }
+}

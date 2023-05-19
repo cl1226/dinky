@@ -40,16 +40,12 @@ export const isAntDesignProOrDev = (): boolean => {
 }
 
 // 将枚举转换为option数组
-export const transferEnumToOptions = (e, option?: any) => {
+export const transferEnumToOptions = (e, option?: any): any => {
   const { labelKey = 'label', valueKey = 'value' } = option || {}
   return Object.keys(e).map((key) => ({
-    [labelKey]: key,
-    [valueKey]: e[key],
+    [labelKey]: e[key],
+    [valueKey]: key,
   }))
-}
-// 从枚举中获取label
-export const getEnumLabel = (value, e) => {
-  return Object.keys(e).find((key) => e[key] === value)
 }
 
 //将树形节点改为一维数组

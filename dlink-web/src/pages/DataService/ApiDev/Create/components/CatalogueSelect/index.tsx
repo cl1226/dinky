@@ -43,7 +43,7 @@ export default (props) => {
   return (
     <>
       <Space.Compact style={style}>
-        <Input value={value?.path} onChange={onChange} {...remainProps} />
+        <Input readOnly value={value?.path} onChange={onChange} {...remainProps} />
         <Button
           onClick={() => {
             setVisible(true)
