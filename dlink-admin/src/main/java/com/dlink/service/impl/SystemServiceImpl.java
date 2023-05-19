@@ -21,11 +21,13 @@ package com.dlink.service.impl;
 
 import com.dlink.constant.DirConstant;
 import com.dlink.model.FileNode;
+import com.dlink.service.DataBaseService;
 import com.dlink.service.SystemService;
 import com.dlink.utils.DirUtil;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**

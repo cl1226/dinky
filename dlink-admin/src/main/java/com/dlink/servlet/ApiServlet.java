@@ -82,7 +82,7 @@ public class ApiServlet extends HttpServlet {
 
     private Result process(String path, HttpServletRequest request, HttpServletResponse response) {
 
-        ApiConfig config = apiConfigService.getOne(new QueryWrapper<ApiConfig>().like("path", "/" + apiContext + "/" + path));
+        ApiConfig config = apiConfigService.getOne(new QueryWrapper<ApiConfig>().eq("path", path));
         if (config == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return Result.failed(path + ": api路径不存在");

@@ -1,0 +1,21 @@
+package com.dlink.service;
+
+import com.dlink.db.service.ISuperService;
+import com.dlink.model.AppConfig;
+import com.dlink.model.AppToken;
+
+/**
+ * AppConfigService
+ *
+ * @author cl1226
+ * @since 2023/5/18 16:40
+ **/
+public interface AppConfigService extends ISuperService<AppConfig> {
+
+    AppConfig add(AppConfig appConfig);
+
+    AppToken generateToken(Integer appId, String secret);
+
+    Integer verifyToken(String token);
+
+}

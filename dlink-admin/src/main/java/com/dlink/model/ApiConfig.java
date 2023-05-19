@@ -18,7 +18,15 @@ public class ApiConfig extends SuperEntity {
 
     private String path;
 
+    private String authType;
+
+    private String accessType;
+
+    private String datasourceType;
+
     private String datasourceId;
+
+    private String datasourceDb;
 
     private Integer catalogueId;
 
@@ -31,6 +39,8 @@ public class ApiConfig extends SuperEntity {
     private Integer status;
 
     private Integer tenantId;
+
+    private Integer authId;
 
     private String description;
 
