@@ -4,9 +4,7 @@ import { Button, Col, Empty, Input, Menu, Modal, Row, Tooltip, Tree } from 'antd
 import { DownOutlined, FolderAddOutlined, SwitcherOutlined, FileOutlined } from '@ant-design/icons'
 import { convertToTreeData, TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { Scrollbars } from 'react-custom-scrollbars'
-
-import { connect } from 'umi'
-import { StateType } from '@/pages/DataService/ApiDev/Catalogue/model'
+import { generateList, getParentKey } from '@/utils/utils'
 import { l } from '@/utils/intl'
 
 import UpdateCatalogueForm from './UpdateCatalogueForm'
@@ -28,11 +26,11 @@ type RightClickMenu = {
 
 export type ICatalogueTreeProps = {
   getCurrentCatalogue: (node: TreeDataNode) => void
-  dispatch: any
+  simple?: boolean
 }
 
 const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps) => {
-  const { getCurrentCatalogue } = props
+  const { getCurrentCatalogue, simple = false } = props
   const [expandedKeys, setExpandedKeys] = useState<Key[]>()
   const [searchValue, setSearchValue] = useState('')
   const [treeData, setTreeData] = useState<TreeDataNode[]>()
@@ -237,39 +235,24 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
     return treeData && treeData.length == 0 ? empty : ''
   }
 
-  //将树形节点改为一维数组
-  const generateList = (data: any, list: any[]) => {
-    for (const element of data) {
-      const node = element
-      const { name, id, parentId, level } = node
-      list.push({ name, id, key: id, title: name, parentId, level })
-      if (node.children) {
-        generateList(node.children, list)
-      }
-    }
-    return list
-  }
-  // tree树 匹配方法
-  const getParentKey = (key: number | string, tree: any): any => {
-    let parentKey
-    for (const element of tree) {
-      const node = element
-      if (node.children) {
-        if (node.children.some((item: any) => item.id === key)) {
-          parentKey = node.id
-        } else if (getParentKey(key, node.children)) {
-          parentKey = getParentKey(key, node.children)
-        }
-      }
-    }
-    return parentKey
-  }
-
   useEffect(() => {
     getTreeData()
   }, [])
 
-  return (
+  return simple ? (
+    <DirectoryTree
+      className={styles['simple-tree']}
+      multiple
+      onRightClick={handleContextMenu}
+      onSelect={onSelect}
+      switcherIcon={<DownOutlined />}
+      // showIcon={true}
+      treeData={loop(treeData)}
+      onExpand={onExpand}
+      autoExpandParent={autoExpandParent}
+      expandedKeys={expandedKeys}
+    />
+  ) : (
     <div
       className={[styles['catalogue-tree']].join(' ')}
       ref={outsideRef}
@@ -338,4 +321,4 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
   )
 }
 
-export default connect(({ Catalogue }: { Catalogue: StateType }) => ({}))(CatalogueTree)
+export default CatalogueTree

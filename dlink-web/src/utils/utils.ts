@@ -17,24 +17,66 @@
  *
  */
 
-
 /* eslint no-useless-escape:0 import/prefer-default-export:0 */
-const reg = /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
+const reg =
+  /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/
 
-export const isUrl = (path: string): boolean => reg.test(path);
+export const isUrl = (path: string): boolean => reg.test(path)
 
 export const isAntDesignPro = (): boolean => {
   if (ANT_DESIGN_PRO_ONLY_DO_NOT_USE_IN_YOUR_PRODUCTION === 'site') {
-    return true;
+    return true
   }
-  return window.location.hostname === 'preview.pro.ant.design';
-};
+  return window.location.hostname === 'preview.pro.ant.design'
+}
 
 // 给官方演示站点用，用于关闭真实开发环境不需要使用的特性
 export const isAntDesignProOrDev = (): boolean => {
-  const { NODE_ENV } = process.env;
+  const { NODE_ENV } = process.env
   if (NODE_ENV === 'development') {
-    return true;
+    return true
   }
-  return isAntDesignPro();
-};
+  return isAntDesignPro()
+}
+
+// 将枚举转换为option数组
+export const transferEnumToOptions = (e, option?: any) => {
+  const { labelKey = 'label', valueKey = 'value' } = option || {}
+  return Object.keys(e).map((key) => ({
+    [labelKey]: key,
+    [valueKey]: e[key],
+  }))
+}
+// 从枚举中获取label
+export const getEnumLabel = (value, e) => {
+  return Object.keys(e).find((key) => e[key] === value)
+}
+
+//将树形节点改为一维数组
+export const generateList = (data: any, list: any[]) => {
+  for (const element of data) {
+    const node = element
+    const { name, id, parentId, level } = node
+    list.push({ name, id, key: id, title: name, parentId, level })
+    if (node.children) {
+      generateList(node.children, list)
+    }
+  }
+  return list
+}
+
+// tree树 匹配方法
+export const getParentKey = (key: number | string, tree: any): any => {
+  let parentKey
+  for (const element of tree) {
+    const node = element
+    if (node.children) {
+      if (node.children.some((item: any) => item.id === key)) {
+        parentKey = node.id
+      } else if (getParentKey(key, node.children)) {
+        parentKey = getParentKey(key, node.children)
+      }
+    }
+  }
+  return parentKey
+}
