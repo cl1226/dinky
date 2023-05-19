@@ -2,16 +2,16 @@ package com.dlink.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
+import com.dlink.dto.ApiConfigDTO;
 import com.dlink.dto.DebugDTO;
 import com.dlink.dto.SearchCondition;
 import com.dlink.model.ApiConfig;
+import com.dlink.model.Schema;
 import com.dlink.service.ApiConfigService;
 import lombok.extern.slf4j.Slf4j;
-import org.codehaus.jackson.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,6 +32,15 @@ public class ApiConfigController {
     public Result page(@RequestBody SearchCondition searchCondition) throws Exception {
         Page<ApiConfig> page = service.page(searchCondition);
         return Result.succeed(page, "获取成功");
+    }
+
+    @GetMapping("/detail")
+    public Result getDetail(@RequestParam Integer id) {
+        ApiConfigDTO detail = service.getDetail(id);
+        if (detail == null) {
+            return Result.failed(null, "获取失败");
+        }
+        return Result.succeed(detail, "获取成功");
     }
 
     @PutMapping
@@ -80,6 +89,27 @@ public class ApiConfigController {
     public Result executeSql(@RequestBody DebugDTO debugDTO) {
         Result result = service.executeSql(debugDTO);
         return result;
+    }
+
+    @GetMapping("/getMenu/{code}")
+    public Result getMenuByCode(@PathVariable String code, @RequestParam(required = false) String value) {
+        Result result = service.getMenuByCode(code, value);
+        return result;
+    }
+
+    @GetMapping("/getSchemaByDatasourceId")
+    public Result getSchemaByDatasourceId(@RequestParam Integer id) {
+        List<Schema> schemaByDatabase = service.getSchemaByDatabase(id);
+        return Result.succeed(schemaByDatabase, "获取成功");
+    }
+
+    @PutMapping("/configureAuth")
+    public Result configureAuth(@RequestParam Integer id, @RequestParam Integer appId) {
+        ApiConfig apiConfig = service.configureAuth(id, appId);
+        if (apiConfig == null) {
+            return Result.failed("配置失败");
+        }
+        return Result.succeed(apiConfig, "配置成功");
     }
 
 }

@@ -41,6 +41,6 @@ public interface WorkflowCatalogueService extends ISuperService<WorkflowCatalogu
 
     JSONObject dataStatistics(String key);
 
-    LinkedList<JSONObject> getTaskEnum();
+    List<JSONObject> getTaskEnum();
 
 }

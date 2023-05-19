@@ -9,6 +9,7 @@ import com.dlink.service.ApiCatalogueService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -77,5 +78,25 @@ public class ApiCatalogueServiceImpl extends SuperServiceImpl<ApiCatalogueMapper
             this.updateById(catalogue);
             return true;
         }
+    }
+
+    private void getParentById(List<String> paths, Integer id) {
+        if (id == 0) {
+            return;
+        }
+        ApiCatalogue apiCatalogue = this.getById(id);
+        if (apiCatalogue != null){
+            paths.add(apiCatalogue.getName());
+            this.getParentById(paths, apiCatalogue.getParentId());
+        } else {
+            return;
+        }
+    }
+
+    @Override
+    public List<String> listAbsolutePathById(Integer id) {
+        List<String> paths = new ArrayList<>();
+        this.getParentById(paths, id);
+        return paths;
     }
 }

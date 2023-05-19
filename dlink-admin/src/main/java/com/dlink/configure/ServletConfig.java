@@ -1,6 +1,7 @@
 package com.dlink.configure;
 
 import com.dlink.servlet.ApiServlet;
+import com.dlink.servlet.TokenServlet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,12 +25,23 @@ public class ServletConfig {
     @Autowired
     private ApiServlet apiServlet;
 
+    @Autowired
+    private TokenServlet tokenServlet;
+
     @Bean
     public ServletRegistrationBean getServletRegistrationBean() {
         String format = String.format("/%s/*", apiContext);
         ServletRegistrationBean bean = new ServletRegistrationBean(apiServlet);
         bean.addUrlMappings(format);
         log.info("regist APIServlet servelet for {} urlMappings",format);
+        return bean;
+    }
+
+    @Bean
+    public ServletRegistrationBean tokenServletRegistrationBean() {
+        ServletRegistrationBean bean = new ServletRegistrationBean(tokenServlet);
+        bean.addUrlMappings("/token/generate");
+        log.info("Register tokenServlet servlet ");
         return bean;
     }
 }

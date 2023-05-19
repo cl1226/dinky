@@ -11,7 +11,9 @@ import lombok.Data;
 @Data
 public class DebugDTO {
 
-    private String id;
+    private String datasourceId;
+
+    private String sql;
 
     private String params;
 

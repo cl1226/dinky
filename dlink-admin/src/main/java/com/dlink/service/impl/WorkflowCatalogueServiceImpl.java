@@ -270,12 +270,13 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
     }
 
     @Override
-    public LinkedList<JSONObject> getTaskEnum() {
-        LinkedList<String> list1 = new LinkedList<>();
-        list1.add("FlinkSql");
-        list1.add("FlinkJar");
+    public List<JSONObject> getTaskEnum() {
+        List<String> list1 = new ArrayList<>();
+        list1.add("RestClient");
+        list1.add("KafkaClient");
+        list1.add("File");
 
-        LinkedList<String> list2 = new LinkedList<>();
+        List<String> list2 = new ArrayList<>();
         list2.add("FlinkSql");
         list2.add("Hive");
         list2.add("Mysql");
@@ -286,12 +287,12 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
         list2.add("Presto");
         list2.add("Sql");
 
-        LinkedList<String> list3 = new LinkedList<>();
+        List<String> list3 = new ArrayList<>();
         list3.add("Data Quality");
-        LinkedList<String> list4 = new LinkedList<>();
+        List<String> list4 = new ArrayList<>();
         list4.add("Python");
 
-        LinkedList<JSONObject> result = new LinkedList<>();
+        List<JSONObject> result = new ArrayList<>();
         JSONObject jsonObject1 = new JSONObject();
         jsonObject1.set("key", "data integration");
         jsonObject1.set("title", "数据集成");

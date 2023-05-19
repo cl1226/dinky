@@ -3,6 +3,7 @@ package com.dlink.service;
 import com.dlink.db.service.ISuperService;
 import com.dlink.model.ApiCatalogue;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -22,5 +23,7 @@ public interface ApiCatalogueService extends ISuperService<ApiCatalogue> {
     List<String> removeCatalogueId(Integer id);
 
     boolean toRename(ApiCatalogue catalogue);
+
+    List<String> listAbsolutePathById(Integer id);
 
 }

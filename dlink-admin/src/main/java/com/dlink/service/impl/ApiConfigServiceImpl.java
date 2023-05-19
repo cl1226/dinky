@@ -8,13 +8,15 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
 import com.dlink.db.service.impl.SuperServiceImpl;
+import com.dlink.dto.ApiConfigDTO;
 import com.dlink.dto.DebugDTO;
 import com.dlink.dto.SearchCondition;
 import com.dlink.mapper.ApiConfigMapper;
 import com.dlink.metadata.driver.Driver;
-import com.dlink.model.ApiConfig;
-import com.dlink.model.DataBase;
+import com.dlink.model.*;
+import com.dlink.service.ApiCatalogueService;
 import com.dlink.service.ApiConfigService;
+import com.dlink.service.AppConfigService;
 import com.dlink.service.DataBaseService;
 import com.dlink.utils.JdbcUtil;
 import com.dlink.utils.PoolUtils;
@@ -22,11 +24,13 @@ import com.dlink.utils.SqlEngineUtils;
 import com.github.freakchick.orange.SqlMeta;
 import com.github.freakchick.orange.engine.DynamicSqlEngine;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * ApiConfigServiceImpl
@@ -39,6 +43,10 @@ public class ApiConfigServiceImpl extends SuperServiceImpl<ApiConfigMapper, ApiC
 
     @Autowired
     private DataBaseService dataBaseService;
+    @Autowired
+    private ApiCatalogueService apiCatalogueService;
+    @Autowired
+    private AppConfigService appConfigService;
 
     @Override
     public Page<ApiConfig> page(SearchCondition searchCondition) {
@@ -53,10 +61,33 @@ public class ApiConfigServiceImpl extends SuperServiceImpl<ApiConfigMapper, ApiC
             queryWrapper.eq("catalogue_id", searchCondition.getCatalogueId());
         }
 
-        queryWrapper.orderByDesc("update_time");
+        queryWrapper.orderByDesc("create_time");
 
         return this.baseMapper.selectPage(page, queryWrapper);
     }
+
+    @Override
+    public ApiConfigDTO getDetail(Integer id) {
+        ApiConfig apiConfig = this.getById(id);
+        if (apiConfig == null) {
+            return null;
+        }
+        ApiConfigDTO apiConfigDTO = new ApiConfigDTO();
+        BeanUtils.copyProperties(apiConfig, apiConfigDTO);
+        DataBase database = dataBaseService.getById(apiConfig.getDatasourceId());
+        if (database != null) {
+            apiConfigDTO.setDatasourceName(database.getName());
+        }
+        ApiCatalogue apiCatalogue = apiCatalogueService.getById(apiConfig.getCatalogueId());
+        if (apiCatalogue == null) {
+            return null;
+        }
+        List<String> paths = apiCatalogueService.listAbsolutePathById(apiConfig.getCatalogueId());
+        apiConfigDTO.setAbsolutePath("/" + paths.stream().map(String::valueOf).collect(Collectors.joining("/")));
+        return apiConfigDTO;
+    }
+
+
 
     @Override
     public ApiConfig online(Integer id) {
@@ -82,23 +113,65 @@ public class ApiConfigServiceImpl extends SuperServiceImpl<ApiConfigMapper, ApiC
 
     @Override
     public Result executeSql(DebugDTO debugDTO) {
-        ApiConfig apiConfig = this.getById(debugDTO.getId());
-        if (apiConfig == null) {
-            return Result.failed("调试失败");
-        }
-        DataBase dataBase = dataBaseService.getById(apiConfig.getDatasourceId());
+        DataBase dataBase = dataBaseService.getById(debugDTO.getDatasourceId());
         if (dataBase == null) {
             return Result.failed("调试失败， 数据源不存在");
         }
         try {
             DruidPooledConnection connection = PoolUtils.getPooledConnection(dataBase);
             Map<String, Object> map = JSON.parseObject(debugDTO.getParams(), Map.class);
-            SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(apiConfig.getSegment(), map);
+            SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(debugDTO.getSql(), map);
             Object data = JdbcUtil.executeSql(connection, sqlMeta.getSql(), sqlMeta.getJdbcParamValues());
             return Result.succeed(data, "调试成功");
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return Result.failed("调试失败");
+    }
+
+    @Override
+    public Result getMenuByCode(String code, String value) {
+        String datasourceType = "Hive,StarRocks,Mysql,SQLServer,Oracle,PostgreSQL,Clickhouse,Presto";
+        List<Map<String, String>> list = new ArrayList<>();
+        Arrays.stream(datasourceType.split(",")).forEach(x -> {
+            Map<String, String> map = new HashMap<>();
+            map.put("label", x);
+            map.put("value", x);
+            list.add(map);
+        });
+        // 获取数据源类型
+        if ("datasourceType".equals(code)) {
+            return Result.succeed(list, "获取成功");
+        }
+        if ("datasourceId".equals(code)) {
+            List<DataBase> database = dataBaseService.list(new QueryWrapper<DataBase>().eq("type", value));
+            return Result.succeed(database, "获取成功");
+        }
+        if ("dataSourceDb".equals(code)) {
+            List<Schema> schemasAndTables = dataBaseService.getSchemasAndTables(Integer.valueOf(value));
+            return Result.succeed(schemasAndTables, "获取成功");
+        }
+        return null;
+    }
+
+    @Override
+    public List<Schema> getSchemaByDatabase(Integer databaseId) {
+        List<Schema> schemasAndTables = dataBaseService.getSchemasAndTables(databaseId);
+        return schemasAndTables;
+    }
+
+    @Override
+    public ApiConfig configureAuth(Integer id, Integer appId) {
+        ApiConfig apiConfig = this.getById(id);
+        if (apiConfig == null) {
+            return null;
+        }
+        AppConfig appConfig = appConfigService.getById(appId);
+        if (appConfig == null) {
+            return null;
+        }
+        apiConfig.setAuthId(appConfig.getId());
+        this.saveOrUpdate(apiConfig);
+        return apiConfig;
     }
 }
