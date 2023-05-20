@@ -6,6 +6,7 @@ import { history } from 'umi'
 import { Scrollbars } from 'react-custom-scrollbars'
 import BasicSetting from './components/BasicSetting'
 import AccessLogic from './components/AccessLogic'
+import ApiTest from './components/ApiTest'
 const formLayout = {
   labelCol: { flex: '150px' },
   labelAlign: 'left',
@@ -15,10 +16,10 @@ const formLayout = {
 }
 const ApiCatalogue: React.FC<{}> = (props: any) => {
   const sref: any = React.createRef<Scrollbars>()
-  const [pageStep, setPageStep] = useState(1)
+  const [pageStep, setPageStep] = useState(2)
   const [form] = Form.useForm()
   const forms = useMemo(() => ({}), [])
-  const StepComponents = [BasicSetting, AccessLogic]
+  const StepComponents = [BasicSetting, AccessLogic, ApiTest]
 
   const getCurrentPage = (currentStep) => {
     const Com = StepComponents[currentStep]

@@ -105,7 +105,7 @@ export const ParamtersTable = ({ params, onAdd }) => {
   )
 }
 
-const CustomTable = ({ dataSource }) => {
+export const CustomTable = ({ dataSource }) => {
   const getColumns = (rowItem) =>
     Object.keys(rowItem || []).map((key) => ({
       title: key,
