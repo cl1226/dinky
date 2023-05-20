@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { Button, Form, Space, Modal, Input, Select, Table } from 'antd'
 import { l } from '@/utils/intl'
-import { transferEnumToOptions, getEnumLabel } from '@/utils/utils'
-
+import { transferEnumToOptions } from '@/utils/utils'
+import { cloneDeep } from 'lodash'
 export enum EDataType {
   'string' = 'string',
   'bigint' = 'bigint',
@@ -30,7 +30,7 @@ export default (props) => {
   const defaultValue = JSON.parse(value || '[]')
   const [visible, setVisible] = useState(false)
   const [form] = Form.useForm()
-  const [isCreate, setIsCreate] = useState(true)
+  const [currentId, setCurrentId] = useState<number | null>(null)
   const [paramList, setParamList] = useState<IParametersJson[]>(defaultValue)
   const onAdd = () => {
     form.setFieldsValue({
@@ -38,15 +38,32 @@ export default (props) => {
       type: '',
       description: '',
     })
-    setIsCreate(true)
+    setCurrentId(null)
     setVisible(true)
   }
-
+  const onEdit = (rowItem) => {
+    const { tempId, ...remainItem } = rowItem
+    form.setFieldsValue(remainItem)
+    setCurrentId(tempId)
+    setVisible(true)
+  }
+  const onDelete = (rowItem) => {
+    const tempList = cloneDeep(paramList)
+    tempList.splice(rowItem.tempId, 1)
+    setParamList(tempList)
+    onChange(JSON.stringify(tempList))
+  }
   const submitForm = async () => {
     const fieldsValue = await form.validateFields()
 
-    if (isCreate) {
+    if (currentId === null) {
       const tempList = [...paramList, fieldsValue]
+      setParamList(tempList)
+      onChange(JSON.stringify(tempList))
+      setVisible(false)
+    } else {
+      const tempList = cloneDeep(paramList)
+      tempList[currentId] = fieldsValue
       setParamList(tempList)
       onChange(JSON.stringify(tempList))
       setVisible(false)
@@ -96,24 +113,52 @@ export default (props) => {
       title: '参数名',
       dataIndex: 'name',
       key: 'name',
+      width: 200,
     },
     {
       title: '类型',
       dataIndex: 'type',
       key: 'type',
+      width: 150,
+      render: (cellValue, record) => {
+        return EDataType[cellValue]
+      },
     },
     {
       title: '描述',
       dataIndex: 'description',
       key: 'description',
-      render: (cellValue, record) => {
-        return getEnumLabel(cellValue, EDataType)
-      },
+      width: 250,
+      ellipsis: true,
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: 200,
+      render: (cellValue, record) => (
+        <Space size="middle">
+          <Button size="small" type="link" onClick={() => onEdit(record)}>
+            编辑
+          </Button>
+          <Button size="small" type="link" onClick={() => onDelete(record)}>
+            删除
+          </Button>
+        </Space>
+      ),
     },
   ]
   const renderTable = () => {
     if (paramList && paramList.length) {
-      return <Table dataSource={paramList} columns={columns} />
+      return (
+        <Table
+          style={{ marginTop: 10, width: 800 }}
+          rowKey="tempId"
+          size="small"
+          dataSource={paramList.map((item, index) => ({ ...item, tempId: index }))}
+          columns={columns}
+          pagination={false}
+        />
+      )
     }
     return null
   }
@@ -138,7 +183,7 @@ export default (props) => {
         width={640}
         bodyStyle={{ padding: '32px 40px 48px' }}
         destroyOnClose
-        title={'添加入参'}
+        title={`${currentId === null ? '添加' : '编辑'}入参`}
         open={visible}
         footer={renderFooter()}
         onCancel={() => setVisible(false)}
