@@ -14,6 +14,7 @@ import {
   ConfigProvider,
   Tabs,
   message,
+  Tooltip,
 } from 'antd'
 import { transferEnumToOptions } from '@/utils/utils'
 import { EDataType } from '@/pages/DataService/ApiDev/Create/components/Parameters'
@@ -26,6 +27,7 @@ import type { ProColumns } from '@ant-design/pro-components'
 import { EditableProTable } from '@ant-design/pro-components'
 import { requestExecuteSql } from '@/pages/DataService/ApiDev/Create/service'
 import { CODE } from '@/components/Common/crud'
+
 interface ITestParams {
   name: string
   value: string
@@ -103,13 +105,32 @@ export const ParamtersTable = ({ params, onAdd }) => {
   )
 }
 
-const CustomTable=(dataSource)=>{
-
-    dataSource = [{"tenant_id":1,"cron":"{\"timezoneId\":\"Asia/Shanghai\",\"crontab\":\"0 0 * * * ? *\",\"startTime\":\"2023-05-12 16:58:14\",\"endTime\":\"2123-05-12 16:58:14\"}","create_time":"2023-05-12T16:57:00","graph_data":"{\"nodes\":[{\"id\":\"8fbe131e-fba8-47cd-9d35-860d16cff019\",\"renderKey\":\"DND_NDOE\",\"width\":180,\"height\":36,\"label\":\"mysql_create_table\",\"parentId\":\"1\",\"jobId\":9,\"popoverContent\":{\"key\":null,\"ref\":null,\"props\":{},\"_owner\":null},\"x\":-230,\"y\":-150,\"ports\":[{\"type\":\"input\",\"group\":\"top\",\"tooltip\":\"输入桩1\",\"id\":\"42dc72b2-943a-4782-9045-fd2168ced833\"},{\"type\":\"output\",\"group\":\"bottom\",\"tooltip\":\"输出桩\",\"id\":\"225c88a0-7093-4e9b-943f-2226cad9eac9\"}]},{\"id\":\"c8e97cd8-a5fc-4eec-af32-f339a0f319b6\",\"renderKey\":\"DND_NDOE\",\"width\":180,\"height\":36,\"label\":\"mysql_hive\",\"parentId\":\"1\",\"jobId\":10,\"popoverContent\":{\"key\":null,\"ref\":null,\"props\":{},\"_owner\":null},\"x\":-60,\"y\":-30,\"ports\":[{\"type\":\"input\",\"group\":\"top\",\"tooltip\":\"输入桩1\",\"id\":\"254b9482-d03d-413a-865d-e31592c17142\"},{\"type\":\"output\",\"group\":\"bottom\",\"tooltip\":\"输出桩\",\"id\":\"d73ad268-94c8-4648-aabf-b1042631f5e6\"}]},{\"id\":\"82950284-ecdc-4fa4-a410-dbdeee308f55\",\"renderKey\":\"DND_NDOE\",\"width\":180,\"height\":36,\"label\":\"hive_starrocks\",\"parentId\":\"1\",\"jobId\":14,\"popoverContent\":{\"key\":null,\"ref\":null,\"props\":{},\"_owner\":null},\"x\":80,\"y\":110,\"ports\":[{\"type\":\"input\",\"group\":\"top\",\"tooltip\":\"输入桩1\",\"id\":\"bef05100-390e-4b38-93a4-ca0fafd1b156\"},{\"type\":\"output\",\"group\":\"bottom\",\"tooltip\":\"输出桩\",\"id\":\"b4ad1c72-23f2-42ce-a610-cb18b302c656\"}]}],\"edges\":[{\"id\":\"01c54af6-999c-4733-98ea-22ac161e162b\",\"targetPortId\":\"254b9482-d03d-413a-865d-e31592c17142\",\"sourcePortId\":\"225c88a0-7093-4e9b-943f-2226cad9eac9\",\"source\":\"8fbe131e-fba8-47cd-9d35-860d16cff019\",\"target\":\"c8e97cd8-a5fc-4eec-af32-f339a0f319b6\",\"edge\":{\"shape\":\"xflow-edge\",\"attrs\":{\"line\":{\"stroke\":\"#d5d5d5\",\"strokeWidth\":1,\"targetMarker\":\"\",\"strokeDasharray\":\"\"}},\"zIndex\":1,\"highlight\":false,\"id\":\"df529c22-8534-4742-ba72-9f885a73f7a3\",\"source\":{\"cell\":\"8fbe131e-fba8-47cd-9d35-860d16cff019\",\"port\":\"225c88a0-7093-4e9b-943f-2226cad9eac9\"},\"target\":{\"cell\":\"c8e97cd8-a5fc-4eec-af32-f339a0f319b6\",\"port\":\"254b9482-d03d-413a-865d-e31592c17142\"}},\"connector\":{\"name\":\"rounded\"},\"router\":{\"name\":\"manhattan\"},\"sourcePort\":\"225c88a0-7093-4e9b-943f-2226cad9eac9\",\"targetPort\":\"254b9482-d03d-413a-865d-e31592c17142\"},{\"id\":\"f4bcd69d-f235-455b-9264-abcee2707733\",\"targetPortId\":\"bef05100-390e-4b38-93a4-ca0fafd1b156\",\"sourcePortId\":\"d73ad268-94c8-4648-aabf-b1042631f5e6\",\"source\":\"c8e97cd8-a5fc-4eec-af32-f339a0f319b6\",\"target\":\"82950284-ecdc-4fa4-a410-dbdeee308f55\",\"edge\":{\"shape\":\"xflow-edge\",\"attrs\":{\"line\":{\"stroke\":\"#d5d5d5\",\"strokeWidth\":1,\"targetMarker\":\"\",\"strokeDasharray\":\"\"}},\"zIndex\":1,\"highlight\":false,\"id\":\"2d8ac096-cd4d-4fe7-9c4d-15c35c248dec\",\"source\":{\"cell\":\"c8e97cd8-a5fc-4eec-af32-f339a0f319b6\",\"port\":\"d73ad268-94c8-4648-aabf-b1042631f5e6\"},\"target\":{\"cell\":\"82950284-ecdc-4fa4-a410-dbdeee308f55\",\"port\":\"bef05100-390e-4b38-93a4-ca0fafd1b156\"}},\"connector\":{\"name\":\"rounded\"},\"router\":{\"name\":\"manhattan\"},\"sourcePort\":\"d73ad268-94c8-4648-aabf-b1042631f5e6\",\"targetPort\":\"bef05100-390e-4b38-93a4-ca0fafd1b156\"}]}","scheduler_type":"CYCLE","version_id":null,"type":null,"cron_id":null,"lock_user":"1","enabled":true,"update_time":"2023-05-12T16:58:28","name":"Job_01","alias":"Job_01","id":195,"status":"DEPLOY"}]
-
-
-
-    return null
+const CustomTable = ({ dataSource }) => {
+  const getColumns = (rowItem) =>
+    Object.keys(rowItem || []).map((key) => ({
+      title: key,
+      dataIndex: key,
+      ellipsis: {
+        showTitle: false,
+      },
+      width: 100,
+      render: (cellValue) => (
+        <Tooltip placement="topLeft" title={cellValue}>
+          {cellValue}
+        </Tooltip>
+      ),
+    }))
+  return dataSource && dataSource.length ? (
+    <Table
+      columns={getColumns(dataSource?.[0])}
+      dataSource={dataSource}
+      rowKey="id"
+      size="small"
+      bordered
+      scroll={{ y: 400 }}
+      pagination={false}
+    />
+  ) : null
 }
 
 export default ({ form, formLayout, forms }) => {
@@ -117,7 +138,7 @@ export default ({ form, formLayout, forms }) => {
   const editorRef = useRef<any>(null)
   const [testParams, setTestParams] = useState<readonly ITestParams[]>([])
   const [executeKey, setExecuteKey] = useState('1')
-  const [executeResult, setExecuteResult] = useState('')
+  const [executeResult, setExecuteResult] = useState([])
 
   const [tableForm] = Form.useForm()
 
@@ -132,14 +153,10 @@ export default ({ form, formLayout, forms }) => {
       sql: form.getFieldValue('segment'),
       params: JSON.stringify(reqP),
     }
-    requestExecuteSql({
-      datasourceId: 6,
-      sql: 'select * from dlink.dlink_workflow_task where id=#{id}',
-      params: '{ id: 195 }',
-    }).then((res) => {
+    requestExecuteSql(tempParam).then((res) => {
       if (res.code === CODE.SUCCESS) {
         setExecuteKey('2')
-        setExecuteResult(JSON.stringify(res.datas))
+        setExecuteResult(res.datas || [])
       } else {
         message.error(res.msg)
       }
@@ -380,7 +397,7 @@ export default ({ form, formLayout, forms }) => {
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab="执行结果" key="2">
-                {executeResult}
+                <CustomTable dataSource={executeResult}></CustomTable>
               </Tabs.TabPane>
             </Tabs>
           </div>
