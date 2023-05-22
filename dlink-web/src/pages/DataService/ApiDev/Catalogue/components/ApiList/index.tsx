@@ -137,6 +137,9 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
         <Space size="middle">
           <Tooltip title={'编辑'}>
             <Button
+              onClick={() => {
+                history.push(`/dataService/devApi/edit/${record.id}`)
+              }}
               size="small"
               disabled={record.status === 1}
               type="text"

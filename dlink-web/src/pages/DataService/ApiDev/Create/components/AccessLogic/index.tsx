@@ -133,7 +133,7 @@ export const CustomTable = ({ dataSource }) => {
   ) : null
 }
 
-export default ({ form, formLayout, forms }) => {
+export default ({ form, formLayout, forms, mode }) => {
   const [visible, setVisible] = useState(false)
   const editorRef = useRef<any>(null)
   const [testParams, setTestParams] = useState<readonly ITestParams[]>([])
@@ -222,7 +222,7 @@ export default ({ form, formLayout, forms }) => {
           }
         >
           {({ getFieldValue }) =>
-            getFieldValue('datasourceType') ? (
+            getFieldValue('datasourceType') || mode === 'edit' ? (
               <Form.Item
                 label="数据连接"
                 name="datasourceId"
@@ -253,7 +253,7 @@ export default ({ form, formLayout, forms }) => {
           }
         >
           {({ getFieldValue }) =>
-            getFieldValue('datasourceId') ? (
+            getFieldValue('datasourceId') || mode === 'edit' ? (
               <Form.Item
                 label="数据库"
                 name="datasourceDb"
@@ -264,7 +264,7 @@ export default ({ form, formLayout, forms }) => {
                   asyncCode={EAsyncCode.datasourceDb}
                   asyncParams={{ value: getFieldValue('datasourceId') }}
                   optionFormatter={(options) =>
-                    options.map((option) => ({ label: option.name, value: option.id }))
+                    options.map((option) => ({ label: option.name, value: option.name }))
                   }
                 ></SelectHelp>
               </Form.Item>

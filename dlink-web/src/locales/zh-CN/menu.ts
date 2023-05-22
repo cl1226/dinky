@@ -37,6 +37,7 @@ export default {
   'menu.dataService.devApi.catalogue': 'API目录',
   'menu.dataService.devApi.management': 'API管理',
   'menu.dataService.devApi.create': 'API创建',
+  'menu.dataService.devApi.edit': 'API编辑',
   'menu.dataService.invokeApi': '调用API',
   'menu.dataService.invokeApi.catalogue': '服务目录',
   'menu.dataService.invokeApi.overview': '服务概览',
