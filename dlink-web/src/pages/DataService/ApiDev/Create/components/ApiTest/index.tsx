@@ -1,12 +1,14 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styles from './index.less'
 import { Descriptions, Form, Button, message, Row, Input } from 'antd'
 import type { ProColumns } from '@ant-design/pro-components'
 import { EditableProTable } from '@ant-design/pro-components'
-import { CODE } from '@/components/Common/crud'
-import { requestApiTest } from '@/pages/DataService/ApiDev/Create/service'
-import { EDataType } from '@/pages/DataService/ApiDev/Create/components/Parameters'
 
+import { CODE } from '@/components/Common/crud'
+import { EDataType } from '@/pages/DataService/ApiDev/Create/components/Parameters'
+import { IStepComProps } from '@/pages/DataService/ApiDev/Create/type'
+
+import { requestApiTest } from '@/pages/DataService/ApiDev/Create/service'
 interface ITestParams {
   name: string
   value?: string
@@ -21,7 +23,7 @@ interface IExecuteResult {
   timeConsuming?: number
 }
 
-export default ({ form, formLayout, forms, mode }) => {
+export default ({ form, formLayout, forms, mode }: IStepComProps) => {
   const [testParams, setTestParams] = useState<readonly ITestParams[]>([])
   const [tableForm] = Form.useForm()
   const [executeResult, setExecuteResult] = useState<IExecuteResult>({})

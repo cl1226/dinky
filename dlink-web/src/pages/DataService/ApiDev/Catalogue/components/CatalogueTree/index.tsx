@@ -42,6 +42,7 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
   const [rightClickNode, setRightClickNode] = useState<TreeDataNode>()
   const [rightClickMenuVisible, setRightClickMenuVisible] = useState<boolean>(false)
   const [rightClickNodeTreeItem, setRightClickNodeTreeItem] = useState<RightClickMenu>()
+  const [selectedKeys, setSelectedKeys] = useState<(number | string)[]>([])
 
   const outsideRef: any = useOutsideClick(() => {
     setRightClickMenuVisible(false)
@@ -168,6 +169,7 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
   const onSelect = (selectedKeys: Key[], e: any) => {
     if (e.node) {
       console.log(e.node)
+      setSelectedKeys([e.node.key])
       getCurrentCatalogue(e.node)
     }
   }
@@ -251,6 +253,7 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
       onExpand={onExpand}
       autoExpandParent={autoExpandParent}
       expandedKeys={expandedKeys}
+      selectedKeys={selectedKeys}
     />
   ) : (
     <div
@@ -288,6 +291,7 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
             onExpand={onExpand}
             autoExpandParent={autoExpandParent}
             expandedKeys={expandedKeys}
+            selectedKeys={selectedKeys}
           />
         ) : null}
         {getNodeTreeRightClickMenu()}

@@ -6,11 +6,12 @@ import Parameters from '@/pages/DataService/ApiDev/Create/components/Parameters'
 
 import { EContentType, EAuthType } from '@/utils/enum'
 import { transferEnumToOptions } from '@/utils/utils'
-
-import { requestCheckPath } from '@/pages/DataService/ApiDev/Create/service'
+import { IStepComProps } from '@/pages/DataService/ApiDev/Create/type'
 import { CODE } from '@/components/Common/crud'
 
-export default ({ form, formLayout, forms, mode, detailInfo }) => {
+import { requestCheckPath } from '@/pages/DataService/ApiDev/Create/service'
+
+export default ({ form, formLayout, forms, mode, detailInfo }: IStepComProps) => {
   return (
     <Form
       {...formLayout}
@@ -25,14 +26,14 @@ export default ({ form, formLayout, forms, mode, detailInfo }) => {
         name="name"
         rules={[{ required: true, message: '请输入API名称！' }]}
       >
-        <Input style={{ width: 500 }} />
+        <Input placeholder="请输入API名称" style={{ width: 500 }} />
       </Form.Item>
       <Form.Item
         label="API目录"
         name="catalogue"
         rules={[{ required: true, message: '请选择API目录！' }]}
       >
-        <CatalogueSelect style={{ width: 500 }} />
+        <CatalogueSelect placeholder="请选择" style={{ width: 500 }} />
       </Form.Item>
       <Form.Item
         label="请求Path"
@@ -44,7 +45,7 @@ export default ({ form, formLayout, forms, mode, detailInfo }) => {
             validateTrigger: 'onBlur',
             validator: async (_, value) => {
               if (mode === 'edit') {
-                if (value === detailInfo.path) {
+                if (value === detailInfo?.path) {
                   return Promise.resolve()
                 }
               }
@@ -69,7 +70,11 @@ export default ({ form, formLayout, forms, mode, detailInfo }) => {
         name="contentType"
         rules={[{ required: true, message: '请选择Content-Type！' }]}
       >
-        <Select style={{ width: 300 }} options={transferEnumToOptions(EContentType)}></Select>
+        <Select
+          placeholder="请选择"
+          style={{ width: 300 }}
+          options={transferEnumToOptions(EContentType)}
+        ></Select>
       </Form.Item>
 
       <Form.Item label="安全认证" name="authType">
@@ -81,7 +86,7 @@ export default ({ form, formLayout, forms, mode, detailInfo }) => {
       </Form.Item>
 
       <Form.Item label="描述" name="description">
-        <Input.TextArea style={{ resize: 'none' }} rows={4}></Input.TextArea>
+        <Input.TextArea placeholder="请输入" style={{ resize: 'none' }} rows={4}></Input.TextArea>
       </Form.Item>
 
       <Form.Item label="入参定义" name="params">

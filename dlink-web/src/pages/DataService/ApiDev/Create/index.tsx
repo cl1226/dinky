@@ -44,7 +44,6 @@ const CreateApi: React.FC<{}> = (props: any) => {
   }
   const onSubmit = (e) => {
     e.preventDefault()
-    console.log('forms', forms)
     const { catalogue, ...basicForm } = forms[0]
     const params = {
       catalogueId: catalogue.id,
