@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Form, Space, Modal, Input, Select, Table } from 'antd'
 import { l } from '@/utils/intl'
 import { transferEnumToOptions } from '@/utils/utils'
@@ -8,10 +8,10 @@ export enum EDataType {
   'bigint' = 'bigint',
   'double' = 'double',
   'date' = 'date',
-  'string 数组' = 'Array<string>',
-  'bigint 数组' = 'Array<bigint>',
-  'double 数组' = 'Array<double>',
-  'date 数组' = 'Array<date>',
+  'Array<string>' = 'string 数组',
+  'Array<bigint>' = 'bigint 数组',
+  'Array<double>' = 'double 数组',
+  'Array<date>' = 'date 数组',
 }
 
 const formLayout = {
@@ -69,7 +69,11 @@ export default (props) => {
       setVisible(false)
     }
   }
-
+  useEffect(() => {
+    if (value !== JSON.stringify(paramList)) {
+      setParamList(JSON.parse(value || '[]'))
+    }
+  }, [value])
   const renderFooter = () => {
     return (
       <>

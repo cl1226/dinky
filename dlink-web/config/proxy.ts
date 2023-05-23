@@ -17,7 +17,6 @@
  *
  */
 
-
 /**
  * 在生产环境 代理是无法生效的，所以这里没有生产环境的配置
  * The agent cannot take effect in the production environment
@@ -25,12 +24,19 @@
  * For details, please see
  * https://pro.ant.design/docs/deploy
  */
+
+// const targetUrl = 'http://localhost:8888'
+// const targetUrl = 'http://OLWX-JXPTP93.Svolt.cn:8888'
+const targetUrl = 'http://10.36.30.14:8888'
 export default {
   dev: {
     '/api': {
-      // target: 'http://localhost:8888',
-      target: 'http://OLWX-JXPTP93.Svolt.cn:8888',
-      // target: 'http://10.36.30.14:8888',
+      target: targetUrl,
+      changeOrigin: true,
+      pathRewrite: { '^': '' },
+    },
+    '/debugapi': {
+      target: targetUrl,
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
@@ -49,4 +55,4 @@ export default {
       pathRewrite: { '^': '' },
     },
   },
-};
+}

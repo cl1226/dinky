@@ -51,7 +51,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
   const { catalogue } = props
 
   const getApiList = async (extra?: IgetApiConfigListParams) => {
-    if (!catalogue?.id) return
+    if (!catalogue?.id && !extra?.catalogueId) return
 
     const params: IgetApiConfigListParams = {
       pageIndex: pageNum,
@@ -99,8 +99,18 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
     if (catalogue && catalogue.id) {
       getApiList()
     }
+    console.log('catalogue', catalogue)
   }, [catalogue])
 
+  useEffect(() => {
+    const sessionQuery = sessionStorage.getItem('dataService.devApi.catalogue.list')
+
+    if (sessionQuery) {
+      getApiList(JSON.parse(sessionQuery || '{}'))
+      sessionStorage.removeItem('dataService.devApi.catalogue.list')
+    }
+    console.log('初始', sessionQuery)
+  }, [])
   const columns: ColumnsType<DataType> = [
     {
       title: '名称',
@@ -137,6 +147,18 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
         <Space size="middle">
           <Tooltip title={'编辑'}>
             <Button
+              onClick={() => {
+                sessionStorage.setItem(
+                  'dataService.devApi.catalogue.list',
+                  JSON.stringify({
+                    pageIndex: pageNum,
+                    pageSize: pageSize,
+                    name: searchKey,
+                    catalogueId: catalogue?.id,
+                  }),
+                )
+                history.push(`/dataService/devApi/edit/${record.id}`)
+              }}
               size="small"
               disabled={record.status === 1}
               type="text"

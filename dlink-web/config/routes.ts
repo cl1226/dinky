@@ -110,6 +110,12 @@ export default [
             component: './DataService/ApiDev/Create',
             hideInMenu: true,
           },
+          {
+            path: '/dataService/devApi/edit/:id',
+            name: 'edit',
+            component: './DataService/ApiDev/Edit',
+            hideInMenu: true,
+          },
         ],
       },
       {

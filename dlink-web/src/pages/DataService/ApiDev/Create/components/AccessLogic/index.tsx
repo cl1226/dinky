@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import styles from './index.less'
 import { PlusOutlined } from '@ant-design/icons'
 import {
@@ -6,7 +6,6 @@ import {
   Button,
   Table,
   Form,
-  Input,
   Select,
   Row,
   Col,
@@ -16,18 +15,20 @@ import {
   message,
   Tooltip,
 } from 'antd'
-import { transferEnumToOptions } from '@/utils/utils'
-import { EDataType } from '@/pages/DataService/ApiDev/Create/components/Parameters'
-import SelectHelp, { EAsyncCode } from '@/components/SelectHelp'
-import { EAccessType } from '@/utils/enum'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-mysql'
 import 'ace-builds/src-noconflict/theme-github'
+import SelectHelp, { EAsyncCode } from '@/components/SelectHelp'
 import type { ProColumns } from '@ant-design/pro-components'
 import { EditableProTable } from '@ant-design/pro-components'
-import { requestExecuteSql } from '@/pages/DataService/ApiDev/Create/service'
+
+import { transferEnumToOptions } from '@/utils/utils'
+import { EAccessType } from '@/utils/enum'
+import { EDataType } from '@/pages/DataService/ApiDev/Create/components/Parameters'
+import { IStepComProps } from '@/pages/DataService/ApiDev/Create/type'
 import { CODE } from '@/components/Common/crud'
 
+import { requestExecuteSql } from '@/pages/DataService/ApiDev/Create/service'
 interface ITestParams {
   name: string
   value: string
@@ -133,7 +134,7 @@ export const CustomTable = ({ dataSource }) => {
   ) : null
 }
 
-export default ({ form, formLayout, forms }) => {
+export default ({ form, formLayout, forms, mode }: IStepComProps) => {
   const [visible, setVisible] = useState(false)
   const editorRef = useRef<any>(null)
   const [testParams, setTestParams] = useState<readonly ITestParams[]>([])
@@ -196,7 +197,7 @@ export default ({ form, formLayout, forms }) => {
           name="accessType"
           rules={[{ required: true, message: '请选择取数方式' }]}
         >
-          <Select style={{ width: 300 }} options={accessTypeOptions}></Select>
+          <Select placeholder="请选择" style={{ width: 300 }} options={accessTypeOptions}></Select>
         </Form.Item>
         <Form.Item
           label="数据源类型"
@@ -204,6 +205,7 @@ export default ({ form, formLayout, forms }) => {
           rules={[{ required: true, message: '请选择数据源类型' }]}
         >
           <SelectHelp
+            placeholder="请选择"
             style={{ width: 300 }}
             asyncCode={EAsyncCode.datasourceType}
             onChange={() => {
@@ -222,13 +224,14 @@ export default ({ form, formLayout, forms }) => {
           }
         >
           {({ getFieldValue }) =>
-            getFieldValue('datasourceType') ? (
+            getFieldValue('datasourceType') || mode === 'edit' ? (
               <Form.Item
                 label="数据连接"
                 name="datasourceId"
                 rules={[{ required: true, message: '请选择数据连接' }]}
               >
                 <SelectHelp
+                  placeholder="请选择"
                   style={{ width: 300 }}
                   asyncCode={EAsyncCode.datasourceId}
                   asyncParams={{ value: getFieldValue('datasourceType') }}
@@ -253,18 +256,19 @@ export default ({ form, formLayout, forms }) => {
           }
         >
           {({ getFieldValue }) =>
-            getFieldValue('datasourceId') ? (
+            getFieldValue('datasourceId') || mode === 'edit' ? (
               <Form.Item
                 label="数据库"
                 name="datasourceDb"
                 rules={[{ required: true, message: '请选择数据库' }]}
               >
                 <SelectHelp
+                  placeholder="请选择"
                   style={{ width: 300 }}
                   asyncCode={EAsyncCode.datasourceDb}
                   asyncParams={{ value: getFieldValue('datasourceId') }}
                   optionFormatter={(options) =>
-                    options.map((option) => ({ label: option.name, value: option.id }))
+                    options.map((option) => ({ label: option.name, value: option.name }))
                   }
                 ></SelectHelp>
               </Form.Item>

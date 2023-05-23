@@ -3,14 +3,16 @@ import styles from './index.less'
 
 import { Card, Button, Steps, Form, message } from 'antd'
 import { PageContainer } from '@ant-design/pro-layout'
-import { history } from 'umi'
+import { history, useParams } from 'umi'
 
 import { Scrollbars } from 'react-custom-scrollbars'
-import BasicSetting from './components/BasicSetting'
-import AccessLogic from './components/AccessLogic'
-import ApiTest from './components/ApiTest'
+import BasicSetting from '@/pages/DataService/ApiDev/Create/components/BasicSetting'
+import AccessLogic from '@/pages/DataService/ApiDev/Create/components/AccessLogic'
+import ApiTest from '@/pages/DataService/ApiDev/Create/components/ApiTest'
 
 import { requestCreateApi } from '@/pages/DataService/ApiDev/Create/service'
+import { requestApiDetail } from '@/pages/DataService/ApiDev/Edit/service'
+
 import { CODE } from '@/components/Common/crud'
 
 const formLayout = {
@@ -20,45 +22,102 @@ const formLayout = {
   wrapperCol: { flex: 1 },
   colon: false,
 }
-const CreateApi: React.FC<{}> = (props: any) => {
+
+const EditApi: React.FC<{}> = (props: any) => {
   const sref: any = React.createRef<Scrollbars>()
   const [pageStep, setPageStep] = useState(0)
+  const [detailInfo, setDetailInfo] = useState<any>({})
   const [form] = Form.useForm()
   const forms = useMemo(() => ({}), [])
   const StepComponents = [BasicSetting, AccessLogic, ApiTest]
+  const pageParams: any = useParams()
 
   const getCurrentPage = (currentStep) => {
     const Com = StepComponents[currentStep]
 
-    return <Com mode={'create'} form={form} formLayout={formLayout} forms={forms} />
+    return (
+      <Com
+        mode={'edit'}
+        detailInfo={detailInfo}
+        form={form}
+        formLayout={formLayout}
+        forms={forms}
+      />
+    )
   }
+
   const onNext = (e) => {
     e.preventDefault()
     form
       .validateFields()
       .then((value) => {
         forms[pageStep] = value
+        if (pageStep === 0) {
+          const { accessType, datasourceType, datasourceId, datasourceDb, segment } = detailInfo
+
+          form.setFieldsValue({
+            accessType,
+            datasourceType,
+            datasourceId,
+            datasourceDb,
+            segment,
+          })
+        }
         setPageStep(pageStep + 1)
       })
       .catch(() => {})
   }
   const onSubmit = (e) => {
     e.preventDefault()
+    console.log('forms', forms)
     const { catalogue, ...basicForm } = forms[0]
     const params = {
+      id: detailInfo.id,
       catalogueId: catalogue.id,
       ...basicForm,
       ...forms[1],
     }
     requestCreateApi(params).then((res) => {
       if (res.code === CODE.SUCCESS) {
-        message.success('创建成功')
-        history.push('/dataService/devApi/catalogue')
+        message.success('编辑成功')
+        history.goBack()
       } else {
         message.error(res.msg)
       }
     })
   }
+
+  useEffect(() => {
+    requestApiDetail(pageParams.id).then((res) => {
+      if (res.code === CODE.SUCCESS) {
+        console.log(res.datas)
+        setDetailInfo(res.datas)
+        const {
+          authType,
+          absolutePath,
+          catalogueId,
+          path,
+          name,
+          contentType,
+          params,
+          description,
+        } = res.datas
+        form.setFieldsValue({
+          catalogue: {
+            id: catalogueId,
+            path: absolutePath,
+          },
+          path,
+          name,
+          contentType,
+          params,
+          description,
+          authType,
+        })
+      }
+    })
+  }, [])
+
   return (
     <PageContainer
       className={styles['create-page']}
@@ -121,4 +180,4 @@ const CreateApi: React.FC<{}> = (props: any) => {
   )
 }
 
-export default CreateApi
+export default EditApi
