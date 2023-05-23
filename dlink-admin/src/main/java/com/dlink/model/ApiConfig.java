@@ -24,7 +24,7 @@ public class ApiConfig extends SuperEntity {
 
     private String datasourceType;
 
-    private String datasourceId;
+    private Integer datasourceId;
 
     private String datasourceDb;
 
@@ -47,7 +47,7 @@ public class ApiConfig extends SuperEntity {
     public ApiConfig() {
     }
 
-    public ApiConfig(String path, String datasourceId, Integer catalogueId, String params, String contentType, String segment, Integer status, Integer tenantId, String description) {
+    public ApiConfig(String path, Integer datasourceId, Integer catalogueId, String params, String contentType, String segment, Integer status, Integer tenantId, String description) {
         this.path = path;
         this.datasourceId = datasourceId;
         this.catalogueId = catalogueId;

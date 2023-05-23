@@ -2,12 +2,9 @@ package com.dlink.servlet;
 
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dlink.common.result.Result;
-import com.dlink.model.ApiConfig;
 import com.dlink.model.DataBase;
 import com.dlink.service.ApiConfigService;
 import com.dlink.service.DataBaseService;
@@ -16,7 +13,6 @@ import com.dlink.utils.PoolUtils;
 import com.dlink.utils.SqlEngineUtils;
 import com.github.freakchick.orange.SqlMeta;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -33,17 +29,16 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
- * ApiServlet
+ * DebugApiServlet
  *
  * @author cl1226
- * @since 2023/5/17 18:18
+ * @since 2023/5/22 14:23
  **/
 @Slf4j
 @Component
-public class ApiServlet extends HttpServlet {
+public class DebugApiServlet extends HttpServlet {
 
     @Autowired
     private ApiConfigService apiConfigService;
@@ -53,10 +48,13 @@ public class ApiServlet extends HttpServlet {
     @Value("${dinky.api.context}")
     String apiContext;
 
+    @Value("${dinky.api.debug.context}")
+    String debugapiContext;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String servletPath = req.getRequestURI();
-        servletPath = servletPath.substring(apiContext.length() + 2);
+        servletPath = servletPath.substring(debugapiContext.length() + 2);
 
         PrintWriter out = null;
         try {
@@ -83,30 +81,25 @@ public class ApiServlet extends HttpServlet {
     private Result process(String path, HttpServletRequest request, HttpServletResponse response) {
         long now = System.currentTimeMillis();
 
-        ApiConfig config = apiConfigService.getOne(new QueryWrapper<ApiConfig>().eq("path", path));
-        if (config == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return Result.failed(path + ": api路径不存在");
-        }
-
         try {
-            DataBase dataBase = dataBaseService.getById(config.getDatasourceId());
-            if (dataBase == null) {
+            // 获取数据源, SQL, Params
+            Map<String, Object> requestInfo = getRequestInfo(request);
+            DataBase database = (DataBase) requestInfo.get("database");
+            if (database == null) {
                 response.setStatus(500);
                 return Result.failed("Datasource not exists!");
             }
+            Map<String, Object> params = (Map<String, Object>) requestInfo.get("params");
 
-            Map<String, Object> sqlParam = getParams(request, config);
-
-            DruidPooledConnection connection = PoolUtils.getPooledConnection(dataBase);
-            SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(config.getSegment(), sqlParam);
+            DruidPooledConnection connection = PoolUtils.getPooledConnection(database);
+            SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(String.valueOf(requestInfo.get("sql")), params);
             Object data = JdbcUtil.executeSql(connection, sqlMeta.getSql(), sqlMeta.getJdbcParamValues());
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("timeConsuming", System.currentTimeMillis() - now);
-            jsonObject.put("requestPath", request.getRequestURI());
+            jsonObject.put("requestPath", apiContext + request.getPathInfo());
             StringBuilder sb = new StringBuilder();
-            sb.append(request.getMethod()).append(" ").
-                    append(request.getServletPath()).append(request.getPathInfo()).append(" ")
+            sb.append(request.getMethod()).append(" ")
+                    .append(request.getServletPath()).append(request.getPathInfo()).append(" ")
                     .append(request.getProtocol()).append("\n")
                     .append("User-Agent: " + request.getHeader("user-agent"));
             StringBuilder sb2 = new StringBuilder();
@@ -135,9 +128,8 @@ public class ApiServlet extends HttpServlet {
         }
     }
 
-    private Map<String, Object> getParams(HttpServletRequest request, ApiConfig apiConfig) {
+    private Map<String, Object> getRequestInfo(HttpServletRequest request) {
         String unParseContentType = request.getContentType();
-
         // 如果是浏览器get请求过来，取出来的contentType是null
         if (unParseContentType == null) {
             unParseContentType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
@@ -147,25 +139,24 @@ public class ApiServlet extends HttpServlet {
         String[] contentTypeArr = unParseContentType.split(";");
         String contentType = contentTypeArr[0];
 
+        Map<String, Object> info = new HashMap<>();
         Map<String, Object> params = null;
         // 如果是application/json请求，不管接口规定的content-type是什么，接口都可以访问，且请求参数都以json body 为准
         if (contentType.equalsIgnoreCase(MediaType.APPLICATION_JSON_VALUE)) {
             JSONObject jo = getHttpJsonBody(request);
-            params = JSONObject.parseObject(jo.toJSONString(), new TypeReference<Map<String, Object>>() {
+
+            DataBase dataBase = dataBaseService.getById(jo.getString("datasourceId"));
+            info.put("database", dataBase);
+            params = JSONObject.parseObject(jo.getJSONObject("params").toJSONString(), new TypeReference<Map<String, Object>>() {
             });
-        }
-        // 如果是application/x-www-form-urlencoded请求，先判断接口规定的content-type是不是确实是application/x-www-form-urlencoded
-        else if (contentType.equalsIgnoreCase(MediaType.APPLICATION_FORM_URLENCODED_VALUE)) {
-            if (MediaType.APPLICATION_FORM_URLENCODED_VALUE.equalsIgnoreCase(apiConfig.getContentType())) {
-                params = this.getSqlParam(request, apiConfig);
-            } else {
-                throw new RuntimeException("this API only support content-type: " + apiConfig.getContentType() + ", but you use: " + contentType);
-            }
+            info.put("params", params);
+            info.put("sql", jo.getString("sql"));
+        } else if (contentType.equalsIgnoreCase(MediaType.APPLICATION_FORM_URLENCODED_VALUE)) {
         } else {
             throw new RuntimeException("content-type not supported: " + contentType);
         }
 
-        return params;
+        return info;
     }
 
     private JSONObject getHttpJsonBody(HttpServletRequest request) {
@@ -188,65 +179,4 @@ public class ApiServlet extends HttpServlet {
         return null;
     }
 
-    public Map<String, Object> getSqlParam(HttpServletRequest request, ApiConfig config) {
-        Map<String, Object> map = new HashMap<>();
-
-        JSONArray requestParams = JSON.parseArray(config.getParams());
-        for (int i = 0; i < requestParams.size(); i++) {
-            JSONObject jo = requestParams.getJSONObject(i);
-            String name = jo.getString("name");
-            String type = jo.getString("type");
-
-            //数组类型参数
-            if (type.startsWith("Array")) {
-                String[] values = request.getParameterValues(name);
-                if (values != null) {
-                    List<String> list = Arrays.asList(values);
-                    if (values.length > 0) {
-                        switch (type) {
-                            case "Array<double>":
-                                List<Double> collect = list.stream().map(value -> Double.valueOf(value)).collect(Collectors.toList());
-                                map.put(name, collect);
-                                break;
-                            case "Array<bigint>":
-                                List<Long> longs = list.stream().map(value -> Long.valueOf(value)).collect(Collectors.toList());
-                                map.put(name, longs);
-                                break;
-                            case "Array<string>":
-                            case "Array<date>":
-                                map.put(name, list);
-                                break;
-                        }
-                    } else {
-                        map.put(name, list);
-                    }
-                } else {
-                    map.put(name, null);
-                }
-            } else {
-
-                String value = request.getParameter(name);
-                if (StringUtils.isNotBlank(value)) {
-
-                    switch (type) {
-                        case "double":
-                            Double v = Double.valueOf(value);
-                            map.put(name, v);
-                            break;
-                        case "bigint":
-                            Long longV = Long.valueOf(value);
-                            map.put(name, longV);
-                            break;
-                        case "string":
-                        case "date":
-                            map.put(name, value);
-                            break;
-                    }
-                } else {
-                    map.put(name, value);
-                }
-            }
-        }
-        return map;
-    }
 }

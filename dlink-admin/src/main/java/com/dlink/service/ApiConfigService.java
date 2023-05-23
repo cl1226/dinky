@@ -34,4 +34,6 @@ public interface ApiConfigService extends ISuperService<ApiConfig> {
     List<Schema> getSchemaByDatabase(Integer databaseId);
 
     ApiConfig configureAuth(Integer id, Integer appId);
+
+    ApiConfig checkPath(String path);
 }

@@ -112,4 +112,13 @@ public class ApiConfigController {
         return Result.succeed(apiConfig, "配置成功");
     }
 
+    @GetMapping("/checkPath")
+    public Result checkPath(@RequestParam String path) {
+        ApiConfig apiConfig = service.checkPath(path);
+        if (apiConfig != null) {
+            return Result.failed("路径重复, 请重新填写");
+        }
+        return  Result.succeed(null, "校验通过");
+    }
+
 }

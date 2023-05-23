@@ -20,6 +20,7 @@ public class ApiConfigDTO {
     private String absolutePath;
     private Date createTime;
     private Date updateTime;
+    private String authType;
     private String accessType;
     private String datasourceType;
     private Integer datasourceId;
@@ -29,6 +30,8 @@ public class ApiConfigDTO {
     private String contentType;
     private String segment;
     private Integer status;
+    private Integer tenantId;
+    private Integer authId;
     private String description;
 
 }

@@ -4,6 +4,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
@@ -147,7 +148,7 @@ public class ApiConfigServiceImpl extends SuperServiceImpl<ApiConfigMapper, ApiC
             List<DataBase> database = dataBaseService.list(new QueryWrapper<DataBase>().eq("type", value));
             return Result.succeed(database, "获取成功");
         }
-        if ("dataSourceDb".equals(code)) {
+        if ("datasourceDb".equals(code)) {
             List<Schema> schemasAndTables = dataBaseService.getSchemasAndTables(Integer.valueOf(value));
             return Result.succeed(schemasAndTables, "获取成功");
         }
@@ -172,6 +173,12 @@ public class ApiConfigServiceImpl extends SuperServiceImpl<ApiConfigMapper, ApiC
         }
         apiConfig.setAuthId(appConfig.getId());
         this.saveOrUpdate(apiConfig);
+        return apiConfig;
+    }
+
+    @Override
+    public ApiConfig checkPath(String path) {
+        ApiConfig apiConfig = this.getOne(new QueryWrapper<ApiConfig>().eq("path", path.replaceAll("/", "")));
         return apiConfig;
     }
 }
