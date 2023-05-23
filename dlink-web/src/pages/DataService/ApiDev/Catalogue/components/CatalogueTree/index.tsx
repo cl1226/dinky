@@ -238,6 +238,13 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
   }
 
   useEffect(() => {
+    const sessionQuery = JSON.parse(
+      sessionStorage.getItem('dataService.devApi.catalogue.list') || '{}',
+    )
+    if (sessionQuery && sessionQuery.catalogueId) {
+      setSelectedKeys([sessionQuery.catalogueId])
+      getCurrentCatalogue({ id: sessionQuery.catalogueId } as any)
+    }
     getTreeData()
   }, [])
 

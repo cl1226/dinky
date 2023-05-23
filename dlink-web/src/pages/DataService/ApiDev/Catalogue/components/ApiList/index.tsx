@@ -97,20 +97,13 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
 
   useEffect(() => {
     if (catalogue && catalogue.id) {
-      getApiList()
-    }
-    console.log('catalogue', catalogue)
-  }, [catalogue])
-
-  useEffect(() => {
-    const sessionQuery = sessionStorage.getItem('dataService.devApi.catalogue.list')
-
-    if (sessionQuery) {
-      getApiList(JSON.parse(sessionQuery || '{}'))
+      const sessionJson = sessionStorage.getItem('dataService.devApi.catalogue.list')
+      const sessionQuery = JSON.parse(sessionJson || '{}')
+      getApiList(sessionQuery)
       sessionStorage.removeItem('dataService.devApi.catalogue.list')
     }
-    console.log('初始', sessionQuery)
-  }, [])
+  }, [catalogue])
+
   const columns: ColumnsType<DataType> = [
     {
       title: '名称',

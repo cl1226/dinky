@@ -116,22 +116,11 @@ export default [
             component: './DataService/ApiDev/Edit',
             hideInMenu: true,
           },
-        ],
-      },
-      {
-        path: '/dataService/invokeApi',
-        name: 'invokeApi',
-        icon: 'cluster',
-        routes: [
           {
-            path: '/dataService/invokeApi/catalogue',
-            name: 'catalogue',
-            component: './DataService/ApiInvoke/Catalogue',
-          },
-          {
-            path: '/dataService/invokeApi/overview',
-            name: 'overview',
-            component: './DataService/ApiInvoke/Overview',
+            path: '/dataService/devApi/detail/:id',
+            name: 'detail',
+            component: './DataService/ApiDev/Detail',
+            hideInMenu: true,
           },
         ],
       },
