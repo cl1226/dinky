@@ -1,6 +1,7 @@
 package com.dlink.configure;
 
 import com.dlink.servlet.ApiServlet;
+import com.dlink.servlet.DebugApiServlet;
 import com.dlink.servlet.TokenServlet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,14 @@ public class ServletConfig {
     @Value("${dinky.api.context}")
     private String apiContext;
 
+    @Value("${dinky.api.debug.context}")
+    private String apiDebugContext;
+
     @Autowired
     private ApiServlet apiServlet;
+
+    @Autowired
+    private DebugApiServlet debugApiServlet;
 
     @Autowired
     private TokenServlet tokenServlet;
@@ -33,7 +40,14 @@ public class ServletConfig {
         String format = String.format("/%s/*", apiContext);
         ServletRegistrationBean bean = new ServletRegistrationBean(apiServlet);
         bean.addUrlMappings(format);
-        log.info("regist APIServlet servelet for {} urlMappings",format);
+        return bean;
+    }
+
+    @Bean
+    public ServletRegistrationBean getServletRegistrationBean2() {
+        String format = String.format("/%s/*", apiDebugContext);
+        ServletRegistrationBean bean = new ServletRegistrationBean(debugApiServlet);
+        bean.addUrlMappings(format);
         return bean;
     }
 
@@ -41,7 +55,6 @@ public class ServletConfig {
     public ServletRegistrationBean tokenServletRegistrationBean() {
         ServletRegistrationBean bean = new ServletRegistrationBean(tokenServlet);
         bean.addUrlMappings("/token/generate");
-        log.info("Register tokenServlet servlet ");
         return bean;
     }
 }
