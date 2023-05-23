@@ -38,6 +38,7 @@ export default {
   'menu.dataService.devApi.management': 'API管理',
   'menu.dataService.devApi.create': 'API创建',
   'menu.dataService.devApi.edit': 'API编辑',
+  'menu.dataService.devApi.debug': 'API调试',
   'menu.dataService.devApi.detail': 'API详情',
 
 

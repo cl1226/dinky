@@ -14,19 +14,19 @@ import { requestCreateApi } from '@/pages/DataService/ApiDev/Create/service'
 import { requestApiDetail } from '@/pages/DataService/ApiDev/Edit/service'
 
 import { CODE } from '@/components/Common/crud'
+import {
+  transferFormFieldsValue,
+  getStepBasic,
+  formLayout,
+} from '@/pages/DataService/ApiDev/Create/utils'
 
-const formLayout = {
-  labelCol: { flex: '150px' },
-  labelAlign: 'left',
-  labelWrap: true,
-  wrapperCol: { flex: 1 },
-  colon: false,
-}
+const mode = 'edit'
 
 const EditApi: React.FC<{}> = (props: any) => {
   const sref: any = React.createRef<Scrollbars>()
   const [pageStep, setPageStep] = useState(0)
   const [detailInfo, setDetailInfo] = useState<any>({})
+  const [loading, setLoading] = useState(true)
   const [form] = Form.useForm()
   const forms = useMemo(() => ({}), [])
   const StepComponents = [BasicSetting, AccessLogic, ApiTest]
@@ -34,14 +34,16 @@ const EditApi: React.FC<{}> = (props: any) => {
 
   const getCurrentPage = (currentStep) => {
     const Com = StepComponents[currentStep]
+    const stepBasic = getStepBasic(currentStep, forms, detailInfo)
 
     return (
       <Com
-        mode={'edit'}
+        mode={mode}
         detailInfo={detailInfo}
         form={form}
         formLayout={formLayout}
         forms={forms}
+        stepBasic={stepBasic}
       />
     )
   }
@@ -52,17 +54,9 @@ const EditApi: React.FC<{}> = (props: any) => {
       .validateFields()
       .then((value) => {
         forms[pageStep] = value
-        if (pageStep === 0) {
-          const { accessType, datasourceType, datasourceId, datasourceDb, segment } = detailInfo
 
-          form.setFieldsValue({
-            accessType,
-            datasourceType,
-            datasourceId,
-            datasourceDb,
-            segment,
-          })
-        }
+        form.setFieldsValue(transferFormFieldsValue(pageStep + 1, detailInfo))
+
         setPageStep(pageStep + 1)
       })
       .catch(() => {})
@@ -88,40 +82,24 @@ const EditApi: React.FC<{}> = (props: any) => {
   }
 
   useEffect(() => {
-    requestApiDetail(pageParams.id).then((res) => {
-      if (res.code === CODE.SUCCESS) {
-        console.log(res.datas)
-        setDetailInfo(res.datas)
-        const {
-          authType,
-          absolutePath,
-          catalogueId,
-          path,
-          name,
-          contentType,
-          params,
-          description,
-        } = res.datas
-        form.setFieldsValue({
-          catalogue: {
-            id: catalogueId,
-            path: absolutePath,
-          },
-          path,
-          name,
-          contentType,
-          params,
-          description,
-          authType,
-        })
-      }
-    })
+    requestApiDetail(pageParams.id)
+      .then((res) => {
+        if (res.code === CODE.SUCCESS) {
+          setDetailInfo(res.datas)
+
+          form.setFieldsValue(transferFormFieldsValue(0, res.datas))
+        }
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
   return (
     <PageContainer
       className={styles['create-page']}
       title={false}
+      loading={loading}
       footer={[
         pageStep > 0 ? (
           <Button

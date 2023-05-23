@@ -11,15 +11,12 @@ import AccessLogic from './components/AccessLogic'
 import ApiTest from './components/ApiTest'
 
 import { requestCreateApi } from '@/pages/DataService/ApiDev/Create/service'
-import { CODE } from '@/components/Common/crud'
 
-const formLayout = {
-  labelCol: { flex: '150px' },
-  labelAlign: 'left',
-  labelWrap: true,
-  wrapperCol: { flex: 1 },
-  colon: false,
-}
+import { CODE } from '@/components/Common/crud'
+import { getStepBasic, formLayout } from '@/pages/DataService/ApiDev/Create/utils'
+
+const mode = 'create'
+
 const CreateApi: React.FC<{}> = (props: any) => {
   const sref: any = React.createRef<Scrollbars>()
   const [pageStep, setPageStep] = useState(0)
@@ -29,8 +26,11 @@ const CreateApi: React.FC<{}> = (props: any) => {
 
   const getCurrentPage = (currentStep) => {
     const Com = StepComponents[currentStep]
+    const stepBasic = getStepBasic(currentStep, forms)
 
-    return <Com mode={'create'} form={form} formLayout={formLayout} forms={forms} />
+    return (
+      <Com mode={mode} form={form} formLayout={formLayout} forms={forms} stepBasic={stepBasic} />
+    )
   }
   const onNext = (e) => {
     e.preventDefault()

@@ -95,6 +95,19 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
     setSelectedRowKeys(newSelectedRowKeys)
   }
 
+  const pageJump = (type, record) => {
+    sessionStorage.setItem(
+      'dataService.devApi.catalogue.list',
+      JSON.stringify({
+        pageIndex: pageNum,
+        pageSize: pageSize,
+        name: searchKey,
+        catalogueId: catalogue?.id,
+      }),
+    )
+    history.push(`/dataService/devApi/${type}/${record.id}`)
+  }
+
   useEffect(() => {
     if (catalogue && catalogue.id) {
       const sessionJson = sessionStorage.getItem('dataService.devApi.catalogue.list')
@@ -141,16 +154,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
           <Tooltip title={'编辑'}>
             <Button
               onClick={() => {
-                sessionStorage.setItem(
-                  'dataService.devApi.catalogue.list',
-                  JSON.stringify({
-                    pageIndex: pageNum,
-                    pageSize: pageSize,
-                    name: searchKey,
-                    catalogueId: catalogue?.id,
-                  }),
-                )
-                history.push(`/dataService/devApi/edit/${record.id}`)
+                pageJump('edit', record)
               }}
               size="small"
               disabled={record.status === 1}
@@ -185,7 +189,14 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
           )}
 
           <Tooltip title={'调试'}>
-            <Button size="small" type="text" icon={<BugOutlined />}></Button>
+            <Button
+              size="small"
+              type="text"
+              onClick={() => {
+                pageJump('debug', record)
+              }}
+              icon={<BugOutlined />}
+            ></Button>
           </Tooltip>
           <Tooltip title={'删除'}>
             <Popconfirm

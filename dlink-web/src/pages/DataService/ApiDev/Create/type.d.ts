@@ -8,9 +8,10 @@ export interface IFormLayout {
   colon: boolean
 }
 export interface IStepComProps {
-  form: FormInstance
-  formLayout: IFormLayout
-  forms: { [key: string]: any }
-  mode: 'create' | 'edit'
+  form?: FormInstance
+  formLayout?: IFormLayout
+  forms?: { [key: string]: any }
+  mode?: 'create' | 'edit' | 'view'
   detailInfo?: { [key: string]: any }
+  stepBasic?: { [key: string]: any }
 }

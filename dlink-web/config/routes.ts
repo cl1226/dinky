@@ -122,6 +122,12 @@ export default [
             component: './DataService/ApiDev/Detail',
             hideInMenu: true,
           },
+          {
+            path: '/dataService/devApi/debug/:id',
+            name: 'debug',
+            component: './DataService/ApiDev/Debug',
+            hideInMenu: true,
+          },
         ],
       },
     ],

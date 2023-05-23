@@ -38,6 +38,7 @@ export default {
   'menu.dataService.devApi.management': 'API Management',
   'menu.dataService.devApi.create': 'API Create',
   'menu.dataService.devApi.edit': 'API Edit',
+  'menu.dataService.devApi.debug': 'API Debug',
   'menu.dataService.devApi.detail': 'API Detail',
 
   'menu.devops': 'Devops',
