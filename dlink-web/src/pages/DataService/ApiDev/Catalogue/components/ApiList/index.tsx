@@ -22,15 +22,17 @@ import {
 import { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { debounce } from 'lodash'
+import { EAccessType } from '@/utils/enum'
 
 const { Search } = Input
 
 export type IApiListProps = {
   catalogue: TreeDataNode | undefined
-  dispatch?: any
+  mode: 'catalogue' | 'management'
+  tableProps?: {}
 }
 
-interface DataType {
+export interface DataType {
   id: number
   name: string
   path: string
@@ -38,6 +40,10 @@ interface DataType {
   status: number
 }
 
+export enum EDebugStatus {
+  '失败',
+  '成功',
+}
 const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
   const sref: any = React.createRef<Scrollbars>()
   const [searchKey, setSearchKey] = useState('')
@@ -48,10 +54,10 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [loading, setLoading] = useState(false)
   const [apiData, setApiData] = useState([])
-  const { catalogue } = props
+  const { catalogue, mode, tableProps = {} } = props
 
   const getApiList = async (extra?: IgetApiConfigListParams) => {
-    if (!catalogue?.id && !extra?.catalogueId) return
+    if (!catalogue?.id && !extra?.catalogueId && mode === 'catalogue') return
 
     const params: IgetApiConfigListParams = {
       pageIndex: pageNum,
@@ -109,7 +115,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
   }
 
   useEffect(() => {
-    if (catalogue && catalogue.id) {
+    if ((catalogue && catalogue.id) || mode === 'management') {
       const sessionJson = sessionStorage.getItem('dataService.devApi.catalogue.list')
       const sessionQuery = JSON.parse(sessionJson || '{}')
       getApiList(sessionQuery)
@@ -117,37 +123,80 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
     }
   }, [catalogue])
 
+  const columnsMaps = {
+    catalogue: [
+      {
+        title: '路径',
+        dataIndex: 'path',
+        key: 'path',
+        width: 200,
+      },
+      {
+        title: '修改时间',
+        dataIndex: 'updateTime',
+        key: 'updateTime',
+        width: 200,
+      },
+      {
+        title: '状态',
+        dataIndex: 'status',
+        key: 'status',
+        width: 150,
+        render: (cellValue, record) => {
+          return <span>{cellValue === 1 ? '已上线' : '已创建'}</span>
+        },
+      },
+    ],
+    management: [
+      {
+        title: '描述',
+        dataIndex: 'description',
+        key: 'description',
+        width: 200,
+        ellipsis: true,
+      },
+      {
+        title: '状态',
+        dataIndex: 'status',
+        key: 'status',
+        width: 120,
+        render: (cellValue, record) => {
+          return <span>{cellValue === 1 ? '已上线' : '已创建'}</span>
+        },
+      },
+      {
+        title: '调试状态',
+        dataIndex: 'debugStatus',
+        key: 'debugStatus',
+        width: 120,
+        render: (cellValue, record) => EDebugStatus[cellValue] || '-',
+      },
+      {
+        title: '类型',
+        dataIndex: 'accessType',
+        key: 'accessType',
+        width: 150,
+        render: (cellValue, record) => EAccessType[cellValue],
+      },
+      {
+        title: '创建时间',
+        dataIndex: 'createTime',
+        key: 'createTime',
+        width: 200,
+      },
+    ],
+  }
   const columns: ColumnsType<DataType> = [
     {
-      title: '名称',
+      title: 'API名称',
       dataIndex: 'name',
       key: 'name',
-      width: 250,
-    },
-    {
-      title: '路径',
-      dataIndex: 'path',
-      key: 'path',
-      width: 350,
-    },
-    {
-      title: '修改时间',
-      dataIndex: 'updateTime',
-      key: 'updateTime',
-      width: 250,
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
       width: 200,
-      render: (cellValue, record) => {
-        return <span>{cellValue === 1 ? '上线' : '下线'}</span>
-      },
     },
+    ...columnsMaps[mode],
     {
       title: '操作',
-      width: 400,
+      width: 300,
       key: 'action',
       render: (cellValue, record) => (
         <Space size="middle">
@@ -220,7 +269,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
     },
   ]
   return (
-    <div className={styles['api-list']}>
+    <div className={[styles['api-list'], styles[mode]].join(' ')}>
       <Scrollbars style={{ height: `100%` }} ref={sref}>
         <div style={{ padding: 10 }}>
           <Row justify={'space-between'}>
@@ -292,6 +341,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
               showSizeChanger: true,
               showQuickJumper: true,
             }}
+            {...tableProps}
           />
         </div>
       </Scrollbars>

@@ -14,6 +14,7 @@ import {
   Tabs,
   message,
   Tooltip,
+  Empty,
 } from 'antd'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-mysql'
@@ -131,10 +132,15 @@ export const CustomTable = ({ dataSource }) => {
       scroll={{ y: 400 }}
       pagination={false}
     />
-  ) : null
+  ) : (
+    <Empty />
+  )
 }
 
-export default ({ form, formLayout, forms, mode }: IStepComProps) => {
+export default (props: IStepComProps) => {
+  const { formLayout, forms, mode } = props
+  const form: any = props.form
+  
   const [visible, setVisible] = useState(false)
   const editorRef = useRef<any>(null)
   const [testParams, setTestParams] = useState<readonly ITestParams[]>([])

@@ -179,7 +179,6 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
     setExpandedKeys(expandedKeys)
     setAutoExpandParent(false)
   }
-
   const loop = (data: any) =>
     data?.map((item: any) => {
       const index = item.title.indexOf(searchValue)
