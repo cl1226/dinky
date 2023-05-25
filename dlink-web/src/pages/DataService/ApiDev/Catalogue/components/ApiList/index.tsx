@@ -192,6 +192,16 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
       dataIndex: 'name',
       key: 'name',
       width: 200,
+      render: (cellValue, record) => (
+        <Button
+          type="link"
+          onClick={() => {
+            pageJump('detail', record)
+          }}
+        >
+          {cellValue}
+        </Button>
+      ),
     },
     ...columnsMaps[mode],
     {
@@ -211,19 +221,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
               icon={<EditOutlined />}
             ></Button>
           </Tooltip>
-          {record.status === 0 ? (
-            <Tooltip title={'上线'}>
-              <Popconfirm
-                title="请确认将执行上线操作"
-                placement="bottom"
-                onConfirm={() => {
-                  onUpdateApiStatus(record.id, 'online')
-                }}
-              >
-                <Button size="small" type="text" icon={<RiseOutlined />}></Button>
-              </Popconfirm>
-            </Tooltip>
-          ) : (
+          {record.status === 1 ? (
             <Tooltip title={'下线'}>
               <Popconfirm
                 title="请确认将执行下线操作！"
@@ -233,6 +231,18 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
                 }}
               >
                 <Button size="small" type="text" icon={<FallOutlined />}></Button>
+              </Popconfirm>
+            </Tooltip>
+          ) : (
+            <Tooltip title={'上线'}>
+              <Popconfirm
+                title="请确认将执行上线操作"
+                placement="bottom"
+                onConfirm={() => {
+                  onUpdateApiStatus(record.id, 'online')
+                }}
+              >
+                <Button size="small" type="text" icon={<RiseOutlined />}></Button>
               </Popconfirm>
             </Tooltip>
           )}
