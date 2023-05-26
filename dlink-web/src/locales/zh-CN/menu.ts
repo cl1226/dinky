@@ -51,7 +51,7 @@ export default {
   'menu.dataService.devApi.edit': 'API编辑',
   'menu.dataService.devApi.debug': 'API调试',
   'menu.dataService.devApi.detail': 'API详情',
-
+  'menu.dataService.application': '应用管理',
 
   'menu.devops': '运维中心',
   'menu.job': '作业实例',
@@ -85,4 +85,4 @@ export default {
   'menu.settings.processList': '进程列表',
 
   'menu.about': '关于',
-};
+}

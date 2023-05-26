@@ -14,7 +14,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { connect, history } from 'umi'
 import { StateType } from '@/pages/DataService/ApiDev/Catalogue/model'
 import {
-  IgetApiConfigListParams,
+  IGetApiConfigListParams,
   getApiConfigList,
   deleteApiConfig,
   updateApiConfigStatus,
@@ -56,10 +56,10 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
   const [apiData, setApiData] = useState([])
   const { catalogue, mode, tableProps = {} } = props
 
-  const getApiList = async (extra?: IgetApiConfigListParams) => {
+  const getApiList = async (extra?: IGetApiConfigListParams) => {
     if (!catalogue?.id && !extra?.catalogueId && mode === 'catalogue') return
 
-    const params: IgetApiConfigListParams = {
+    const params: IGetApiConfigListParams = {
       pageIndex: pageNum,
       pageSize: pageSize,
       name: searchKey,
@@ -294,7 +294,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
                 </Button>
 
                 <Popconfirm
-                  title="请确认将执行下线操作！"
+                  title="请确认将执行删除操作！"
                   placement="bottom"
                   disabled={!selectedRowKeys.length}
                   onConfirm={() => {

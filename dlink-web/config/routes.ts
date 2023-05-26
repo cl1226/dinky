@@ -187,6 +187,12 @@ export default [
           },
         ],
       },
+      {
+        path: '/dataService/application',
+        name: 'application',
+        icon: 'appstore',
+        component: './DataService/Application',
+      },
     ],
   },
   {
