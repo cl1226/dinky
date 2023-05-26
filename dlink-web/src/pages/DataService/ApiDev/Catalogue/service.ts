@@ -2,7 +2,7 @@ import { request2, CODE } from '@/components/Common/crud'
 import { message } from 'antd'
 import { l } from '@/utils/intl'
 
-export interface IgetApiConfigListParams {
+export interface IGetApiConfigListParams {
   catalogueId?: number
   name?: string
   pageIndex: number
@@ -63,7 +63,7 @@ export const removeCatalogueById = async (id: number) => {
 }
 
 // 获取api列表
-export async function requestApiConfigList(params: IgetApiConfigListParams) {
+export async function requestApiConfigList(params: IGetApiConfigListParams) {
   return request2('/api/dataservice/config/page', {
     method: 'POST',
     data: {
@@ -73,7 +73,7 @@ export async function requestApiConfigList(params: IgetApiConfigListParams) {
 }
 
 // 获取api列表
-export const getApiConfigList = async (params: IgetApiConfigListParams) => {
+export const getApiConfigList = async (params: IGetApiConfigListParams) => {
   try {
     const { code, msg, datas } = await requestApiConfigList(params)
     if (code == CODE.SUCCESS) {

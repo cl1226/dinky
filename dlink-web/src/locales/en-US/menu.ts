@@ -51,7 +51,9 @@ export default {
   'menu.dataService.devApi.edit': 'API Edit',
   'menu.dataService.devApi.debug': 'API Debug',
   'menu.dataService.devApi.detail': 'API Detail',
-
+  'menu.dataService.application': 'Application',
+  'menu.dataService.applicationDetail': 'Application Detail',
+  
   'menu.devops': 'Devops',
   'menu.job': 'Job Instance',
 

@@ -75,7 +75,7 @@ export default [
     routes: [
       {
         path: '/dataDev',
-        redirect: '/dataDev/home'
+        redirect: '/dataDev/home',
       },
       {
         path: '/dataDev/home',
@@ -92,12 +92,12 @@ export default [
             path: '/dataDev/develop/dataStudio',
             name: 'dataStudio',
             component: './DataStudio',
-          }, 
+          },
           {
             path: '/dataDev/develop/scheduler',
             name: 'scheduler',
             component: './Scheduler',
-          }
+          },
         ],
       },
       {
@@ -109,7 +109,7 @@ export default [
             path: '/dataDev/devops/overview',
             name: 'overview',
             component: './DataStudio',
-          }, 
+          },
           {
             path: '/dataDev/devops/monitor',
             name: 'monitor',
@@ -119,10 +119,10 @@ export default [
             path: '/dataDev/devops/instance',
             name: 'instance',
             component: './Scheduler',
-          }
+          },
         ],
       },
-    ]
+    ],
   },
   {
     path: '/dataService',
@@ -186,6 +186,18 @@ export default [
             hideInMenu: true,
           },
         ],
+      },
+      {
+        path: '/dataService/application',
+        name: 'application',
+        icon: 'appstore',
+        component: './DataService/Application',
+      },
+      {
+        path: '/dataService/application/detail/:id',
+        name: 'applicationDetail',
+        component: './DataService/Application/Detail',
+        hideInMenu: true,
       },
     ],
   },

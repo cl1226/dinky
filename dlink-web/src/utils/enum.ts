@@ -26,3 +26,13 @@ export enum EAuthType {
   'none' = '无认证',
   'app' = 'APP认证',
 }
+
+// Token过期时间
+export enum ETokenExpire {
+  '5min' = '5分钟',
+  '1hour' = '1小时',
+  '1day' = '1天',
+  '30day' = '30天',
+  'once' = '单次有效',
+  'forever' = '永久',
+}
