@@ -82,7 +82,7 @@ export const requestGetSecret = () => {
 
 // 删除app
 export async function requestDeleteApp(ids: (string | number)[]) {
-  return request2('/api/app/config/delete', {
+  return request2('/api/app/config', {
     method: 'DELETE',
     data: { ids },
   })
