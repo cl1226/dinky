@@ -2,3 +2,57 @@
   width: 100%;
   padding: 20px;
 }
+.tabs-wrap {
+  margin-top: 20px;
+  :global {
+    .ant-tabs-tab {
+      padding: 4px 12px !important;
+    }
+  }
+}
+.tab-wrap {
+  padding: 10px 0;
+  :global {
+    .description-item {
+      display: flex;
+      width: 100%;
+      margin-bottom: 20px;
+      .description-label {
+        width: 100px;
+        color: rgb(138, 142, 153);
+        font-size: 14px;
+      }
+      .description-content {
+        flex: 1 1;
+        &.base-define {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 30px;
+          background-color: #ececec;
+          .icon-box {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100px;
+            height: 100px;
+            text-align: center;
+            background-color: #fff;
+          }
+          .info-box {
+            width: 280px;
+            height: 250px;
+            padding: 10px;
+            background-color: #fff;
+            .ant-descriptions-header {
+              margin-bottom: 10px;
+            }
+            .ant-descriptions-row .ant-descriptions-item {
+              padding-bottom: 8px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
