@@ -11,8 +11,8 @@ export enum EParamProtocol {
 
 // Content-Type
 export enum EContentType {
-  'application/x-www-form-urlencoded' = 'application/x-www-form-urlencoded',
   'application/json' = 'application/json',
+  'application/x-www-form-urlencoded' = 'application/x-www-form-urlencoded',
 }
 
 // 取数方式

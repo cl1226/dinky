@@ -26,8 +26,8 @@
  */
 
 // const targetUrl = 'http://localhost:8888'
-// const targetUrl = 'http://OLWX-JXPTP93.Svolt.cn:8888'
-const targetUrl = 'http://10.36.30.14:8888'
+const targetUrl = 'http://OLWX-JXPTP93.Svolt.cn:8888'
+// const targetUrl = 'http://10.36.30.14:8888'
 export default {
   dev: {
     '/api': {

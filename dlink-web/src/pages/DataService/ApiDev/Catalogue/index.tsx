@@ -17,7 +17,7 @@ const ApiCatalogue: React.FC<{}> = (props: any) => {
       <Card className={styles['catalogue-card']} title={false} bordered={false}>
         <CatalogueTree getCurrentCatalogue={getCurrentCatalogue}></CatalogueTree>
 
-        <ApiList catalogue={catalogue}></ApiList>
+        <ApiList catalogue={catalogue} mode={'catalogue'}></ApiList>
       </Card>
     </PageContainer>
   )

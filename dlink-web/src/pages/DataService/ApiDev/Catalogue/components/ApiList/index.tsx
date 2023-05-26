@@ -22,15 +22,17 @@ import {
 import { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { debounce } from 'lodash'
+import { EAccessType } from '@/utils/enum'
 
 const { Search } = Input
 
 export type IApiListProps = {
   catalogue: TreeDataNode | undefined
-  dispatch?: any
+  mode: 'catalogue' | 'management'
+  tableProps?: {}
 }
 
-interface DataType {
+export interface DataType {
   id: number
   name: string
   path: string
@@ -38,6 +40,10 @@ interface DataType {
   status: number
 }
 
+export enum EDebugStatus {
+  '失败',
+  '成功',
+}
 const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
   const sref: any = React.createRef<Scrollbars>()
   const [searchKey, setSearchKey] = useState('')
@@ -48,10 +54,10 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [loading, setLoading] = useState(false)
   const [apiData, setApiData] = useState([])
-  const { catalogue } = props
+  const { catalogue, mode, tableProps = {} } = props
 
   const getApiList = async (extra?: IgetApiConfigListParams) => {
-    if (!catalogue?.id && !extra?.catalogueId) return
+    if (!catalogue?.id && !extra?.catalogueId && mode === 'catalogue') return
 
     const params: IgetApiConfigListParams = {
       pageIndex: pageNum,
@@ -95,69 +101,119 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
     setSelectedRowKeys(newSelectedRowKeys)
   }
 
-  useEffect(() => {
-    if (catalogue && catalogue.id) {
-      getApiList()
-    }
-    console.log('catalogue', catalogue)
-  }, [catalogue])
+  const pageJump = (type, record) => {
+    sessionStorage.setItem(
+      'dataService.devApi.catalogue.list',
+      JSON.stringify({
+        pageIndex: pageNum,
+        pageSize: pageSize,
+        name: searchKey,
+        catalogueId: catalogue?.id,
+      }),
+    )
+    history.push(`/dataService/devApi/${type}/${record.id}`)
+  }
 
   useEffect(() => {
-    const sessionQuery = sessionStorage.getItem('dataService.devApi.catalogue.list')
-
-    if (sessionQuery) {
-      getApiList(JSON.parse(sessionQuery || '{}'))
+    if ((catalogue && catalogue.id) || mode === 'management') {
+      const sessionJson = sessionStorage.getItem('dataService.devApi.catalogue.list')
+      const sessionQuery = JSON.parse(sessionJson || '{}')
+      getApiList(sessionQuery)
       sessionStorage.removeItem('dataService.devApi.catalogue.list')
     }
-    console.log('初始', sessionQuery)
-  }, [])
+  }, [catalogue])
+
+  const columnsMaps = {
+    catalogue: [
+      {
+        title: '路径',
+        dataIndex: 'path',
+        key: 'path',
+        width: 200,
+      },
+      {
+        title: '修改时间',
+        dataIndex: 'updateTime',
+        key: 'updateTime',
+        width: 200,
+      },
+      {
+        title: '状态',
+        dataIndex: 'status',
+        key: 'status',
+        width: 150,
+        render: (cellValue, record) => {
+          return <span>{cellValue === 1 ? '已上线' : '已创建'}</span>
+        },
+      },
+    ],
+    management: [
+      {
+        title: '描述',
+        dataIndex: 'description',
+        key: 'description',
+        width: 200,
+        ellipsis: true,
+      },
+      {
+        title: '状态',
+        dataIndex: 'status',
+        key: 'status',
+        width: 120,
+        render: (cellValue, record) => {
+          return <span>{cellValue === 1 ? '已上线' : '已创建'}</span>
+        },
+      },
+      {
+        title: '调试状态',
+        dataIndex: 'debugStatus',
+        key: 'debugStatus',
+        width: 120,
+        render: (cellValue, record) => EDebugStatus[cellValue] || '-',
+      },
+      {
+        title: '类型',
+        dataIndex: 'accessType',
+        key: 'accessType',
+        width: 150,
+        render: (cellValue, record) => EAccessType[cellValue],
+      },
+      {
+        title: '创建时间',
+        dataIndex: 'createTime',
+        key: 'createTime',
+        width: 200,
+      },
+    ],
+  }
   const columns: ColumnsType<DataType> = [
     {
-      title: '名称',
+      title: 'API名称',
       dataIndex: 'name',
       key: 'name',
-      width: 250,
-    },
-    {
-      title: '路径',
-      dataIndex: 'path',
-      key: 'path',
-      width: 350,
-    },
-    {
-      title: '修改时间',
-      dataIndex: 'updateTime',
-      key: 'updateTime',
-      width: 250,
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
       width: 200,
-      render: (cellValue, record) => {
-        return <span>{cellValue === 1 ? '上线' : '下线'}</span>
-      },
+      render: (cellValue, record) => (
+        <Button
+          type="link"
+          onClick={() => {
+            pageJump('detail', record)
+          }}
+        >
+          {cellValue}
+        </Button>
+      ),
     },
+    ...columnsMaps[mode],
     {
       title: '操作',
-      width: 400,
+      width: 300,
       key: 'action',
       render: (cellValue, record) => (
         <Space size="middle">
           <Tooltip title={'编辑'}>
             <Button
               onClick={() => {
-                sessionStorage.setItem(
-                  'dataService.devApi.catalogue.list',
-                  JSON.stringify({
-                    pageIndex: pageNum,
-                    pageSize: pageSize,
-                    name: searchKey,
-                    catalogueId: catalogue?.id,
-                  }),
-                )
-                history.push(`/dataService/devApi/edit/${record.id}`)
+                pageJump('edit', record)
               }}
               size="small"
               disabled={record.status === 1}
@@ -165,19 +221,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
               icon={<EditOutlined />}
             ></Button>
           </Tooltip>
-          {record.status === 0 ? (
-            <Tooltip title={'上线'}>
-              <Popconfirm
-                title="请确认将执行上线操作"
-                placement="bottom"
-                onConfirm={() => {
-                  onUpdateApiStatus(record.id, 'online')
-                }}
-              >
-                <Button size="small" type="text" icon={<RiseOutlined />}></Button>
-              </Popconfirm>
-            </Tooltip>
-          ) : (
+          {record.status === 1 ? (
             <Tooltip title={'下线'}>
               <Popconfirm
                 title="请确认将执行下线操作！"
@@ -189,10 +233,29 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
                 <Button size="small" type="text" icon={<FallOutlined />}></Button>
               </Popconfirm>
             </Tooltip>
+          ) : (
+            <Tooltip title={'上线'}>
+              <Popconfirm
+                title="请确认将执行上线操作"
+                placement="bottom"
+                onConfirm={() => {
+                  onUpdateApiStatus(record.id, 'online')
+                }}
+              >
+                <Button size="small" type="text" icon={<RiseOutlined />}></Button>
+              </Popconfirm>
+            </Tooltip>
           )}
 
           <Tooltip title={'调试'}>
-            <Button size="small" type="text" icon={<BugOutlined />}></Button>
+            <Button
+              size="small"
+              type="text"
+              onClick={() => {
+                pageJump('debug', record)
+              }}
+              icon={<BugOutlined />}
+            ></Button>
           </Tooltip>
           <Tooltip title={'删除'}>
             <Popconfirm
@@ -216,7 +279,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
     },
   ]
   return (
-    <div className={styles['api-list']}>
+    <div className={[styles['api-list'], styles[mode]].join(' ')}>
       <Scrollbars style={{ height: `100%` }} ref={sref}>
         <div style={{ padding: 10 }}>
           <Row justify={'space-between'}>
@@ -288,6 +351,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
               showSizeChanger: true,
               showQuickJumper: true,
             }}
+            {...tableProps}
           />
         </div>
       </Scrollbars>

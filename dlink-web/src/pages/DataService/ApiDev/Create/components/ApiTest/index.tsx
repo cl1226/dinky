@@ -23,14 +23,13 @@ interface IExecuteResult {
   timeConsuming?: number
 }
 
-export default ({ form, formLayout, forms, mode }: IStepComProps) => {
+export default ({ form, formLayout, forms, mode, stepBasic = {} }: IStepComProps) => {
   const [testParams, setTestParams] = useState<readonly ITestParams[]>([])
   const [tableForm] = Form.useForm()
   const [executeResult, setExecuteResult] = useState<IExecuteResult>({})
 
   const executeQuery = (reqP) => {
-    const { path } = forms[0]
-    const { datasourceId, segment } = forms[1]
+    const { path, datasourceId, segment } = stepBasic
     const tempParam = {
       datasourceId: datasourceId,
       sql: segment,
@@ -54,14 +53,14 @@ export default ({ form, formLayout, forms, mode }: IStepComProps) => {
 
   useEffect(() => {
     setTestParams(
-      JSON.parse(forms?.[0]?.params || '[]').map((item, index) => ({
+      JSON.parse(stepBasic?.params || '[]').map((item, index) => ({
         id: index,
         name: item.name,
         type: item.type,
         value: '',
       })),
     )
-  }, [forms?.[0]?.params])
+  }, [stepBasic?.params])
   const columns: ProColumns<ITestParams>[] = [
     {
       title: '参数名',
@@ -94,8 +93,8 @@ export default ({ form, formLayout, forms, mode }: IStepComProps) => {
     <div className={styles['api-test']}>
       <div className="left-part">
         <Descriptions column={1} title={false} layout="horizontal">
-          <Descriptions.Item label="API 名称">{forms?.[0].name}</Descriptions.Item>
-          <Descriptions.Item label="请求Path">{forms?.[0].path}</Descriptions.Item>
+          <Descriptions.Item label="API 名称">{stepBasic?.name}</Descriptions.Item>
+          <Descriptions.Item label="请求Path">{stepBasic?.path}</Descriptions.Item>
         </Descriptions>
         <div>参数配置</div>
         <EditableProTable<ITestParams>

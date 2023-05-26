@@ -69,7 +69,7 @@
     "@umijs/plugin-openapi": "^1.2.0",
     "@umijs/route-utils": "^1.0.36",
     "ace-builds": "^1.21.1",
-    "antd": "^4.20.0",
+    "antd": "^4.24.10",
     "classnames": "^2.2.6",
     "dva": "^2.4.0",
     "echarts": "^5.4.2",

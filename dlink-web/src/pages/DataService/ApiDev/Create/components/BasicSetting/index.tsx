@@ -41,6 +41,7 @@ export default ({ form, formLayout, forms, mode, detailInfo }: IStepComProps) =>
         validateTrigger={['onChange', 'onBlur']}
         rules={[
           { required: true, message: '请输入请求Path！' },
+          { pattern: /^\//, message: '请求Path只能以/开头' },
           {
             validateTrigger: 'onBlur',
             validator: async (_, value) => {

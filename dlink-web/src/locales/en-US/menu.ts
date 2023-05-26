@@ -26,7 +26,6 @@ export default {
   'menu.account.checkTenantConfirm': 'Are you sure to switch  tenant [ {tenantCode} ] ?',
   'menu.account.logout': 'Logout',
 
-
   'menu.dataStudio': 'Data Studio',
 
   'menu.dataDev': 'Data Develop',
@@ -50,9 +49,8 @@ export default {
   'menu.dataService.devApi.management': 'API Management',
   'menu.dataService.devApi.create': 'API Create',
   'menu.dataService.devApi.edit': 'API Edit',
-  'menu.dataService.invokeApi': 'Invoke API',
-  'menu.dataService.invokeApi.catalogue': 'Service Catalogue',
-  'menu.dataService.invokeApi.overview': 'Service Overview',
+  'menu.dataService.devApi.debug': 'API Debug',
+  'menu.dataService.devApi.detail': 'API Detail',
 
   'menu.devops': 'Devops',
   'menu.job': 'Job Instance',
@@ -86,4 +84,4 @@ export default {
   'menu.settings.processList': 'Process List',
 
   'menu.about': 'About',
-};
+}
