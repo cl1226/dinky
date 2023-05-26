@@ -228,7 +228,7 @@ const Console = (props: any) => {
               width={"100%"}
               height={"30vh"}
               language={currentDatabase.type.toLowerCase()}
-              theme="vs-dark"
+              theme="vs"
               editorDidMount={editorDidMountHandle}
               options={{
                 automaticLayout: true,

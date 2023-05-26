@@ -361,7 +361,7 @@ const StudioHistory = (props: any) => {
               </Tag>
             </ProDescriptions.Item>
             <ProDescriptions.Item>
-              <CodeShow height={"80vh"} language={"sql"} code={row.statement} theme={"vs-dark"}/>
+              <CodeShow height={"80vh"} language={"sql"} code={row.statement} theme={"vs"}/>
             </ProDescriptions.Item>
           </ProDescriptions>
         )}
@@ -391,7 +391,7 @@ const StudioHistory = (props: any) => {
               </Tag>
             </ProDescriptions.Item>
             <ProDescriptions.Item>
-              <CodeShow height={"80vh"} language={"java"} code={row.error} theme={"vs-dark"}/>
+              <CodeShow height={"80vh"} language={"java"} code={row.error} theme={"vs"}/>
             </ProDescriptions.Item>
           </ProDescriptions>
         )}

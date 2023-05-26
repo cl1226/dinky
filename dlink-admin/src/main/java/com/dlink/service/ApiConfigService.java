@@ -21,6 +21,8 @@ public interface ApiConfigService extends ISuperService<ApiConfig> {
 
     Page<ApiConfig> page(SearchCondition searchCondition);
 
+    boolean addOrEdit(ApiConfig apiConfig);
+
     ApiConfigDTO getDetail(Integer id);
 
     ApiConfig online(Integer id);

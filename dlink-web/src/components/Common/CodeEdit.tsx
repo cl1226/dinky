@@ -54,7 +54,7 @@ const CodeEdit = (props: CodeEditFormProps) => {
       value={code}
       options={options}
       onChange={onChange}
-      theme='vs-dark'
+      theme='vs'
     />
   </>)
 };

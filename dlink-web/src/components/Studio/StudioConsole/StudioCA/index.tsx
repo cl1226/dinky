@@ -66,7 +66,7 @@ const StudioCA = (props: any) => {
         width: 1000,
         content: (
           <CodeShow code={JSON.stringify((result.datas ? result.datas : result.msg), null, "\t")} language='json'
-                    height='500px' theme="vs-dark"/>
+                    height='500px' theme="vs"/>
         ),
         onOk() {
         },

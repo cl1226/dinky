@@ -53,19 +53,76 @@ export default [
     path: '/',
     redirect: '/dataStudio',
   },
+  // {
+  //   path: '/dataStudio',
+  //   name: 'dataStudio',
+  //   icon: 'consoleSql',
+  //   footerRender: false,
+  //   component: './DataStudio',
+  // },
+  // {
+  //   path: '/scheduler',
+  //   name: 'scheduler',
+  //   icon: 'nodeExpand',
+  //   footerRender: false,
+  //   component: './Scheduler',
+  // },
   {
-    path: '/dataStudio',
-    name: 'dataStudio',
+    path: '/dataDev',
+    name: 'dataDev',
     icon: 'consoleSql',
     footerRender: false,
-    component: './DataStudio',
-  },
-  {
-    path: '/scheduler',
-    name: 'scheduler',
-    icon: 'nodeExpand',
-    footerRender: false,
-    component: './Scheduler',
+    routes: [
+      {
+        path: '/dataDev',
+        redirect: '/dataDev/home'
+      },
+      {
+        path: '/dataDev/home',
+        name: 'dataDevHome',
+        icon: 'windows',
+        component: './DataDev/Home',
+      },
+      {
+        path: '/dataDev/develop',
+        name: 'develop',
+        icon: 'cluster',
+        routes: [
+          {
+            path: '/dataDev/develop/dataStudio',
+            name: 'dataStudio',
+            component: './DataStudio',
+          }, 
+          {
+            path: '/dataDev/develop/scheduler',
+            name: 'scheduler',
+            component: './Scheduler',
+          }
+        ],
+      },
+      {
+        path: '/dataDev/devops',
+        name: 'devops',
+        icon: 'cluster',
+        routes: [
+          {
+            path: '/dataDev/devops/overview',
+            name: 'overview',
+            component: './DataStudio',
+          }, 
+          {
+            path: '/dataDev/devops/monitor',
+            name: 'monitor',
+            component: './Scheduler',
+          },
+          {
+            path: '/dataDev/devops/instance',
+            name: 'instance',
+            component: './Scheduler',
+          }
+        ],
+      },
+    ]
   },
   {
     path: '/dataService',

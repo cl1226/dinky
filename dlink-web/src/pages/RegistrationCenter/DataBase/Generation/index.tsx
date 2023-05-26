@@ -57,7 +57,7 @@ const Generation = (props: any) => {
           key="FlinkDDL"
         >
           <Paragraph copyable={{text: sqlGeneration.flinkSqlCreate}}></Paragraph>
-          <CodeShow height={"400px"} code={sqlGeneration.flinkSqlCreate || ''} language={"sql"} theme={"vs-dark"} />
+          <CodeShow height={"400px"} code={sqlGeneration.flinkSqlCreate || ''} language={"sql"} theme={"vs"} />
         </TabPane>
         <TabPane
           tab={
@@ -68,7 +68,7 @@ const Generation = (props: any) => {
           key="SQLSelect"
         >
           <Paragraph copyable={{text: sqlGeneration.sqlSelect}}></Paragraph>
-          <CodeShow height={"400px"} code={sqlGeneration.sqlSelect || ''} language={"sql"} theme={"vs-dark"} />
+          <CodeShow height={"400px"} code={sqlGeneration.sqlSelect || ''} language={"sql"} theme={"vs"} />
         </TabPane>
         <TabPane
           tab={
@@ -79,7 +79,7 @@ const Generation = (props: any) => {
           key="SQLDDL"
         >
           <Paragraph copyable={{text: sqlGeneration.sqlCreate}}></Paragraph>
-          <CodeShow height={"400px"} code={sqlGeneration.sqlCreate || '' } language={"sql"} theme={"vs-dark"} />
+          <CodeShow height={"400px"} code={sqlGeneration.sqlCreate || '' } language={"sql"} theme={"vs"} />
         </TabPane>
       </Tabs>
 

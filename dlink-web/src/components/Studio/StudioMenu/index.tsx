@@ -174,7 +174,7 @@ const StudioMenu = (props: any) => {
     const result = executeSql(param)
     result.then((res) => {
       notification.close(taskKey)
-      if (res.datas.success) {
+      if (res.datas && res.datas.success) {
         res.datas?.jobInstanceId &&
           props.changeTaskJobInstance(current.task.id, res.datas?.jobInstanceId)
         message.success(l('pages.datastudio.editor.exec.success'))

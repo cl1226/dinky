@@ -19,7 +19,7 @@
 
 
 import {Tabs} from "antd";
-import {ContainerOutlined, ScheduleOutlined, SettingOutlined} from "@ant-design/icons";
+import {ContainerOutlined, ScheduleOutlined, SettingOutlined, CodeOutlined} from "@ant-design/icons";
 import {StateType} from "@/pages/DataStudio/model";
 import {connect} from "umi";
 import StudioConfig from "./StudioConfig";
@@ -34,13 +34,19 @@ import StudioGuide from "./StudioGuide";
 import StudioTaskInfo from "./StudioTaskInfo";
 import {DIALECT, isSql} from "@/components/Studio/conf";
 import StudioKubernetesConfig from "@/components/Studio/StudioRightTool/StudioKubernetesConfig";
+import './index.less'
 import {l} from "@/utils/intl";
+import { useState } from "react";
+import { Scrollbars } from 'react-custom-scrollbars'
+import StudioMsg from "../StudioConsole/StudioMsg"
 
 const {TabPane} = Tabs;
 
 const StudioRightTool = (props: any) => {
 
   const {current, form, toolHeight} = props;
+
+  const [showTabPane, setshowTabPane] = useState(false)
 
   const renderContent = () => {
     if (isSql(current.task.dialect)) {
@@ -74,6 +80,24 @@ const StudioRightTool = (props: any) => {
       </TabPane>
     )
   };
+
+  // const renderConsoleMsg = () => {
+  //   return (
+  //     <TabPane
+  //       tab={
+  //         <span>
+  //         <CodeOutlined/>
+  //           {l('pages.datastudio.label.info')}
+  //       </span>
+  //       }
+  //       key="StudioMsg"
+  //     >
+  //       <Scrollbars style={{height: '100%'}}>
+  //         <StudioMsg height={'100%'}/>
+  //       </Scrollbars>
+  //     </TabPane>
+  //   )
+  // }
 
   const renderSqlContent = () => {
     return (<>
@@ -137,7 +161,7 @@ const StudioRightTool = (props: any) => {
   return (
     <>
       {current?.task ?
-        <Tabs defaultActiveKey="1" size="small" tabPosition="right" style={{height: toolHeight}}>
+        <Tabs className={`righttools-tabcontent-wrap righttools-tabcontent-wrap${showTabPane && '-show'}`} onTabClick={() => setshowTabPane(!showTabPane)} defaultActiveKey="1" size="small" tabPosition="right" >
           {renderContent()}
           {renderTaskInfoContent()}
         </Tabs> : <StudioGuide toolHeight={toolHeight}/>}

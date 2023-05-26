@@ -19,6 +19,11 @@
 
 package com.dlink.constant;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class BaseConstant {
     public static final String LOCALE_LANGUAGE_COOKIE = "language";
+
+    public static final Map<String, Boolean> API_DEBUG_STATUS = new HashMap<>();
 }

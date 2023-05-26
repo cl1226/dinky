@@ -615,6 +615,11 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
     },
   };
 
+  const [size, setSize] = useState({
+    width: document.documentElement.clientWidth,
+    height: document.documentElement.clientHeight,
+  });
+
   return (
     <div className={style.tree_div}>
       <Row>
@@ -651,7 +656,7 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
         </Col>
       </Row>
       <Search style={{marginBottom: 8}} placeholder="Search" onChange={onChange} allowClear={true}/>
-      <Scrollbars style={{height: (toolHeight - 72)}} ref={sref}>
+      <Scrollbars style={{height: (size.height - 180)}} ref={sref}>
         <DirectoryTree
           multiple
           onRightClick={handleContextMenu}

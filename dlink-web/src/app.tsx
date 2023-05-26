@@ -155,14 +155,14 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     },
     links: isDev
       ? [
-          <Link to="/umi/plugin/openapi" target="_blank">
-            <LinkOutlined />
-            <span>OpenAPI Document</span>
-          </Link>,
-          <Link to="/~docs">
-            <BookOutlined />
-            <span>Business Component Document</span>
-          </Link>,
+          // <Link to="/umi/plugin/openapi" target="_blank">
+          //   <LinkOutlined />
+          //   <span>OpenAPI Document</span>
+          // </Link>,
+          // <Link to="/~docs">
+          //   <BookOutlined />
+          //   <span>Business Component Document</span>
+          // </Link>,
         ]
       : [],
     menuHeaderRender: undefined,

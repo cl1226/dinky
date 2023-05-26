@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
+import com.dlink.constant.BaseConstant;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.ApiConfigDTO;
 import com.dlink.dto.DebugDTO;
@@ -23,7 +24,6 @@ import com.dlink.utils.JdbcUtil;
 import com.dlink.utils.PoolUtils;
 import com.dlink.utils.SqlEngineUtils;
 import com.github.freakchick.orange.SqlMeta;
-import com.github.freakchick.orange.engine.DynamicSqlEngine;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +65,15 @@ public class ApiConfigServiceImpl extends SuperServiceImpl<ApiConfigMapper, ApiC
         queryWrapper.orderByDesc("create_time");
 
         return this.baseMapper.selectPage(page, queryWrapper);
+    }
+
+    @Override
+    public boolean addOrEdit(ApiConfig apiConfig) {
+        String path = apiConfig.getPath().replaceAll("/", "");
+        if (BaseConstant.API_DEBUG_STATUS.containsKey(path)) {
+            apiConfig.setDebugStatus(BaseConstant.API_DEBUG_STATUS.get(path) ? 1 : 0);
+        }
+        return this.saveOrUpdate(apiConfig);
     }
 
     @Override

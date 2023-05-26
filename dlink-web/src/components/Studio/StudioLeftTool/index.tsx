@@ -36,16 +36,16 @@ const StudioLeftTool = (props: any) => {
 
   return (
     <Tabs defaultActiveKey="1" size="small" tabPosition="left" style={{height: toolHeight}}>
-      <TabPane tab={<span><BarsOutlined/> {l('pages.datastudio.label.directory')}</span>} key="StudioTree">
+      {/* <TabPane tab={<span><BarsOutlined/> {l('pages.datastudio.label.directory')}</span>} key="StudioTree">
         <StudioTree/>
-      </TabPane>
-      <TabPane tab={<span><InsertRowAboveOutlined/> {l('pages.datastudio.label.structure')}</span>}
+      </TabPane> */}
+      {/* <TabPane tab={<span><InsertRowAboveOutlined/> {l('pages.datastudio.label.structure')}</span>}
                key="MetaStore">
         <StudioMetaStore/>
-      </TabPane>
-      <TabPane tab={<span><MessageOutlined/> {l('pages.datastudio.label.session')}</span>} key="Connectors">
+      </TabPane> */}
+      {/* <TabPane tab={<span><MessageOutlined/> {l('pages.datastudio.label.session')}</span>} key="Connectors">
         <StudioConnector/>
-      </TabPane>
+      </TabPane> */}
       {/*<TabPane tab={<span><ClusterOutlined/> {l('pages.datastudio.label.cluster')}</span>} key="Cluster">*/}
       {/*  <StudioCluster/>*/}
       {/*</TabPane>*/}
@@ -53,9 +53,9 @@ const StudioLeftTool = (props: any) => {
       {/*         key="DataSource">*/}
       {/*  <StudioDataBase/>*/}
       {/*</TabPane>*/}
-      <TabPane tab={<span><AppstoreOutlined/> {l('pages.datastudio.label.meta')}</span>} key="MetaData">
+      {/* <TabPane tab={<span><AppstoreOutlined/> {l('pages.datastudio.label.meta')}</span>} key="MetaData">
         <StudioMetaData/>
-      </TabPane>
+      </TabPane> */}
       {/*<TabPane tab={<span><CloudOutlined/> {l('pages.datastudio.label.globalvariable')}</span>}*/}
       {/*         key="fragment">*/}
       {/*  <StudioFragment/>*/}
