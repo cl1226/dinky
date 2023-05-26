@@ -17,255 +17,55 @@
  *
  */
 
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
-import styles from './index.less'
-import { Image, Card, Steps, Row, Spin } from 'antd'
-import { ReloadOutlined } from '@ant-design/icons'
-import * as echarts from 'echarts'
-import { debounce } from 'lodash'
-import { getSchedulerStatistics } from '@/components/Common/crud'
-export interface IChartData {
-  value: string | number
-  name: string
-}
-export interface ICardChartProps {
-  chartName: string
-  chartData: IChartData[]
-  setChart: (key, chart) => void
-}
-
-export enum EChartLabel {
-  'sourceNum' = '数据源数',
-  'jobNum' = '作业数',
-  'flowNum' = '流程数',
-  'finished' = '完成',
-  'failed' = '失败',
-  'processing' = '调度中',
-  'success' = '成功',
-  'fail' = '失败',
-}
-
-const CardChart = (props: ICardChartProps) => {
-  const { chartName, chartData, setChart } = props
-  const chartsRef = useRef<HTMLDivElement | null>(null)
-
-  const initChart = () => {
-    const chartDom = chartsRef.current
-    if (!chartDom) return
-    const tempChart = echarts.init(chartDom)
-
-    const getValueByName = (name) => {
-      return chartData.find((item) => item.name === name)?.value
-    }
-    const options = {
-      tooltip: {
-        trigger: 'item',
-      },
-      legend: {
-        top: '30%',
-        left: '70%',
-        orient: 'vertical',
-        icon: 'circle',
-        itemWidth: 8,
-        show: chartData && chartData.length,
-        // 使用回调函数
-        formatter: (name) => {
-          return `${name} ${getValueByName(name)}`
-        },
-      },
-      series: [
-        {
-          name: chartName,
-          type: 'pie',
-          center: ['35%', '45%'],
-          radius: ['60%', '70%'],
-          avoidLabelOverlap: false,
-          label: {
-            show: false,
-            position: 'center',
-          },
-          emphasis: {
-            label: {
-              show: false,
-            },
-          },
-          labelLine: {
-            show: false,
-          },
-          left: '0',
-          data: chartData,
-        },
-      ],
-    }
-    tempChart.setOption(options)
-    setChart && setChart(chartName, tempChart)
-  }
-
-  useEffect(() => {
-    initChart()
-  }, [chartData])
-  return <div style={{ width: '100%', height: '28vh' }} ref={chartsRef}></div>
-}
+import { List, Avatar, Row, Button } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import { history } from 'umi'
 
 const SchedulerHome: React.FC = () => {
-  const [chartList, setChartList] = useState<any>([
-    {
-      key: 'develop',
-      title: '数据开发',
-      data: [],
-    },
-    {
-      key: 'devops',
-      title: '作业监控',
-      data: [],
-    },
-    {
-      key: 'alert',
-      title: '告警监控',
-      data: [],
-    },
-  ])
 
-  const cacheChart = useMemo<{ [key: string]: echarts.ECharts }>(() => ({}), [])
-  const [cacheLoading, setCacheLoading] = useState<{ [key: string]: boolean }>(() => ({}))
+  const list = [{
+    name: '新建脚本',
+    imageUrl: '/schedule/develop.png',
+    description: '对脚本进行在线开发、调试和执行，开发完成的脚本也可以在作业中执行',
+    type: '新建脚本',
+    url: '/dataDev/develop/dataStudio'
+  }, {
+    name: '新建作业',
+    imageUrl: '/schedule/workflow.png',
+    description: '拖拽所需节点至画布中，连接节点，轻松实现作业开发',
+    type: '新建作业',
+    url: '/dataDev/develop/scheduler'
+  }, {
+    name: '新建数据连接',
+    imageUrl: '/schedule/project.png',
+    description: '通过配置数据源信息、建立数据连接，配置的数据连接会在脚本和作业的开发过程中用到，用于访问数据源',
+    type: '新建数据连接',
+    url: '/registration/database'
+  }]
 
-  const handleCacheChart = (key, chart) => {
-    cacheChart[key] = chart
-  }
-
-  const refreshChart = async (key) => {
-    setCacheLoading({
-      ...cacheLoading,
-      [key]: true,
-    })
-    const { datas: currentChartData } = await getSchedulerStatistics(key)
-    setCacheLoading({
-      ...cacheLoading,
-      [key]: false,
-    })
-    const option: any = cacheChart[key].getOption()
-    option.series[0].data = Object.keys(currentChartData).map((item) => {
-      return {
-        value: currentChartData[item],
-        name: EChartLabel[item],
-      }
-    })
-  }
-
-  const getChartCard = () => {
-    return chartList.map((chartItem) => {
-      return (
-        <Card
-          key={chartItem.key}
-          className={styles['chart-card']}
-          title={chartItem.title}
-          bordered={false}
-          extra={
-            <ReloadOutlined
-              onClick={() => refreshChart(chartItem.key)}
-              style={{ cursor: 'pointer' }}
-            />
-          }
-        >
-          <Spin spinning={!!cacheLoading[chartItem.key]}>
-            {useMemo(
-              () => (
-                <CardChart
-                  chartName={chartItem.key}
-                  chartData={chartItem.data}
-                  setChart={handleCacheChart}
-                />
-              ),
-              [chartItem.data],
-            )}
-          </Spin>
-        </Card>
-      )
-    })
-  }
-
-  const onResize = useCallback(
-    debounce(() => {
-      Object.keys(cacheChart).map((key) => {
-        cacheChart[key].resize()
-      })
-    }, 200),
-    [],
-  )
-
-  useEffect(() => {
-    window.addEventListener('resize', onResize)
-    onResize()
-    return () => {
-      window.removeEventListener('resize', onResize)
-    }
-  }, [onResize])
-  useEffect(() => {
-    ~(async () => {
-      const chartMaps = {
-        develop: '数据开发',
-        devops: '作业监控',
-        alert: '告警监控',
-      }
-      const keyList = Object.keys(chartMaps)
-      const res = await Promise.all(keyList.map((key) => getSchedulerStatistics(key)))
-      const tempList = keyList.map((key, index) => {
-        const tempData = res[index]['datas']
-        return {
-          key,
-          title: chartMaps[key],
-          data: Object.keys(tempData).map((item) => {
-            return {
-              value: tempData[item],
-              name: EChartLabel[item],
-            }
-          }),
-        }
-      })
-      setChartList(tempList)
-    })()
-  }, [])
   return (
-    <div
-      style={{
-        height: '100%',
-        overflow: 'hidden',
-        background: '#eee',
-        paddingLeft: 5,
-        paddingRight: 5,
-        minWidth: 960,
-      }}
-    >
-      <Card title="快速入门" bordered={false} className={styles['fast-card']}>
-        <Steps progressDot={true} current={4} style={{ paddingTop: 150 }}>
-          <Steps.Step
-            className={styles['step-box']}
-            title="项目管理"
-            subTitle="根目录与项目一一对应，实现工作流的快速分类。"
-            description={<Image src={'schedule/project.png'} preview={false}></Image>}
+    <List
+      className="demo-loadmore-list"
+      itemLayout="horizontal"
+      size={"large"}
+      dataSource={list}
+      renderItem={(item) => (
+        <List.Item style={{height: '150px'}}>
+          <List.Item.Meta
+            avatar={<Avatar shape="square" style={{'width': '100px', 'height': '100px'}} src={item.imageUrl} />}
+            title={item.name}
+            description={item.description}
           />
-          <Steps.Step
-            className={styles['step-box']}
-            title="数据开发"
-            subTitle="在线脚本编辑调试、支持多种语法，轻松实现数据开发工作。"
-            description={<Image src={'schedule/develop.png'} preview={false}></Image>}
-          />
-          <Steps.Step
-            className={styles['step-box']}
-            title="流程开发"
-            subTitle="拖拽式作业开发，轻松实现工作流开发工作。"
-            description={<Image src={'schedule/workflow.png'} preview={false}></Image>}
-          />
-          <Steps.Step
-            className={styles['step-box']}
-            title="运维调度"
-            subTitle="强大的作业调度与灵活的作业监控告警，轻松管理数据作业运维。"
-            description={<Image src={'schedule/devops.png'} preview={false}></Image>}
-          />
-        </Steps>
-      </Card>
-      <Row justify={'space-between'}>{getChartCard()}</Row>
-    </div>
+          <Row>
+            <Button icon={<PlusOutlined />}
+            onClick={() => {
+              history.push(item.url)
+            }}
+            >{item.type}</Button>
+          </Row>
+        </List.Item>
+      )}
+    />
   )
 }
 

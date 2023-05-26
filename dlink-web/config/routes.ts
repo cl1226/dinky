@@ -51,7 +51,7 @@ export default [
   },
   {
     path: '/',
-    redirect: '/dataStudio',
+    redirect: '/dataDev/home',
   },
   // {
   //   path: '/dataStudio',

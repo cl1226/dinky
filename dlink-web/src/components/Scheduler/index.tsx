@@ -29,7 +29,7 @@ const Scheduler = (props: any) => {
   const { rightClickMenu, dispatch } = props
 
   const VIEW = {
-    leftToolWidth: 300,
+    leftToolWidth: 346,
   }
 
   const onClick = () => {
@@ -43,7 +43,7 @@ const Scheduler = (props: any) => {
   }
 
   return (
-    <div onClick={onClick} style={{ margin: '-24px', marginBottom: 0, overflow: 'hidden' }}>
+    <div onClick={onClick} style={{ margin: '-24px', overflow: 'hidden' }}>
       <SchedulerMenu />
       <div className={styles.card}>
         <div className="guide-content">

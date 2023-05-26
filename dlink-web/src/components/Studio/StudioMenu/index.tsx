@@ -657,19 +657,19 @@ const StudioMenu = (props: any) => {
           </Col>
           {
             current?.task ? (
-              <Col span={12}>
-                <Tooltip title={l('pages.datastudio.editor.clearConsole')}>
+              <Col span={12} push="5">
+                {/* <Tooltip title={l('pages.datastudio.editor.clearConsole')}>
                   <Button
                     type="text"
                     icon={<ClearOutlined style={{ color: '#1890ff' }} />}
                     onClick={toClearConsole}
                   />
-                </Tooltip>
-                <Tooltip title={l('pages.datastudio.editor.fullScreen')}>
+                </Tooltip> */}
+                {/* <Tooltip title={l('pages.datastudio.editor.fullScreen')}>
                   <Button type="text" icon={<CodeTwoTone />} onClick={toFullScreen} />
-                </Tooltip>
-                <Button type="text" icon={<FileAddTwoTone twoToneColor="#ddd" />} />
-                <Button type="text" icon={<FolderOpenTwoTone twoToneColor="#ddd" />} />
+                </Tooltip> */}
+                {/* <Button type="text" icon={<FileAddTwoTone twoToneColor="#ddd" />} /> */}
+                {/* <Button type="text" icon={<FolderOpenTwoTone twoToneColor="#ddd" />} /> */}
                 <Tooltip title={l('pages.datastudio.editor.save')}>
                   <Button type="text" icon={<SaveTwoTone />} onClick={saveSqlAndSettingToTask} />
                 </Tooltip>
@@ -702,7 +702,7 @@ const StudioMenu = (props: any) => {
                     </Tooltip>
                   </>
                 )}
-                {isShowSubmitBtn() && (
+                {/* {isShowSubmitBtn() && (
                   <>
                     <Tooltip title={l('pages.datastudio.editor.push.ds')}>
                       <Button
@@ -713,7 +713,7 @@ const StudioMenu = (props: any) => {
                       />
                     </Tooltip>
                   </>
-                )}
+                )} */}
                 {isShowCancelTaskBtn() && (
                   <Tooltip title={l('pages.datastudio.editor.stop')}>
                     <Button
@@ -754,14 +754,14 @@ const StudioMenu = (props: any) => {
                     <Button type="text" icon={<DeleteTwoTone />} onClick={toCancelTask} />
                   </Tooltip>
                 ) : undefined}
-                {current.task.step == JOB_LIFE_CYCLE.CANCEL ? (
+                {/* {current.task.step == JOB_LIFE_CYCLE.CANCEL ? (
                   <Tooltip title={l('pages.datastudio.editor.recovery')}>
                     <Button type="text" icon={<RestTwoTone />} onClick={toRecoveryTask} />
                   </Tooltip>
-                ) : undefined}
-                <Tooltip title={l('pages.datastudio.editor.api')}>
+                ) : undefined} */}
+                {/* <Tooltip title={l('pages.datastudio.editor.api')}>
                   <Button type="text" icon={<ApiTwoTone />} onClick={showAPI} />
-                </Tooltip>
+                </Tooltip> */}
                 {/* <Tooltip title={l('pages.datastudio.editor.help')}>
                 <Button
                   type="text"

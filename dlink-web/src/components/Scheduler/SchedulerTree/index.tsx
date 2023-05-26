@@ -115,7 +115,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
     const expandList: any[] = generateList(tempTreeData, []).map((item) => item.key)
 
     //默认展开所有
-    setExpandedKeys(expandList)
+    // setExpandedKeys(expandList)
 
     current && setSelectedKeys([current.treeId])
   }
@@ -478,7 +478,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
         onChange={onChange}
         allowClear={true}
       />
-      <Scrollbars style={{ height: 'calc(100vh - 82px - 72px)' }} ref={sref}>
+      <Scrollbars style={{ height: 'calc(100vh - 150px)' }} ref={sref}>
         {treeData?.length && (
           <DirectoryTree
             multiple

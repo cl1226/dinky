@@ -1,7 +1,9 @@
 package com.dlink.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
 import com.dlink.dto.SearchCondition;
+import com.dlink.model.ApiConfig;
 import com.dlink.model.AppConfig;
 import com.dlink.service.AppConfigService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,19 +25,20 @@ public class AppConfigController {
     @Autowired
     private AppConfigService appConfigService;
 
-    @PostMapping("/list")
+    @PostMapping("/page")
     public Result page(@RequestBody SearchCondition searchCondition) throws Exception {
-        return Result.succeed(appConfigService.list(), "获取成功");
+        Page<AppConfig> page = appConfigService.page(searchCondition);
+        return Result.succeed(page, "获取成功");
     }
 
     @PutMapping
     public Result saveOrUpdate(@RequestBody AppConfig appConfig) {
         try {
             appConfigService.add(appConfig);
-            return Result.succeed(appConfig, "创建成功");
+            return Result.succeed(appConfig, appConfig.getId() != null ? "编辑成功" : "创建成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return Result.failed("创建失败");
+            return Result.failed(appConfig.getId() != null ? "编辑失败" : "创建失败");
         }
     }
 

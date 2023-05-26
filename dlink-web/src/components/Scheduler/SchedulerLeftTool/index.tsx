@@ -17,27 +17,10 @@
  *
  */
 
-import { Tabs } from 'antd'
-import { BarsOutlined } from '@ant-design/icons'
-import { l } from '@/utils/intl'
 import SchedulerTree from '../SchedulerTree'
-
-const { TabPane } = Tabs
 
 const SchedulerLeftTool = () => {
   return (
-    // <Tabs defaultActiveKey="1" size="small" tabPosition="left" style={{ height: '100%' }}>
-    //   <TabPane
-    //     tab={
-    //       <span>
-    //         <BarsOutlined /> {l('pages.scheduler.workflow.develop')}
-    //       </span>
-    //     }
-    //     key="SchedulerTree"
-    //   >
-    //     <SchedulerTree />
-    //   </TabPane>
-    // </Tabs>
     <SchedulerTree />
   )
 }
