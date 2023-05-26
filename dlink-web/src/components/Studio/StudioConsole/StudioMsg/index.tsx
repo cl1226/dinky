@@ -30,6 +30,17 @@ const StudioMsg = (props: any) => {
   const {current, height, isActive} = props;
   const [consoleInfo, setConsoleInfo] = useState<string>("");
 
+  const options = {
+        selectOnLineNumbers: true,
+        renderSideBySide: false,
+        autoIndent:'None',
+        automaticLayout: true,
+        renderLineHighlight: 'gutter',
+        minimap: {
+          enabled: false // 是否启用预览图
+        }
+      }
+
   useEffect(() => {
     refreshConsoleInfo();
     let dataPolling = setInterval(refreshConsoleInfo, 3000);
@@ -39,7 +50,7 @@ const StudioMsg = (props: any) => {
   }, [isActive]);
 
   const refreshConsoleInfo = () => {
-    if (isActive) {
+    if (true) {
       const res = getConsoleInfo();
       res.then((result) => {
         result.datas && setConsoleInfo(result.datas);
@@ -65,7 +76,7 @@ const StudioMsg = (props: any) => {
 
   return (
     <>
-      <CodeShow code={consoleInfo} language='java' height={height} theme="vs" editorDidMountHandle={editorDidMountHandle}/>
+      <CodeShow code={consoleInfo} language='java' height={height} theme="vs" options={options} editorDidMountHandle={editorDidMountHandle}/>
     </>
   );
 };
