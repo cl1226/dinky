@@ -81,23 +81,23 @@ const StudioRightTool = (props: any) => {
     )
   };
 
-  // const renderConsoleMsg = () => {
-  //   return (
-  //     <TabPane
-  //       tab={
-  //         <span>
-  //         <CodeOutlined/>
-  //           {l('pages.datastudio.label.info')}
-  //       </span>
-  //       }
-  //       key="StudioMsg"
-  //     >
-  //       <Scrollbars style={{height: '100%'}}>
-  //         <StudioMsg height={'100%'}/>
-  //       </Scrollbars>
-  //     </TabPane>
-  //   )
-  // }
+  const renderConsoleMsg = () => {
+    return (
+      <TabPane
+        tab={
+          <span>
+          <CodeOutlined/>
+            {l('pages.datastudio.label.info')}
+        </span>
+        }
+        key="StudioMsg"
+      >
+        <Scrollbars style={{height: '500px'}}>
+          <StudioMsg/>
+        </Scrollbars>
+      </TabPane>
+    )
+  }
 
   const renderSqlContent = () => {
     return (<>
@@ -164,6 +164,7 @@ const StudioRightTool = (props: any) => {
         <Tabs className={`righttools-tabcontent-wrap righttools-tabcontent-wrap${showTabPane && '-show'}`} onTabClick={() => setshowTabPane(!showTabPane)} defaultActiveKey="1" size="small" tabPosition="right" >
           {renderContent()}
           {renderTaskInfoContent()}
+          {renderConsoleMsg()}
         </Tabs> : <StudioGuide toolHeight={toolHeight}/>}
     </>
   );
