@@ -52,6 +52,7 @@ export default {
   'menu.dataService.devApi.debug': 'API调试',
   'menu.dataService.devApi.detail': 'API详情',
   'menu.dataService.application': '应用管理',
+  'menu.dataService.applicationDetail': '应用详情',
 
   'menu.devops': '运维中心',
   'menu.job': '作业实例',

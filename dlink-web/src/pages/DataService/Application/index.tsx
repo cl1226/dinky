@@ -65,7 +65,7 @@ const Application: React.FC<{}> = (props: any) => {
         name: searchKey,
       }),
     )
-    history.push(`/dataService/devApi/detail/${record.id}`)
+    history.push(`/dataService/application/detail/${record.id}`)
   }
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
