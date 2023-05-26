@@ -38,24 +38,12 @@ public class ApiConfig extends SuperEntity {
 
     private Integer status;
 
+    private Integer debugStatus;
+
     private Integer tenantId;
 
     private Integer authId;
 
     private String description;
 
-    public ApiConfig() {
-    }
-
-    public ApiConfig(String path, Integer datasourceId, Integer catalogueId, String params, String contentType, String segment, Integer status, Integer tenantId, String description) {
-        this.path = path;
-        this.datasourceId = datasourceId;
-        this.catalogueId = catalogueId;
-        this.params = params;
-        this.contentType = contentType;
-        this.segment = segment;
-        this.status = status;
-        this.tenantId = tenantId;
-        this.description = description;
-    }
 }

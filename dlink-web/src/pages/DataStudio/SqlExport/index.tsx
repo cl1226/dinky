@@ -44,7 +44,7 @@ const SqlExport = (props: any) => {
     </Paragraph>
     <Paragraph>
       <CodeShow code={statement} language='sql'
-                height='500px' theme="vs-dark"/>
+                height='500px' theme="vs"/>
     </Paragraph></>)
 };
 

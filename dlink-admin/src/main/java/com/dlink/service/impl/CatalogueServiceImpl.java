@@ -272,6 +272,7 @@ public class CatalogueServiceImpl extends SuperServiceImpl<CatalogueMapper, Cata
         newTask.setName(oldTask.getName() + "_" + size);
         newTask.setAlias(oldTask.getAlias() + "_" + size);
         newTask.setStep(JobLifeCycle.DEVELOP.getValue());
+        newTask.setVersionId(null);
         taskService.save(newTask);
 
         Statement statementServiceById = statementService.getById(catalogue.getTaskId());

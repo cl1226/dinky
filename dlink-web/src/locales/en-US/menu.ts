@@ -28,7 +28,18 @@ export default {
 
   'menu.dataStudio': 'Data Studio',
 
+  'menu.dataDev': 'Data Develop',
+
   'menu.scheduler': 'Scheduler',
+
+  'menu.dataDev.dataDevHome': 'Overview',
+  'menu.dataDev.develop': 'Data Develop',
+  'menu.dataDev.develop.dataStudio': 'Shell Develop',
+  'menu.dataDev.develop.scheduler': 'Workflow Develop',
+  'menu.dataDev.devops': 'DevOps',
+  'menu.dataDev.devops.overview': 'DevOps Overview',
+  'menu.dataDev.devops.monitor': 'Workflow Monitor',
+  'menu.dataDev.devops.instance': 'Instance Monitor',
 
   'menu.dataService': 'Data Service',
   'menu.dataService.serviceHome': 'Home',

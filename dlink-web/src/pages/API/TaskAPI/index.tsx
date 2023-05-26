@@ -56,7 +56,7 @@ const TaskAPI = (props: any) => {
         key="submitTask"
       >
         <CodeShow code={`curl http://${address}/openapi/submitTask?id=${(task ? task.id : '1')}`} language='shell'
-                  height='500px' theme="vs-dark"/>
+                  height='500px' theme="vs"/>
       </TabPane>
       <TabPane
         tab={
@@ -71,7 +71,7 @@ const TaskAPI = (props: any) => {
 --data-raw '{
         "taskId":${(task ? task.id : '1')},
         "type":"canceljob"
-}'`} language='shell' height='500px' theme="vs-dark"/>
+}'`} language='shell' height='500px' theme="vs"/>
       </TabPane>
       <TabPane
         tab={
@@ -82,7 +82,7 @@ const TaskAPI = (props: any) => {
         key="restartTask"
       >
         <CodeShow code={`curl http://${address}/openapi/restartTask?id=${(task ? task.id : '1')}`} language='shell'
-                  height='500px' theme="vs-dark"/>
+                  height='500px' theme="vs"/>
       </TabPane>
       <TabPane
         tab={
@@ -94,7 +94,7 @@ const TaskAPI = (props: any) => {
       >
         <CodeShow code={`curl http://${address}/openapi/getJobInstanceByTaskId?id=${(task ? task.id : '1')}`}
                   language='shell'
-                  height='500px' theme="vs-dark"/>
+                  height='500px' theme="vs"/>
       </TabPane>
       <TabPane
         tab={
@@ -109,7 +109,7 @@ const TaskAPI = (props: any) => {
 --data-raw '{
         "taskId":${(task ? task.id : '1')},
         "type":"trigger"
-}'`} language='shell' height='500px' theme="vs-dark"/>
+}'`} language='shell' height='500px' theme="vs"/>
       </TabPane>
       <TabPane
         tab={
@@ -124,7 +124,7 @@ const TaskAPI = (props: any) => {
 --data-raw '{
         "taskId":${(task ? task.id : '1')},
         "type":"cancel"
-}'`} language='shell' height='500px' theme="vs-dark"/>
+}'`} language='shell' height='500px' theme="vs"/>
       </TabPane>
       <TabPane
         tab={
@@ -135,7 +135,7 @@ const TaskAPI = (props: any) => {
         key="onLineTask"
       >
         <CodeShow code={`curl http://${address}/openapi/onLineTask?id=${(task ? task.id : '1')}`} language='shell'
-                  height='500px' theme="vs-dark"/>
+                  height='500px' theme="vs"/>
       </TabPane>
       <TabPane
         tab={
@@ -146,7 +146,7 @@ const TaskAPI = (props: any) => {
         key="offLineTask"
       >
         <CodeShow code={`curl http://${address}/openapi/offLineTask?id=${(task ? task.id : '1')}`} language='shell'
-                  height='500px' theme="vs-dark"/>
+                  height='500px' theme="vs"/>
       </TabPane>
       <TabPane
         tab={
@@ -157,7 +157,7 @@ const TaskAPI = (props: any) => {
         key="reOnLineTask"
       >
         <CodeShow code={`curl http://${address}/openapi/reOnLineTask?id=${(task ? task.id : '1')}`} language='shell'
-                  height='500px' theme="vs-dark"/>
+                  height='500px' theme="vs"/>
       </TabPane>
     </Tabs>
   );

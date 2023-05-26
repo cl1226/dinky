@@ -18,16 +18,18 @@
  */
 
 
-import React, {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {connect} from "umi";
 import styles from './index.less';
 import StudioMenu from "./StudioMenu";
-import {Card, Col, Form, Row} from "antd";
+import {Card, Col, Form, Row, Drawer, Tabs} from "antd";
 import StudioTabs from "./StudioTabs";
 import {StateType} from "@/pages/DataStudio/model";
 import StudioConsole from "./StudioConsole";
-import StudioLeftTool from "./StudioLeftTool";
 import StudioRightTool from "./StudioRightTool";
+import StudioTree from "./StudioTree";
+import {BarsOutlined} from "@ant-design/icons";
+
 import {
   getFillAllByVersion,
   listSession,
@@ -101,11 +103,52 @@ const Studio = (props: any) => {
     }
   };
 
+  const [open, setOpen] = useState(true);
+
+  const showDrawer = () => {
+    setOpen(true);
+  };
+
+  const onClose = () => {
+    setOpen(false);
+  };
+
   return (
     <div onClick={onClick} style={{'margin': '-24px'}}>
       <StudioMenu form={form} width={size.width} height={size.height}/>
       <Card bordered={false} className={styles.card} size="small" id="studio_card" style={{marginBottom: 0}}>
-        <DraggleVerticalLayout
+        
+        <Row>
+          <DraggleLayout
+            containerWidth={size.width - 240}
+            containerHeight={size.height - 85}
+            min={VIEW.leftMargin}
+            max={size.width - VIEW.rightMargin - VIEW.midMargin}
+            initLeftWidth={toolLeftWidth}
+            isLeft={true}
+            handler={
+              <div
+                style={{
+                  width: 4,
+                  height: '100%',
+                  background: 'rgb(240, 240, 240)',
+                }}
+              />
+            }
+          >
+            <Col className={styles["vertical-tabs"]}>
+              <StudioTree/>
+            </Col>
+            <Col>
+              {!isFullScreen ? <StudioTabs width={size.width - toolLeftWidth}/> : undefined}
+            </Col>
+          </DraggleLayout>
+          <Col id='StudioRightTool' className={styles["vertical-tabs"]}>
+              <StudioRightTool form={form}/>
+            </Col>
+        </Row>
+
+        {/* <DraggleVerticalLayout
           containerWidth={size.width}
           containerHeight={(size.height - VIEW.marginTop)}
           min={(VIEW.topHeight)}
@@ -121,63 +164,13 @@ const Studio = (props: any) => {
             />
           }
         >
-          <Row>
-            <DraggleLayout
-              containerWidth={size.width}
-              containerHeight={toolHeight}
-              min={VIEW.leftMargin + VIEW.midMargin}
-              max={size.width - VIEW.rightMargin}
-              initLeftWidth={size.width - toolRightWidth}
-              isLeft={false}
-              handler={
-                <div
-                  style={{
-                    width: 4,
-                    height: '100%',
-                    background: 'rgb(240, 240, 240)',
-                  }}
-                />
-              }
-            >
-              <DraggleLayout
-                containerWidth={size.width - toolRightWidth}
-                containerHeight={toolHeight}
-                min={VIEW.leftMargin}
-                max={size.width - VIEW.rightMargin - VIEW.midMargin}
-                initLeftWidth={toolLeftWidth}
-                isLeft={true}
-                handler={
-                  <div
-                    style={{
-                      width: 4,
-                      height: '100%',
-                      background: 'rgb(240, 240, 240)',
-                    }}
-                  />
-                }
-              >
-                <Col className={styles["vertical-tabs"]}>
-                  <StudioLeftTool style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}/>
-                </Col>
-                <Col>
-                  {!isFullScreen ? <StudioTabs width={size.width - toolRightWidth - toolLeftWidth}/> : undefined}
-                </Col>
-              </DraggleLayout>
-              <Col id='StudioRightTool' className={styles["vertical-tabs"]}>
-                <StudioRightTool form={form}/>
-              </Col>
-            </DraggleLayout>
-          </Row>
+          
           <Row>
             <Col span={24}>
               <StudioConsole height={size.height - toolHeight - VIEW.marginTop}/>
             </Col>
           </Row>
-        </DraggleVerticalLayout>
+        </DraggleVerticalLayout> */}
       </Card>
     </div>
   )

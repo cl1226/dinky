@@ -52,6 +52,10 @@ const FlinkSqlEditor = (props:any) => {
         renderSideBySide: false,
         autoIndent:'None',
         automaticLayout: true,
+        renderLineHighlight: 'gutter',
+        minimap: {
+          enabled: false // 是否启用预览图
+        }
       },
     sql,
     monaco,
@@ -191,13 +195,13 @@ const FlinkSqlEditor = (props:any) => {
     <React.Fragment>
       <MonacoEditor
         ref={monaco}
-        width={width}
+        // width={width}
         height={height}
         language={language}
         value={code}
         options={options}
         onChange={onChangeHandle}
-        theme="vs-dark"
+        theme="vs"
         editorDidMount={editorDidMountHandle}
       />
       <StudioExplain

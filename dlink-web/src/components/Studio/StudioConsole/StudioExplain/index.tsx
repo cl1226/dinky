@@ -150,7 +150,7 @@ const StudioExplain = (props: any) => {
                     {row.error ?
                       (<Paragraph>
                         <CodeShow code={row.error} language='java'
-                                  height='500px' theme="vs-dark"/>
+                                  height='500px' theme="vs"/>
                       </Paragraph>) : null
                     }
                   </>

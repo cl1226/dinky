@@ -30,6 +30,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.dlink.constant.BaseConstant.API_DEBUG_STATUS;
+
 /**
  * DebugApiServlet
  *
@@ -112,6 +114,7 @@ public class DebugApiServlet extends HttpServlet {
                     .append(data);
             jsonObject.put("request", sb.toString());
             jsonObject.put("response", sb2.toString());
+            API_DEBUG_STATUS.put(path, true);
             return Result.succeed(jsonObject, "Interface request successful!");
 
         } catch (Exception e) {
@@ -123,6 +126,7 @@ public class DebugApiServlet extends HttpServlet {
             jsonObject.put("requestPath", request.getRequestURI());
             jsonObject.put("request", sb.toString());
             jsonObject.put("response", e.getMessage());
+            API_DEBUG_STATUS.put(path, false);
             return Result.failed(jsonObject, "Interface request failed");
 
         }
@@ -151,6 +155,7 @@ public class DebugApiServlet extends HttpServlet {
             });
             info.put("params", params);
             info.put("sql", jo.getString("sql"));
+            info.put("apiId", jo.getIntValue("apiId"));
         } else if (contentType.equalsIgnoreCase(MediaType.APPLICATION_FORM_URLENCODED_VALUE)) {
         } else {
             throw new RuntimeException("content-type not supported: " + contentType);

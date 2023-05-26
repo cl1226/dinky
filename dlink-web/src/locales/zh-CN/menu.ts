@@ -28,7 +28,18 @@ export default {
 
   'menu.dataStudio': '数据开发',
 
+  'menu.dataDev': '数据开发',
+
   'menu.scheduler': '调度中心',
+
+  'menu.dataDev.dataDevHome': '总览',
+  'menu.dataDev.develop': '数据开发',
+  'menu.dataDev.develop.dataStudio': '脚本开发',
+  'menu.dataDev.develop.scheduler': '流程开发',
+  'menu.dataDev.devops': '运维调度',
+  'menu.dataDev.devops.overview': '运维概览',
+  'menu.dataDev.devops.monitor': '作业监控',
+  'menu.dataDev.devops.instance': '实例监控',
 
   'menu.dataService': '数据服务',
   'menu.dataService.serviceHome': '首页',

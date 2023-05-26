@@ -55,7 +55,7 @@ const CodeShow = (props: CodeShowFormProps) => {
       language={language}
       value={code}
       options={options}
-      theme='vs-dark'
+      theme='vs'
       editorDidMount={editorDidMountHandle}
     />
   </>)

@@ -83,7 +83,7 @@ const StudioConsole = (props: any) => {
           {current ? <StudioTable/> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>}
         </Scrollbars>
       </TabPane>
-      <TabPane
+      {/* <TabPane
         tab={
           <span>
           <BarChartOutlined/>
@@ -95,8 +95,8 @@ const StudioConsole = (props: any) => {
         <Scrollbars style={{height: consoleHeight}}>
           {current ? <Chart height={consoleHeight}/> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>}
         </Scrollbars>
-      </TabPane>
-      <TabPane
+      </TabPane> */}
+      {/* <TabPane
         tab={
           <span>
           <ApartmentOutlined/>
@@ -108,8 +108,8 @@ const StudioConsole = (props: any) => {
         <Scrollbars style={{height: consoleHeight}}>
           {current ? <StudioCA/> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>}
         </Scrollbars>
-      </TabPane>
-      <TabPane
+      </TabPane> */}
+      {/* <TabPane
         tab={
           <span>
           <DesktopOutlined/>
@@ -121,7 +121,7 @@ const StudioConsole = (props: any) => {
         <Scrollbars style={{height: consoleHeight}}>
           <StudioProcess/>
         </Scrollbars>
-      </TabPane>
+      </TabPane> */}
       <TabPane
         tab={
           <span>

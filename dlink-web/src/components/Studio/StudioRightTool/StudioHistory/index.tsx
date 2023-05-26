@@ -98,7 +98,7 @@ const StudioHistory = (props: any) => {
                 lineDecorationsWidth: 20,
                 mouseWheelZoom: true,
                 automaticLayout:true,
-              }} language={"sql"} theme={"vs-dark"} original={originalValue} value={currentValue}/>
+              }} language={"sql"} theme={"vs"} original={originalValue} value={currentValue}/>
             </React.StrictMode>
           </Scrollbars>
         </Modal>

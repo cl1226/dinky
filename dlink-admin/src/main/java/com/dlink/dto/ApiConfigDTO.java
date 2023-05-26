@@ -33,5 +33,6 @@ public class ApiConfigDTO {
     private Integer tenantId;
     private Integer authId;
     private String description;
+    private String domain;
 
 }

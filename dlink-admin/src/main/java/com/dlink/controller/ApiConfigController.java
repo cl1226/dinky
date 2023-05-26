@@ -10,8 +10,12 @@ import com.dlink.model.Schema;
 import com.dlink.service.ApiConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
 /**
@@ -28,6 +32,9 @@ public class ApiConfigController {
     @Autowired
     private ApiConfigService service;
 
+    @Value("${dinky.api.context}")
+    String apiContext;
+
     @PostMapping("/page")
     public Result page(@RequestBody SearchCondition searchCondition) throws Exception {
         Page<ApiConfig> page = service.page(searchCondition);
@@ -35,8 +42,11 @@ public class ApiConfigController {
     }
 
     @GetMapping("/detail")
-    public Result getDetail(@RequestParam Integer id) {
+    public Result getDetail(HttpServletRequest request, @RequestParam Integer id) throws UnknownHostException {
         ApiConfigDTO detail = service.getDetail(id);
+        String domain = request.getScheme() + "://" + InetAddress.getLocalHost().getHostAddress() + ":" + request.getServerPort();
+        detail.setDomain(domain);
+        detail.setPath(apiContext + "/" + (detail.getPath().startsWith("/") ? detail.getPath().substring(1) : detail.getPath()));
         if (detail == null) {
             return Result.failed(null, "获取失败");
         }
@@ -46,7 +56,7 @@ public class ApiConfigController {
     @PutMapping
     public Result saveOrUpdate(@RequestBody ApiConfig apiConfig) {
         try {
-            service.saveOrUpdate(apiConfig);
+            service.addOrEdit(apiConfig);
             return Result.succeed(apiConfig, "创建成功");
         } catch (Exception e) {
             e.printStackTrace();

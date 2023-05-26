@@ -18,8 +18,8 @@
  */
 
 
-import {Dropdown, Menu, message, Tabs} from 'antd';
-import React from 'react';
+import {Dropdown, Menu, message, Tabs, Form} from 'antd';
+import { useState } from 'react';
 import {connect} from 'umi';
 import {StateType} from '@/pages/DataStudio/model';
 import styles from './index.less';
@@ -40,6 +40,11 @@ const EditorTabs = (props: any) => {
     props.saveToolHeight(toolHeight);
     props.changeActiveKey(activeKey);
   };
+
+  const [size, setSize] = useState({
+    width: document.documentElement.clientWidth,
+    height: document.documentElement.clientHeight,
+  });
 
   const onEdit = (targetKey: any, action: any) => {
     if (action === 'add') {
@@ -115,7 +120,7 @@ const EditorTabs = (props: any) => {
             tabsKey={pane.key}
             conf={pane.value}
             monaco={pane.monaco}
-            height={height ? height : (toolHeight - 32)}
+            height={size.height - 120}
             width={width}
           />
         </TabPane>
@@ -127,7 +132,7 @@ const EditorTabs = (props: any) => {
           sql={pane.value}
           monaco={pane.monaco}
           sqlMetaData={pane.sqlMetaData}
-          height={height ? height : (toolHeight - 32)}
+          height={size.height - 120}
           width={width}
           language={getLanguage(current.task.dialect)}
         />
