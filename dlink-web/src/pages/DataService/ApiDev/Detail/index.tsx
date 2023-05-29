@@ -24,7 +24,7 @@ const ApiDetail: React.FC<{}> = (props: any) => {
   }
 
   useEffect(() => {
-    requestApiDetail(pageParams.id)
+    requestApiDetail(Number(pageParams.id))
       .then((res) => {
         if (res.code === CODE.SUCCESS) {
           const { name } = res.datas
@@ -90,7 +90,7 @@ const ApiDetail: React.FC<{}> = (props: any) => {
                 labelStyle={{ width: 100, color: '#8a8e99' }}
               >
                 <Descriptions.Item label="域名">{detailInfo.domain || '-'}</Descriptions.Item>
-                <Descriptions.Item label="请求路径">{detailInfo.path || '-'}</Descriptions.Item>
+                <Descriptions.Item label="请求路径">{`${detailInfo.apiPrefix}${detailInfo.path}`}</Descriptions.Item>
                 <Descriptions.Item label="Content-Type">{detailInfo.contentType}</Descriptions.Item>
               </Descriptions>
             </div>
@@ -197,9 +197,11 @@ const ApiDetail: React.FC<{}> = (props: any) => {
                 </Descriptions.Item>
                 <Descriptions.Item label="URL">
                   <Typography.Text
-                    copyable={{ text: `${detailInfo.domain}${detailInfo.absolutePath}` }}
+                    copyable={{
+                      text: `${detailInfo.domain}${detailInfo.apiPrefix}${detailInfo.path}`,
+                    }}
                   >
-                    {`${detailInfo.domain}${detailInfo.absolutePath}`}
+                    {`${detailInfo.domain}${detailInfo.apiPrefix}${detailInfo.path}`}
                   </Typography.Text>
                 </Descriptions.Item>
                 <Descriptions.Item label="描述">{detailInfo.description || '-'}</Descriptions.Item>

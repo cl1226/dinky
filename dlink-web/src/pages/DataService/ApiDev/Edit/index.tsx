@@ -82,7 +82,7 @@ const EditApi: React.FC<{}> = (props: any) => {
   }
 
   useEffect(() => {
-    requestApiDetail(pageParams.id)
+    requestApiDetail(Number(pageParams.id))
       .then((res) => {
         if (res.code === CODE.SUCCESS) {
           setDetailInfo(res.datas)

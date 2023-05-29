@@ -14,7 +14,7 @@ const ApiDebug: React.FC<{}> = (props: any) => {
   const [stepBasic, setStepBasic] = useState<any>({})
   const [loading, setLoading] = useState(true)
   useEffect(() => {
-    requestApiDetail(pageParams.id)
+    requestApiDetail(Number(pageParams.id))
       .then((res) => {
         if (res.code === CODE.SUCCESS) {
           const { name, path, params, segment, datasourceId } = res.datas

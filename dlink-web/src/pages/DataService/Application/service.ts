@@ -107,3 +107,81 @@ export const deleteApp = async (ids: (string | number)[]) => {
     return false
   }
 }
+
+// 获取App详情
+export const requestAppDetail = (id: number) => {
+  return request2('/api/app/config/detail', {
+    method: 'GET',
+    params: {
+      id: id,
+    },
+  })
+}
+
+// 获取app绑定api列表
+export const requestAppBindApi = async (params) => {
+  return request2('/api/app/config/apiConfig/search', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  })
+}
+
+// 获取app绑定api列表
+export const getAppBindApiList = async (params) => {
+  try {
+    const { code, msg, datas } = await requestAppBindApi(params)
+    if (code == CODE.SUCCESS) {
+      const { records, total, current, size } = datas
+      return {
+        list: records,
+        total,
+        pn: current,
+        ps: size,
+      }
+    } else {
+      message.warn(msg)
+      return {
+        list: [],
+        total: 0,
+        pn: 1,
+        ps: 10,
+      }
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return {
+      list: [],
+      total: 0,
+      pn: 1,
+      ps: 10,
+    }
+  }
+}
+
+// 解绑app的api
+export const requestUnbindApi = async ({ appId, apiId }) => {
+  return request2('/api/app/config/auth/unbind', {
+    method: 'POST',
+    data: { apiId, appId },
+  })
+}
+
+// 删除app
+export const unbindApi = async ({ appId, apiId }) => {
+  try {
+    const { code, msg } = await requestUnbindApi({ appId, apiId })
+
+    if (code == CODE.SUCCESS) {
+      message.success(msg)
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    message.error(l('app.request.delete.error'))
+    return false
+  }
+}
