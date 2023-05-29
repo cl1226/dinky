@@ -17,73 +17,55 @@
  *
  */
 
-import {Divider, Typography} from 'antd';
-import React from 'react';
-import {connect} from 'umi';
-import {StateType} from '@/pages/DataStudio/model';
-import {Scrollbars} from 'react-custom-scrollbars';
-import {VERSION} from "@/components/Common/Version";
-import {l} from "@/utils/intl";
-
-const {Title, Paragraph, Text} = Typography;
+import { List, Avatar, Row, Button } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import { history } from 'umi'
 
 const StudioHome = (props: any) => {
-
-
-  const {toolHeight} = props;
+  const list = [{
+    name: '新建脚本',
+    imageUrl: '/schedule/develop.png',
+    description: '对脚本进行在线开发、调试和执行，开发完成的脚本也可以在作业中执行',
+    type: '新建脚本',
+    url: '/dataDev/develop/dataStudio'
+  }, {
+    name: '新建作业',
+    imageUrl: '/schedule/workflow.png',
+    description: '拖拽所需节点至画布中，连接节点，轻松实现作业开发',
+    type: '新建作业',
+    url: '/dataDev/develop/scheduler'
+  }, {
+    name: '新建数据连接',
+    imageUrl: '/schedule/project.png',
+    description: '通过配置数据源信息、建立数据连接，配置的数据连接会在脚本和作业的开发过程中用到，用于访问数据源',
+    type: '新建数据连接',
+    url: '/registration/database'
+  }]
 
   return (
-    <Scrollbars style={{height: toolHeight}}>
-      <Typography style={{padding: '15px'}}>
-        {/* <Title level={4}>{l('pages.datastudio.label.welcomeuse', '', {version: VERSION})}</Title>
-        <Paragraph>
-          <blockquote>{l('pages.datastudio.label.dinkydescribe')}</blockquote>
-        </Paragraph> */}
-        <Title level={5}>{l('shortcut.title')}</Title>
-        <Paragraph>
-          <Text keyboard>Ctrl + s</Text> {l('shortcut.key.save')} <Divider type="vertical"/>
-          <Text keyboard>Alt + 2</Text> {l('shortcut.key.check')} <Divider type="vertical"/>
-          <Text keyboard>Alt + 3</Text> {l('shortcut.key.beautify')} <Divider type="vertical"/>
-          <Text keyboard>F2</Text> {l('shortcut.key.fullscreen')} <Divider type="vertical"/>
-          <Text keyboard>Esc</Text> {l('shortcut.key.fullscreenClose')} <Divider type="vertical"/>
-          <Text keyboard>F1</Text> {l('shortcut.key.more')}
-        </Paragraph>
-        <Paragraph>
-          <Text keyboard>Ctrl + F</Text> {l('shortcut.key.search')} <Divider type="vertical"/>
-          <Text keyboard>Ctrl + H</Text> {l('shortcut.key.replace')} <Divider type="vertical"/>
-          <Text keyboard>Ctrl + Z</Text> {l('shortcut.key.revoke')} <Divider type="vertical"/>
-          <Text keyboard>Ctrl + Y</Text> {l('shortcut.key.redo')} <Divider type="vertical"/>
-          <Text keyboard>Ctrl + /</Text> {l('shortcut.key.notes')}
-        </Paragraph>
-        <Paragraph>
-          <Text keyboard>{l('shortcut.key.checked')} + Tab</Text> {l('shortcut.key.indent')} <Divider type="vertical"/>
-          <Text keyboard>{l('shortcut.key.checked')} + Shift + Tab</Text> {l('shortcut.key.removeIndent')} <Divider
-          type="vertical"/>
-          <Text keyboard>Shift + Alt + Right</Text> {l('shortcut.key.selectToEnd')} <Divider type="vertical"/>
-          <Text keyboard>Shift + Alt + F</Text> {l('shortcut.key.format')}
-        </Paragraph>
-        <Paragraph>
-          <Text keyboard>Ctrl + Shift + Up/Down</Text> {l('shortcut.key.editMultiline')} <Divider type="vertical"/>
-          <Text keyboard>Shift + Alt + Up/Down</Text> {l('shortcut.key.copyRow')} <Divider type="vertical"/>
-          <Text keyboard>Ctrl + Shift + K</Text> {l('shortcut.key.deleteRow')}
-        </Paragraph>
-        <Paragraph>
-          <Text keyboard>Ctrl + F3</Text> {l('shortcut.key.matchNext')} <Divider type="vertical"/>
-          <Text keyboard>Ctrl + Shift + F3</Text> {l('shortcut.key.matchPrevious')} <Divider type="vertical"/>
-          <Text keyboard>F7</Text> {l('shortcut.key.goNextHighlight')} <Divider type="vertical"/>
-          <Text keyboard>Shift +F7</Text> {l('shortcut.key.goPreviousHighlight')}
-        </Paragraph>
-        <Paragraph>
-          <Text keyboard>Ctrl + Shift + End</Text> {l('shortcut.key.appendLineBefore')} <Divider type="vertical"/>
-          <Text keyboard>Ctrl + End</Text> {l('shortcut.key.appendLine')} <Divider type="vertical"/>
-          <Text keyboard>Alt + Up/Down</Text> {l('shortcut.key.transpositionUpAndDown')} <Divider type="vertical"/>
-          <Text keyboard>Ctrl + Shift + [/]</Text> {l('shortcut.key.collapseOrExpand')}
-        </Paragraph>
-      </Typography>
-    </Scrollbars>
-  );
+    <List
+      className="demo-loadmore-list"
+      itemLayout="horizontal"
+      size={"large"}
+      dataSource={list}
+      renderItem={(item) => (
+        <List.Item style={{height: '150px'}}>
+          <List.Item.Meta
+            avatar={<Avatar shape="square" style={{'width': '100px', 'height': '100px'}} src={item.imageUrl} />}
+            title={item.name}
+            description={item.description}
+          />
+          <Row>
+            <Button icon={<PlusOutlined />}
+            onClick={() => {
+              history.push(item.url)
+            }}
+            >{item.type}</Button>
+          </Row>
+        </List.Item>
+      )}
+    />
+  )
 };
 
-export default connect(({Studio}: { Studio: StateType }) => ({
-  toolHeight: Studio.toolHeight,
-}))(StudioHome);
+export default StudioHome

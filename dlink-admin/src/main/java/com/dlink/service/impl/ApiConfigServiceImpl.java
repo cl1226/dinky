@@ -1,10 +1,7 @@
 package com.dlink.service.impl;
 
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
@@ -14,7 +11,6 @@ import com.dlink.dto.ApiConfigDTO;
 import com.dlink.dto.DebugDTO;
 import com.dlink.dto.SearchCondition;
 import com.dlink.mapper.ApiConfigMapper;
-import com.dlink.metadata.driver.Driver;
 import com.dlink.model.*;
 import com.dlink.service.ApiCatalogueService;
 import com.dlink.service.ApiConfigService;
@@ -30,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -181,6 +178,7 @@ public class ApiConfigServiceImpl extends SuperServiceImpl<ApiConfigMapper, ApiC
             return null;
         }
         apiConfig.setAuthId(appConfig.getId());
+        apiConfig.setAuthTime(LocalDateTime.now());
         this.saveOrUpdate(apiConfig);
         return apiConfig;
     }

@@ -22,13 +22,11 @@ import {useCallback, useEffect, useState} from "react";
 import {connect} from "umi";
 import styles from './index.less';
 import StudioMenu from "./StudioMenu";
-import {Card, Col, Form, Row, Drawer, Tabs} from "antd";
+import {Card, Col, Form, Row } from "antd";
 import StudioTabs from "./StudioTabs";
 import {StateType} from "@/pages/DataStudio/model";
-import StudioConsole from "./StudioConsole";
 import StudioRightTool from "./StudioRightTool";
 import StudioTree from "./StudioTree";
-import {BarsOutlined} from "@ant-design/icons";
 
 import {
   getFillAllByVersion,
@@ -43,9 +41,7 @@ import {
   showSessionCluster
 } from "@/components/Studio/StudioEvent/DDL";
 import DraggleLayout from "@/components/DraggleLayout";
-import DraggleVerticalLayout from "@/components/DraggleLayout/DraggleVerticalLayout";
 import {loadSettings} from "@/pages/SettingCenter/FlinkSettings/function";
-import {l} from "@/utils/intl";
 
 const Studio = (props: any) => {
 
@@ -103,16 +99,6 @@ const Studio = (props: any) => {
     }
   };
 
-  const [open, setOpen] = useState(true);
-
-  const showDrawer = () => {
-    setOpen(true);
-  };
-
-  const onClose = () => {
-    setOpen(false);
-  };
-
   return (
     <div onClick={onClick} style={{'margin': '-24px'}}>
       <StudioMenu form={form} width={size.width} height={size.height}/>
@@ -144,33 +130,9 @@ const Studio = (props: any) => {
             </Col>
           </DraggleLayout>
           <Col id='StudioRightTool' className={styles["vertical-tabs"]}>
-              <StudioRightTool form={form}/>
-            </Col>
+            <StudioRightTool form={form}/>
+          </Col>
         </Row>
-
-        {/* <DraggleVerticalLayout
-          containerWidth={size.width}
-          containerHeight={(size.height - VIEW.marginTop)}
-          min={(VIEW.topHeight)}
-          max={(size.height - VIEW.bottomHeight)}
-          initTopHeight={VIEW.topHeight}
-          handler={
-            <div
-              style={{
-                height: 4,
-                width: '100%',
-                background: 'rgb(240, 240, 240)',
-              }}
-            />
-          }
-        >
-          
-          <Row>
-            <Col span={24}>
-              <StudioConsole height={size.height - toolHeight - VIEW.marginTop}/>
-            </Col>
-          </Row>
-        </DraggleVerticalLayout> */}
       </Card>
     </div>
   )

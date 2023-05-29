@@ -46,7 +46,8 @@ public class ApiConfigController {
         ApiConfigDTO detail = service.getDetail(id);
         String domain = request.getScheme() + "://" + InetAddress.getLocalHost().getHostAddress() + ":" + request.getServerPort();
         detail.setDomain(domain);
-        detail.setPath(apiContext + "/" + (detail.getPath().startsWith("/") ? detail.getPath().substring(1) : detail.getPath()));
+        detail.setApiPrefix("/" + (apiContext.startsWith("/") ? apiContext.substring(1) : apiContext));
+        detail.setPath(detail.getPath());
         if (detail == null) {
             return Result.failed(null, "获取失败");
         }
