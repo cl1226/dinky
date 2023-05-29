@@ -1,9 +1,23 @@
 import React, { useRef, useState, useEffect } from 'react'
 import styles from './index.less'
 import { PageContainer } from '@ant-design/pro-layout'
-import { Descriptions, Row, Col, Typography, Tabs, Input, Table } from 'antd'
+import {
+  Descriptions,
+  Row,
+  Col,
+  Typography,
+  Tabs,
+  Input,
+  Table,
+  Space,
+  Popconfirm,
+  Button,
+  Modal,
+  Alert,
+} from 'antd'
 import { DesktopOutlined, ArrowRightOutlined, HddOutlined } from '@ant-design/icons'
 import { history, useParams } from 'umi'
+import { debounce } from 'lodash'
 
 import { Scrollbars } from 'react-custom-scrollbars'
 import { requestApiDetail } from '@/pages/DataService/ApiDev/Edit/service'
@@ -11,6 +25,11 @@ import { requestApiDetail } from '@/pages/DataService/ApiDev/Edit/service'
 import { CODE } from '@/components/Common/crud'
 import { EAccessType, EContentType, EAuthType } from '@/utils/enum'
 import { EDataType } from '@/pages/DataService/ApiDev/Create/components/Parameters'
+import { ETokenExpire } from '@/utils/enum'
+
+import { getApplicationList } from '@/pages/DataService/Application/service'
+
+const { Search } = Input
 
 const ApiDetail: React.FC<{}> = (props: any) => {
   const sref: any = React.createRef<Scrollbars>()
@@ -19,9 +38,16 @@ const ApiDetail: React.FC<{}> = (props: any) => {
   const [pageTitle, setPageTitle] = useState('')
   const [detailInfo, setDetailInfo] = useState<any>({})
 
-  const onChange = (key: string) => {
-    console.log(key)
-  }
+  const [tableLoading, setTableLoading] = useState(false)
+  const [authModalVisible, setAuthModalVisible] = useState(false)
+  const [authAppData, setAuthAppData] = useState([])
+
+  const [appData, setAppData] = useState([])
+  const [searchKey, setSearchKey] = useState('')
+  const [pageNum, setPageNum] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [pageTotal, setPageTotal] = useState(0)
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
   useEffect(() => {
     requestApiDetail(Number(pageParams.id))
@@ -37,6 +63,43 @@ const ApiDetail: React.FC<{}> = (props: any) => {
       })
   }, [])
 
+  const getAuthAppData = async (extra?: any) => {
+    setTableLoading(true)
+    const list = await getAppBindApiList({
+      apiId: Number(pageParams.id),
+    })
+    setAuthAppData(list)
+    setTableLoading(false)
+  }
+
+  const getAppData = async (extra?: any) => {
+    const params = {
+      pageIndex: pageNum,
+      pageSize: pageSize,
+      name: searchKey,
+      ...(extra || {}),
+    }
+    const { list, total, pn, ps } = await getApplicationList(params)
+
+    setAppData(list)
+    setPageTotal(total)
+    setPageNum(pn)
+    setPageSize(ps)
+  }
+
+  const onUnbind = async (appId) => {
+    if (tableLoading) return
+    setTableLoading(true)
+    const result = await unbindApi({ apiId: Number(pageParams.id), appId: appId })
+    setTableLoading(false)
+    if (result) {
+      getAuthAppData()
+    }
+  }
+
+  const submitAuth = () => {
+    console.log('selectedRowKeys', selectedRowKeys)
+  }
   const getDispatchInfo = () => {
     const getDataSource = () => {
       return JSON.parse(detailInfo?.params || '[]').map((item, index) => ({
@@ -171,6 +234,159 @@ const ApiDetail: React.FC<{}> = (props: any) => {
       </div>
     )
   }
+
+  const getAuthInfo = () => {
+    const columns = [
+      {
+        title: '应用名称',
+        dataIndex: 'name',
+        key: 'name',
+        width: 150,
+      },
+      {
+        title: '应用ID',
+        dataIndex: 'id',
+        key: 'id',
+        width: 150,
+      },
+      {
+        title: '授权时间',
+        dataIndex: 'authTime',
+        key: 'authTime',
+        width: 150,
+      },
+      {
+        title: 'Token过期时间',
+        dataIndex: 'expireDesc',
+        key: 'expireDesc',
+        width: 200,
+        render: (cellValue, record) => ETokenExpire[cellValue] || '-',
+      },
+      {
+        title: '操作',
+        width: 150,
+        key: 'action',
+        render: (cellValue, record) => (
+          <Space size="middle">
+            <Popconfirm
+              title="请确认将执行解绑操作！"
+              placement="bottom"
+              onConfirm={() => {
+                onUnbind(record.id)
+              }}
+            >
+              <Button size="small" type="link">
+                解绑
+              </Button>
+            </Popconfirm>
+          </Space>
+        ),
+      },
+    ]
+    const appColumns = [
+      {
+        title: '应用名称',
+        dataIndex: 'name',
+        key: 'name',
+        width: 150,
+      },
+      {
+        title: '应用ID',
+        dataIndex: 'id',
+        key: 'id',
+        width: 150,
+      },
+    ]
+    return (
+      <div className={styles['tab-wrap']}>
+        <Row>
+          <Button
+            onClick={() => {
+              setAuthModalVisible(true)
+              getAppData()
+            }}
+          >
+            授权
+          </Button>
+        </Row>
+        <Table
+          style={{ marginTop: 10 }}
+          loading={tableLoading}
+          rowKey="id"
+          size="small"
+          columns={columns}
+          dataSource={authAppData}
+          pagination={false}
+        />
+
+        <Modal
+          width={640}
+          bodyStyle={{ padding: '32px 40px 48px' }}
+          destroyOnClose
+          title={'添加授权'}
+          open={authModalVisible}
+          footer={
+            <>
+              <Button onClick={() => setAuthModalVisible(false)}>取消</Button>
+              <Button type="primary" onClick={() => submitAuth()}>
+                确认授权
+              </Button>
+            </>
+          }
+          onCancel={() => setAuthModalVisible(false)}
+        >
+          <Alert
+            message="注意"
+            description="请确保授权用户为可信任用户，否则存在数据库安全风险（如数据泄露、数据库高并发访问导致宕机、SQL注入等风险）。"
+            type="warning"
+            showIcon
+          />
+
+          <Row justify={'end'} style={{ marginTop: 20 }}>
+            <Search
+              placeholder="请输入关键字"
+              onSearch={() => {
+                getAppData()
+              }}
+              onChange={debounce((e) => {
+                setSearchKey(e.target.value)
+              }, 150)}
+              style={{ width: 200 }}
+            />
+          </Row>
+          <Table
+            style={{ marginTop: 10 }}
+            rowKey="id"
+            size="small"
+            rowSelection={{
+              type: 'radio',
+              selectedRowKeys,
+              onChange: (newSelectedRowKeys: React.Key[]) => {
+                setSelectedRowKeys(newSelectedRowKeys)
+              },
+            }}
+            columns={appColumns}
+            dataSource={appData}
+            pagination={{
+              current: pageNum,
+              pageSize: pageSize,
+              size: 'small',
+              onChange: (pn, ps) => {
+                getAppData({
+                  pageIndex: pn,
+                  pageSize: ps,
+                })
+              },
+              total: pageTotal,
+              showTotal: (total) => `共 ${total} 条`,
+              showSizeChanger: true,
+              showQuickJumper: true,
+            }}
+          />
+        </Modal>
+      </div>
+    )
+  }
   return (
     <PageContainer title={pageTitle || false} onBack={() => history.goBack()} loading={loading}>
       <Scrollbars
@@ -211,7 +427,6 @@ const ApiDetail: React.FC<{}> = (props: any) => {
           <Tabs
             className={styles['tabs-wrap']}
             defaultActiveKey="1"
-            onChange={onChange}
             type="card"
             items={[
               {
@@ -222,7 +437,7 @@ const ApiDetail: React.FC<{}> = (props: any) => {
               {
                 label: '授权信息',
                 key: '2',
-                children: <div>授权信息</div>,
+                children: getAuthInfo(),
               },
             ]}
           />
