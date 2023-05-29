@@ -3,6 +3,7 @@ package com.dlink.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
 import com.dlink.dto.SearchCondition;
+import com.dlink.model.ApiConfig;
 import com.dlink.model.AppConfig;
 import com.dlink.service.AppConfigService;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,24 @@ public class AppConfigController {
     public Result page(@RequestBody SearchCondition searchCondition) throws Exception {
         Page<AppConfig> page = appConfigService.page(searchCondition);
         return Result.succeed(page, "获取成功");
+    }
+
+    @GetMapping("/detail")
+    public Result getDetailById(@RequestParam Integer id) {
+        AppConfig appConfig = appConfigService.getDetailById(id);
+        if (appConfig != null) {
+            return Result.succeed(appConfig, "获取成功");
+        }
+        return Result.failed(null, "获取失败");
+    }
+
+    @PostMapping("/apiConfig/search")
+    public Result searchApiConfigByCondition(@RequestBody SearchCondition condition) {
+        Page<ApiConfig> apiConfigs = appConfigService.searchApiConfigByCondition(condition);
+        if (apiConfigs != null) {
+            return Result.succeed(apiConfigs, "获取成功");
+        }
+        return Result.failed(null, "获取失败");
     }
 
     @PutMapping

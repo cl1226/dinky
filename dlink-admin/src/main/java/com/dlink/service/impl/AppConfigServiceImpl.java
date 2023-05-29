@@ -6,8 +6,10 @@ import com.dlink.constant.AuthConstant;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.SearchCondition;
 import com.dlink.mapper.AppConfigMapper;
+import com.dlink.model.ApiConfig;
 import com.dlink.model.AppConfig;
 import com.dlink.model.AppToken;
+import com.dlink.service.ApiConfigService;
 import com.dlink.service.AppConfigService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +30,9 @@ public class AppConfigServiceImpl extends SuperServiceImpl<AppConfigMapper, AppC
     @Autowired
     private CacheManager cacheManager;
 
+    @Autowired
+    private ApiConfigService apiConfigService;
+
     @Override
     public Page<AppConfig> page(SearchCondition searchCondition) {
         Page<AppConfig> page = new Page<>(searchCondition.getPageIndex(), searchCondition.getPageSize());
@@ -43,6 +48,28 @@ public class AppConfigServiceImpl extends SuperServiceImpl<AppConfigMapper, AppC
         queryWrapper.orderByDesc("create_time");
 
         return this.baseMapper.selectPage(page, queryWrapper);
+    }
+
+    @Override
+    public AppConfig getDetailById(Integer id) {
+        AppConfig appConfig = this.getById(id);
+        if (appConfig == null) {
+            return null;
+        }
+        return appConfig;
+    }
+
+    @Override
+    public Page<ApiConfig> searchApiConfigByCondition(SearchCondition searchCondition) {
+        AppConfig appConfig = this.getById(searchCondition.getAppId());
+        if (appConfig == null) {
+            return null;
+        }
+        Page<ApiConfig> page = new Page<>(searchCondition.getPageIndex(), searchCondition.getPageSize());
+        QueryWrapper<ApiConfig> queryWrapper = new QueryWrapper<ApiConfig>().eq("auth_id", appConfig.getId()).and(qr -> qr.like("name", searchCondition.getName()));
+        queryWrapper.orderByDesc("auth_time");
+        Page<ApiConfig> apiConfigs = apiConfigService.getBaseMapper().selectPage(page, queryWrapper);
+        return apiConfigs;
     }
 
     @Override

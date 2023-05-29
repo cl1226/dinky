@@ -2,6 +2,7 @@ package com.dlink.dto;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -18,9 +19,10 @@ public class ApiConfigDTO {
     private String path;
     private Integer catalogueId;
     private String absolutePath;
-    private Date createTime;
-    private Date updateTime;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
     private String authType;
+    private LocalDateTime authTime;
     private String accessType;
     private String datasourceType;
     private Integer datasourceId;
@@ -34,5 +36,6 @@ public class ApiConfigDTO {
     private Integer authId;
     private String description;
     private String domain;
+    private String apiPrefix;
 
 }

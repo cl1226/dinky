@@ -15,6 +15,8 @@ public class SearchCondition {
 
     private Integer catalogueId;
 
+    private Integer appId;
+
     private String name;
 
     private Integer pageIndex;

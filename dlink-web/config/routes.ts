@@ -108,17 +108,17 @@ export default [
           {
             path: '/dataDev/devops/overview',
             name: 'overview',
-            component: './DataStudio',
+            component: './DataDev/Dashboard',
           },
           {
             path: '/dataDev/devops/monitor',
             name: 'monitor',
-            component: './Scheduler',
+            component: './DataDev/Dashboard',
           },
           {
             path: '/dataDev/devops/instance',
             name: 'instance',
-            component: './Scheduler',
+            component: './DataDev/Dashboard',
           },
         ],
       },
