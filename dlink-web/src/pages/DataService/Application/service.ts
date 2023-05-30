@@ -160,7 +160,7 @@ export const getAppBindApiList = async (params) => {
   }
 }
 
-// 解绑app的api
+// 解绑app api
 export const requestUnbindApi = async ({ appId, apiId }) => {
   return request2('/api/app/config/auth/unbind', {
     method: 'POST',
@@ -168,7 +168,7 @@ export const requestUnbindApi = async ({ appId, apiId }) => {
   })
 }
 
-// 删除app
+// 解绑app api
 export const unbindApi = async ({ appId, apiId }) => {
   try {
     const { code, msg } = await requestUnbindApi({ appId, apiId })
@@ -181,7 +181,59 @@ export const unbindApi = async ({ appId, apiId }) => {
       return false
     }
   } catch (error) {
-    message.error(l('app.request.delete.error'))
+    message.error(l('app.request.failed'))
+    return false
+  }
+}
+
+// 获取api绑定app列表
+export const requestApiBindApp = async (params) => {
+  return request2('/api/dataservice/config/getAppsByApiId', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+  })
+}
+
+// 获取api绑定app列表
+export const getApiBindAppList = async (params) => {
+  try {
+    const { code, msg, datas } = await requestApiBindApp(params)
+    if (code == CODE.SUCCESS) {
+      return datas ? [datas] : []
+    } else {
+      message.warn(msg)
+      return []
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return []
+  }
+}
+
+// 授权app api
+export const requestBindAuth = async ({ appId, apiId }) => {
+  return request2('/api/dataservice/config/configureAuth', {
+    method: 'PUT',
+    data: { apiId, appId },
+  })
+}
+
+// 授权app api
+export const bindAuth = async ({ appId, apiId }) => {
+  try {
+    const { code, msg } = await requestBindAuth({ appId, apiId })
+
+    if (code == CODE.SUCCESS) {
+      message.success(msg)
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    message.error(l('app.request.failed'))
     return false
   }
 }

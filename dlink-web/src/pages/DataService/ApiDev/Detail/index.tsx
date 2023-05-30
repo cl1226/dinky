@@ -27,7 +27,12 @@ import { EAccessType, EContentType, EAuthType } from '@/utils/enum'
 import { EDataType } from '@/pages/DataService/ApiDev/Create/components/Parameters'
 import { ETokenExpire } from '@/utils/enum'
 
-import { getApplicationList } from '@/pages/DataService/Application/service'
+import {
+  getApplicationList,
+  unbindApi,
+  getApiBindAppList,
+  bindAuth,
+} from '@/pages/DataService/Application/service'
 
 const { Search } = Input
 
@@ -56,6 +61,7 @@ const ApiDetail: React.FC<{}> = (props: any) => {
           const { name } = res.datas
           setPageTitle(name)
           setDetailInfo(res.datas)
+          getAuthAppData()
         }
       })
       .finally(() => {
@@ -63,9 +69,9 @@ const ApiDetail: React.FC<{}> = (props: any) => {
       })
   }, [])
 
-  const getAuthAppData = async (extra?: any) => {
+  const getAuthAppData = async () => {
     setTableLoading(true)
-    const list = await getAppBindApiList({
+    const list: any = await getApiBindAppList({
       apiId: Number(pageParams.id),
     })
     setAuthAppData(list)
@@ -73,6 +79,7 @@ const ApiDetail: React.FC<{}> = (props: any) => {
   }
 
   const getAppData = async (extra?: any) => {
+    setSelectedRowKeys([])
     const params = {
       pageIndex: pageNum,
       pageSize: pageSize,
@@ -80,7 +87,6 @@ const ApiDetail: React.FC<{}> = (props: any) => {
       ...(extra || {}),
     }
     const { list, total, pn, ps } = await getApplicationList(params)
-
     setAppData(list)
     setPageTotal(total)
     setPageNum(pn)
@@ -97,8 +103,13 @@ const ApiDetail: React.FC<{}> = (props: any) => {
     }
   }
 
-  const submitAuth = () => {
-    console.log('selectedRowKeys', selectedRowKeys)
+  const submitAuth = async () => {
+    const result = await bindAuth({ apiId: Number(pageParams.id), appId: selectedRowKeys[0] })
+
+    if (result) {
+      setAuthModalVisible(false)
+      getAuthAppData()
+    }
   }
   const getDispatchInfo = () => {
     const getDataSource = () => {
@@ -303,7 +314,10 @@ const ApiDetail: React.FC<{}> = (props: any) => {
           <Button
             onClick={() => {
               setAuthModalVisible(true)
-              getAppData()
+              getAppData({
+                pageIndex: 1,
+                pageSize: 10,
+              })
             }}
           >
             授权
@@ -328,7 +342,11 @@ const ApiDetail: React.FC<{}> = (props: any) => {
           footer={
             <>
               <Button onClick={() => setAuthModalVisible(false)}>取消</Button>
-              <Button type="primary" onClick={() => submitAuth()}>
+              <Button
+                type="primary"
+                disabled={!(selectedRowKeys && selectedRowKeys.length)}
+                onClick={() => submitAuth()}
+              >
                 确认授权
               </Button>
             </>
