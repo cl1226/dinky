@@ -19,6 +19,7 @@
 
 package com.dlink.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.alert.Alert;
 import com.dlink.alert.AlertConfig;
 import com.dlink.alert.AlertMsg;
@@ -37,6 +38,7 @@ import com.dlink.context.TenantContextHolder;
 import com.dlink.daemon.task.DaemonFactory;
 import com.dlink.daemon.task.DaemonTaskConfig;
 import com.dlink.db.service.impl.SuperServiceImpl;
+import com.dlink.dto.SearchCondition;
 import com.dlink.dto.SqlDTO;
 import com.dlink.dto.TaskRollbackVersionDTO;
 import com.dlink.dto.TaskVersionConfigureDTO;
@@ -62,29 +64,7 @@ import com.dlink.job.JobResult;
 import com.dlink.mapper.TaskMapper;
 import com.dlink.metadata.driver.Driver;
 import com.dlink.metadata.result.JdbcSelectResult;
-import com.dlink.model.AlertGroup;
-import com.dlink.model.AlertHistory;
-import com.dlink.model.AlertInstance;
-import com.dlink.model.Catalogue;
-import com.dlink.model.Cluster;
-import com.dlink.model.ClusterConfiguration;
-import com.dlink.model.DataBase;
-import com.dlink.model.History;
-import com.dlink.model.Jar;
-import com.dlink.model.JobHistory;
-import com.dlink.model.JobInfoDetail;
-import com.dlink.model.JobInstance;
-import com.dlink.model.JobLifeCycle;
-import com.dlink.model.JobStatus;
-import com.dlink.model.RoleSelectPermissions;
-import com.dlink.model.Savepoints;
-import com.dlink.model.Statement;
-import com.dlink.model.SystemConfiguration;
-import com.dlink.model.Task;
-import com.dlink.model.TaskOperatingSavepointSelect;
-import com.dlink.model.TaskOperatingStatus;
-import com.dlink.model.TaskVersion;
-import com.dlink.model.UDFTemplate;
+import com.dlink.model.*;
 import com.dlink.process.context.ProcessContextHolder;
 import com.dlink.process.model.ProcessEntity;
 import com.dlink.process.model.ProcessType;
@@ -1534,5 +1514,22 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
         }
         sb.append(task.getStatement());
         return sb.toString();
+    }
+
+    @Override
+    public Page<Task> page(SearchCondition searchCondition) {
+        Page<Task> page = new Page<>(searchCondition.getPageIndex(), searchCondition.getPageSize());
+
+        QueryWrapper<Task> queryWrapper = new QueryWrapper<Task>();
+        if (StringUtils.isNotBlank(searchCondition.getName())) {
+            queryWrapper.like("name", searchCondition.getName());
+        }
+        if (StringUtils.isNotBlank(searchCondition.getDialect())) {
+            queryWrapper.eq("dialect", searchCondition.getDialect());
+        }
+
+        queryWrapper.orderByDesc("create_time");
+
+        return this.baseMapper.selectPage(page, queryWrapper);
     }
 }

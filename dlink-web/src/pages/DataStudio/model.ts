@@ -247,7 +247,7 @@ const Model: ModelType = {
     isFullScreen: false,
     toolHeight: 400,
     toolRightWidth: 300,
-    toolLeftWidth: 300,
+    toolLeftWidth: 250,
     cluster: [],
     sessionCluster: [],
     clusterConfiguration: [],

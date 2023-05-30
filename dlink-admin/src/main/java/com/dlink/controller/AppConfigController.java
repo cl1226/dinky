@@ -49,6 +49,11 @@ public class AppConfigController {
         return Result.failed(null, "获取失败");
     }
 
+    @PostMapping("/auth/unbind")
+    public Result unbind(@RequestBody SearchCondition searchCondition) {
+        return appConfigService.unbind(searchCondition);
+    }
+
     @PutMapping
     public Result saveOrUpdate(@RequestBody AppConfig appConfig) {
         try {

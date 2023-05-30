@@ -147,8 +147,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             // 每一个节点生成一个taskRequest
             TaskRequest taskRequest = new TaskRequest();
             DlinkTaskParams dlinkTaskParams = new DlinkTaskParams();
-            Catalogue catalogue1 = service.getById(x.getJobId());
-            dlinkTaskParams.setTaskId(String.valueOf(catalogue1.getTaskId()));
+//            Catalogue catalogue1 = service.getById(x.getJobId());
+            dlinkTaskParams.setTaskId(String.valueOf(x.getJobId()));
             dlinkTaskParams.setAddress(dolphinSchedulerProperties.getAddress());
             taskRequest.setTaskParams(JSONUtil.parseObj(dlinkTaskParams).toString());
             taskRequest.setTaskType("DINKY");

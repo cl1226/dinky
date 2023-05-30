@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 /** app 核心组件 */
 import { XFlow, XFlowCanvas, KeyBindings } from '@antv/xflow'
 import type { IApplication, IAppLoad } from '@antv/xflow'
+import {CaretDownOutlined, CaretUpOutlined} from '@ant-design/icons';
 /** 交互组件 */
 import {
   /** 触发Command的交互组件 */
@@ -13,7 +14,7 @@ import {
   /** Graph的扩展交互组件 */
   CanvasSnapline,
   CanvasNodePortTooltip,
-  DagGraphExtension,
+  DagGraphExtension
 } from '@antv/xflow'
 
 import { CustomJsonForm } from './json-form'
@@ -44,6 +45,9 @@ export interface IProps {
 
 export const XFlowEditor: React.FC<IProps> = (props) => {
   const { activeKey, flowId } = props
+
+  const [showNodePanel, setshowNodePanel] = useState(false)
+
   const cache = React.useMemo<{ app: IApplication | null }>(
     () => ({
       app: null,
@@ -80,20 +84,29 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
     }
   }, [cache.app, flowId])
 
+
+
   return (
     <XFlow
-      className="dag-user-custom-clz"
+      // className="dag-user-custom-clz"
+      className={`dag-user-custom-clz dag-user-custom-clz-custom${showNodePanel && '-hidden'}`}
       hookConfig={graphHooksConfig}
       modelServiceConfig={modelServiceConfig}
       commandConfig={cmdConfig}
       onLoad={onLoad}
       meta={meta}
-      style={{ height: 'calc(100vh - 82px - 32px)' }}
+      style={{ height: 'calc(100vh - 82px - 32px)', width: '100%' }}
     >
       <DagGraphExtension />
       <NodeCollapsePanel
         className="xflow-node-panel"
-        searchService={dndPanelConfig.searchService}
+        // searchService={dndPanelConfig.searchService}
+        header={<div className="dnd-panel-header"> 节点库{showNodePanel} 
+        {
+          showNodePanel ? (<CaretDownOutlined  onClick={() => setshowNodePanel(!showNodePanel)} style={{'margin-left': '30px'}}/>)
+          : (<CaretUpOutlined onClick={() => setshowNodePanel(!showNodePanel)} style={{'margin-left': '30px'}}/>)
+        }
+        </div>}
         nodeDataService={dndPanelConfig.nodeDataService}
         onNodeDrop={dndPanelConfig.onNodeDrop}
         position={{ width: 230, top: 0, bottom: 0, left: 0 }}
@@ -106,8 +119,8 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
         config={toolbarConfig}
         position={{ top: 0, left: 230, right: 320, bottom: 0 }}
       />
-      <XFlowCanvas position={{ top: 40, left: 230, right: 320, bottom: 0 }}>
-        <CanvasScaleToolbar position={{ top: 12, left: 12 }} />
+      <XFlowCanvas position={{ top: 40, left: 230, right: 32, bottom: 0 }}>
+        <CanvasScaleToolbar position={{ top: 12, right: 12 }} />
         <CanvasContextMenu config={menuConfig} />
         <CanvasSnapline color="#faad14" />
         <CanvasNodePortTooltip />
@@ -118,7 +131,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
         formValueUpdateService={formValueUpdateService}
         getCustomRenderComponent={CustomJsonForm.getCustomRenderComponent}
         bodyPosition={{ top: 0, bottom: 0, right: 0 }}
-        position={{ width: 320, top: 0, bottom: 0, right: 0 }}
+        position={{ width: 34, top: 0, bottom: 0, right: 0 }}
         footerPosition={{ height: 0 }}
       />
       <KeyBindings config={keybindingConfig} />

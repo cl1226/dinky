@@ -96,7 +96,7 @@ export namespace NSToolbarConfig {
     /** 部署服务按钮 */
     toolbarGroup2.push({
       iconName: 'CloudSyncOutlined',
-      text: '部署',
+      text: '保存',
       isEnabled:
         state.lockStatus &&
         (state.status === 'CREATE' || state.status === 'DEPLOY' || state.status === 'OFFLINE'),

@@ -19,16 +19,14 @@
 
 package com.dlink.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
 import com.dlink.db.service.ISuperService;
+import com.dlink.dto.SearchCondition;
 import com.dlink.dto.TaskRollbackVersionDTO;
 import com.dlink.explainer.lineage.LineageResult;
 import com.dlink.job.JobResult;
-import com.dlink.model.JobInfoDetail;
-import com.dlink.model.JobInstance;
-import com.dlink.model.JobLifeCycle;
-import com.dlink.model.JobStatus;
-import com.dlink.model.Task;
+import com.dlink.model.*;
 import com.dlink.result.SqlExplainResult;
 import com.dlink.result.TaskOperatingResult;
 
@@ -118,4 +116,6 @@ public interface TaskService extends ISuperService<Task> {
     JobStatus checkJobStatus(JobInfoDetail jobInfoDetail);
 
     LineageResult getTaskLineage(Integer id);
+
+    Page<Task> page(SearchCondition searchCondition);
 }

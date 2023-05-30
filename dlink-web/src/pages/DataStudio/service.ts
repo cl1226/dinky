@@ -18,7 +18,7 @@
  */
 
 
-import {CAParam, StudioMetaStoreParam, StudioParam} from "@/components/Studio/StudioEdit/data";
+import {CAParam, StudioMetaStoreParam, StudioParam, IGetShellListParams} from "@/components/Studio/StudioEdit/data";
 import {request2} from "@/components/Common/crud";
 import {request} from "umi";
 
@@ -158,6 +158,24 @@ export async function updateTaskDefinition(processCode: string, projectCode: str
     },
     data: {
       ...params,
+    },
+  });
+}
+
+export async function page(params: IGetShellListParams) {
+  return request<API.Result>('/api/task/page', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  });
+}
+
+export async function getTask(id: any) {
+  return request<API.Result>('/api/task', {
+    method: 'GET',
+    params: {
+      id,
     },
   });
 }

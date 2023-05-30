@@ -8,6 +8,7 @@ import com.dlink.common.result.Result;
 import com.dlink.constant.BaseConstant;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.ApiConfigDTO;
+import com.dlink.dto.AppConfigDTO;
 import com.dlink.dto.DebugDTO;
 import com.dlink.dto.SearchCondition;
 import com.dlink.mapper.ApiConfigMapper;
@@ -187,5 +188,18 @@ public class ApiConfigServiceImpl extends SuperServiceImpl<ApiConfigMapper, ApiC
     public ApiConfig checkPath(String path) {
         ApiConfig apiConfig = this.getOne(new QueryWrapper<ApiConfig>().eq("path", path.replaceAll("/", "")));
         return apiConfig;
+    }
+
+    @Override
+    public Result getAppsById(Integer apiId) {
+        ApiConfig apiConfig = this.getById(apiId);
+        if (apiConfig == null) {
+            return Result.failed("获取失败!");
+        }
+        AppConfigDTO appConfigDTO = new AppConfigDTO();
+        AppConfig appConfig = appConfigService.getDetailById(apiConfig.getAuthId());
+        BeanUtils.copyProperties(appConfig, appConfigDTO);
+        appConfigDTO.setAuthTime(apiConfig.getAuthTime());
+        return Result.succeed(appConfigDTO, "获取成功!");
     }
 }

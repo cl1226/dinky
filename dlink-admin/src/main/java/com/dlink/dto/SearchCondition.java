@@ -17,11 +17,15 @@ public class SearchCondition {
 
     private Integer appId;
 
+    private Integer apiId;
+
     private String name;
 
     private Integer pageIndex;
 
     private Integer pageSize;
+
+    private String dialect;
 
     private List<Integer> ids;
 

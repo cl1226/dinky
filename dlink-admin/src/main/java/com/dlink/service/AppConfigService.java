@@ -1,6 +1,7 @@
 package com.dlink.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.dlink.common.result.Result;
 import com.dlink.db.service.ISuperService;
 import com.dlink.dto.SearchCondition;
 import com.dlink.model.ApiConfig;
@@ -20,6 +21,8 @@ public interface AppConfigService extends ISuperService<AppConfig> {
     AppConfig getDetailById(Integer id);
 
     Page<ApiConfig> searchApiConfigByCondition(SearchCondition searchCondition);
+
+    Result unbind(SearchCondition searchCondition);
 
     AppConfig add(AppConfig appConfig);
 

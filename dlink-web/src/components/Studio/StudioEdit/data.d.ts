@@ -80,3 +80,10 @@ export type CAParam = {
   databaseId?: number,
   envId?: number,
 }
+
+export type IGetShellListParams = {
+  name?: string
+  pageIndex: number
+  pageSize: number,
+  dialect: string
+}

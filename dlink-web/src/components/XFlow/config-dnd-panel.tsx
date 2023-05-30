@@ -4,8 +4,9 @@ import { XFlowNodeCommands } from '@antv/xflow'
 import { DND_RENDER_ID } from './constant'
 import type { NsNodeCmd } from '@antv/xflow'
 import type { NsNodeCollapsePanel } from '@antv/xflow'
-import { Card } from 'antd'
+import { Avatar, Card } from 'antd'
 import { getFlowTaskEnum } from './service'
+import { getIcon } from '@/components/Studio/icon'
 
 export const onNodeDrop: NsNodeCollapsePanel.IOnNodeDrop = async (node, commands, modelService) => {
   const args: NsNodeCmd.AddNode.IArgs = {
@@ -29,13 +30,20 @@ export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta
     id: item.key,
     header: item.title,
     children: item.res.map((jtem) => ({
-      id: jtem,
-      label: jtem,
+      id: jtem.label,
+      label: jtem.label,
+      type: jtem.type,
       parentId: '1',
       renderKey: DND_RENDER_ID,
+      renderComponent: props => (
+        <div className="react-dnd-node react-custom-node">
+          <Avatar src={getIcon(jtem.type)}></Avatar> 
+          <p>{props.data.label}</p> 
+        </div>
+      ),
       jobId: '0',
-      popoverContent: <NodeDescription name={jtem} />,
-      params: { type: jtem },
+      // popoverContent: <NodeDescription name={jtem} />,
+      params: { type: jtem.type }
     })),
   }))
 }
