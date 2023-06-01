@@ -1,19 +1,43 @@
-import React, {useCallback, useEffect, useState} from "react";
-import styles from './index.less';
-import {Card, Col, Form, Row} from "antd";
-import { PageContainer } from '@ant-design/pro-layout';
-import DraggleLayout from "@/components/DraggleLayout";
-
+import React, { useCallback, useEffect, useState } from 'react'
+import styles from './index.less'
+import { Tabs, Card, Col, Form, Row } from 'antd'
+import { PageContainer } from '@ant-design/pro-layout'
+import { Scrollbars } from 'react-custom-scrollbars'
+import Summary from './Summary'
+import DetailList from './DetailList'
 const ServiceDashboard: React.FC<{}> = (props: any) => {
-  
-
   return (
     <PageContainer title={false}>
-      
+      <div className={styles['dashboard-wrap']}>
+        <Tabs
+          items={[
+            {
+              label: `汇总`,
+              key: 'summary',
+              children: (
+                <div className={styles['tab-wrap']}>
+                  <Scrollbars style={{ height: '100%' }}>
+                    <Summary />
+                  </Scrollbars>
+                </div>
+              ),
+            },
+            {
+              label: `详情`,
+              key: 'detail',
+              children: (
+                <div className={styles['tab-wrap']}>
+                  <Scrollbars style={{ height: '100%' }}>
+                    <DetailList></DetailList>
+                  </Scrollbars>
+                </div>
+              ),
+            },
+          ]}
+        />
+      </div>
     </PageContainer>
   )
-
-
 }
 
-export default ServiceDashboard;
+export default ServiceDashboard
