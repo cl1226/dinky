@@ -54,7 +54,7 @@ public class ApiAuthFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         String uri = request.getRequestURI();
-        String servletPath = uri.substring(apiContext.length() + 2);
+        String servletPath = uri.substring(apiContext.length() + 1);
 
         // 不使用writer的时候不要提前获取response的writer,否则无法在后续filter中设置编码
         try {
