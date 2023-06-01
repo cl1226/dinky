@@ -184,6 +184,8 @@ export type StateType = {
   toolHeight?: number;
   toolRightWidth?: number;
   toolLeftWidth?: number;
+  bottomHeight?: number;
+  operations?: string;
   cluster?: ClusterType[];
   sessionCluster?: ClusterType[];
   clusterConfiguration?: ClusterConfigurationType[];

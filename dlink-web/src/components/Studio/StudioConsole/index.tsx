@@ -25,7 +25,10 @@ import {
   CalendarOutlined,
   CodeOutlined,
   DesktopOutlined,
-  TableOutlined
+  TableOutlined,
+  MinusOutlined,
+  SwitcherOutlined,
+  ExpandOutlined
 } from "@ant-design/icons";
 import {StateType} from "@/pages/DataStudio/model";
 import {connect} from "umi";
@@ -45,7 +48,7 @@ const StudioConsole = (props: any) => {
 
 
 
-  const {height, current} = props;
+  const {height, current, operations} = props;
   let consoleHeight = (height - 37.6);
   const [activeKey, setActiveKey] = useState<string>("StudioMsg");
 
@@ -53,9 +56,13 @@ const StudioConsole = (props: any) => {
     setActiveKey(key);
   }
 
+  console.log(props)
+
   return (
-    <Tabs defaultActiveKey="StudioMsg" size="small" tabPosition="top" style={{
-      border: "1px solid #f0f0f0", height: height, margin: "0 32px"
+    <>
+    {current?.task ?
+    <Tabs defaultActiveKey="StudioMsg" size="small" tabPosition="top" tabBarExtraContent={operations} style={{
+      border: "1px solid #f0f0f0", height: height, 'padding-left': '5px'
     }} onChange={onTabsChange}>
       <TabPane
         tab={
@@ -83,7 +90,7 @@ const StudioConsole = (props: any) => {
           {current ? <StudioTable/> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>}
         </Scrollbars>
       </TabPane>
-      {/* <TabPane
+      <TabPane
         tab={
           <span>
           <BarChartOutlined/>
@@ -95,8 +102,8 @@ const StudioConsole = (props: any) => {
         <Scrollbars style={{height: consoleHeight}}>
           {current ? <Chart height={consoleHeight}/> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>}
         </Scrollbars>
-      </TabPane> */}
-      {/* <TabPane
+      </TabPane>
+      <TabPane
         tab={
           <span>
           <ApartmentOutlined/>
@@ -108,8 +115,8 @@ const StudioConsole = (props: any) => {
         <Scrollbars style={{height: consoleHeight}}>
           {current ? <StudioCA/> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>}
         </Scrollbars>
-      </TabPane> */}
-      {/* <TabPane
+      </TabPane>
+      <TabPane
         tab={
           <span>
           <DesktopOutlined/>
@@ -121,7 +128,7 @@ const StudioConsole = (props: any) => {
         <Scrollbars style={{height: consoleHeight}}>
           <StudioProcess/>
         </Scrollbars>
-      </TabPane> */}
+      </TabPane>
       <TabPane
         tab={
           <span>
@@ -149,10 +156,12 @@ const StudioConsole = (props: any) => {
       {/*  </Scrollbars>*/}
       {/*</TabPane>*/}
     </Tabs>
+      : ''}
+    </>
   );
 };
 
 export default connect(({Studio}: { Studio: StateType }) => ({
   sql: Studio.sql,
-  current: Studio.current,
+  current: Studio.current
 }))(StudioConsole);

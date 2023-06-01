@@ -111,3 +111,7 @@ dinky:
   # python udf 需要用到的 python 执行环境
   python:
     path: python
+  api:
+    context: releaseapi
+    debug:
+      context: debugapi

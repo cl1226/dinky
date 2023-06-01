@@ -115,24 +115,24 @@ const EditorTabs = (props: any) => {
   const getTabPane = (pane, i) => {
     if (pane.task.dialect == DIALECT.KUBERNETES_APPLICATION) {
       return (
-        <TabPane tab={Tab(pane)} key={pane.key} closable={pane.closable}>
+        <TabPane style={{'height': '100%'}} tab={Tab(pane)} key={pane.key} closable={pane.closable}>
           <StudioKubernetes
             tabsKey={pane.key}
             conf={pane.value}
             monaco={pane.monaco}
-            height={size.height - 120}
+            height={'100%'}
             width={width}
           />
         </TabPane>
       )
     } else {
-      return (<TabPane tab={Tab(pane)} key={pane.key} closable={pane.closable}>
+      return (<TabPane style={{'height': '100%'}} tab={Tab(pane)} key={pane.key} closable={pane.closable}>
         <StudioEdit
           tabsKey={pane.key}
           sql={pane.value}
           monaco={pane.monaco}
           sqlMetaData={pane.sqlMetaData}
-          height={size.height - 120}
+          height={'100%'}
           width={width}
           language={getLanguage(current.task.dialect)}
         />
@@ -164,7 +164,7 @@ const EditorTabs = (props: any) => {
           activeKey={tabs.activeKey + ''}
           onEdit={onEdit}
           className={styles['edit-tabs']}
-          style={{height: height ? height : toolHeight}}
+          style={{height: '100%'}}
         >
           {tabs.panes.map((pane, i) => getTabPane(pane, i))}
         </Tabs>}
