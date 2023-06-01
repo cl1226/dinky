@@ -70,7 +70,9 @@
       }
     }
     .xflow-collapse-panel-body {
-      background: #f7f8fa;
+      background: #fff;
+      z-index: 20;
+      transition: all 0.5s ease;
       .xflow-collapse-header {
         padding: 12px 8px;
       }
@@ -123,6 +125,34 @@
   }
 }
 
+.xflow-righttools-tabcontent-wrap {
+  position: relative;
+  top: 40px;
+  .ant-tabs-content-holder{
+      position: absolute;
+      transform: translateX(0px);
+      border: 1px solid #CCC;
+      transition: all 0.5s;
+      background-color: white;
+      background-clip: padding-box;
+      border-radius: 8px;
+      z-index: -1;
+      box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+      width: 30vw;
+
+  }
+  .ant-tabs-nav {
+      background-color: white;
+      z-index: 2;
+  }
+}
+.xflow-righttools-tabcontent-wrap-show{
+  div.ant-tabs-content-holder{
+      transform: translateX(-100%);
+      z-index: 1;
+  }
+}
+
 .custom-form-component {
   height: 100%;
   .info-title {
@@ -152,3 +182,95 @@
     }
   }
 }
+.xflow-collapse-content {
+  width: 100%;
+  display: inline-flex;
+  flex-wrap: wrap;
+}
+.xflow-collapse-content-item:hover {
+  background: #f7f7f7;
+}
+.xflow-collapse-content-item {
+  text-align: center;
+  width: 50%;
+  padding: 4px !important;
+}
+.react-custom-node {
+  height: 64px;
+  padding: 6px 5px 0;
+  cursor: pointer;
+  position: relative;
+  font-size: 12px;
+  word-break: break-all;
+}
+.xflow-collapse-panel {
+  width: 160px !important;
+}
+.xflow-workspace-toolbar-top {
+  inset: 0 32px 0 160px !important;
+}
+.xflow-canvas-root {
+  z-index: 1;
+  inset: 40px 32px 0 0 !important;
+}
+.dag-user-custom-clz-custom .xflow-collapse-panel-body {
+  z-index: 20;
+  opacity: 1;
+}
+.dag-user-custom-clz-custom-hidden .xflow-collapse-panel-body {
+  height: 0;
+  opacity: 0;
+}
+
+/* --- tabs 垂直样式 --- start */
+.vertical-tabs{
+  :global {
+    .ant-tabs-left>.ant-tabs-nav, .ant-tabs-right>.ant-tabs-nav, .ant-tabs-left>div>.ant-tabs-nav, .ant-tabs-right>div>.ant-tabs-nav {
+      min-width: 20px;
+    }
+
+    .ant-tabs-left>.ant-tabs-nav .ant-tabs-tab, .ant-tabs-right>.ant-tabs-nav .ant-tabs-tab, .ant-tabs-left>div>.ant-tabs-nav .ant-tabs-tab, .ant-tabs-right>div>.ant-tabs-nav .ant-tabs-tab {
+      padding: 5px 5px;
+    }
+
+    .ant-tabs-tab-btn {
+      writing-mode: vertical-lr;
+    }
+
+    .ant-tabs-tab .anticon {
+      margin-right: 0;
+    }
+
+    .anticon {
+      vertical-align: 0;
+    }
+
+    .ant-tabs-left > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane, .ant-tabs-left > div > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane {
+      padding-left: 10px;
+    }
+
+    .ant-tabs-right > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane, .ant-tabs-right > div > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane {
+      padding-right: 10px;
+    }
+    .ant-tabs > .ant-tabs-nav .ant-tabs-nav-more, .ant-tabs > div > .ant-tabs-nav .ant-tabs-nav-more {
+      padding: 8px;
+    }
+
+    /* --- 树文字显示  --- start */
+    .ant-tree-node-content-wrapper{
+      white-space: nowrap;
+      //max-width: 100%;
+      height: 15px;
+      overflow: hidden;
+      text-overflow-ellipsis: true;
+    }
+    .ant-tree.ant-tree-directory .ant-tree-treenode-selected::before, .ant-tree.ant-tree-directory .ant-tree-treenode-selected:hover::before {
+      background: rgba(21, 115, 204, 0.58);
+      //background: linear-gradient(112.72013189013455deg, rgba(240, 94, 7,1) 4.927083333333334%,rgba(30, 189, 177,1) 97.84374999999999%);
+      top: -3px;
+      //background: linear-gradient(151.47483992787556deg, rgba(97, 116, 180,1) 28.044290288153682%,rgba(229, 151, 64,1) 78.3110992529349%);
+    }
+  }
+}
+/* --- tabs 垂直样式 --- end */
+

@@ -2,6 +2,7 @@ import type { NsGraph, NsNodeCmd } from '@antv/xflow'
 import { controlMapService, ControlShapeEnum } from './form-controls'
 import { MODELS, XFlowNodeCommands, NsJsonSchemaForm } from '@antv/xflow'
 import { set } from 'lodash'
+import { CustomJsonForm } from './json-form'
 
 export function delay(ms: number) {
   return new Promise((resolve) => setTimeout(() => resolve(true), ms))

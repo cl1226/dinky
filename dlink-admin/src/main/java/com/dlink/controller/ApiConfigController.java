@@ -115,8 +115,8 @@ public class ApiConfigController {
     }
 
     @PutMapping("/configureAuth")
-    public Result configureAuth(@RequestParam Integer id, @RequestParam Integer appId) {
-        ApiConfig apiConfig = service.configureAuth(id, appId);
+    public Result configureAuth(@RequestBody SearchCondition condition) {
+        ApiConfig apiConfig = service.configureAuth(condition.getApiId(), condition.getAppId());
         if (apiConfig == null) {
             return Result.failed("配置失败");
         }
@@ -130,6 +130,12 @@ public class ApiConfigController {
             return Result.failed("路径重复, 请重新填写");
         }
         return  Result.succeed(null, "校验通过");
+    }
+
+    @GetMapping("/getAppsByApiId")
+    public Result getAppsByApiId(@RequestParam Integer apiId) {
+        Result result = service.getAppsById(apiId);
+        return result;
     }
 
 }

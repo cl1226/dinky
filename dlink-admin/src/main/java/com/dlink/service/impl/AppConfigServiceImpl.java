@@ -2,6 +2,7 @@ package com.dlink.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.dlink.common.result.Result;
 import com.dlink.constant.AuthConstant;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.SearchCondition;
@@ -70,6 +71,26 @@ public class AppConfigServiceImpl extends SuperServiceImpl<AppConfigMapper, AppC
         queryWrapper.orderByDesc("auth_time");
         Page<ApiConfig> apiConfigs = apiConfigService.getBaseMapper().selectPage(page, queryWrapper);
         return apiConfigs;
+    }
+
+    @Override
+    public Result unbind(SearchCondition searchCondition) {
+        AppConfig appConfig = this.getById(searchCondition.getAppId());
+        if (appConfig == null) {
+            return Result.failed("解绑失败, AppConfig不存在");
+        }
+        ApiConfig apiConfig = apiConfigService.getById(searchCondition.getApiId());
+        if (apiConfig == null) {
+            return Result.failed("解绑失败, ApiConfig不存在");
+        }
+        apiConfig.setAuthTime(null);
+        apiConfig.setAuthId(null);
+        apiConfigService.lambdaUpdate()
+                .eq(ApiConfig::getId, searchCondition.getApiId())
+                .set(ApiConfig::getAuthId, null)
+                .set(ApiConfig::getAuthTime, null)
+                .update();
+        return Result.succeed(apiConfig, "解绑成功");
     }
 
     @Override

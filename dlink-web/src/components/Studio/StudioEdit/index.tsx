@@ -55,7 +55,8 @@ const FlinkSqlEditor = (props:any) => {
         renderLineHighlight: 'gutter',
         minimap: {
           enabled: false // 是否启用预览图
-        }
+        },
+        wordWrap: 'on'
       },
     sql,
     monaco,

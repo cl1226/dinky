@@ -19,15 +19,14 @@
 
 package com.dlink.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.ProTableResult;
 import com.dlink.common.result.Result;
+import com.dlink.dto.SearchCondition;
 import com.dlink.dto.TaskRollbackVersionDTO;
 import com.dlink.function.pool.UdfCodePool;
 import com.dlink.job.JobResult;
-import com.dlink.model.JobLifeCycle;
-import com.dlink.model.JobStatus;
-import com.dlink.model.Task;
-import com.dlink.model.TaskOperatingSavepointSelect;
+import com.dlink.model.*;
 import com.dlink.service.TaskService;
 import com.dlink.utils.TaskOneClickOperatingUtil;
 import com.dlink.utils.UDFUtils;
@@ -78,6 +77,12 @@ public class TaskController {
         } else {
             return Result.failed("操作失败");
         }
+    }
+
+    @PostMapping("/page")
+    public Result page(@RequestBody SearchCondition searchCondition) throws Exception {
+        Page<Task> page = taskService.page(searchCondition);
+        return Result.succeed(page, "获取成功");
     }
 
     /**

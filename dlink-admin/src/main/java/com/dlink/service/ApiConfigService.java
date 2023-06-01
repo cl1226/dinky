@@ -38,4 +38,6 @@ public interface ApiConfigService extends ISuperService<ApiConfig> {
     ApiConfig configureAuth(Integer id, Integer appId);
 
     ApiConfig checkPath(String path);
+
+    Result getAppsById(Integer apiId);
 }

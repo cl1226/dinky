@@ -184,6 +184,8 @@ export type StateType = {
   toolHeight?: number;
   toolRightWidth?: number;
   toolLeftWidth?: number;
+  bottomHeight?: number;
+  operations?: string;
   cluster?: ClusterType[];
   sessionCluster?: ClusterType[];
   clusterConfiguration?: ClusterConfigurationType[];
@@ -247,7 +249,7 @@ const Model: ModelType = {
     isFullScreen: false,
     toolHeight: 400,
     toolRightWidth: 300,
-    toolLeftWidth: 300,
+    toolLeftWidth: 250,
     cluster: [],
     sessionCluster: [],
     clusterConfiguration: [],

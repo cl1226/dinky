@@ -18,8 +18,8 @@
  */
 
 
-import {Tabs} from "antd";
-import {ContainerOutlined, ScheduleOutlined, SettingOutlined, CodeOutlined} from "@ant-design/icons";
+import {Tabs, Empty} from "antd";
+import {ContainerOutlined, ScheduleOutlined, SettingOutlined, CodeOutlined, TableOutlined} from "@ant-design/icons";
 import {StateType} from "@/pages/DataStudio/model";
 import {connect} from "umi";
 import StudioConfig from "./StudioConfig";
@@ -39,6 +39,7 @@ import {l} from "@/utils/intl";
 import { useState } from "react";
 import { Scrollbars } from 'react-custom-scrollbars'
 import StudioMsg from "../StudioConsole/StudioMsg"
+import StudioTable from "../StudioConsole/StudioTable"
 
 const {TabPane} = Tabs;
 
@@ -94,6 +95,24 @@ const StudioRightTool = (props: any) => {
       >
         <Scrollbars style={{height: '500px'}}>
           <StudioMsg/>
+        </Scrollbars>
+      </TabPane>
+    )
+  }
+
+  const renderStudioTable = () => {
+    return (
+      <TabPane
+        tab={
+          <span>
+          <TableOutlined/>
+            {l('pages.datastudio.label.result')}
+        </span>
+        }
+        key="StudioTable"
+      >
+        <Scrollbars style={{height: '500px'}}>
+          {current ? <StudioTable/> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>}
         </Scrollbars>
       </TabPane>
     )
@@ -164,7 +183,8 @@ const StudioRightTool = (props: any) => {
         <Tabs className={`righttools-tabcontent-wrap righttools-tabcontent-wrap${showTabPane && '-show'}`} onTabClick={() => setshowTabPane(!showTabPane)} defaultActiveKey="1" size="small" tabPosition="right" >
           {renderContent()}
           {renderTaskInfoContent()}
-          {renderConsoleMsg()}
+          {/* {renderConsoleMsg()} */}
+          {/* {renderStudioTable()} */}
         </Tabs> : <StudioGuide toolHeight={toolHeight}/>}
     </>
   );

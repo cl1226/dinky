@@ -17,11 +17,11 @@
  *
  */
 
-import {LockOutlined, UserOutlined,} from '@ant-design/icons';
-import {Button, message, Modal} from 'antd';
+import {LockOutlined, UserOutlined } from '@ant-design/icons';
+import {Button, message, Modal, Card, Avatar} from 'antd';
 import React, {useEffect, useState} from 'react';
 import ProForm, {ProFormCheckbox, ProFormText} from '@ant-design/pro-form';
-import {history, Link, SelectLang, useModel} from 'umi';
+import {history, SelectLang, useModel} from 'umi';
 import Footer from '@/components/Footer';
 import {login} from '@/services/ant-design-pro/api';
 import {CheckCard} from '@ant-design/pro-components';
@@ -176,113 +176,111 @@ const Login: React.FC = () => {
         cookies.set('language', language, {path: '/'})
         setLocale(language)
       }}/>}</div>
-      <div className={styles.content}>
-        <div className={styles.top}>
-          <div className={styles.header}>
-            <Link to="/">
-              <img alt="logo" className={styles.logo} src="/svolt.png"/>
-              {/* <span className={styles.title}>Svolt</span> */}
-            </Link>
+      <Card className={styles.loginBody}>
+        <div className={styles.content}>
+          <div className={styles.top}>
+            <div className={styles.header}>
+              <Avatar style={{'width': '100px', 'height': '100px'}} src={'/svolt.png'} />
+              <strong style={{'padding-left': '20px', 'font-weight': '500', 'font-size': '20px'}}>{l('pages.layouts.userLayout.title')}</strong>
+            </div>
           </div>
-          <div className={styles.desc}>
-            {l('pages.layouts.userLayout.title')}
-          </div>
-        </div>
 
-        <div className={styles.main}>
-          <ProForm
-            initialValues={{
-              autoLogin: true,
-            }}
-            submitter={{
-              searchConfig: {
-                submitText: l('pages.login.submit'),
-              },
-              render: (_, dom) => dom.pop(),
-              submitButtonProps: {
-                loading: submitting,
-                size: 'large',
-                style: {
-                  width: '100%',
+          <div className={styles.main}>
+            <ProForm
+              initialValues={{
+                autoLogin: true,
+              }}
+              submitter={{
+                searchConfig: {
+                  submitText: l('pages.login.submit'),
                 },
-                htmlType: 'submit',
-              },
-            }}
-            onFinish={async (values: API.LoginParams) => {
-              setType("password")
-              let res: TenantTableListItem[] = await getData("/api/geTenants", {username: values.username}).then(result => {
-                if(!result?.datas){
-                  message.error(result?.msg);
-                  return;
+                render: (_, dom) => dom.pop(),
+                submitButtonProps: {
+                  loading: submitting,
+                  size: 'large',
+                  style: {
+                    width: '100%',
+                  },
+                  htmlType: 'submit',
+                },
+              }}
+              onFinish={async (values: API.LoginParams) => {
+                setType("password")
+                let res: TenantTableListItem[] = await getData("/api/geTenants", {username: values.username}).then(result => {
+                  if(!result?.datas){
+                    message.error(result?.msg);
+                    return;
+                  }
+                  setTenant(result?.datas);
+                  return result?.datas
+                })
+                if (res.length === 1) {
+                  let tenantValue = res.pop().id // 进入此处说明 只有一个租户 直接pop() 拿到单个对象获取租户id
+                  values.tenantId = tenantValue; // 将租户id给后端入参
+                  setTenantCookie(tenantValue as number)
+                  setUserParamsState(values);
+                  await handleSubmit(values);
+                } else {
+                  setUserParamsState(values);
+                  setChooseTenant(true)
                 }
-                setTenant(result?.datas);
-                return result?.datas
-              })
-              if (res.length === 1) {
-                let tenantValue = res.pop().id // 进入此处说明 只有一个租户 直接pop() 拿到单个对象获取租户id
-                values.tenantId = tenantValue; // 将租户id给后端入参
-                setTenantCookie(tenantValue as number)
-                setUserParamsState(values);
-                await handleSubmit(values);
-              } else {
-                setUserParamsState(values);
-                setChooseTenant(true)
-              }
-            }}
-          >
-            {type === 'password' && (
-              <>
-                <ProFormText
-                  name="username"
-                  fieldProps={{
-                    size: 'large',
-                    prefix: <UserOutlined className={styles.prefixIcon}/>,
-                  }}
-                  placeholder={l('pages.login.username.placeholder')}
-                  rules={[
-                    {
-                      required: true,
-                      message: l('pages.login.username.required'),
-                    },
-                  ]}
-                />
-                <ProFormText.Password
-                  name="password"
-                  fieldProps={{
-                    size: 'large',
-                    prefix: <LockOutlined className={styles.prefixIcon}/>,
-                  }}
-                  placeholder={l('pages.login.password.placeholder')}
-                  rules={[
-                    {
-                      required: true,
-                      message: l('pages.login.password.required'),
-                    },
-                  ]}
-                />
-              </>
-            )}
-
-
-            <div
-              style={{
-                marginBottom: 24,
               }}
             >
-              <ProFormCheckbox noStyle name="autoLogin">
-                {l('pages.login.rememberMe')}
-              </ProFormCheckbox>
-              <a
+              {type === 'password' && (
+                <>
+                  <ProFormText
+                    name="username"
+                    fieldProps={{
+                      size: 'large',
+                      prefix: <UserOutlined className={styles.prefixIcon}/>,
+                    }}
+                    placeholder={l('pages.login.username.placeholder')}
+                    rules={[
+                      {
+                        required: true,
+                        message: l('pages.login.username.required'),
+                      },
+                    ]}
+                  />
+                  <ProFormText.Password
+                    name="password"
+                    fieldProps={{
+                      size: 'large',
+                      prefix: <LockOutlined className={styles.prefixIcon}/>,
+                    }}
+                    placeholder={l('pages.login.password.placeholder')}
+                    rules={[
+                      {
+                        required: true,
+                        message: l('pages.login.password.required'),
+                      },
+                    ]}
+                  />
+                </>
+              )}
+
+
+              <div
                 style={{
-                  float: 'right',
+                  marginBottom: 24,
                 }}
               >
-                {l('pages.login.forgotPassword')}
-              </a>
-            </div>
-          </ProForm>
+                <ProFormCheckbox noStyle name="autoLogin">
+                  {l('pages.login.rememberMe')}
+                </ProFormCheckbox>
+                <a
+                  style={{
+                    float: 'right',
+                  }}
+                >
+                  {l('pages.login.forgotPassword')}
+                </a>
+              </div>
+            </ProForm>
+          </div>
         </div>
-      </div>
+      </Card>
+      
       <Footer/>
       {handleShowTenant()}
     </div>

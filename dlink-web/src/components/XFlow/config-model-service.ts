@@ -15,10 +15,10 @@ export namespace NS_CANVAS_FORM {
   }
 }
 
-export namespace NS_FLOW_TASK_ENUM {
+export namespace NS_FLOW_TASK_FORM {
   export const id = 'flow_task_enum'
-  export interface ITASK {
-    canvasForm: any
+  export interface ITASKForm {
+    taskForm: any
   }
 }
 

@@ -22,11 +22,17 @@ import {useCallback, useEffect, useState} from "react";
 import {connect} from "umi";
 import styles from './index.less';
 import StudioMenu from "./StudioMenu";
-import {Card, Col, Form, Row } from "antd";
+import {Card, Col, Form, Row, Tooltip } from "antd";
 import StudioTabs from "./StudioTabs";
 import {StateType} from "@/pages/DataStudio/model";
 import StudioRightTool from "./StudioRightTool";
 import StudioTree from "./StudioTree";
+import StudioConsole from "./StudioConsole";
+
+import {
+  MinusOutlined,
+  SwitcherOutlined
+} from "@ant-design/icons";
 
 import {
   getFillAllByVersion,
@@ -51,11 +57,13 @@ const Studio = (props: any) => {
     leftToolWidth: 300,
     marginTop: 84,
     topHeight: 35.6,
-    bottomHeight: 127,
+    bottomHeight: 40,
     rightMargin: 32,
     leftMargin: 36,
     midMargin: 46,
   };
+  
+  const [bottomHeight, setBottomHeight] = useState(40)
   const [size, setSize] = useState({
     width: document.documentElement.clientWidth,
     height: document.documentElement.clientHeight,
@@ -99,6 +107,20 @@ const Studio = (props: any) => {
     }
   };
 
+  const backup = () => {
+    setBottomHeight(300)
+  }
+
+  const min = () => {
+    setBottomHeight(40)
+  }
+
+  const operations = 
+  <>
+    <Tooltip title="最小化"><MinusOutlined onClick={() => min()} style={{'cursor': 'pointer', 'margin-right': '15px'}}/></Tooltip>
+    <Tooltip title="还原"><SwitcherOutlined onClick={() => backup()} tooltip="还原" style={{'cursor': 'pointer', 'margin-right': '15px'}}/></Tooltip>
+  </>;
+
   return (
     <div onClick={onClick} style={{'margin': '-24px'}}>
       <StudioMenu form={form} width={size.width} height={size.height}/>
@@ -123,10 +145,38 @@ const Studio = (props: any) => {
             }
           >
             <Col className={styles["vertical-tabs"]}>
-              <StudioTree/>
+              <Row>
+                <StudioTree/>
+              </Row>
             </Col>
             <Col>
-              {!isFullScreen ? <StudioTabs width={size.width - toolLeftWidth}/> : undefined}
+              {/* <DraggleVerticalLayout
+                containerWidth={size.width - toolLeftWidth - 250}
+                containerHeight={(size.height - VIEW.marginTop)}
+                min={(VIEW.topHeight)}
+                max={(size.height - VIEW.bottomHeight)}
+                initTopHeight={VIEW.topHeight}
+                handler={
+                  <div
+                    style={{
+                      height: 4,
+                      width: '100%',
+                      background: 'rgb(240, 240, 240)',
+                    }}
+                  />
+                }
+              > */}
+                <Row style={{'height': size.height - VIEW.topHeight - bottomHeight - 50}}>
+                  <Col span={24} style={{'height': '100%'}}>
+                    {!isFullScreen ? <StudioTabs height={'100%'} width={size.width - toolLeftWidth}/> : undefined}
+                  </Col>
+                </Row>
+                <Row style={{'height': bottomHeight}}>
+                  <Col span={24}>
+                    <StudioConsole height={bottomHeight} operations={operations}/>
+                  </Col>
+                </Row>
+              {/* </DraggleVerticalLayout> */}
             </Col>
           </DraggleLayout>
           <Col id='StudioRightTool' className={styles["vertical-tabs"]}>

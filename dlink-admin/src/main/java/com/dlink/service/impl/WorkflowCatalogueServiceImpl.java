@@ -271,26 +271,22 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
 
     @Override
     public List<JSONObject> getTaskEnum() {
-        List<String> list1 = new ArrayList<>();
-        list1.add("RestClient");
-        list1.add("KafkaClient");
-        list1.add("File");
+        List<JSONObject> list1 = new ArrayList<>();
+        list1.add(new JSONObject().set("label", "RestClient").set("type", "Rest"));
+        list1.add(new JSONObject().set("label", "KafkaClient").set("type", "Kafka"));
+        list1.add(new JSONObject().set("label", "File").set("type", "File"));
 
-        List<String> list2 = new ArrayList<>();
-        list2.add("FlinkSql");
-        list2.add("Hive");
-        list2.add("Mysql");
-        list2.add("Sqlserver");
-        list2.add("StarRocks");
-        list2.add("ClickHouse");
-        list2.add("Doris");
-        list2.add("Presto");
-        list2.add("Sql");
+        List<JSONObject> list2 = new ArrayList<>();
+        list2.add(new JSONObject().set("label", "FLinkSQL").set("type", "FlinkSQL"));
+        list2.add(new JSONObject().set("label", "Hive").set("type", "Hive"));
+        list2.add(new JSONObject().set("label", "Mysql").set("type", "Mysql"));
+        list2.add(new JSONObject().set("label", "Sqlserver").set("type", "Sqlserver"));
+        list2.add(new JSONObject().set("label", "StarRocks").set("type", "StarRocks"));
+        list2.add(new JSONObject().set("label", "ClickHouse").set("type", "ClickHouse"));
+        list2.add(new JSONObject().set("label", "Doris").set("type", "Doris"));
 
-        List<String> list3 = new ArrayList<>();
-        list3.add("Data Quality");
-        List<String> list4 = new ArrayList<>();
-        list4.add("Python");
+        List<JSONObject> list3 = new ArrayList<>();
+        list3.add(new JSONObject().set("label", "Data Quality").set("type", "Quality"));
 
         List<JSONObject> result = new ArrayList<>();
         JSONObject jsonObject1 = new JSONObject();
@@ -313,13 +309,6 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
         jsonObject3.set("order", "3");
         jsonObject3.set("res", list3);
         result.add(jsonObject3);
-
-        JSONObject jsonObject4 = new JSONObject();
-        jsonObject4.set("key", "other");
-        jsonObject4.set("title", "其他");
-        jsonObject4.set("order", "4");
-        jsonObject4.set("res", list4);
-        result.add(jsonObject4);
 
         return result;
     }

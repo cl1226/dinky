@@ -64,7 +64,7 @@ const StudioTable = (props: any) => {
 
   const renderSQLContent = () => {
     return (<>
-      {current.console.result.result ?
+      {current.console.result?.result ?
         <DTable dataSource={current.console.result.result.rowData}
                 columns={getColumns(current.console.result.result.columns)}/>
         : (<Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>)

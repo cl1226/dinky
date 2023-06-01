@@ -634,7 +634,7 @@ const StudioMenu = (props: any) => {
       <Divider className={styles['ant-divider-horizontal-0']} />
       <Col span={24}>
         <Row>
-          <Col span={12}>
+          <Col span={16}>
             <Breadcrumb className={styles['dw-path']}>
               <EnvironmentOutlined style={{ lineHeight: '32px' }} />
               <Divider type="vertical" style={{ height: 'unset' }} />
@@ -657,7 +657,7 @@ const StudioMenu = (props: any) => {
           </Col>
           {
             current?.task ? (
-              <Col span={12} push="5">
+              <Col span={8}>
                 {/* <Tooltip title={l('pages.datastudio.editor.clearConsole')}>
                   <Button
                     type="text"
