@@ -17,7 +17,9 @@ const ServiceDashboard: React.FC<{}> = (props: any) => {
               children: (
                 <div className={styles['tab-wrap']}>
                   <Scrollbars style={{ height: '100%' }}>
-                    <Summary />
+                    <div style={{ padding: 10 }}>
+                      <Summary />
+                    </div>
                   </Scrollbars>
                 </div>
               ),
@@ -28,7 +30,9 @@ const ServiceDashboard: React.FC<{}> = (props: any) => {
               children: (
                 <div className={styles['tab-wrap']}>
                   <Scrollbars style={{ height: '100%' }}>
-                    <DetailList></DetailList>
+                    <div style={{ padding: 10 }}>
+                      <DetailList></DetailList>
+                    </div>
                   </Scrollbars>
                 </div>
               ),

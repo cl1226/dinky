@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import styles from './index.less'
-import { Card, Col, Input, Row, Descriptions, Space, Button, Table, Popconfirm } from 'antd'
+import { Card, Col, Input, Row, Descriptions, Space, Button, Table, Popconfirm, Alert } from 'antd'
 import { PageContainer } from '@ant-design/pro-layout'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { history, useParams } from 'umi'
@@ -160,6 +160,37 @@ const ApplicationDetail: React.FC<{}> = (props: any) => {
                 <Descriptions.Item label="描述">{detailInfo.description}</Descriptions.Item>
               </Descriptions>
             </Col>
+          </Row>
+          <Row>
+            <Alert
+              type="warning"
+              message={
+                <>
+                  <span>
+                    请求私有接口时，需要把token值放入header的Authorization字段中携带，才可以访问成功。（如果是开放接口，不需要设置header）
+                  </span>
+                  <br />
+                  <span>以python为例，访问api的代码示例如下：</span>
+                  <br />
+                  <br />
+                  <span>import requests</span>
+                  <br />
+                  <span>{`headers = {"Authorization": "5ad0dcb4eb03d3b0b7e4b82ae0ba433f"}`}</span>
+                  <br />
+                  <span>{`re = requests.post("http://ip:port/releaseapi/test", {"id": 1}, headers=headers) `}</span>
+                  <br />
+                  <span>{`print(re.text)`}</span>
+                  <br />
+                  <br />
+                  <span>token如何获取？</span>
+                  <br />
+                  <span>使用appid和secret访问以下接口来获取token</span>
+                  <br />
+                  <br />
+                  <span>{`http://ip:port/token/generate?appid=xxx&secret=xxx`}</span>
+                </>
+              }
+            ></Alert>
           </Row>
           <Row style={{ marginTop: 10, marginBottom: 5 }} justify={'space-between'}>
             <Col span={4}>

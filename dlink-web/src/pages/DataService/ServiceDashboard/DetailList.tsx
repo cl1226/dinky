@@ -1,6 +1,7 @@
 import { Table, Select, DatePicker, Form, Input, Row, Col, Button } from 'antd'
 import { useEffect, useRef, useState } from 'react'
-
+import { getSummaryDetailList } from '@/pages/DataService/ServiceDashboard/service'
+import moment from 'moment'
 const RangePicker: any = DatePicker.RangePicker
 
 export default () => {
@@ -22,7 +23,7 @@ export default () => {
     }
 
     setLoading(true)
-    const { list, total, pn, ps } = await getApplicationList(params)
+    const { list, total, pn, ps } = await getSummaryDetailList(params)
     setLoading(false)
     setTableData(list)
     setPageTotal(total)
@@ -32,55 +33,59 @@ export default () => {
 
   const onFinish = (values: any) => {
     console.log('Finish:', values)
+    const { dateRange, url, status } = values
+    const [beginDate, endDate] = dateRange || []
+    getTableList({
+      url: url || '',
+      status: status,
+      beginDate: beginDate ? beginDate.format('YYYY-MM-DD') : '',
+      endDate: endDate ? endDate.add(1, 'day').format('YYYY-MM-DD') : '',
+      pageIndex: 1,
+      pageSize: 10,
+    })
   }
 
   const columns = [
     {
       title: '调用时间',
-      dataIndex: 'description',
-      key: 'description',
+      dataIndex: 'timestamp',
+      key: 'timestamp',
       width: 200,
     },
     {
       title: 'URL',
-      dataIndex: 'description',
-      key: 'description',
+      dataIndex: 'url',
+      key: 'url',
       width: 200,
     },
     {
       title: '调用时长',
-      dataIndex: 'description',
-      key: 'description',
+      dataIndex: 'duration',
+      key: 'duration',
       width: 200,
     },
     {
       title: '响应码',
-      dataIndex: 'description',
-      key: 'description',
-      width: 200,
-    },
-    {
-      title: '应用名称',
-      dataIndex: 'description',
-      key: 'description',
+      dataIndex: 'status',
+      key: 'status',
       width: 200,
     },
     {
       title: 'IP',
-      dataIndex: 'description',
-      key: 'description',
+      dataIndex: 'ip',
+      key: 'ip',
       width: 200,
     },
     {
       title: '错误信息',
-      dataIndex: 'description',
-      key: 'description',
+      dataIndex: 'error',
+      key: 'error',
       width: 200,
     },
   ]
   useEffect(() => {
-    console.log('111')
     forceUpdate({})
+    getTableList()
   }, [])
 
   return (
@@ -95,26 +100,21 @@ export default () => {
         onFinish={onFinish}
       >
         <Row>
-          <Col span={6}>
-            <Form.Item name="IP" label="日期">
+          <Col span={8}>
+            <Form.Item name="dateRange" label="日期">
               <RangePicker style={{ width: '100%' }} />
             </Form.Item>
           </Col>
-          <Col span={6}>
-            <Form.Item name="URL" label="URL">
-              <Input placeholder="URL" />
+          <Col span={8}>
+            <Form.Item name="url" label="URL">
+              <Input placeholder="URL" allowClear={true} />
             </Form.Item>
           </Col>
-          <Col span={6}>
-            <Form.Item name="IP" label="IP">
-              <Input placeholder="IP" />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
+          <Col span={8}>
             <Form.Item name="status" label="状态">
-              <Select placeholder="请选择">
-                <Select.Option value={200}>成功</Select.Option>
-                <Select.Option value={500}>失败</Select.Option>
+              <Select placeholder="请选择" allowClear={true}>
+                <Select.Option value={1}>成功</Select.Option>
+                <Select.Option value={0}>失败</Select.Option>
               </Select>
             </Form.Item>
           </Col>
