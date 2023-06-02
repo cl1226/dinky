@@ -20,6 +20,9 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,7 +50,8 @@ public class ApiAuthFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         long now = System.currentTimeMillis();
         ApiAccessLog apiAccessLog = new ApiAccessLog();
-        apiAccessLog.setTimestamp(now / 1000);
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        apiAccessLog.setTimestamp(format.format(Calendar.getInstance().getTime()));
 
         log.debug("auth filter execute");
         HttpServletRequest request = (HttpServletRequest) servletRequest;

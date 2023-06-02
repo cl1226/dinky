@@ -5,6 +5,8 @@ import com.dlink.db.model.SuperEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDateTime;
+
 /**
  * ApiAccessLog
  *
@@ -22,7 +24,7 @@ public class ApiAccessLog extends SuperEntity {
 
     private long duration;
 
-    private long timestamp;
+    private String timestamp;
 
     private String ip;
 

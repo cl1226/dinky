@@ -33,15 +33,15 @@ public interface NetConstant {
      */
     String SLASH = "/";
     /**
-     * 连接运行服务器超时时间  1000
+     * 连接运行服务器超时时间  10000
      */
-    Integer SERVER_TIME_OUT_ACTIVE = 1000;
+    Integer SERVER_TIME_OUT_ACTIVE = 10000;
     /**
-     * 读取服务器超时时间  3000
+     * 读取服务器超时时间  30000
      */
-    Integer READ_TIME_OUT = 3000;
+    Integer READ_TIME_OUT = 30000;
     /**
-     * 连接FLINK历史服务器超时时间  2000
+     * 连接FLINK历史服务器超时时间  20000
      */
-    Integer SERVER_TIME_OUT_HISTORY = 3000;
+    Integer SERVER_TIME_OUT_HISTORY = 30000;
 }

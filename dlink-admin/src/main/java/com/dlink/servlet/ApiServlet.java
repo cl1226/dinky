@@ -126,6 +126,7 @@ public class ApiServlet extends HttpServlet {
             return Result.succeed(data, "Interface request successful!");
 
         } catch (Exception e) {
+            response.setStatus(400);
             JSONObject jsonObject = new JSONObject();
             StringBuilder sb = new StringBuilder();
             sb.append(request.getMethod()).append(" ").append(request.getContentType()).append(request.getServletPath()).append(" ").append(request.getProtocol())

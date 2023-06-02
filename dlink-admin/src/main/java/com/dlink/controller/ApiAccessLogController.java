@@ -1,16 +1,15 @@
 package com.dlink.controller;
 
 import cn.hutool.json.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import cn.hutool.json.JSONObject;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
+import com.dlink.dto.SearchCondition;
 import com.dlink.model.ApiAccessLog;
 import com.dlink.service.ApiAccessLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.util.List;
@@ -35,15 +34,21 @@ public class ApiAccessLogController {
         return Result.succeed(list, "获取成功");
     }
 
-    @RequestMapping("/search")
-    public Result search(String url, String appId, String beginDate, String endDate, Integer status, String ip) {
+    @PostMapping("/detail/page")
+    public Result search(@RequestBody SearchCondition condition) {
         try {
-            List<ApiAccessLog> search = accessLogService.search(url, appId, beginDate, endDate, status, ip);
+            Page<ApiAccessLog> search = accessLogService.search(condition);
             return Result.succeed(search, "获取成功");
         } catch (ParseException e) {
             e.printStackTrace();
         }
         return Result.failed("获取失败");
+    }
+
+    @GetMapping
+    public Result summary() {
+        JSONObject summary = accessLogService.summary();
+        return Result.succeed(summary, "获取成功");
     }
 
     @GetMapping("/countByDay")
@@ -106,5 +111,7 @@ public class ApiAccessLogController {
         }
         return Result.failed("获取失败");
     }
+
+
 
 }

@@ -29,4 +29,12 @@ public class SearchCondition {
 
     private List<Integer> ids;
 
+    private String url;
+
+    private String beginDate;
+
+    private String endDate;
+
+    private Integer status;
+
 }

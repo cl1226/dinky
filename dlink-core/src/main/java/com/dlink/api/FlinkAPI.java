@@ -78,8 +78,10 @@ public class FlinkAPI {
 
     private JsonNode get(String route) {
         try {
+            logger.info("address: {}", address);
+            logger.info("route: {}", route);
             String res = HttpUtil.get(NetConstant.HTTP + address + NetConstant.SLASH + route,
-                    NetConstant.SERVER_TIME_OUT_ACTIVE);
+                    -1);
             return parse(res);
         } catch (Exception e) {
             logger.info("Unable to connect to Flink JobManager: {}", NetConstant.HTTP + address);
