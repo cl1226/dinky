@@ -144,9 +144,9 @@ const Studio = (props: any) => {
               />
             }
           >
-            <Col className={styles["vertical-tabs"]}>
-              <Row>
-                <StudioTree/>
+            <Col className={styles["vertical-tabs"]} style={{'width': toolLeftWidth}}>
+              <Row style={{'width': toolLeftWidth}}>
+                <StudioTree width={toolLeftWidth}/>
               </Row>
             </Col>
             <Col>

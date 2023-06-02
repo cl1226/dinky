@@ -185,7 +185,7 @@ const StudioRightTool = (props: any) => {
           {renderTaskInfoContent()}
           {/* {renderConsoleMsg()} */}
           {/* {renderStudioTable()} */}
-        </Tabs> : <StudioGuide toolHeight={toolHeight}/>}
+        </Tabs> : <></>}
     </>
   );
 };

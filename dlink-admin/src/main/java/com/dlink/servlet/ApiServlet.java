@@ -56,7 +56,7 @@ public class ApiServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String servletPath = req.getRequestURI();
-        servletPath = servletPath.substring(apiContext.length() + 2);
+        servletPath = servletPath.substring(apiContext.length() + 1);
 
         PrintWriter out = null;
         try {
@@ -88,6 +88,10 @@ public class ApiServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return Result.failed(path + ": api路径不存在");
         }
+        if (config.getStatus() != 1) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return Result.failed(path + ": api未上线");
+        }
 
         try {
             DataBase dataBase = dataBaseService.getById(config.getDatasourceId());
@@ -101,25 +105,25 @@ public class ApiServlet extends HttpServlet {
             DruidPooledConnection connection = PoolUtils.getPooledConnection(dataBase);
             SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(config.getSegment(), sqlParam);
             Object data = JdbcUtil.executeSql(connection, sqlMeta.getSql(), sqlMeta.getJdbcParamValues());
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("timeConsuming", System.currentTimeMillis() - now);
-            jsonObject.put("requestPath", request.getRequestURI());
-            StringBuilder sb = new StringBuilder();
-            sb.append(request.getMethod()).append(" ").
-                    append(request.getServletPath()).append(request.getPathInfo()).append(" ")
-                    .append(request.getProtocol()).append("\n")
-                    .append("User-Agent: " + request.getHeader("user-agent"));
-            StringBuilder sb2 = new StringBuilder();
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            sb2.append("Response-Status: " + request.getProtocol()).append(" ").append(response.getStatus()).append(" ")
-                    .append("\n")
-                    .append("Content-Length: " + data.toString().length()).append("\n")
-                    .append("Content-Type:" + request.getContentType()).append("\n")
-                    .append("Date: " + format.format(Calendar.getInstance().getTime())).append("\n")
-                    .append(data);
-            jsonObject.put("request", sb.toString());
-            jsonObject.put("response", sb2.toString());
-            return Result.succeed(jsonObject, "Interface request successful!");
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.put("timeConsuming", System.currentTimeMillis() - now);
+//            jsonObject.put("requestPath", request.getRequestURI());
+//            StringBuilder sb = new StringBuilder();
+//            sb.append(request.getMethod()).append(" ").
+//                    append(request.getServletPath()).append(request.getPathInfo()).append(" ")
+//                    .append(request.getProtocol()).append("\n")
+//                    .append("User-Agent: " + request.getHeader("user-agent"));
+//            StringBuilder sb2 = new StringBuilder();
+//            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            sb2.append("Response-Status: " + request.getProtocol()).append(" ").append(response.getStatus()).append(" ")
+//                    .append("\n")
+//                    .append("Content-Length: " + data.toString().length()).append("\n")
+//                    .append("Content-Type:" + request.getContentType()).append("\n")
+//                    .append("Date: " + format.format(Calendar.getInstance().getTime())).append("\n");
+//            jsonObject.put("data", data);
+//            jsonObject.put("request", sb.toString());
+//            jsonObject.put("response", sb2.toString());
+            return Result.succeed(data, "Interface request successful!");
 
         } catch (Exception e) {
             JSONObject jsonObject = new JSONObject();

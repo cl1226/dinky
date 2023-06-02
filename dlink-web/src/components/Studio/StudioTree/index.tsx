@@ -53,6 +53,7 @@ type StudioTreeProps = {
   current: StateType['current'];
   toolHeight: number;
   refs: any;
+  width: number;
 };
 
 type RightClickMenu = {
@@ -96,7 +97,7 @@ const {Search} = Input;
 
 const StudioTree: React.FC<StudioTreeProps> = (props) => {
 
-  const {rightClickMenu, dispatch, tabs, refs, toolHeight} = props;
+  const {rightClickMenu, dispatch, tabs, refs, toolHeight, width} = props;
   const [treeData, setTreeData] = useState<TreeDataNode[]>();
   const [expandedKeys, setExpandedKeys] = useState<Key[]>();
   const [defaultExpandedKeys, setDefaultExpandedKeys] = useState<any[]>([]);
@@ -655,9 +656,10 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
           </Upload>
         </Col>
       </Row>
-      <Search style={{marginBottom: 8}} placeholder="Search" onChange={onChange} allowClear={true}/>
+      <Search style={{marginBottom: 8, width: width-10}} placeholder="Search" onChange={onChange} allowClear={true}/>
       <Scrollbars style={{height: (size.height - 180)}} ref={sref}>
         <DirectoryTree
+          style={{'width': width-10}}
           multiple
           onRightClick={handleContextMenu}
           onSelect={onSelect}
