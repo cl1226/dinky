@@ -38,8 +38,8 @@ export default {
   'menu.dataDev.develop.scheduler': '流程开发',
   'menu.dataDev.devops': '运维调度',
   'menu.dataDev.devops.overview': '运维概览',
-  'menu.dataDev.devops.monitor': '作业监控',
-  'menu.dataDev.devops.instance': '实例监控',
+  'menu.dataDev.devops.processInstance': '作业监控',
+  'menu.dataDev.devops.taskInstance': '实例监控',
 
   'menu.dataService': '数据服务',
   'menu.dataService.serviceHome': '首页',

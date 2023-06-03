@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.dlink.assertion.Assert;
 import com.dlink.common.result.Result;
 import com.dlink.db.service.impl.SuperServiceImpl;
+import com.dlink.dto.DsSearchCondition;
 import com.dlink.dto.WorkflowEdge;
 import com.dlink.dto.WorkflowTaskDTO;
 import com.dlink.exception.BusException;
@@ -579,5 +580,19 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         }
 
         return dates;
+    }
+
+    @Override
+    public JSONObject pageFlowInstance(DsSearchCondition condition) {
+        JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        JSONObject jsonObject = processClient.pageFlowInstance(conditionJSON);
+        return jsonObject;
+    }
+
+    @Override
+    public JSONObject pageTaskInstance(DsSearchCondition condition) {
+        JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        JSONObject jsonObject = processClient.pageTaskInstance(conditionJSON);
+        return jsonObject;
     }
 }

@@ -95,7 +95,7 @@ export default [
           },
           {
             path: '/dataDev/develop/dataJob',
-            name: 'scheduler',
+            name: 'dataJob',
             component: './Scheduler',
           },
         ],
@@ -108,17 +108,17 @@ export default [
           {
             path: '/dataDev/devops/overview',
             name: 'overview',
-            component: './DataDev/Dashboard',
+            component: './DataDev/Devops/Overview',
           },
           {
-            path: '/dataDev/devops/monitor',
-            name: 'monitor',
-            component: './DataDev/Dashboard',
+            path: '/dataDev/devops/processInstance',
+            name: 'processInstance',
+            component: './DataDev/Devops/ProcessInstance',
           },
           {
-            path: '/dataDev/devops/instance',
-            name: 'instance',
-            component: './DataDev/Dashboard',
+            path: '/dataDev/devops/taskInstance',
+            name: 'taskInstance',
+            component: './DataDev/Devops/TaskInstance',
           },
         ],
       },

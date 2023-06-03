@@ -434,4 +434,64 @@ public class ProcessClient {
         }));
     }
 
+    /**
+     * 获取工作流实例
+     *
+     * @author cl1226
+     * @date 2023/04/23 15:54
+     */
+    public JSONObject pageFlowInstance(JSONObject condition) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", condition.getLong("projectCode"));
+        map.put("pageNo", condition.getInt("pageNo"));
+        map.put("pageSize", condition.getInt("pageSize"));
+        map.put("searchVal", condition.getStr("searchVal"));
+        map.put("executorName", condition.getStr("executorName", ""));
+        map.put("host", condition.getStr("host", ""));
+        map.put("stateType", condition.getStr("stateType", ""));
+        map.put("startDate", condition.getStr("startDate", ""));
+        map.put("endDate", condition.getStr("endDate", ""));
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
+                "/projects/{projectCode}/process-instances?pageNo={pageNo}&pageSize={pageSize}&searchVal={searchVal}&executorName={executorName}&host={host}&stateType={stateType}&startDate={startDate}&endDate={endDate}",
+                map);
+
+        String content = HttpRequest.get(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 获取任务实例
+     *
+     * @author cl1226
+     * @date 2023/04/23 15:54
+     */
+    public JSONObject pageTaskInstance(JSONObject condition) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", condition.getLong("projectCode"));
+        map.put("pageNo", condition.getInt("pageNo"));
+        map.put("pageSize", condition.getInt("pageSize"));
+        map.put("searchVal", condition.getStr("searchVal"));
+        map.put("executorName", condition.getStr("executorName", ""));
+        map.put("host", condition.getStr("host", ""));
+        map.put("stateType", condition.getStr("stateType", ""));
+        map.put("startDate", condition.getStr("startDate", ""));
+        map.put("endDate", condition.getStr("endDate", ""));
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
+                        "/projects/{projectCode}/task-instances?pageNo={pageNo}&pageSize={pageSize}&searchVal={searchVal}&executorName={executorName}&host={host}&stateType={stateType}&startDate={startDate}&endDate={endDate}",
+                map);
+
+        String content = HttpRequest.get(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
 }

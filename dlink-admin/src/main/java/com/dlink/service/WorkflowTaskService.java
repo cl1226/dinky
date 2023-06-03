@@ -19,8 +19,10 @@
 
 package com.dlink.service;
 
+import cn.hutool.json.JSONObject;
 import com.dlink.common.result.Result;
 import com.dlink.db.service.ISuperService;
+import com.dlink.dto.DsSearchCondition;
 import com.dlink.dto.WorkflowTaskDTO;
 import com.dlink.model.*;
 
@@ -71,5 +73,9 @@ public interface WorkflowTaskService extends ISuperService<WorkflowTask> {
     boolean recoveryTask(Integer id);
 
     List<String> previewSchedule(String schedule);
+
+    JSONObject pageFlowInstance(DsSearchCondition condition);
+
+    JSONObject pageTaskInstance(DsSearchCondition condition);
 
 }

@@ -19,9 +19,11 @@
 
 package com.dlink.controller;
 
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.ProTableResult;
 import com.dlink.common.result.Result;
+import com.dlink.dto.DsSearchCondition;
 import com.dlink.dto.SearchCondition;
 import com.dlink.dto.WorkflowTaskDTO;
 import com.dlink.model.*;
@@ -218,6 +220,18 @@ public class WorkflowTaskController {
     public Result previewSchedule(@RequestParam String schedule) {
         List<String> result = taskService.previewSchedule(schedule);
         return Result.succeed(result, "生成执行时间成功");
+    }
+
+    @PostMapping(value = "/pageFlowInstance")
+    public Result pageFlowInstance(@RequestBody DsSearchCondition condition) {
+        JSONObject jsonObject = taskService.pageFlowInstance(condition);
+        return Result.succeed(jsonObject, "获取成功");
+    }
+
+    @PostMapping(value = "/pageTaskInstance")
+    public Result pageTaskInstance(@RequestBody DsSearchCondition condition) {
+        JSONObject jsonObject = taskService.pageTaskInstance(condition);
+        return Result.succeed(jsonObject, "获取成功");
     }
 
 }
