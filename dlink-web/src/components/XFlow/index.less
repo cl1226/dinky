@@ -2,30 +2,41 @@
 @primaryColor: #3056e3;
 @light-border: 1px solid #d9d9d9;
 
-.dag-solution {
-  .__dumi-default-previewer-actions {
-    border: 0;
-  }
-}
+// .dag-solution {
+//   .__dumi-default-previewer-actions {
+//     border: 0;
+//   }
+// }
 
 .dag-user-custom-clz {
   position: relative;
   height: 100%;
   // border: @light-border;
   .xflow-x6-canvas {
-    background: @body-bg;
+    // background: @body-bg;
   }
+  // .xflow-port {
+  //   opacity: 0;
+  // }
   .x6-edge {
+    path:nth-child(2) {
+      stroke: rgb(51, 170, 153);
+      stroke-width: 2;
+      transition: stroke-width 0.2s;
+      // marker-end: url(#v-arrow-1);
+    }
     &:hover {
       path:nth-child(2) {
-        stroke: @primaryColor;
-        stroke-width: 2px;
+        stroke: rgb(51, 170, 153);
+        stroke-width: 4;
+        // marker-end: url(#v-arrow-2);
       }
     }
     &.x6-edge-selected {
       path:nth-child(2) {
-        stroke: @primaryColor;
-        stroke-width: 2px;
+        stroke: rgb(51, 170, 153);
+        stroke-width: 4;
+        // marker-end: url(#v-arrow-2);
       }
     }
   }
@@ -93,7 +104,7 @@
       }
     }
     .xflow-node-dnd-panel-footer {
-      display: none;
+      display: block;
     }
   }
 

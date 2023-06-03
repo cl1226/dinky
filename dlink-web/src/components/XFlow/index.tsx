@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 /** app 核心组件 */
-import { XFlow, XFlowCanvas, KeyBindings } from '@antv/xflow'
+import { XFlow, XFlowCanvas, KeyBindings, createGraphConfig } from '@antv/xflow'
 import type { IApplication, IAppLoad } from '@antv/xflow'
 import {CaretDownOutlined, CaretUpOutlined} from '@ant-design/icons';
 /** 交互组件 */
@@ -43,6 +43,12 @@ export interface IProps {
   flowId: string
 }
 
+export const useGraphConfig = createGraphConfig<IProps>(graphConfig => {
+  graphConfig.setEdgeRender("Edge", props => {
+    return <div className="react-edge"> {props.data.label} </div>
+  })
+})
+
 export const XFlowEditor: React.FC<IProps> = (props) => {
   const { activeKey, flowId } = props
 
@@ -84,7 +90,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
     }
   }, [cache.app, flowId])
 
-
+  const graphConfig = useGraphConfig(props)
 
   return (
     <XFlow
@@ -123,7 +129,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
         <CanvasScaleToolbar position={{ top: 12, right: 12 }} />
         <CanvasContextMenu config={menuConfig} />
         <CanvasSnapline color="#faad14" />
-        <CanvasNodePortTooltip />
+        {/* <CanvasNodePortTooltip /> */}
       </XFlowCanvas>
       <JsonSchemaForm
         controlMapService={controlMapService}
@@ -135,7 +141,17 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
         footerPosition={{ height: 0 }}
       />
       <KeyBindings config={keybindingConfig} />
-    </XFlow>
+      <svg width="100%" height="100%">
+        <defs>
+        <marker id="v-arrow-1" orient="auto" overflow="visible" markerUnits="userSpaceOnUse">
+          <polygon id="v-166" stroke="#33aa99" fill="#33aa99" transform="rotate(180)" d="M 10 -5 0 0 10 5 z" points="12,6 6,0 12,-6 -6,0 12,6" strokeWidth="0">
+
+          </polygon>
+        </marker>
+        <marker id="v-arrow-2" orient="auto" overflow="visible" markerUnits="userSpaceOnUse"><polygon id="v-200" stroke="#33aa99" fill="#33aa99" transform="rotate(180)" d="M 10 -5 0 0 10 5 z" points="24,12 12,0 24,-12 -12,0 24,12" strokeWidth="0"></polygon></marker>
+        </defs>
+    </svg>
+      </XFlow>
   )
 }
 

@@ -34,7 +34,7 @@ export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta
       label: jtem.label,
       type: jtem.type,
       parentId: '1',
-      renderKey: DND_RENDER_ID,
+      // renderKey: DND_RENDER_ID,
       renderComponent: props => (
         <div className="react-dnd-node react-custom-node">
           <Avatar src={getIcon(jtem.type)}></Avatar> 

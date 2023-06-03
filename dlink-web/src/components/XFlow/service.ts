@@ -198,6 +198,33 @@ export namespace XFlowApi {
     }
   }
 
+  export const createPorts = (nodeId: string, count = 1, layout = 'LR') => {
+    const ports = [] as NsGraph.INodeAnchor[]
+    Array(count)
+      .fill(1)
+      .forEach((item, idx) => {
+        const portIdx = idx + 1
+        ports.push(
+          ...[
+            {
+              id: `${nodeId}-input-${portIdx}`,
+              type: NsGraph.AnchorType.INPUT,
+              group: layout === 'TB' ? NsGraph.AnchorGroup.TOP : NsGraph.AnchorGroup.LEFT,
+              tooltip: `输入桩-${portIdx}`,
+            },
+            {
+              id: `${nodeId}-output-${portIdx}`,
+              type: NsGraph.AnchorType.OUTPUT,
+              group: layout === 'TB' ? NsGraph.AnchorGroup.BOTTOM : NsGraph.AnchorGroup.RIGHT,
+              tooltip: `输出桩-${portIdx}`,
+            },
+          ],
+        )
+      })
+
+    return ports
+  }
+
   /** 添加节点api */
   export const addNode: NsNodeCmd.AddNode.IArgs['createNodeService'] = async (
     args: NsNodeCmd.AddNode.IArgs,
@@ -226,6 +253,7 @@ export namespace XFlowApi {
       ports: (ports as NsGraph.INodeAnchor[]).map((port) => {
         return { ...port, id: uuidv4() }
       }),
+      // ports: ports
     }
     /** group没有链接桩 */
     if (groupChildren && groupChildren.length) {

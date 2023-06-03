@@ -94,7 +94,7 @@ export default [
             component: './DataStudio',
           },
           {
-            path: '/dataDev/develop/scheduler',
+            path: '/dataDev/develop/dataJob',
             name: 'scheduler',
             component: './Scheduler',
           },

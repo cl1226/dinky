@@ -1,5 +1,5 @@
 import type {} from '@antv/xflow'
-import { createCmdConfig, DisposableCollection, XFlowGraphCommands } from '@antv/xflow'
+import { createCmdConfig, DisposableCollection, XFlowGraphCommands, NsGraph } from '@antv/xflow'
 
 import type { IGraphPipelineCommand, NsGraphCmd, IApplication } from '@antv/xflow'
 import { XFlowApi } from './service'
@@ -41,13 +41,6 @@ export const useCmdConfig = createCmdConfig((config) => {
         name: 'get edge config from backend api',
         handler: async (args) => {
           args.createEdgeService = XFlowApi.addEdge
-          args.edgeConfig = {
-            ...args.edgeConfig,
-            connector: { name: 'rounded' },
-            router: {
-              name: 'manhattan',
-            },
-          }
         },
       }),
       hooks.delEdge.registerHook({
@@ -90,17 +83,21 @@ export const initGraphCmds = async (
 
         return {
           args: {
-            layoutType: 'dagre',
-            layoutOptions: {
-              type: 'dagre',
-              /** 布局方向 */
-              rankdir: 'TB',
-              /** 节点间距 */
-              nodesep: 60,
-              /** 层间距 */
-              ranksep: 30,
-            },
+            // layoutType: 'dagre',
+            // layoutOptions: {
+            //   type: 'dagre',
+            //   /** 布局方向 */
+            //   rankdir: 'TB',
+            //   /** 节点间距 */
+            //   nodesep: 60,
+            //   /** 层间距 */
+            //   ranksep: 30,
+            // },
             graphData: { nodes, edges },
+            customLayout: async (graphData: NsGraph.IGraphData) => {
+              const res: NsGraph.IGraphData = graphData
+              return res
+            },
           },
         }
       },
@@ -110,6 +107,17 @@ export const initGraphCmds = async (
       commandId: XFlowGraphCommands.GRAPH_RENDER.id,
       getCommandOption: async (ctx) => {
         const { graphData } = ctx.getResult()
+        for (var i=0; i<graphData.edges.length; i++) {
+          graphData.edges[i].edge.attrs.line = {
+            targetMarker: {
+              name: 'Classic',
+              width: 8,
+              height: 10,
+            },
+            stroke: 'rgb(51, 170, 153)',
+            strokeWidth: 2,
+          }
+        };
         return {
           args: {
             graphData,
@@ -122,7 +130,7 @@ export const initGraphCmds = async (
       commandId: XFlowGraphCommands.GRAPH_ZOOM.id,
       getCommandOption: async () => {
         return {
-          args: { factor: 'fit', zoomOptions: { maxScale: 0.9 } },
+          args: { factor: 'real', zoomOptions: { maxScale: 1 } },
         }
       },
     } as IGraphPipelineCommand<NsGraphCmd.GraphZoom.IArgs>,
