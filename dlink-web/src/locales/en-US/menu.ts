@@ -35,7 +35,7 @@ export default {
   'menu.dataDev.dataDevHome': 'Overview',
   'menu.dataDev.develop': 'Data Develop',
   'menu.dataDev.develop.dataStudio': 'Shell Develop',
-  'menu.dataDev.develop.scheduler': 'Workflow Develop',
+  'menu.dataDev.develop.dataJob': 'Workflow Develop',
   'menu.dataDev.devops': 'DevOps',
   'menu.dataDev.devops.overview': 'DevOps Overview',
   'menu.dataDev.devops.monitor': 'Workflow Monitor',
