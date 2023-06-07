@@ -2,7 +2,6 @@ import { request2, CODE } from '@/components/Common/crud'
 import { message } from 'antd'
 import { l } from '@/utils/intl'
 
-
 export interface ProcessInstanceParams {
   projectCode?: number
   searchVal?: string
@@ -95,6 +94,140 @@ export const getTaskInstanceList = async (params: ProcessInstanceParams) => {
       total: 0,
       pn: 1,
       ps: 10,
+    }
+  }
+}
+
+// 获取任务状态统计
+export const requestTaskStateCount = (params) => {
+  return request2('/api/workflow/task/getTaskStateCount', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  })
+}
+
+// 获取任务状态统计
+export const getTaskStateCount = async (params) => {
+  try {
+    const { code, datas } = await requestTaskStateCount(params)
+    if (code == CODE.SUCCESS) {
+      const chartList: any = []
+      const tableList: any = []
+      const { taskCountDtos } = datas
+
+      ~(taskCountDtos || []).forEach((item, index) => {
+        chartList.push({
+          value: item.count,
+          name: item.taskStateType,
+        })
+        tableList.push({
+          rowIndex: index,
+          count: item.count,
+          state: item.taskStateType,
+        })
+      })
+      return {
+        chartList,
+        tableList,
+      }
+    } else {
+      return {
+        chartList: [],
+        tableList: [],
+      }
+    }
+  } catch (error) {
+    return {
+      chartList: [],
+      tableList: [],
+    }
+  }
+}
+
+// 获取流程状态统计
+export const requestFlowStateCount = (params) => {
+  return request2('/api/workflow/task/getProcessStateCount ', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  })
+}
+
+// 获取流程状态统计
+export const getFlowStateCount = async (params) => {
+  try {
+    const { code, datas } = await requestFlowStateCount(params)
+    if (code == CODE.SUCCESS) {
+      const chartList: any = []
+      const tableList: any = []
+      const { taskCountDtos } = datas
+
+      ~(taskCountDtos || []).forEach((item, index) => {
+        chartList.push({
+          value: item.count,
+          name: item.taskStateType,
+        })
+        tableList.push({
+          rowIndex: index,
+          count: item.count,
+          state: item.taskStateType,
+        })
+      })
+      return {
+        chartList,
+        tableList,
+      }
+    } else {
+      return {
+        chartList: [],
+        tableList: [],
+      }
+    }
+  } catch (error) {
+    return {
+      chartList: [],
+      tableList: [],
+    }
+  }
+}
+
+// 获取流程定义统计
+export const requestTaskDefineCount = () => {
+  return request2('/api/workflow/task/getTaskDefineCount ', {
+    method: 'POST',
+    data: {},
+  })
+}
+
+// 获取流程定义统计
+export const getTaskDefineCount = async () => {
+  try {
+    const { code, datas } = await requestTaskDefineCount()
+    if (code == CODE.SUCCESS) {
+      const x: string[] = []
+      const y: number[] = []
+      const { userList } = datas || {}
+      ~(userList || []).forEach((item, index) => {
+        x.push(item.userName)
+        y.push(item.count)
+      })
+      return {
+        x,
+        y,
+      }
+    } else {
+      return {
+        x: [],
+        y: [],
+      }
+    }
+  } catch (error) {
+    return {
+      x: [],
+      y: [],
     }
   }
 }
