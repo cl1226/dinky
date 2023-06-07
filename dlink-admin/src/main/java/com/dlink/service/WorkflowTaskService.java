@@ -78,4 +78,19 @@ public interface WorkflowTaskService extends ISuperService<WorkflowTask> {
 
     JSONObject pageTaskInstance(DsSearchCondition condition);
 
+    JSONObject getProcessStateCount(DsSearchCondition condition);
+
+    JSONObject getTaskStateCount(DsSearchCondition condition);
+
+    JSONObject getTaskDefineCount(DsSearchCondition condition);
+
+    JSONObject getTaskLog(Integer taskId);
+
+    JSONObject rerun(DsSearchCondition condition);
+
+    JSONObject stop(DsSearchCondition condition);
+
+    JSONObject pause(DsSearchCondition condition);
+
+    JSONObject suspend(DsSearchCondition condition);
 }

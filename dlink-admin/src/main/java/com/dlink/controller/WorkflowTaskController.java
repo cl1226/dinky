@@ -234,4 +234,53 @@ public class WorkflowTaskController {
         return Result.succeed(jsonObject, "获取成功");
     }
 
+    @PostMapping(value = "/getProcessStateCount")
+    public Result getProcessStateCount(@RequestBody DsSearchCondition condition) {
+        JSONObject jsonObject = taskService.getProcessStateCount(condition);
+        return Result.succeed(jsonObject, "获取成功");
+    }
+
+    @PostMapping(value = "/getTaskStateCount")
+    public Result getTaskStateCount(@RequestBody DsSearchCondition condition) {
+        JSONObject jsonObject = taskService.getTaskStateCount(condition);
+        return Result.succeed(jsonObject, "获取成功");
+    }
+
+    @PostMapping(value = "/getTaskDefineCount")
+    public Result getTaskDefineCount(@RequestBody DsSearchCondition condition) {
+        JSONObject jsonObject = taskService.getTaskDefineCount(condition);
+        return Result.succeed(jsonObject, "获取成功");
+    }
+
+    @GetMapping(value = "/getTaskLog")
+    public Result getTaskLog(@RequestParam Integer taskId) {
+        JSONObject taskLog = taskService.getTaskLog(taskId);
+        return Result.succeed(taskLog, "获取成功");
+    }
+
+    @PostMapping(value = "/rerun")
+    public Result rerun(@RequestBody DsSearchCondition condition) {
+        JSONObject rerun = taskService.rerun(condition);
+        return Result.succeed(rerun, "执行成功");
+    }
+
+    @PostMapping(value = "/stop")
+    public Result stop(@RequestBody DsSearchCondition condition) {
+        JSONObject stop = taskService.stop(condition);
+        return Result.succeed(stop, "执行成功");
+    }
+
+    @PostMapping(value = "/pause")
+    public Result pause(@RequestBody DsSearchCondition condition) {
+        JSONObject pause = taskService.pause(condition);
+        return Result.succeed(pause, "执行成功");
+    }
+
+    @PostMapping(value = "/suspend")
+    public Result suspend(@RequestBody DsSearchCondition condition) {
+        JSONObject suspend = taskService.suspend(condition);
+        return Result.succeed(suspend, "执行成功");
+    }
+
+
 }

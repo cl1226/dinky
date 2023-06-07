@@ -35,7 +35,7 @@ export default {
   'menu.dataDev.dataDevHome': '总览',
   'menu.dataDev.develop': '数据开发',
   'menu.dataDev.develop.dataStudio': '脚本开发',
-  'menu.dataDev.develop.scheduler': '流程开发',
+  'menu.dataDev.develop.dataJob': '流程开发',
   'menu.dataDev.devops': '运维调度',
   'menu.dataDev.devops.overview': '运维概览',
   'menu.dataDev.devops.processInstance': '作业监控',

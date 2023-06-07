@@ -494,4 +494,213 @@ public class ProcessClient {
         }));
     }
 
+    /**
+     * 获取任务状态图表
+     *
+     * @author cl1226
+     * @date 2023/06/07 08:27
+     */
+    public JSONObject getTaskStateCount(JSONObject condition) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", 0);
+        map.put("startDate", condition.getStr("startDate"));
+        map.put("endDate", condition.getStr("endDate"));
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
+                        "/projects/analysis/task-state-count?startDate={startDate}&endDate={endDate}&projectCode=0",
+                map);
+
+        String content = HttpRequest.get(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 获取工作流状态图表
+     *
+     * @author cl1226
+     * @date 2023/06/07 08:27
+     */
+    public JSONObject getProcessStateCount(JSONObject condition) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", 0);
+        map.put("startDate", condition.getStr("startDate"));
+        map.put("endDate", condition.getStr("endDate"));
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
+                        "/projects/analysis/process-state-count?startDate={startDate}&endDate={endDate}&projectCode=0",
+                map);
+
+        String content = HttpRequest.get(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 获取任务定义图表
+     *
+     * @author cl1226
+     * @date 2023/06/07 08:27
+     */
+    public JSONObject getTaskDefineCount(JSONObject condition) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", 0);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
+                        "/projects/analysis/define-user-count?projectCode=0",
+                map);
+
+        String content = HttpRequest.get(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 获取任务日志
+     *
+     * @author cl1226
+     * @date 2023/06/07 16:08
+     */
+    public JSONObject getTaskLog(Integer taskId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("taskInstanceId", taskId);
+        map.put("limit", 1000);
+        map.put("skipLineNum", 0);
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
+                        "/log/detail?taskInstanceId={taskInstanceId}&limit={limit}&skipLineNum={skipLineNum}",
+                map);
+
+        String content = HttpRequest.get(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 工作流重跑
+     *
+     * @author cl1226
+     * @date 2023/06/07 16:08
+     */
+    public JSONObject rerun(JSONObject condition) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", condition.getInt("projectCode"));
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("index", condition.getInt("index", 1));
+        params.put("processInstanceId", condition.getStr("processInstanceId"));
+        params.put("executeType", condition.getStr("executeType", "REPEAT_RUNNING"));
+        params.put("buttonType", condition.getStr("buttonType", "run"));
+
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
+                        "/projects/{projectCode}/executors/execute",
+                map);
+
+        String content = HttpRequest.post(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(params)
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 工作流停止
+     *
+     * @author cl1226
+     * @date 2023/06/07 16:08
+     */
+    public JSONObject stop(JSONObject condition) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", condition.getInt("projectCode"));
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("processInstanceId", condition.getStr("processInstanceId"));
+        params.put("executeType", condition.getStr("executeType", "STOP"));
+
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
+                        "/projects/{projectCode}/executors/execute",
+                map);
+
+        String content = HttpRequest.post(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(params)
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 工作流暂停
+     *
+     * @author cl1226
+     * @date 2023/06/07 16:08
+     */
+    public JSONObject pause(JSONObject condition) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", condition.getInt("projectCode"));
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("processInstanceId", condition.getStr("processInstanceId"));
+        params.put("executeType", condition.getStr("executeType", "PAUSE"));
+
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
+                        "/projects/{projectCode}/executors/execute",
+                map);
+
+        String content = HttpRequest.post(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(params)
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
+
+    /**
+     * 工作流恢复运行
+     *
+     * @author cl1226
+     * @date 2023/06/07 16:08
+     */
+    public JSONObject suspend(JSONObject condition) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("projectCode", condition.getInt("projectCode"));
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("index", condition.getInt("index", 0));
+        params.put("processInstanceId", condition.getStr("processInstanceId"));
+        params.put("executeType", condition.getStr("executeType", "RECOVER_SUSPENDED_PROCESS"));
+        params.put("buttonType", condition.getStr("buttonType", "suspend"));
+
+        String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
+                        "/projects/{projectCode}/executors/execute",
+                map);
+
+        String content = HttpRequest.post(format)
+                .header(Constants.TOKEN, dolphinSchedulerProperties.getToken())
+                .form(params)
+                .timeout(5000)
+                .execute().body();
+
+        return MyJSONUtil.verifyResult(MyJSONUtil.toBean(content, new TypeReference<Result<JSONObject>>() {
+        }));
+    }
 }

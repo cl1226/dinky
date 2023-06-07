@@ -26,6 +26,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -82,7 +83,7 @@ public class DebugApiServlet extends HttpServlet {
 
     private Result process(String path, HttpServletRequest request, HttpServletResponse response) {
         long now = System.currentTimeMillis();
-
+        DruidPooledConnection connection = null;
         try {
             // 获取数据源, SQL, Params
             Map<String, Object> requestInfo = getRequestInfo(request);
@@ -93,7 +94,7 @@ public class DebugApiServlet extends HttpServlet {
             }
             Map<String, Object> params = (Map<String, Object>) requestInfo.get("params");
 
-            DruidPooledConnection connection = PoolUtils.getPooledConnection(database);
+            connection = PoolUtils.getPooledConnection(database);
             SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(String.valueOf(requestInfo.get("sql")), params);
             Object data = JdbcUtil.executeSql(connection, sqlMeta.getSql(), sqlMeta.getJdbcParamValues());
             JSONObject jsonObject = new JSONObject();
@@ -128,8 +129,16 @@ public class DebugApiServlet extends HttpServlet {
             jsonObject.put("response", e.getMessage());
             API_DEBUG_STATUS.put(path, false);
             return Result.failed(jsonObject, "Interface request failed");
-
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+
     }
 
     private Map<String, Object> getRequestInfo(HttpServletRequest request) {

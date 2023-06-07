@@ -21,4 +21,9 @@ public class DsSearchCondition {
     private String startDate;
     private String endDate;
 
+    private Integer index;
+    private Integer processInstanceId;
+    private String executeType;
+    private String buttonType;
+
 }

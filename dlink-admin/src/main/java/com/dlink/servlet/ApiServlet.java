@@ -30,6 +30,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -92,7 +93,7 @@ public class ApiServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return Result.failed(path + ": api未上线");
         }
-
+        DruidPooledConnection connection = null;
         try {
             DataBase dataBase = dataBaseService.getById(config.getDatasourceId());
             if (dataBase == null) {
@@ -102,7 +103,7 @@ public class ApiServlet extends HttpServlet {
 
             Map<String, Object> sqlParam = getParams(request, config);
 
-            DruidPooledConnection connection = PoolUtils.getPooledConnection(dataBase);
+            connection = PoolUtils.getPooledConnection(dataBase);
             SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(config.getSegment(), sqlParam);
             Object data = JdbcUtil.executeSql(connection, sqlMeta.getSql(), sqlMeta.getJdbcParamValues());
 //            JSONObject jsonObject = new JSONObject();
@@ -136,7 +137,14 @@ public class ApiServlet extends HttpServlet {
             jsonObject.put("request", sb.toString());
             jsonObject.put("response", e.getMessage());
             return Result.failed(jsonObject, "Interface request failed");
-
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
