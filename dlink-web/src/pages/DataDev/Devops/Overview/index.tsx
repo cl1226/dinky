@@ -80,6 +80,12 @@ const BarChart = (props) => {
       xAxis: {
         type: 'category',
         data: chartData.x || [],
+        axisLabel: {
+          show: true,
+          width: 100,
+          overflow: 'breakAll',
+          interval: 0,
+        },
       },
       yAxis: {
         type: 'value',

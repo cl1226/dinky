@@ -106,6 +106,12 @@ export default () => {
         xAxis: {
           type: 'category',
           data: chartData.x || [],
+          axisLabel: {
+            show: true,
+            width: 100,
+            overflow: 'breakAll',
+            interval: 0,
+          },
         },
         yAxis: {
           type: 'value',
@@ -114,6 +120,7 @@ export default () => {
           {
             data: chartData.y,
             type: 'bar',
+            barMaxWidth: 100,
           },
         ],
       }
