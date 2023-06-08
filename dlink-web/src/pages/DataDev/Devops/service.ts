@@ -315,3 +315,13 @@ export const getTaskDefineCount = async () => {
     }
   }
 }
+
+// 获取访问量趋势
+export const requestTaskLog = (taskId?: number) => {
+  return request2('/api/workflow/task/getTaskLog', {
+    method: 'GET',
+    params: {
+      taskId,
+    },
+  })
+}

@@ -18,7 +18,7 @@
  */
 
 import React, { Key, useEffect, useMemo, useState } from 'react'
-import { connect } from 'umi'
+import { connect, history } from 'umi'
 import { DownOutlined, FolderAddOutlined, SwitcherOutlined } from '@ant-design/icons'
 import { Button, Col, Empty, Input, Menu, message, Modal, Row, Tooltip, Tree } from 'antd'
 import { getWorkflowCatalogueTreeData } from '@/pages/Scheduler/service'
@@ -86,6 +86,21 @@ const getParentKey = (key: number | string, tree: any): any => {
   return parentKey
 }
 
+const getTreeSingleNode = (key: number | string, tree: any): any => {
+  let findNode
+  for (const element of tree) {
+    const node = element
+    if (node.children) {
+      const findIndex = node.children.findIndex((item: any) => item.taskId === key)
+      if (findIndex > -1) {
+        findNode = node.children[findIndex]
+      } else if (getTreeSingleNode(key, node.children)) {
+        findNode = getTreeSingleNode(key, node.children)
+      }
+    }
+  }
+  return findNode
+}
 const { DirectoryTree } = Tree
 const { Search } = Input
 
@@ -107,7 +122,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
   const [autoExpandParent, setAutoExpandParent] = useState(true)
   const [selectedKeys, setSelectedKeys] = useState<(number | string)[]>([])
 
-  const getTreeData = async () => {
+  const getTreeData = async (isInit?: boolean) => {
     const result = await getWorkflowCatalogueTreeData()
     let data = result.datas
     const tempTreeData = convertToTreeData(data, 0)
@@ -118,6 +133,11 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
     // setExpandedKeys(expandList)
 
     current && setSelectedKeys([current.treeId])
+
+    if (isInit && history.location.query?.workflowId) {
+      const findNode = getTreeSingleNode(Number(history.location.query?.workflowId), loop(tempTreeData))
+      toOpen(findNode)
+    }
   }
 
   const onChange = (e: any) => {
@@ -159,7 +179,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
   }
 
   useEffect(() => {
-    getTreeData()
+    getTreeData(true)
   }, [])
 
   const handleMenuClick = (key: string) => {

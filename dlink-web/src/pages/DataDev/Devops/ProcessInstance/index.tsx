@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Table, Popconfirm, Form, Row, Col, DatePicker, Input, Select, Button } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+import { history } from 'umi'
 import PageWrap from '@/components/Common/PageWrap'
 import {
   getProcessInstanceList,
@@ -37,7 +38,11 @@ const ProcessInstance: React.FC = () => {
       title: '工作流实例名称',
       dataIndex: 'name',
       key: 'name',
-      render: (text, record) => <a>{text}</a>,
+      render: (text, record) => (
+        <a onClick={() => history.push(`/dataDev/develop/dataJob?workflowId=${record.workflowId}`)}>
+          {text}
+        </a>
+      ),
       width: 250,
     },
     {

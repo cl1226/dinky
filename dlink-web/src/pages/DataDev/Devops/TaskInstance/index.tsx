@@ -1,23 +1,29 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Space, Table, Popconfirm, Form, Row, Col, DatePicker, Input, Select, Button } from 'antd'
+import { Modal, Space, Table, Spin, Form, Row, Col, DatePicker, Input, Select, Button } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+import { history } from 'umi'
 import PageWrap from '@/components/Common/PageWrap'
 import {
-  getProcessInstanceList,
+  requestTaskLog,
   getTaskInstanceList,
   ProcessInstanceParams,
 } from '@/pages/DataDev/Devops/service'
 import { EState, ECommandType } from '@/pages/DataDev/Devops/data.d'
-import moment from 'moment'
-import type { Moment } from 'moment'
+
 import { transferEnumToOptions } from '@/utils/utils'
+import SelectHelp, { EAsyncCode } from '@/components/SelectHelp'
+
 const RangePicker: any = DatePicker.RangePicker
-type RangeValue = [Moment, Moment]
+
+let timerId: any = null
 
 const TaskInstance: React.FC = () => {
   const [form] = Form.useForm()
+  const [logModalVisible, setLogModalVisible] = useState(false)
+  const [logText, setLogText] = useState('')
+  const [logId, setLogId] = useState<any>(null)
+  const [logLoading, setLogLoading] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [searchVal, setSearchVal] = useState('')
   const [pageNum, setPageNum] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [pageTotal, setPageTotal] = useState(0)
@@ -35,13 +41,22 @@ const TaskInstance: React.FC = () => {
       title: '任务名称',
       dataIndex: 'name',
       key: 'name',
+      render: (text, record) => (
+        <a onClick={() => history.push(`/dataDev/develop/dataStudio?taskId=${record.taskId}`)}>
+          {text}
+        </a>
+      ),
       width: 200,
     },
     {
       title: '工作流实例',
       dataIndex: 'processInstanceName',
       key: 'processInstanceName',
-      render: (text,record) => <a>{text}</a>,
+      render: (text, record) => (
+        <a onClick={() => history.push(`/dataDev/develop/dataJob?workflowId=${record.workflowId}`)}>
+          {text}
+        </a>
+      ),
       width: 250,
     },
     {
@@ -97,22 +112,42 @@ const TaskInstance: React.FC = () => {
       title: '操作',
       key: 'action',
       fixed: 'right',
-      width: 150,
+      width: 100,
       render: (_, record) => (
-        <Space size="middle">
-          <a>查看日志</a>
-          <a>下载</a>
-        </Space>
+        <>
+          <Button
+            type="link"
+            size={'small'}
+            onClick={async () => {
+              setLogModalVisible(true)
+              setLogId(record.id)
+              setLogLoading(true)
+              const res = await requestTaskLog(record.id)
+              setLogLoading(false)
+              const { datas } = res
+              setLogText(datas?.message)
+            }}
+          >
+            查看日志
+          </Button>
+        </>
       ),
     },
   ]
 
   const getTaskList = async (extra?: ProcessInstanceParams) => {
+    const fieldsValue = await form.getFieldsValue()
+    const { dateRange, stateType, name, projectCode } = fieldsValue
+    const [startDate, endDate] = dateRange || []
+
     const params: ProcessInstanceParams = {
       pageNo: pageNum,
       pageSize: pageSize,
-      searchVal: '',
-      projectCode: 9529772328832,
+      projectCode: projectCode,
+      stateType,
+      searchVal: name || '',
+      startDate: startDate ? startDate.format('YYYY-MM-DD HH:mm:ss') : '',
+      endDate: endDate ? endDate.format('YYYY-MM-DD HH:mm:ss') : '',
       ...(extra || {}),
     }
 
@@ -123,24 +158,17 @@ const TaskInstance: React.FC = () => {
     setPageTotal(total)
     setPageNum(pn)
     setPageSize(ps)
-  }
 
-  const onFinish = (values: any) => {
-    console.log('Finish:', values)
-    const { dateRange, stateType, name } = values
-    const [startDate, endDate] = dateRange || []
-    getTaskList({
-      stateType,
-      searchVal: name,
-      startDate: startDate.format('YYYY-MM-DD HH:mm:ss'),
-      endDate: endDate.format('YYYY-MM-DD HH:mm:ss'),
-      pageNo: 1,
-      pageSize: 10,
-    })
+    clearTimeout(timerId)
+    timerId = setTimeout(() => {
+      getTaskList(params)
+    }, 10000)
   }
 
   useEffect(() => {
-    getTaskList()
+    return () => {
+      clearTimeout(timerId)
+    }
   }, [])
 
   return (
@@ -152,10 +180,38 @@ const TaskInstance: React.FC = () => {
         labelWrap={true}
         wrapperCol={{ flex: 1 }}
         name="form-search"
-        onFinish={onFinish}
+        onFinish={() => {
+          getTaskList({
+            pageNo: 1,
+            pageSize: 10,
+          })
+        }}
         style={{ marginBottom: 20 }}
       >
         <Row>
+          <Col span={8}>
+            <Form.Item name="projectCode" label="项目">
+              <SelectHelp
+                placeholder="请选择"
+                asyncCode={EAsyncCode.rootCatalogue}
+                defaultSelectFirst={true}
+                afterFirstSelect={(value, option) => {
+                  getTaskList({
+                    pageNo: 1,
+                    pageSize: 10,
+                    projectCode: value,
+                  })
+                }}
+                optionFormatter={(options) =>
+                  options.map((item) => ({
+                    value: item.projectCode,
+                    label: item.name,
+                  }))
+                }
+              ></SelectHelp>
+            </Form.Item>
+          </Col>
+
           <Col span={8}>
             <Form.Item name="name" label="名称">
               <Input placeholder="名称" allowClear={true} />
@@ -217,6 +273,48 @@ const TaskInstance: React.FC = () => {
           showQuickJumper: true,
         }}
       />
+
+      <Modal
+        title="查看日志"
+        open={logModalVisible}
+        width={1000}
+        footer={[
+          <Button
+            key="refresh"
+            onClick={async () => {
+              if (!logId) return
+              setLogLoading(true)
+              const res = await requestTaskLog(logId)
+              setLogLoading(false)
+              const { datas } = res
+              setLogText(datas?.message)
+            }}
+          >
+            刷新
+          </Button>,
+          <Button
+            key="close"
+            onClick={() => {
+              setLogModalVisible(false)
+              setLogText('')
+            }}
+          >
+            关闭
+          </Button>,
+        ]}
+        onCancel={() => {
+          setLogModalVisible(false)
+          setLogText('')
+        }}
+      >
+        <Spin spinning={logLoading}>
+          <Input.TextArea
+            value={logText}
+            readOnly
+            autoSize={{ minRows: 30, maxRows: 30 }}
+          ></Input.TextArea>
+        </Spin>
+      </Modal>
     </PageWrap>
   )
 }

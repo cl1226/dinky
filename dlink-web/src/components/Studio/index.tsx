@@ -17,22 +17,18 @@
  *
  */
 
+import { useCallback, useEffect, useState } from 'react'
+import { connect } from 'umi'
+import styles from './index.less'
+import StudioMenu from './StudioMenu'
+import { Card, Col, Form, Row, Tooltip, Spin } from 'antd'
+import StudioTabs from './StudioTabs'
+import { StateType } from '@/pages/DataStudio/model'
+import StudioRightTool from './StudioRightTool'
+import StudioTree from './StudioTree'
+import StudioConsole from './StudioConsole'
 
-import {useCallback, useEffect, useState} from "react";
-import {connect} from "umi";
-import styles from './index.less';
-import StudioMenu from "./StudioMenu";
-import {Card, Col, Form, Row, Tooltip } from "antd";
-import StudioTabs from "./StudioTabs";
-import {StateType} from "@/pages/DataStudio/model";
-import StudioRightTool from "./StudioRightTool";
-import StudioTree from "./StudioTree";
-import StudioConsole from "./StudioConsole";
-
-import {
-  MinusOutlined,
-  SwitcherOutlined
-} from "@ant-design/icons";
+import { MinusOutlined, SwitcherOutlined } from '@ant-design/icons'
 
 import {
   getFillAllByVersion,
@@ -44,15 +40,22 @@ import {
   showDataBase,
   showEnv,
   showJars,
-  showSessionCluster
-} from "@/components/Studio/StudioEvent/DDL";
-import DraggleLayout from "@/components/DraggleLayout";
-import {loadSettings} from "@/pages/SettingCenter/FlinkSettings/function";
+  showSessionCluster,
+} from '@/components/Studio/StudioEvent/DDL'
+import DraggleLayout from '@/components/DraggleLayout'
+import { loadSettings } from '@/pages/SettingCenter/FlinkSettings/function'
 
 const Studio = (props: any) => {
-
-  const {isFullScreen, rightClickMenu, toolHeight, toolLeftWidth, toolRightWidth, dispatch} = props;
-  const [form] = Form.useForm();
+  const {
+    pageLoading,
+    isFullScreen,
+    rightClickMenu,
+    toolHeight,
+    toolLeftWidth,
+    toolRightWidth,
+    dispatch,
+  } = props
+  const [form] = Form.useForm()
   const VIEW = {
     leftToolWidth: 300,
     marginTop: 84,
@@ -61,51 +64,52 @@ const Studio = (props: any) => {
     rightMargin: 32,
     leftMargin: 36,
     midMargin: 46,
-  };
-  
+  }
+
   const [bottomHeight, setBottomHeight] = useState(40)
   const [size, setSize] = useState({
     width: document.documentElement.clientWidth,
     height: document.documentElement.clientHeight,
-  });
+  })
   const onResize = useCallback(() => {
     setSize({
       width: document.documentElement.clientWidth,
       height: document.documentElement.clientHeight,
     })
-  }, []);
+  }, [])
 
   useEffect(() => {
-    window.addEventListener('resize', onResize);
-    onResize();
+    window.addEventListener('resize', onResize)
+    onResize()
     return () => {
-      window.removeEventListener('resize', onResize);
-    };
-  }, [onResize]);
+      window.removeEventListener('resize', onResize)
+    }
+  }, [onResize])
 
   useEffect(() => {
-    loadSettings(dispatch);
-    getFillAllByVersion('', dispatch);
-    showCluster(dispatch);
-    showSessionCluster(dispatch);
-    showClusterConfiguration(dispatch);
-    showDataBase(dispatch);
-    listSession(dispatch);
-    showJars(dispatch);
-    showAlertInstance(dispatch);
-    showAlertGroup(dispatch);
-    showEnv(dispatch);
-    onResize();
-  }, []);
+    loadSettings(dispatch)
+    getFillAllByVersion('', dispatch)
+    showCluster(dispatch)
+    showSessionCluster(dispatch)
+    showClusterConfiguration(dispatch)
+    showDataBase(dispatch)
+    listSession(dispatch)
+    showJars(dispatch)
+    showAlertInstance(dispatch)
+    showAlertGroup(dispatch)
+    showEnv(dispatch)
+    onResize()
+  }, [])
 
   const onClick = () => {
     if (rightClickMenu) {
-      dispatch && dispatch({
-        type: "Studio/showRightClickMenu",
-        payload: false,
-      });
+      dispatch &&
+        dispatch({
+          type: 'Studio/showRightClickMenu',
+          payload: false,
+        })
     }
-  };
+  }
 
   const backup = () => {
     setBottomHeight(300)
@@ -115,17 +119,34 @@ const Studio = (props: any) => {
     setBottomHeight(40)
   }
 
-  const operations = 
-  <>
-    <Tooltip title="最小化"><MinusOutlined onClick={() => min()} style={{'cursor': 'pointer', 'margin-right': '15px'}}/></Tooltip>
-    <Tooltip title="还原"><SwitcherOutlined onClick={() => backup()} tooltip="还原" style={{'cursor': 'pointer', 'margin-right': '15px'}}/></Tooltip>
-  </>;
+  const operations = (
+    <>
+      <Tooltip title="最小化">
+        <MinusOutlined
+          onClick={() => min()}
+          style={{ cursor: 'pointer', 'margin-right': '15px' }}
+        />
+      </Tooltip>
+      <Tooltip title="还原">
+        <SwitcherOutlined
+          onClick={() => backup()}
+          tooltip="还原"
+          style={{ cursor: 'pointer', 'margin-right': '15px' }}
+        />
+      </Tooltip>
+    </>
+  )
 
   return (
-    <div onClick={onClick} style={{'margin': '-24px'}}>
-      <StudioMenu form={form} width={size.width} height={size.height}/>
-      <Card bordered={false} className={styles.card} size="small" id="studio_card" style={{marginBottom: 0}}>
-        
+    <div onClick={onClick} style={{ margin: '-24px' }}>
+      <StudioMenu form={form} width={size.width} height={size.height} />
+      <Card
+        bordered={false}
+        className={styles.card}
+        size="small"
+        id="studio_card"
+        style={{ marginBottom: 0 }}
+      >
         <Row>
           <DraggleLayout
             containerWidth={size.width - 240}
@@ -144,13 +165,14 @@ const Studio = (props: any) => {
               />
             }
           >
-            <Col className={styles["vertical-tabs"]} style={{'width': toolLeftWidth}}>
-              <Row style={{'width': toolLeftWidth}}>
-                <StudioTree width={toolLeftWidth}/>
+            <Col className={styles['vertical-tabs']} style={{ width: toolLeftWidth }}>
+              <Row style={{ width: toolLeftWidth }}>
+                <StudioTree width={toolLeftWidth} />
               </Row>
             </Col>
-            <Col>
-              {/* <DraggleVerticalLayout
+            <Spin spinning={pageLoading}>
+              <Col>
+                {/* <DraggleVerticalLayout
                 containerWidth={size.width - toolLeftWidth - 250}
                 containerHeight={(size.height - VIEW.marginTop)}
                 min={(VIEW.topHeight)}
@@ -166,32 +188,36 @@ const Studio = (props: any) => {
                   />
                 }
               > */}
-                <Row style={{'height': size.height - VIEW.topHeight - bottomHeight - 50}}>
-                  <Col span={24} style={{'height': '100%'}}>
-                    {!isFullScreen ? <StudioTabs height={'100%'} width={size.width - toolLeftWidth}/> : undefined}
+                <Row style={{ height: size.height - VIEW.topHeight - bottomHeight - 50 }}>
+                  <Col span={24} style={{ height: '100%' }}>
+                    {!isFullScreen ? (
+                      <StudioTabs height={'100%'} width={size.width - toolLeftWidth} />
+                    ) : undefined}
                   </Col>
                 </Row>
-                <Row style={{'height': bottomHeight}}>
+                <Row style={{ height: bottomHeight }}>
                   <Col span={24}>
-                    <StudioConsole height={bottomHeight} operations={operations}/>
+                    <StudioConsole height={bottomHeight} operations={operations} />
                   </Col>
                 </Row>
-              {/* </DraggleVerticalLayout> */}
-            </Col>
+                {/* </DraggleVerticalLayout> */}
+              </Col>
+            </Spin>
           </DraggleLayout>
-          <Col id='StudioRightTool' className={styles["vertical-tabs"]}>
-            <StudioRightTool form={form}/>
+          <Col id="StudioRightTool" className={styles['vertical-tabs']}>
+            <StudioRightTool form={form} />
           </Col>
         </Row>
       </Card>
     </div>
   )
-};
+}
 
-export default connect(({Studio}: { Studio: StateType }) => ({
+export default connect(({ Studio }: { Studio: StateType }) => ({
+  pageLoading: Studio.pageLoading,
   isFullScreen: Studio.isFullScreen,
   rightClickMenu: Studio.rightClickMenu,
   toolHeight: Studio.toolHeight,
   toolLeftWidth: Studio.toolLeftWidth,
   toolRightWidth: Studio.toolRightWidth,
-}))(Studio);
+}))(Studio)
