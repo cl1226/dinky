@@ -127,6 +127,7 @@ export type TabsItemType = {
   task?: TaskType
   console: ConsoleType
   monaco?: any
+  treeId?: number
   isModified: boolean
   sqlMetaData?: SqlMetaData
   metaStore?: MetaStoreCatalogType[]
@@ -179,7 +180,7 @@ export type MetaStoreColumnType = {
 }
 
 export type StateType = {
-  pageLoading?:boolean
+  pageLoading?: boolean
   isFullScreen: boolean
   toolHeight?: number
   toolRightWidth?: number

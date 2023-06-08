@@ -132,11 +132,19 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
     //默认展开所有
     // setExpandedKeys(expandList)
 
-    current && setSelectedKeys([current.treeId])
-
-    if (isInit && history.location.query?.workflowId) {
-      const findNode = getTreeSingleNode(Number(history.location.query?.workflowId), loop(tempTreeData))
-      toOpen(findNode)
+    if (isInit) {
+      if (history.location.query?.workflowId) {
+        const findNode = getTreeSingleNode(
+          Number(history.location.query?.workflowId),
+          loop(tempTreeData),
+        )
+        setExpandedKeys([findNode.key])
+        setSelectedKeys([findNode.key])
+        toOpen(findNode)
+      } else if (current) {
+        setSelectedKeys([current.treeId])
+        setExpandedKeys([current.treeId])
+      }
     }
   }
 

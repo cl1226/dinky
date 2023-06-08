@@ -121,7 +121,7 @@ const { DirectoryTree } = Tree
 const { Search } = Input
 
 const StudioTree: React.FC<StudioTreeProps> = (props) => {
-  const { rightClickMenu, dispatch, tabs, refs, toolHeight, width } = props
+  const { rightClickMenu, dispatch, tabs, refs, toolHeight, width, current } = props
   const [treeData, setTreeData] = useState<TreeDataNode[]>()
   const [expandedKeys, setExpandedKeys] = useState<Key[]>()
   const [defaultExpandedKeys, setDefaultExpandedKeys] = useState<any[]>([])
@@ -141,6 +141,7 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
   const [autoExpandParent, setAutoExpandParent] = useState(true)
   const [cutId, setCutId] = useState<number | undefined>(undefined)
   const [exportTaskIds, setExportTaskIds] = useState<any[]>([])
+  const [selectedKeys, setSelectedKeys] = useState<(number | string)[]>([])
 
   const getTreeData = async (isInit?: boolean) => {
     const result = await getCatalogueTreeData()
@@ -153,15 +154,26 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
     setDefaultExpandedKeys([])
     setExportTaskIds([])
 
-    if (isInit && history.location.query?.taskId) {
-      dispatch &&
-        dispatch({
-          type: 'Studio/changePageLoading',
-          payload: true,
-        })
+    if (isInit) {
+      if (history.location.query?.taskId) {
+        dispatch &&
+          dispatch({
+            type: 'Studio/changePageLoading',
+            payload: true,
+          })
 
-      const findNode = getTreeSingleNode(Number(history.location.query?.taskId), loop(tempTreeData))
-      toOpen(findNode)
+        const findNode = getTreeSingleNode(
+          Number(history.location.query?.taskId),
+          loop(tempTreeData),
+        )
+        console.log('isInit', findNode.key)
+        setExpandedKeys([findNode.key])
+        setSelectedKeys([findNode.key])
+        toOpen(findNode)
+      } else if (current) {
+        setSelectedKeys([current.treeId])
+        setExpandedKeys([current.treeId])
+      }
     }
   }
 
@@ -295,6 +307,7 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
           icon: node.icon,
           closable: true,
           path: node.path,
+          treeId: node.id,
           task: {
             session: '',
             maxRowNum: 100,
@@ -614,6 +627,7 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
   //选中节点时触发
   const onSelect = (selectedKeys: Key[], e: any) => {
     if (e.node && e.node.isLeaf) {
+      setSelectedKeys([e.node.key])
       dispatch({
         type: 'Studio/saveCurrentPath',
         payload: e.node.path,
@@ -747,6 +761,7 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
           autoExpandParent={autoExpandParent}
           // defaultExpandAll
           expandedKeys={expandedKeys}
+          selectedKeys={selectedKeys}
         />
         {getNodeTreeRightClickMenu()}
         {getEmpty()}
@@ -821,6 +836,7 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
 }
 
 export default connect(({ Studio }: { Studio: StateType }) => ({
+  current: Studio.current,
   currentPath: Studio.currentPath,
   tabs: Studio.tabs,
   rightClickMenu: Studio.rightClickMenu,
