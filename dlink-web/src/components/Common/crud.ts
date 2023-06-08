@@ -21,7 +21,7 @@ import { extend } from 'umi-request'
 import { TableListParams } from '@/components/Common/data'
 import { message } from 'antd'
 import { l } from '@/utils/intl'
-
+import { EAsyncCode } from '@/components/SelectHelp'
 export const request2 = extend({
   headers: { tenantId: localStorage.getItem('dlink-tenantId') || '' },
 })
@@ -280,14 +280,25 @@ export const getCatalogueTreeDataByType = async (type) => {
   })
 }
 
-export const getCommonSelectOptions = async (menuCode, params?: any) => {
-  try {
-    const { code, datas } = await request2(`/api/dataservice/config/getMenu/${menuCode}`, {
-      method: 'GET',
+export const getCommonSelectOptions = async (menuCode: EAsyncCode, params?: any) => {
+  let url = `/api/dataservice/config/getMenu/${menuCode}`
+  let option = {
+    method: 'GET',
+    params: {
+      ...(params || {}),
+    },
+  }
+  if (menuCode === EAsyncCode.rootCatalogue) {
+    url = '/api/workflow/catalogue/getAllRootCatalogueData'
+    option = {
+      method: 'POST',
       params: {
         ...(params || {}),
       },
-    })
+    }
+  }
+  try {
+    const { code, datas } = await request2(url, option)
 
     if (code == CODE.SUCCESS) {
       return datas
