@@ -3,7 +3,7 @@ import { message } from 'antd'
 import { l } from '@/utils/intl'
 
 export interface ProcessInstanceParams {
-  projectCode?: number
+  projectCode?: string
   searchVal?: string
   pageNo: number
   pageSize: number
@@ -63,6 +63,90 @@ export const getProcessInstanceList = async (params: ProcessInstanceParams) => {
       pn: 1,
       ps: 10,
     }
+  }
+}
+// 重跑
+export const updateProcessRerun = async (processInstanceId: string, projectCode: string) => {
+  try {
+    const { code, msg } = await request2('/api/workflow/task/rerun', {
+      method: 'POST',
+      data: {
+        processInstanceId,
+        projectCode,
+      },
+    })
+    if (code == CODE.SUCCESS) {
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    message.error(l('app.request.error'))
+    return false
+  }
+}
+// 停止
+export const updateProcessStop = async (processInstanceId: string, projectCode: string) => {
+  try {
+    const { code, msg } = await request2('/api/workflow/task/stop', {
+      method: 'POST',
+      data: {
+        processInstanceId,
+        projectCode,
+      },
+    })
+    if (code == CODE.SUCCESS) {
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    message.error(l('app.request.error'))
+    return false
+  }
+}
+// 暂停
+export const updateProcessPause = async (processInstanceId: string, projectCode: string) => {
+  try {
+    const { code, msg } = await request2('/api/workflow/task/pause', {
+      method: 'POST',
+      data: {
+        processInstanceId,
+        projectCode,
+      },
+    })
+    if (code == CODE.SUCCESS) {
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    message.error(l('app.request.error'))
+    return false
+  }
+}
+// 恢复运行
+export const updateProcessSuspend = async (processInstanceId: string, projectCode: string) => {
+  try {
+    const { code, msg } = await request2('/api/workflow/task/suspend', {
+      method: 'POST',
+      data: {
+        processInstanceId,
+        projectCode,
+      },
+    })
+    if (code == CODE.SUCCESS) {
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    message.error(l('app.request.error'))
+    return false
   }
 }
 
