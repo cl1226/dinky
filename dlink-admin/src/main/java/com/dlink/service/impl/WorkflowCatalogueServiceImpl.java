@@ -59,6 +59,11 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
     }
 
     @Override
+    public List<WorkflowCatalogue> getAllRootData() {
+        return this.list(Wrappers.<WorkflowCatalogue>query().eq("parent_id", 0));
+    }
+
+    @Override
     public WorkflowCatalogue findByParentIdAndName(Integer parentId, String name) {
         return baseMapper.selectOne(Wrappers.<WorkflowCatalogue>query().eq("parent_id", parentId).eq("name", name));
     }

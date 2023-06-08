@@ -1,9 +1,11 @@
 package com.dlink.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.dlink.assertion.Assert;
 import com.dlink.common.result.Result;
 import com.dlink.db.service.impl.SuperServiceImpl;
@@ -586,6 +588,27 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     public JSONObject pageFlowInstance(DsSearchCondition condition) {
         JSONObject conditionJSON = JSONUtil.parseObj(condition);
         JSONObject jsonObject = processClient.pageFlowInstance(conditionJSON);
+        JSONArray totalList = jsonObject.getJSONArray("totalList");
+        List<String> taskNames = new ArrayList<>();
+        if (totalList != null && totalList.size() > 0) {
+            for (JSONObject jo : totalList.jsonIter()) {
+                String name = jo.getStr("name");
+                String taskName = name.substring(0, name.indexOf("-"));
+                taskNames.add(taskName);
+            }
+        }
+        if (taskNames.size() > 0) {
+            Map<String, Integer> map = new HashMap<>();
+            List<WorkflowTask> workflowTasks = this.list(Wrappers.<WorkflowTask>query().in("name", taskNames));
+            for (WorkflowTask task : workflowTasks) {
+                map.put(task.getName(), task.getId());
+            }
+            for (JSONObject jo : totalList.jsonIter()) {
+                String name = jo.getStr("name");
+                String taskName = name.substring(0, name.indexOf("-"));
+                jo.set("workflowId", map.get(taskName));
+            }
+        }
         return jsonObject;
     }
 
@@ -593,6 +616,32 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     public JSONObject pageTaskInstance(DsSearchCondition condition) {
         JSONObject conditionJSON = JSONUtil.parseObj(condition);
         JSONObject jsonObject = processClient.pageTaskInstance(conditionJSON);
+        JSONArray totalList = jsonObject.getJSONArray("totalList");
+        if (totalList != null && totalList.size() > 0) {
+            List<String> workflowNames = new ArrayList<>();
+            for (JSONObject jo : totalList.jsonIter()) {
+                JSONObject taskParams = jo.getJSONObject("taskParams");
+                if (taskParams != null) {
+                    jo.set("taskId", taskParams.getInt("taskId"));
+                }
+                String processInstanceName = jo.getStr("processInstanceName");
+                String workflowName = processInstanceName.substring(0, processInstanceName.indexOf("-"));
+                workflowNames.add(workflowName);
+            }
+            if (workflowNames.size() > 0) {
+                Map<String, Integer> map = new HashMap<>();
+                List<WorkflowTask> workflowTasks = this.list(Wrappers.<WorkflowTask>query().in("name", workflowNames));
+                for (WorkflowTask task : workflowTasks) {
+                    map.put(task.getName(), task.getId());
+                }
+                for (JSONObject jo : totalList.jsonIter()) {
+                    String processInstanceName = jo.getStr("processInstanceName");
+                    String workflowName = processInstanceName.substring(0, processInstanceName.indexOf("-"));
+                    jo.set("workflowId", map.get(workflowName));
+                }
+            }
+        }
+
         return jsonObject;
     }
 

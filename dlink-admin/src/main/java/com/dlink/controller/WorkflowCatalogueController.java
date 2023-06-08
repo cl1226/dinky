@@ -214,6 +214,15 @@ public class WorkflowCatalogueController {
     }
 
     /**
+     * 获取所有跟目录
+     */
+    @PostMapping("/getAllRootCatalogueData")
+    public Result getAllRootCatalogueData() throws Exception {
+        List<WorkflowCatalogue> catalogues = catalogueService.getAllRootData();
+        return Result.succeed(catalogues, "获取成功");
+    }
+
+    /**
      * 创建节点和作业
      */
     @PutMapping("/createTask")
