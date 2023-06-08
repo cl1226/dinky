@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import styles from './index.less'
-import { PlusOutlined } from '@ant-design/icons'
+import { DoubleRightOutlined } from '@ant-design/icons'
 import {
   Space,
   Button,
@@ -84,7 +84,7 @@ export const ParamtersTable = ({ params, onAdd }) => {
           size="small"
           type="text"
           icon={
-            <PlusOutlined
+            <DoubleRightOutlined 
               onClick={() => {
                 onAdd(record)
               }}
@@ -152,7 +152,7 @@ export default (props: IStepComProps) => {
   const onAddVariable = (rowItem) => {
     const editor = editorRef?.current?.editor
     const cursorPos = editor.getCursorPosition()
-    editor.session.insert(cursorPos, rowItem.variable)
+    editor.session.insert(cursorPos, rowItem.type == 'string' ? "'" + rowItem.variable + "'" : rowItem.variable)
   }
   const executeSql = (reqP) => {
     const tempParam = {

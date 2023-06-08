@@ -595,4 +595,60 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         JSONObject jsonObject = processClient.pageTaskInstance(conditionJSON);
         return jsonObject;
     }
+
+    @Override
+    public JSONObject getProcessStateCount(DsSearchCondition condition) {
+        JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        JSONObject jsonObject = processClient.getProcessStateCount(conditionJSON);
+        return jsonObject;
+    }
+
+    @Override
+    public JSONObject getTaskStateCount(DsSearchCondition condition) {
+        JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        JSONObject jsonObject = processClient.getTaskStateCount(conditionJSON);
+        return jsonObject;
+    }
+
+    @Override
+    public JSONObject getTaskDefineCount(DsSearchCondition condition) {
+        JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        JSONObject jsonObject = processClient.getTaskDefineCount(conditionJSON);
+        return jsonObject;
+    }
+
+    @Override
+    public JSONObject getTaskLog(Integer taskId) {
+        JSONObject taskLog = processClient.getTaskLog(taskId);
+        return taskLog;
+    }
+
+    @Override
+    public JSONObject rerun(DsSearchCondition condition) {
+        JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        JSONObject rerun = processClient.rerun(conditionJSON);
+        return rerun;
+    }
+
+    @Override
+    public JSONObject stop(DsSearchCondition condition) {
+        JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        JSONObject stop = processClient.stop(conditionJSON);
+        return stop;
+    }
+
+    @Override
+    public JSONObject pause(DsSearchCondition condition) {
+        JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        JSONObject pause = processClient.pause(conditionJSON);
+        return pause;
+    }
+
+    @Override
+    public JSONObject suspend(DsSearchCondition condition) {
+        JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        JSONObject suspend = processClient.suspend(conditionJSON);
+        return suspend;
+    }
+
 }

@@ -197,9 +197,15 @@ public class ApiConfigServiceImpl extends SuperServiceImpl<ApiConfigMapper, ApiC
             return Result.failed("获取失败!");
         }
         AppConfigDTO appConfigDTO = new AppConfigDTO();
-        AppConfig appConfig = appConfigService.getDetailById(apiConfig.getAuthId());
-        BeanUtils.copyProperties(appConfig, appConfigDTO);
-        appConfigDTO.setAuthTime(apiConfig.getAuthTime());
+        if (apiConfig.getAuthType().equals("app") && apiConfig.getAuthId() != null) {
+            AppConfig appConfig = appConfigService.getDetailById(apiConfig.getAuthId());
+            if (appConfig != null) {
+                BeanUtils.copyProperties(appConfig, appConfigDTO);
+                appConfigDTO.setAuthTime(apiConfig.getAuthTime());
+                return Result.succeed(appConfigDTO, "获取成功");
+            }
+        }
+
         return Result.succeed(appConfigDTO, "获取成功!");
     }
 }

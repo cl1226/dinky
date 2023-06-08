@@ -38,8 +38,8 @@ export default {
   'menu.dataDev.develop.dataJob': 'Workflow Develop',
   'menu.dataDev.devops': 'DevOps',
   'menu.dataDev.devops.overview': 'DevOps Overview',
-  'menu.dataDev.devops.monitor': 'Workflow Monitor',
-  'menu.dataDev.devops.instance': 'Instance Monitor',
+  'menu.dataDev.devops.processInstance': 'ProcessInstance Monitor',
+  'menu.dataDev.devops.taskInstance': 'TaskInstance Monitor',
 
   'menu.dataService': 'Data Service',
   'menu.dataService.serviceHome': 'Home',

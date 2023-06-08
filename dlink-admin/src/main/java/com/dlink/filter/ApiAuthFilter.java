@@ -115,9 +115,7 @@ public class ApiAuthFilter implements Filter {
             apiAccessLog.setUrl(uri);
             apiAccessLog.setName("AccessLog");
             log.info(JSON.toJSONString(apiAccessLog));
-            ThreadUtil.execute(() -> {
-                apiAccessLogService.save(apiAccessLog);
-            });
+            apiAccessLogService.save(apiAccessLog);
 
         }
     }
