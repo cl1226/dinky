@@ -596,7 +596,7 @@ public class ProcessClient {
      */
     public JSONObject rerun(JSONObject condition) {
         Map<String, Object> map = new HashMap<>();
-        map.put("projectCode", condition.getInt("projectCode"));
+        map.put("projectCode", condition.getLong("projectCode"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("index", condition.getInt("index", 1));
@@ -626,7 +626,7 @@ public class ProcessClient {
      */
     public JSONObject stop(JSONObject condition) {
         Map<String, Object> map = new HashMap<>();
-        map.put("projectCode", condition.getInt("projectCode"));
+        map.put("projectCode", condition.getLong("projectCode"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("processInstanceId", condition.getStr("processInstanceId"));
@@ -654,7 +654,7 @@ public class ProcessClient {
      */
     public JSONObject pause(JSONObject condition) {
         Map<String, Object> map = new HashMap<>();
-        map.put("projectCode", condition.getInt("projectCode"));
+        map.put("projectCode", condition.getLong("projectCode"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("processInstanceId", condition.getStr("processInstanceId"));
@@ -682,7 +682,7 @@ public class ProcessClient {
      */
     public JSONObject suspend(JSONObject condition) {
         Map<String, Object> map = new HashMap<>();
-        map.put("projectCode", condition.getInt("projectCode"));
+        map.put("projectCode", condition.getLong("projectCode"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("index", condition.getInt("index", 0));

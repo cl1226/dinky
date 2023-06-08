@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class DsSearchCondition {
 
-    private Long projectCode;
+    private String projectCode;
     private Integer pageNo;
     private Integer pageSize;
     private String searchVal;
