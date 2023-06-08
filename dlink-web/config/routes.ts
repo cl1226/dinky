@@ -202,6 +202,57 @@ export default [
     ],
   },
   {
+    path: '/dataAsset',
+    name: 'dataAsset',
+    icon: 'appstore',
+    routes: [
+      {
+        path: '/dataAsset',
+        // TODO change
+        redirect: '/dataAsset/metaDataManage/overview',
+      },
+      {
+        path: '/dataAsset/dataMap',
+        name: 'dataMap',
+        icon: 'appstore',
+        routes: [
+          {
+            path: '/dataAsset/dataMap/overview',
+            name: 'overview',
+            component: './DataAsset/DataMap/Overview',
+          },
+          {
+            path: '/dataAsset/dataMap/dataDirectory',
+            name: 'dataDirectory',
+            component: './DataAsset/DataMap/DataDirectory',
+          },
+        ],
+      },
+      {
+        path: '/dataAsset/metaDataManage',
+        name: 'metaDataManage',
+        icon: 'appstore',
+        routes: [
+          {
+            path: '/dataAsset/metaDataManage/overview',
+            name: 'overview',
+            component: './DataAsset/MetaDataManage/Overview',
+          },
+          {
+            path: '/dataAsset/metaDataManage/taskManage',
+            name: 'taskManage',
+            component: './DataAsset/MetaDataManage/TaskManage',
+          },
+          {
+            path: '/dataAsset/metaDataManage/taskMonitoring',
+            name: 'taskMonitoring',
+            component: './DataAsset/MetaDataManage/TaskMonitoring',
+          },
+        ],
+      },
+    ],
+  },
+  {
     path: '/devops',
     name: 'devops',
     icon: 'control',

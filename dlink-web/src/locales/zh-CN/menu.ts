@@ -53,6 +53,16 @@ export default {
   'menu.dataService.devApi.detail': 'API详情',
   'menu.dataService.application': '应用管理',
   'menu.dataService.applicationDetail': '应用详情',
+  
+  'menu.dataAsset': '数据资产',
+  'menu.dataAsset.dataMap': '数据地图',
+  'menu.dataAsset.dataMap.overview': '总览',
+  'menu.dataAsset.dataMap.dataDirectory': '数据目录',
+  'menu.dataAsset.metaDataManage': '元数据采集',
+  'menu.dataAsset.metaDataManage.overview': '总览',
+  'menu.dataAsset.metaDataManage.taskManage': '任务管理',
+  'menu.dataAsset.metaDataManage.taskMonitoring': '任务监控',
+
 
   'menu.devops': '运维中心',
   'menu.job': '作业实例',

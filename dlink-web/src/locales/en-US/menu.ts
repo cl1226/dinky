@@ -53,6 +53,16 @@ export default {
   'menu.dataService.devApi.detail': 'API Detail',
   'menu.dataService.application': 'Application',
   'menu.dataService.applicationDetail': 'Application Detail',
+
+  'menu.dataAsset': 'Data Asset',
+  'menu.dataAsset.dataMap': 'Data Map',
+  'menu.dataAsset.dataMap.overview': 'Overview',
+  'menu.dataAsset.dataMap.dataDirectory': 'Data Directory',
+  'menu.dataAsset.metaDataManage': 'Meta Data Manage',
+  'menu.dataAsset.metaDataManage.overview': 'Overview',
+  'menu.dataAsset.metaDataManage.taskManage': 'Task Manage',
+  'menu.dataAsset.metaDataManage.taskMonitoring': 'Task Monitoring',
+
   
   'menu.devops': 'Devops',
   'menu.job': 'Job Instance',
