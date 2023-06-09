@@ -205,6 +205,7 @@ export default [
     path: '/dataAsset',
     name: 'dataAsset',
     icon: 'appstore',
+    footerRender: false,
     routes: [
       {
         path: '/dataAsset',
@@ -247,6 +248,12 @@ export default [
             path: '/dataAsset/metaDataManage/taskMonitoring',
             name: 'taskMonitoring',
             component: './DataAsset/MetaDataManage/TaskMonitoring',
+          },
+          {
+            path: '/dataAsset/metaDataManage/create',
+            name: 'create',
+            component: './DataAsset/MetaDataManage/Create',
+            hideInMenu: true,
           },
         ],
       },

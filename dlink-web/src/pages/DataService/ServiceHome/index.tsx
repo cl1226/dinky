@@ -6,7 +6,7 @@ import { history } from 'umi'
 
 export interface IStepItem {
   title: string
-  url: string
+  url?: string
   image: string
   detail: string
 }
@@ -16,11 +16,16 @@ export const StepGuide: React.FC<{ steps: IStepItem[] }> = (props) => {
     <ul className={styles['step-guide']}>
       {steps.map((step, index) => {
         return (
-          <li key={index} style={{ width: `${100 / steps.length}%` }}>
+          <li
+            key={index}
+            style={{ width: `${100 / steps.length}%`, cursor: step.url && 'pointer' }}
+          >
             <div
               className="guide-desc"
               onClick={() => {
-                history.push(step.url)
+                if (step.url) {
+                  history.push(step.url)
+                }
               }}
             >
               <div className="img-box">
