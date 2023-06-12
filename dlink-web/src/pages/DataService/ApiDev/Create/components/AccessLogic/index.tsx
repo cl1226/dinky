@@ -291,6 +291,7 @@ export default (props: IStepComProps) => {
               message={
                 <>
                   <div>{`支持动态SQL语法：`}</div>
+                  <div>{'支持参数 #{ }、${ } 两种写法'}</div>
                   <div>{`<if test=""></if>`}</div>
                   <div>{`<where></where>`}</div>
                   <div>{`<foreach open="(" close=")" collection="" separator="," item="item" index="index">#{item}</foreach>`}</div>
