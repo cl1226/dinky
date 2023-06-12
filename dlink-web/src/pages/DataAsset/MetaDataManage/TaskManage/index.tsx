@@ -3,7 +3,7 @@ import PageWrap from '@/components/Common/PageWrap'
 import CatalogueTree from './components/CatalogueTree'
 import TaskList from './components/TaskList'
 import type { TreeDataNode } from 'antd'
-export default () => {
+const TaskManage = () => {
   const [catalogue, setcatalogue] = useState<TreeDataNode>()
   const getCurrentCatalogue = (node: TreeDataNode) => {
     setcatalogue(node)
@@ -16,3 +16,5 @@ export default () => {
     </PageWrap>
   )
 }
+
+export default TaskManage

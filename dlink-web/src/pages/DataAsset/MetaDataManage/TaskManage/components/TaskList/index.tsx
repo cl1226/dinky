@@ -8,12 +8,23 @@ import {
   BugOutlined,
   DeleteOutlined,
 } from '@ant-design/icons'
-import { Button, Card, Col, Form, Row, Input, Popconfirm, Table, Space, Tooltip } from 'antd'
+import {
+  Button,
+  Card,
+  Col,
+  DatePicker,
+  Form,
+  Row,
+  Input,
+  Popconfirm,
+  Table,
+  Space,
+  Tooltip,
+} from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 
 import { history } from 'umi'
-import type {
-  IGetApiConfigListParams} from '@/pages/DataAsset/MetaDataManage/TaskManage/service';
+import type { IGetApiConfigListParams } from '@/pages/DataAsset/MetaDataManage/TaskManage/service'
 import {
   getApiConfigList,
   deleteApiConfig,
@@ -25,10 +36,10 @@ import { debounce } from 'lodash'
 import { EAccessType } from '@/utils/enum'
 
 const { Search } = Input
+const { RangePicker } = DatePicker
 
 export type IApiListProps = {
   catalogue: TreeDataNode | undefined
-  mode: 'catalogue' | 'management'
   tableProps?: {}
 }
 
@@ -55,10 +66,10 @@ export default (props: IApiListProps) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [loading, setLoading] = useState(false)
   const [apiData, setApiData] = useState([])
-  const { catalogue, mode, tableProps = {} } = props
+  const { catalogue, tableProps = {} } = props
 
   const getApiList = async (extra?: IGetApiConfigListParams) => {
-    if (!catalogue?.id && !extra?.catalogueId && mode === 'catalogue') return
+    if (!catalogue?.id && !extra?.catalogueId) return
 
     const params: IGetApiConfigListParams = {
       pageIndex: pageNum,
@@ -104,89 +115,27 @@ export default (props: IApiListProps) => {
 
   const pageJump = (type, record) => {
     sessionStorage.setItem(
-      'dataService.devApi.catalogue.list',
+      'dataAsset.metaDataManage.taskManage.list',
       JSON.stringify({
         pageIndex: pageNum,
         pageSize: pageSize,
         name: searchKey,
         catalogueId: catalogue?.id,
+        // TODO 存入运行时间
       }),
     )
     history.push(`/dataService/devApi/${type}/${record.id}`)
   }
 
   useEffect(() => {
-    if ((catalogue && catalogue.id) || mode === 'management') {
-      const sessionJson = sessionStorage.getItem('dataService.devApi.catalogue.list')
+    if (catalogue && catalogue.id) {
+      const sessionJson = sessionStorage.getItem('dataAsset.metaDataManage.taskManage.list')
       const sessionQuery = JSON.parse(sessionJson || '{}')
       getApiList(sessionQuery)
-      sessionStorage.removeItem('dataService.devApi.catalogue.list')
+      sessionStorage.removeItem('dataAsset.metaDataManage.taskManage.list')
     }
   }, [catalogue])
 
-  const columnsMaps = {
-    catalogue: [
-      {
-        title: '路径',
-        dataIndex: 'path',
-        key: 'path',
-        width: 200,
-      },
-      {
-        title: '修改时间',
-        dataIndex: 'updateTime',
-        key: 'updateTime',
-        width: 200,
-      },
-      {
-        title: '状态',
-        dataIndex: 'status',
-        key: 'status',
-        width: 150,
-        render: (cellValue, record) => {
-          return <span>{cellValue === 1 ? '已上线' : '已创建'}</span>
-        },
-      },
-    ],
-    management: [
-      {
-        title: '描述',
-        dataIndex: 'description',
-        key: 'description',
-        width: 200,
-        ellipsis: true,
-      },
-      {
-        title: '状态',
-        dataIndex: 'status',
-        key: 'status',
-        width: 120,
-        render: (cellValue, record) => {
-          return <span>{cellValue === 1 ? '已上线' : '已创建'}</span>
-        },
-      },
-      {
-        title: '调试状态',
-        dataIndex: 'debugStatus',
-        key: 'debugStatus',
-        width: 120,
-        render: (cellValue, record) => EDebugStatus[cellValue] || '-',
-      },
-      {
-        title: '类型',
-        dataIndex: 'accessType',
-        key: 'accessType',
-        width: 150,
-        render: (cellValue, record) => EAccessType[cellValue],
-      },
-      {
-        title: '创建时间',
-        dataIndex: 'createTime',
-        key: 'createTime',
-        width: 200,
-      },
-    ],
-  }
   const columns: ColumnsType<DataType> = [
     {
       title: 'API名称',
@@ -204,7 +153,6 @@ export default (props: IApiListProps) => {
         </Button>
       ),
     },
-    ...columnsMaps[mode],
     {
       title: '操作',
       width: 300,
@@ -220,7 +168,7 @@ export default (props: IApiListProps) => {
               disabled={record.status === 1}
               type="text"
               icon={<EditOutlined />}
-             />
+            />
           </Tooltip>
           {record.status === 1 ? (
             <Tooltip title={'下线'}>
@@ -256,7 +204,7 @@ export default (props: IApiListProps) => {
                 pageJump('debug', record)
               }}
               icon={<BugOutlined />}
-             />
+            />
           </Tooltip>
           <Tooltip title={'删除'}>
             <Popconfirm
@@ -272,7 +220,7 @@ export default (props: IApiListProps) => {
                 type="text"
                 disabled={record.status === 1}
                 icon={<DeleteOutlined />}
-               />
+              />
             </Popconfirm>
           </Tooltip>
         </Space>
@@ -280,7 +228,7 @@ export default (props: IApiListProps) => {
     },
   ]
   return (
-    <div className={[styles['api-list'], styles[mode]].join(' ')}>
+    <div className={styles['api-list']}>
       <Scrollbars style={{ height: `100%` }} ref={sref}>
         <div style={{ padding: 10 }}>
           <Row justify={'space-between'}>
@@ -307,18 +255,6 @@ export default (props: IApiListProps) => {
               </Space>
             </div>
             <div className="condition-col">
-              <div className="condition-item">
-                <div className="condition-label">最近运行时间</div>
-                {/* TODO add */}
-                {/* <Search
-                  placeholder="请输入名称"
-                  onSearch={() => {
-                    getApiList()
-                  }}
-                  onChange={debounce(onApiNameChange, 150)}
-                  style={{ width: 200 }}
-                /> */}
-              </div>
               <div className="condition-item">
                 <div className="condition-label">任务名称</div>
                 <Search

@@ -62,6 +62,7 @@ export default {
   'menu.dataAsset.metaDataManage.overview': 'Overview',
   'menu.dataAsset.metaDataManage.taskManage': 'Task Manage',
   'menu.dataAsset.metaDataManage.taskMonitoring': 'Task Monitoring',
+  "menu.dataAsset.metaDataManage.create": 'Create',
 
   
   'menu.devops': 'Devops',
