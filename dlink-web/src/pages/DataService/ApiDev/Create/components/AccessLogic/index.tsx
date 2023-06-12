@@ -15,6 +15,7 @@ import {
   message,
   Tooltip,
   Empty,
+  Alert,
 } from 'antd'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-mysql'
@@ -84,7 +85,7 @@ export const ParamtersTable = ({ params, onAdd }) => {
           size="small"
           type="text"
           icon={
-            <DoubleRightOutlined 
+            <DoubleRightOutlined
               onClick={() => {
                 onAdd(record)
               }}
@@ -140,7 +141,7 @@ export const CustomTable = ({ dataSource }) => {
 export default (props: IStepComProps) => {
   const { formLayout, forms, mode } = props
   const form: any = props.form
-  
+
   const [visible, setVisible] = useState(false)
   const editorRef = useRef<any>(null)
   const [testParams, setTestParams] = useState<readonly ITestParams[]>([])
@@ -152,7 +153,10 @@ export default (props: IStepComProps) => {
   const onAddVariable = (rowItem) => {
     const editor = editorRef?.current?.editor
     const cursorPos = editor.getCursorPosition()
-    editor.session.insert(cursorPos, rowItem.type == 'string' ? "'" + rowItem.variable + "'" : rowItem.variable)
+    editor.session.insert(
+      cursorPos,
+      rowItem.type == 'string' ? "'" + rowItem.variable + "'" : rowItem.variable,
+    )
   }
   const executeSql = (reqP) => {
     const tempParam = {
@@ -178,14 +182,7 @@ export default (props: IStepComProps) => {
     {
       title: '值',
       dataIndex: 'value',
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-            message: '此项为必填项',
-          },
-        ],
-      },
+      formItemProps: {},
     },
   ]
   return (
@@ -198,89 +195,113 @@ export default (props: IStepComProps) => {
           accessType: (accessTypeOptions as any)[0].value,
         }}
       >
-        <Form.Item
-          label="取数方式"
-          name="accessType"
-          rules={[{ required: true, message: '请选择取数方式' }]}
-        >
-          <Select placeholder="请选择" style={{ width: 300 }} options={accessTypeOptions}></Select>
-        </Form.Item>
-        <Form.Item
-          label="数据源类型"
-          name="datasourceType"
-          rules={[{ required: true, message: '请选择数据源类型' }]}
-        >
-          <SelectHelp
-            placeholder="请选择"
-            style={{ width: 300 }}
-            asyncCode={EAsyncCode.datasourceType}
-            onChange={() => {
-              form.setFieldsValue({
-                datasourceId: '',
-                datasourceDb: '',
-              })
-            }}
-          ></SelectHelp>
-        </Form.Item>
+        <Row>
+          <Col span={10} style={{ paddingRight: 10 }}>
+            <Form.Item
+              label="取数方式"
+              name="accessType"
+              rules={[{ required: true, message: '请选择取数方式' }]}
+            >
+              <Select
+                placeholder="请选择"
+                style={{ width: 300 }}
+                options={accessTypeOptions}
+              ></Select>
+            </Form.Item>
+            <Form.Item
+              label="数据源类型"
+              name="datasourceType"
+              rules={[{ required: true, message: '请选择数据源类型' }]}
+            >
+              <SelectHelp
+                placeholder="请选择"
+                style={{ width: 300 }}
+                asyncCode={EAsyncCode.datasourceType}
+                onChange={() => {
+                  form.setFieldsValue({
+                    datasourceId: '',
+                    datasourceDb: '',
+                  })
+                }}
+              ></SelectHelp>
+            </Form.Item>
 
-        <Form.Item
-          noStyle
-          shouldUpdate={(prevValues, currentValues) =>
-            prevValues.datasourceType !== currentValues.datasourceType
-          }
-        >
-          {({ getFieldValue }) =>
-            getFieldValue('datasourceType') || mode === 'edit' ? (
-              <Form.Item
-                label="数据连接"
-                name="datasourceId"
-                rules={[{ required: true, message: '请选择数据连接' }]}
-              >
-                <SelectHelp
-                  placeholder="请选择"
-                  style={{ width: 300 }}
-                  asyncCode={EAsyncCode.datasourceId}
-                  asyncParams={{ value: getFieldValue('datasourceType') }}
-                  optionFormatter={(options) =>
-                    options.map((option) => ({ label: option.name, value: option.id }))
-                  }
-                  onChange={() => {
-                    form.setFieldsValue({
-                      datasourceDb: '',
-                    })
-                  }}
-                ></SelectHelp>
-              </Form.Item>
-            ) : null
-          }
-        </Form.Item>
+            <Form.Item
+              noStyle
+              shouldUpdate={(prevValues, currentValues) =>
+                prevValues.datasourceType !== currentValues.datasourceType
+              }
+            >
+              {({ getFieldValue }) =>
+                getFieldValue('datasourceType') || mode === 'edit' ? (
+                  <Form.Item
+                    label="数据连接"
+                    name="datasourceId"
+                    rules={[{ required: true, message: '请选择数据连接' }]}
+                  >
+                    <SelectHelp
+                      placeholder="请选择"
+                      style={{ width: 300 }}
+                      asyncCode={EAsyncCode.datasourceId}
+                      asyncParams={{ value: getFieldValue('datasourceType') }}
+                      optionFormatter={(options) =>
+                        options.map((option) => ({ label: option.name, value: option.id }))
+                      }
+                      onChange={() => {
+                        form.setFieldsValue({
+                          datasourceDb: '',
+                        })
+                      }}
+                    ></SelectHelp>
+                  </Form.Item>
+                ) : null
+              }
+            </Form.Item>
 
-        <Form.Item
-          noStyle
-          shouldUpdate={(prevValues, currentValues) =>
-            prevValues.datasourceId !== currentValues.datasourceId
-          }
-        >
-          {({ getFieldValue }) =>
-            getFieldValue('datasourceId') || mode === 'edit' ? (
-              <Form.Item
-                label="数据库"
-                name="datasourceDb"
-                rules={[{ required: true, message: '请选择数据库' }]}
-              >
-                <SelectHelp
-                  placeholder="请选择"
-                  style={{ width: 300 }}
-                  asyncCode={EAsyncCode.datasourceDb}
-                  asyncParams={{ value: getFieldValue('datasourceId') }}
-                  optionFormatter={(options) =>
-                    options.map((option) => ({ label: option.name, value: option.name }))
-                  }
-                ></SelectHelp>
-              </Form.Item>
-            ) : null
-          }
-        </Form.Item>
+            <Form.Item
+              noStyle
+              shouldUpdate={(prevValues, currentValues) =>
+                prevValues.datasourceId !== currentValues.datasourceId
+              }
+            >
+              {({ getFieldValue }) =>
+                getFieldValue('datasourceId') || mode === 'edit' ? (
+                  <Form.Item
+                    label="数据库"
+                    name="datasourceDb"
+                    rules={[{ required: true, message: '请选择数据库' }]}
+                  >
+                    <SelectHelp
+                      placeholder="请选择"
+                      style={{ width: 300 }}
+                      asyncCode={EAsyncCode.datasourceDb}
+                      asyncParams={{ value: getFieldValue('datasourceId') }}
+                      optionFormatter={(options) =>
+                        options.map((option) => ({ label: option.name, value: option.name }))
+                      }
+                    ></SelectHelp>
+                  </Form.Item>
+                ) : null
+              }
+            </Form.Item>
+          </Col>
+          <Col span={14}>
+            <Alert
+              type="warning"
+              message={
+                <>
+                  <div>{`支持动态SQL语法：`}</div>
+                  <div>{`<if test=""></if>`}</div>
+                  <div>{`<where></where>`}</div>
+                  <div>{`<foreach open="(" close=")" collection="" separator="," item="item" index="index">#{item}</foreach>`}</div>
+                  <div>{`<trim prefix="" suffix="" suffixesToOverride="" prefixesToOverride=""></trim>`}</div>
+                  <div>{`更多请参考MyBatis动态SQL官网`}</div>
+                </>
+              }
+            ></Alert>
+          </Col>
+          <br />
+        </Row>
 
         <Row>
           <Col span={10} style={{ paddingRight: 10 }}>

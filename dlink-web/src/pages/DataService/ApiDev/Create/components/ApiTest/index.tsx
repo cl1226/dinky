@@ -79,12 +79,7 @@ export default ({ form, formLayout, forms, mode, stepBasic = {} }: IStepComProps
       title: '值',
       dataIndex: 'value',
       formItemProps: {
-        rules: [
-          {
-            required: true,
-            message: '此项为必填项',
-          },
-        ],
+        rules: [],
       },
     },
   ]
@@ -131,7 +126,7 @@ export default ({ form, formLayout, forms, mode, stepBasic = {} }: IStepComProps
             executeQuery({})
           }}
         >
-          SQL测试
+          接口测试
         </Button>
       </div>
       <div className="right-part">
