@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 
-export default () => {
+const TaskMonitoring: React.FC = () => {
   return <div>taskMonitoring</div>
 }
+
+export default TaskMonitoring

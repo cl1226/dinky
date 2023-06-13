@@ -1,4 +1,4 @@
-import type { RadioChangeEvent } from 'antd'
+import type { CheckboxOptionType, RadioChangeEvent } from 'antd'
 import { Col, Divider, Row, Radio } from 'antd'
 import { useEffect, useState, useRef } from 'react'
 import { getOldStatistic } from '../service'
@@ -12,7 +12,7 @@ export default () => {
   const [tabType, settabType] = useState<number>(7)
   const chartDom = useRef<HTMLDivElement | null>(null)
   const chartIns = useRef<EChartsType | null>(null)
-  const options = [
+  const options: CheckboxOptionType[] = [
     { label: '最近7天', value: 7 },
     { label: '最近15天', value: 15 },
     { label: '最近30天', value: 30 },
@@ -22,7 +22,7 @@ export default () => {
     settabType(value)
   }
 
-  const initEchart = () => {
+  const initEchart = (): void => {
     const ins = echarts.init(chartDom.current as HTMLDivElement)
     ins.setOption({
       color: ['#7B93E4'],
@@ -61,6 +61,7 @@ export default () => {
     initEchart()
     return () => {
       console.log('unmount')
+      chartIns.current?.dispose()
     }
   }, [])
 
