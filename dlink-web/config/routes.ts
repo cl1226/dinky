@@ -227,6 +227,12 @@ export default [
             name: 'dataDirectory',
             component: './DataAsset/DataMap/DataDirectory',
           },
+          {
+            path: '/dataAsset/dataMap/assetDetail/:id',
+            name: 'assetDetail',
+            component: './DataAsset/DataMap/AssetDetail',
+            hideInMenu: true,
+          },
         ],
       },
       {

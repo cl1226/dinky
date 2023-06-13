@@ -2,13 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Select } from 'antd'
 import { getCommonSelectOptions } from '@/components/Common/crud'
 import type { SelectProps } from 'antd/es/select'
-
-export enum EAsyncCode {
-  'datasourceType' = 'datasourceType',
-  'datasourceId' = 'datasourceId',
-  'datasourceDb' = 'datasourceDb',
-  'rootCatalogue' = 'rootCatalogue',
-}
+import { EAsyncCode } from './type'
 export interface ISelectProps extends SelectProps {
   asyncCode: EAsyncCode
   asyncParams?: any
