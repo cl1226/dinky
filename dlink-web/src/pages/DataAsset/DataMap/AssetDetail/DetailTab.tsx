@@ -11,11 +11,11 @@ export default (props) => {
             <Descriptions.Item label="数据源">{basicInfo.datasourceName}</Descriptions.Item>
             <Descriptions.Item label="数据源类型">{basicInfo.datasourceType}</Descriptions.Item>
             <Descriptions.Item label="路径">{basicInfo.position}</Descriptions.Item>
-            {basicInfo.position && (
-              <Descriptions.Item label="所属库">{basicInfo.position}</Descriptions.Item>
+            {basicInfo.dbName && (
+              <Descriptions.Item label="所属库">{basicInfo.dbName}</Descriptions.Item>
             )}
-            {basicInfo.position && (
-              <Descriptions.Item label="所属表">{basicInfo.position}</Descriptions.Item>
+            {basicInfo.tableName && (
+              <Descriptions.Item label="所属表">{basicInfo.tableName}</Descriptions.Item>
             )}
           </Descriptions>
         </Col>

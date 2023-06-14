@@ -6,21 +6,6 @@ import { connect, history } from 'umi'
 import { getDataDirectoryList } from '@/pages/DataAsset/DataMap/service'
 import { debounce } from 'lodash'
 
-const getExpandDetail = (record) => {
-  const { datasourceType, attributes } = record
-  const attributesObj = JSON.parse(attributes)
-  if (datasourceType === 'Hive') {
-  }
-  return (
-    <Descriptions className={styles['table-descriptions']}>
-      <Descriptions.Item label="数据连接">{record.datasourceName}</Descriptions.Item>
-      <Descriptions.Item label="类型">{record.datasourceType}</Descriptions.Item>
-      {Object.keys(attributesObj).map((objKey) => (
-        <Descriptions.Item label={objKey}>{attributesObj[objKey] || '-'}</Descriptions.Item>
-      ))}
-    </Descriptions>
-  )
-}
 const Property = (props) => {
   const { filterForm } = props
   const [loading, setLoading] = useState(false)
@@ -175,9 +160,6 @@ const Property = (props) => {
         //   },
         // }}
         columns={columns}
-        expandable={{
-          expandedRowRender: (record) => getExpandDetail(record),
-        }}
         dataSource={dataSource}
         pagination={{
           current: pageNum,

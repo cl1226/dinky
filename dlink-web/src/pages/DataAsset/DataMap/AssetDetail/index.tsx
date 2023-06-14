@@ -27,14 +27,16 @@ const getDetailContent = (paneItem) => {
       key: '2',
       children: <TableInfoTab basicInfo={paneItem} />,
     })
-  }else if(type === 'Column'){
-    tabs.push(...[
-      {
-        label: '列属性',
-        key: '2',
-        children: <ColumnInfoTab basicInfo={paneItem} />,
-      }
-    ])
+  } else if (type === 'Table') {
+    tabs.push(
+      ...[
+        {
+          label: '列属性',
+          key: '2',
+          children: <ColumnInfoTab basicInfo={paneItem} />,
+        },
+      ],
+    )
   }
   return (
     <div className={styles['detail-content']}>
@@ -87,11 +89,11 @@ const AssetDetailTabs = (props: any) => {
     let newActiveKey = currentTab.tabKey
     const newTabs = tabs.filter((tab) => tab.tabKey !== targetKey)
     const targetIndex = tabs.findIndex((tab) => tab.tabKey === targetKey)
-    console.log('targetKey', targetKey, currentTab, currentTab.tabKey)
+
     if (newTabs.length && targetKey === currentTab.tabKey) {
       newActiveKey = newTabs[targetIndex === newTabs.length ? targetIndex - 1 : targetIndex].tabKey
     }
-    console.log(newTabs, newActiveKey)
+
     props.saveTabs(newTabs, newActiveKey)
   }
 
@@ -108,8 +110,15 @@ const AssetDetailTabs = (props: any) => {
   const Tab = (pane: any) => (
     <span>
       <Dropdown overlay={menu(pane)} trigger={['contextMenu']}>
-        <span className="ant-dropdown-link">
-          {pane.icon} {pane.name}
+        <span>
+          {
+            <img
+              style={{ width: 16, height: 16, marginRight: 5, marginTop: -3 }}
+              src={`/dataAsset/dataMap/${pane.type || 'Table'}.svg`}
+              alt=""
+            />
+          }
+          {pane.name}
         </span>
       </Dropdown>
     </span>

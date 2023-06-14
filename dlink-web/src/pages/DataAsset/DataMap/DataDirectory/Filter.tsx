@@ -10,6 +10,7 @@ const { Panel } = Collapse
 const Filter = (props) => {
   const { filterForm } = props
   const [form] = Form.useForm()
+  const [cacheItemTypeOptions, setCacheItemTypeOptions] = useState<any>([])
   const filterItems = [
     {
       title: '数据源类型',
@@ -35,6 +36,7 @@ const Filter = (props) => {
     })
   }
   const initFilter = (options) => {
+    setCacheItemTypeOptions(options)
     if (filterForm) {
       const { itemType, datasourceType } = filterForm
       form.setFieldValue('itemType', itemType || [options[0]?.value])
@@ -54,12 +56,12 @@ const Filter = (props) => {
           onClick={() => {
             form.setFieldsValue({
               datasourceType: [],
-              itemType: [],
+              itemType: [cacheItemTypeOptions[0]?.value],
             })
             handleValueChange()
           }}
         >
-          全部清除
+          重置
         </div>
       </div>
       <div className="filter-items">
