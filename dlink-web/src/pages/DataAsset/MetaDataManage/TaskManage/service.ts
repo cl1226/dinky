@@ -64,7 +64,7 @@ export const removeCatalogueById = async (id: number) => {
 
 // 获取api列表
 export async function requestApiConfigList(params: IGetApiConfigListParams) {
-  return request2('/api/asset/config/page', {
+  return request2('/api/metadata/task/page', {
     method: 'POST',
     data: {
       ...params,
@@ -106,7 +106,7 @@ export const getApiConfigList = async (params: IGetApiConfigListParams) => {
 
 // 删除api
 export async function requestDeleteApiConfig(ids: (string | number)[]) {
-  return request2('/api/asset/config', {
+  return request2('/api/metadata/task', {
     method: 'DELETE',
     data: { ids },
   })
@@ -134,8 +134,8 @@ export const deleteApiConfig = async (ids: (string | number)[]) => {
 
 // api上线
 export async function updateApiConfigOnline(id: number) {
-  return request2('/api/asset/config/online', {
-    method: 'GET',
+  return request2('/api/metadata/task/online', {
+    method: 'PUT',
     params: {
       id,
     },
@@ -144,15 +144,15 @@ export async function updateApiConfigOnline(id: number) {
 
 // api下线
 export async function updateApiConfigOffline(id: number) {
-  return request2('/api/asset/config/offline', {
-    method: 'GET',
+  return request2('/api/metadata/task/offline', {
+    method: 'PUT',
     params: {
       id,
     },
   })
 }
 
-// 删除api
+// 更新上下线
 export const updateApiConfigStatus = async (id: number, mode: 'offline' | 'online') => {
   const reqApiMaps = {
     offline: updateApiConfigOffline,
@@ -172,4 +172,12 @@ export const updateApiConfigStatus = async (id: number, mode: 'offline' | 'onlin
     message.error(l('app.request.failed'))
     return false
   }
+}
+
+// 运行
+export const ExecuteTask = (id: number) => {
+  return request2('/api/metadata/task/execute', {
+    method: 'PUT',
+    params: { id },
+  })
 }

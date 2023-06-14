@@ -7,6 +7,7 @@ import {
   FallOutlined,
   BugOutlined,
   DeleteOutlined,
+  PlayCircleOutlined,
 } from '@ant-design/icons'
 import {
   Button,
@@ -20,6 +21,8 @@ import {
   Table,
   Space,
   Tooltip,
+  message,
+  Badge,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 
@@ -29,6 +32,7 @@ import {
   getApiConfigList,
   deleteApiConfig,
   updateApiConfigStatus,
+  ExecuteTask,
 } from '@/pages/DataAsset/MetaDataManage/TaskManage/service'
 import type { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { Scrollbars } from 'react-custom-scrollbars'
@@ -54,6 +58,21 @@ export interface DataType {
 export enum EDebugStatus {
   '失败',
   '成功',
+}
+
+const RunningStatusConfig = {
+  0: {
+    type: 'success',
+    msg: '运行成功',
+  },
+  1: {
+    type: 'processing',
+    msg: '正在运行',
+  },
+  2: {
+    type: 'error',
+    msg: '运行失败',
+  },
 }
 
 export default (props: IApiListProps) => {
@@ -113,7 +132,29 @@ export default (props: IApiListProps) => {
     setSelectedRowKeys(newSelectedRowKeys)
   }
 
-  const pageJump = (type, record) => {
+  const handleStart = (record) => {
+    if (loading) return
+    setLoading(true)
+    ExecuteTask(record.id)
+      .then((res) => {
+        setLoading(false)
+        if (res.code == 0) {
+          message.success(res.msg)
+          getApiList()
+        } else {
+          message.error(res.msg)
+        }
+      })
+      .catch((err) => {
+        setLoading(false)
+        message.error(err)
+      })
+  }
+
+  const pageJump = (type, record?) => {
+    if (loading) {
+      return
+    }
     sessionStorage.setItem(
       'dataAsset.metaDataManage.taskManage.list',
       JSON.stringify({
@@ -121,10 +162,15 @@ export default (props: IApiListProps) => {
         pageSize: pageSize,
         name: searchKey,
         catalogueId: catalogue?.id,
-        // TODO 存入运行时间
       }),
     )
-    history.push(`/dataService/devApi/${type}/${record.id}`)
+    if (type == 'edit') {
+      history.push(`/dataAsset/metaDataManage/create?id=${record.id}`)
+    } else if (record) {
+      history.push(`/dataAsset/metaDataManage/${type}/${record.id}`)
+    } else {
+      history.push(`/dataAsset/metaDataManage/${type}`)
+    }
   }
 
   useEffect(() => {
@@ -138,10 +184,10 @@ export default (props: IApiListProps) => {
 
   const columns: ColumnsType<DataType> = [
     {
-      title: 'API名称',
+      title: '任务名称',
       dataIndex: 'name',
       key: 'name',
-      width: 200,
+      width: 150,
       render: (cellValue, record) => (
         <Button
           type="link"
@@ -154,20 +200,56 @@ export default (props: IApiListProps) => {
       ),
     },
     {
+      title: '数据源类型',
+      dataIndex: 'datasourceType',
+      key: 'datasourceType',
+      width: 100,
+    },
+    {
+      title: '调度状态',
+      dataIndex: 'status',
+      key: 'status',
+      width: 100,
+      render(value, record, index) {
+        return (
+          <Badge status={RunningStatusConfig[value].type} text={RunningStatusConfig[value].msg} />
+        )
+      },
+    },
+    {
+      title: '调度周期',
+      width: 100,
+      dataIndex: 'cronExpression',
+      key: 'cronExpression',
+    },
+    {
+      title: '描述',
+      width: 150,
+      dataIndex: 'description',
+      key: 'description',
+    },
+    {
+      title: '最近运行时间',
+      // TODO xx
+      dataIndex: 'xx',
+      width: 120,
+      key: 'xx',
+    },
+    {
       title: '操作',
-      width: 300,
+      width: 160,
       key: 'action',
       render: (cellValue, record) => (
         <Space size="middle">
-          <Tooltip title={'编辑'}>
+          <Tooltip title={'运行'}>
             <Button
-              onClick={() => {
-                pageJump('edit', record)
-              }}
               size="small"
-              disabled={record.status === 1}
               type="text"
-              icon={<EditOutlined />}
+              disabled={record.status == 0}
+              onClick={() => {
+                handleStart(record)
+              }}
+              icon={<PlayCircleOutlined />}
             />
           </Tooltip>
           {record.status === 1 ? (
@@ -195,15 +277,15 @@ export default (props: IApiListProps) => {
               </Popconfirm>
             </Tooltip>
           )}
-
-          <Tooltip title={'调试'}>
+          <Tooltip title={'编辑'}>
             <Button
-              size="small"
-              type="text"
               onClick={() => {
-                pageJump('debug', record)
+                pageJump('edit', record)
               }}
-              icon={<BugOutlined />}
+              size="small"
+              disabled={record.status === 1}
+              type="text"
+              icon={<EditOutlined />}
             />
           </Tooltip>
           <Tooltip title={'删除'}>
@@ -236,7 +318,7 @@ export default (props: IApiListProps) => {
               <Space>
                 <Button
                   onClick={() => {
-                    history.push('/dataAsset/metaDataManage/create')
+                    pageJump('create')
                   }}
                 >
                   新建

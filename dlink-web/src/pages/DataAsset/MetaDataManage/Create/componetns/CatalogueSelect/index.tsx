@@ -1,25 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import type { TreeProps } from 'antd'
 import { Button, Space, Input, Modal, Tree } from 'antd'
-import { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
+import type { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import {
   handleAddOrUpdateCatalogue,
   getAllCatalogueTreeData,
   removeCatalogueById,
 } from '@/pages/DataAsset/MetaDataManage/TaskManage/service'
+import type { CatalogueValue } from '../../index.d'
 
 const { DirectoryTree } = Tree
-
-type CatalogueValue = {
-  id: number | string
-  path: string
-  [key: string]: any
-}
-
 interface ICatalogueSelectProps {
   value?: CatalogueValue
   style?: React.CSSProperties
-  onChange?: (value: CatalogueValue) => void
+  onChange?: (e: CatalogueValue) => void
 }
 
 function convertToTreeData(data: TreeDataNode[], pid: number, path?: string[]) {
@@ -28,7 +22,7 @@ function convertToTreeData(data: TreeDataNode[], pid: number, path?: string[]) {
   let temp: TreeDataNode[] = []
   for (let i = 0; i < data?.length; i++) {
     if (data[i].parentId === pid) {
-      let obj = data[i]
+      const obj = data[i]
       obj.title = obj.name
       obj.key = obj.id
       obj.value = obj.key
@@ -47,7 +41,7 @@ function convertToTreeData(data: TreeDataNode[], pid: number, path?: string[]) {
 export default ({ value, onChange }: ICatalogueSelectProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [treeData, settreeData] = useState<TreeDataNode[]>([])
-  const [currentCatalogue, setCurrentCatalogue] = useState<CatalogueValue | null>(value)
+  const [currentCatalogue, setCurrentCatalogue] = useState<CatalogueValue | undefined>(value)
 
   //   获取目录
   const getTreeData = async () => {
@@ -55,9 +49,6 @@ export default ({ value, onChange }: ICatalogueSelectProps) => {
     const data = result.datas
     const tempTreeData = convertToTreeData(data, 0)
     settreeData(tempTreeData)
-
-    if (value?.id) {
-    }
   }
 
   const onSelect: TreeProps['onSelect'] = (_selectedKeys, { node }) => {
@@ -70,7 +61,7 @@ export default ({ value, onChange }: ICatalogueSelectProps) => {
 
   const handleOk = () => {
     if (onChange) {
-      onChange({ ...currentCatalogue })
+      onChange({ ...currentCatalogue } as CatalogueValue)
     }
     setIsModalOpen(false)
   }

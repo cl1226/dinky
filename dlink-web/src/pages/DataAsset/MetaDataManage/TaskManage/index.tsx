@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import PageWrap from '@/components/Common/PageWrap'
 import CatalogueTree from './components/CatalogueTree'
 import TaskList from './components/TaskList'
-import type { TreeDataNode } from 'antd'
+import type { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 const TaskManage = () => {
   const [catalogue, setcatalogue] = useState<TreeDataNode>()
   const getCurrentCatalogue = (node: TreeDataNode) => {
@@ -12,7 +12,7 @@ const TaskManage = () => {
     <PageWrap>
       <CatalogueTree getCurrentCatalogue={getCurrentCatalogue} />
 
-      <TaskList catalogue={catalogue} mode={'catalogue'} />
+      <TaskList catalogue={catalogue} />
     </PageWrap>
   )
 }
