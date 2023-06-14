@@ -1,29 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Row, Descriptions, Col, Table } from 'antd'
+import React, { useEffect, useState } from 'react'
 import styles from './index.less'
+import { Table } from 'antd'
+import { connect } from 'umi'
 
-export default (props) => {
+const ColumnInfoTab = (props) => {
   const { basicInfo } = props
-  const [pageNum, setPageNum] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [pageTotal, setPageTotal] = useState(0)
-  const [tableLoading, setTableLoading] = useState(false)
-  const [dataSource, setDataSource] = useState([])
-
-  const getTableInfoList = async (extra?: any) => {
-    setTableLoading(true)
-    const { list, total, pn, ps } = await getAppBindApiList({
-      pageIndex: pageNum,
-      pageSize: pageSize,
-      ...(extra || {}),
-    })
-
-    setDataSource(list)
-    setPageTotal(total)
-    setPageNum(pn)
-    setPageSize(ps)
-    setTableLoading(false)
-  }
 
   const columns = [
     {
@@ -31,11 +12,26 @@ export default (props) => {
       dataIndex: 'name',
       key: 'name',
       width: 200,
+      render: (text, record) => (
+        <a
+          onClick={() => {
+            props.dispatch({
+              type: 'AssetDetail/openTab',
+              payload: {
+                itemType: 'Column',
+                id: record.id,
+              },
+            })
+          }}
+        >
+          {text}
+        </a>
+      ),
     },
     {
       title: '类型',
-      dataIndex: 'authTime',
-      key: 'authTime',
+      dataIndex: 'columnType',
+      key: 'columnType',
       width: 150,
     },
     {
@@ -54,22 +50,11 @@ export default (props) => {
   return (
     <div className={styles['detail-tab-wrap']}>
       <Table
-        loading={tableLoading}
         rowKey="id"
         size="small"
         columns={columns}
-        dataSource={dataSource}
+        dataSource={basicInfo.metadataColumnDTOS || []}
         pagination={{
-          current: pageNum,
-          pageSize: pageSize,
-          size: 'small',
-          onChange: (pn, ps) => {
-            getTableInfoList({
-              pageIndex: pn,
-              pageSize: ps,
-            })
-          },
-          total: pageTotal,
           showTotal: (total) => `共 ${total} 条`,
           showSizeChanger: true,
           showQuickJumper: true,
@@ -78,3 +63,5 @@ export default (props) => {
     </div>
   )
 }
+
+export default connect(() => ({}))(ColumnInfoTab)

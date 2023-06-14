@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import styles from './index.less'
-import { Tabs, Menu, Dropdown, Button } from 'antd'
+import { Tabs, Menu, Dropdown, Button, Spin } from 'antd'
 import { l } from '@/utils/intl'
 import { connect, history, useParams } from 'umi'
 import { ArrowLeftOutlined } from '@ant-design/icons'
@@ -59,25 +59,26 @@ const getDetailContent = (paneItem) => {
 
 const AssetDetailTabs = (props: any) => {
   const { itemType, id } = useParams() as any
-  const { tabs, currentTab } = props
+  const { tabs, currentTab, pageLoading } = props
 
   useEffect(() => {
-    initDetail()
+    props.asyncOpenTab(itemType, id)
   }, [])
 
-  const initDetail = async () => {
-    const result = await getDataDirectoryDetail(itemType, id)
-    if (result) {
-      const newTabs = [...tabs]
-      const findTabIndex = newTabs.findIndex((tab) => tab.tabKey === result.tabKey)
-      if (findTabIndex > -1) {
-        newTabs[findTabIndex] = result
-      } else {
-        newTabs.push(result)
-      }
-      props.saveTabs(newTabs, result.tabKey)
-    }
-  }
+  // const initDetail = async () => {
+  //   const result = await getDataDirectoryDetail(itemType, id)
+
+  //   if (result) {
+  //     const newTabs = [...tabs]
+  //     const findTabIndex = newTabs.findIndex((tab) => tab.tabKey === result.tabKey)
+  //     if (findTabIndex > -1) {
+  //       newTabs[findTabIndex] = result
+  //     } else {
+  //       newTabs.push(result)
+  //     }
+  //     props.saveTabs(newTabs, result.tabKey)
+  //   }
+  // }
   const onChange = (activeKey: any) => {
     if (activeKey === currentTab.tabKey) return
     props.changeCurrentTab(activeKey)
@@ -135,39 +136,49 @@ const AssetDetailTabs = (props: any) => {
   return (
     <div style={{ margin: -24 }}>
       {currentTab ? (
-        <Tabs
-          tabBarExtraContent={{
-            left: (
-              <div
-                className={styles['page-back-btn']}
-                onClick={() => {
-                  history.push('/dataAsset/dataMap/dataDirectory')
-                }}
-              >
-                <ArrowLeftOutlined />
-              </div>
-            ),
-          }}
-          hideAdd
-          type="editable-card"
-          size="small"
-          onChange={onChange}
-          activeKey={currentTab.tabKey}
-          onEdit={(targetKey: any, action: any) => {
-            if (action === 'remove') {
-              removeTab(targetKey)
-            }
-          }}
-          className={styles['edit-tabs']}
-        >
-          {tabs.map((pane, i) => getTabPane(pane, i))}
-        </Tabs>
+        <Spin spinning={pageLoading}>
+          <Tabs
+            tabBarExtraContent={{
+              left: (
+                <div
+                  className={styles['page-back-btn']}
+                  onClick={() => {
+                    history.push('/dataAsset/dataMap/dataDirectory')
+                  }}
+                >
+                  <ArrowLeftOutlined />
+                </div>
+              ),
+            }}
+            hideAdd
+            type="editable-card"
+            size="small"
+            onChange={onChange}
+            activeKey={currentTab.tabKey}
+            onEdit={(targetKey: any, action: any) => {
+              if (action === 'remove') {
+                removeTab(targetKey)
+              }
+            }}
+            className={styles['edit-tabs']}
+          >
+            {tabs.map((pane, i) => getTabPane(pane, i))}
+          </Tabs>
+        </Spin>
       ) : null}
     </div>
   )
 }
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
+  asyncOpenTab: (itemType: any, id: any) =>
+    dispatch({
+      type: 'AssetDetail/openTab',
+      payload: {
+        itemType,
+        id,
+      },
+    }),
   changeCurrentTab: (activeKey: string) =>
     dispatch({
       type: 'AssetDetail/changeCurrentTab',
@@ -195,6 +206,7 @@ export default connect(
   ({ AssetDetail }) => ({
     tabs: AssetDetail.tabs,
     currentTab: AssetDetail.currentTab,
+    pageLoading: AssetDetail.pageLoading,
   }),
   mapDispatchToProps,
 )(AssetDetailTabs)

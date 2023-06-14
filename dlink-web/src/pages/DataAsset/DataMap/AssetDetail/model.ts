@@ -1,8 +1,11 @@
 import type { Reducer } from 'umi'
 import { history } from 'umi'
+import { getDataDirectoryDetail } from '@/pages/DataAsset/DataMap/service'
+
 export type StateType = {
   tabs?: any
   currentTab?: any
+  pageLoading?: boolean
 }
 export type ModelType = {
   namespace: string
@@ -15,9 +18,50 @@ const Model: ModelType = {
   state: {
     tabs: [],
     currentTab: undefined,
+    pageLoading: false,
   },
-  effects: {},
+  effects: {
+    *openTab({ payload }, { call, put, select }) {
+      const { itemType, id } = payload
+
+      yield put({
+        type: 'changePageLoading',
+        payload: true,
+      })
+
+      const result = yield call(getDataDirectoryDetail, itemType, id)
+
+      const cacheTabs = yield select((state) => state.AssetDetail.tabs)
+
+      yield put({
+        type: 'changePageLoading',
+        payload: false,
+      })
+
+      const newTabs = [...cacheTabs]
+      const findTabIndex = newTabs.findIndex((tab) => tab.tabKey === result.tabKey)
+      if (findTabIndex > -1) {
+        newTabs[findTabIndex] = result
+      } else {
+        newTabs.push(result)
+      }
+
+      yield put({
+        type: 'saveTabs',
+        payload: {
+          tabs: newTabs,
+          activeKey: result.tabKey,
+        },
+      })
+    },
+  },
   reducers: {
+    changePageLoading(state, { payload }) {
+      return {
+        ...state,
+        pageLoading: payload,
+      }
+    },
     changeCurrentTab(state, { payload }) {
       const newTabs = state?.tabs
       let newCurrent = state?.currentTab
@@ -26,6 +70,7 @@ const Model: ModelType = {
           newCurrent = newTabs[i]
         }
       }
+      history.push(`/dataAsset/dataMap/assetDetail/${newCurrent.type}/${newCurrent.id}`)
       return {
         ...state,
         currentTab: { ...newCurrent },
@@ -40,6 +85,7 @@ const Model: ModelType = {
         const keys = [currentTab.tabKey]
         newCurrent = currentTab
         newTabs = newTabs.filter((item) => keys.includes(item.tabKey))
+        history.push(`/dataAsset/dataMap/assetDetail/${newCurrent.type}/${newCurrent.id}`)
       } else {
         newTabs = []
         history.push('/dataAsset/dataMap/dataDirectory')
@@ -67,6 +113,7 @@ const Model: ModelType = {
           tabs: [],
         }
       }
+      history.push(`/dataAsset/dataMap/assetDetail/${newCurrent.type}/${newCurrent.id}`)
       return {
         ...state,
         currentTab: { ...newCurrent },
