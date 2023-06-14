@@ -7,46 +7,50 @@ import { ArrowLeftOutlined } from '@ant-design/icons'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { Dispatch } from '@@/plugin-dva/connect'
 import { getDataDirectoryDetail } from '@/pages/DataAsset/DataMap/service'
-
+import DetailTab from './DetailTab'
+import TableInfoTab from './TableInfoTab'
+import ColumnInfoTab from './ColumnInfoTab'
 const { TabPane } = Tabs
 
 const getDetailContent = (paneItem) => {
+  const { type } = paneItem
+  const tabs = [
+    {
+      label: '详情',
+      key: '1',
+      children: <DetailTab basicInfo={paneItem} />,
+    },
+  ]
+  if (type === 'Database') {
+    tabs.push({
+      label: '表信息',
+      key: '2',
+      children: <TableInfoTab basicInfo={paneItem} />,
+    })
+  }else if(type === 'Column'){
+    tabs.push(...[
+      {
+        label: '列属性',
+        key: '2',
+        children: <ColumnInfoTab basicInfo={paneItem} />,
+      }
+    ])
+  }
   return (
     <div className={styles['detail-content']}>
       <div className="top-detail">
         <div className="left-header">
-          <img src="" alt="" />
+          <img src={`/dataAsset/dataMap/${paneItem.type || 'Table'}.svg`} alt="" />
         </div>
         <div className="right-header">
-          <div className="title">dbms_om</div>
+          <div className="title">{paneItem.name}</div>
           <div className="tip-list">
-            <div className="tip-item">/db_dev</div>
-            <div className="tip-item">创建人: hw_008618921220523_01/dlg_agency</div>
+            {`数据源：${paneItem.datasourceName}`}
+            {paneItem.position && <div className="tip-item">{paneItem.position}</div>}
           </div>
-          <Button style={{ position: 'absolute', right: 0, top: 0 }}>删除</Button>
         </div>
       </div>
-      <Tabs
-        size={'small'}
-        defaultActiveKey="1"
-        items={[
-          {
-            label: '详情',
-            key: '1',
-            children: <>1111</>,
-          },
-          {
-            label: '表信息',
-            key: '2',
-            children: <>222</>,
-          },
-          {
-            label: '视图信息',
-            key: '3',
-            children: <>333</>,
-          },
-        ]}
-      />
+      <Tabs size={'small'} defaultActiveKey="1" items={tabs} />
     </div>
   )
 }
@@ -58,34 +62,36 @@ const AssetDetailTabs = (props: any) => {
   useEffect(() => {
     initDetail()
   }, [])
+
   const initDetail = async () => {
     const result = await getDataDirectoryDetail(itemType, id)
-    console.log(result)
     if (result) {
-      props.saveTabs([...(tabs || []), result], result.tabKey)
+      const newTabs = [...tabs]
+      const findTabIndex = newTabs.findIndex((tab) => tab.tabKey === result.tabKey)
+      if (findTabIndex > -1) {
+        newTabs[findTabIndex] = result
+      } else {
+        newTabs.push(result)
+      }
+      props.saveTabs(newTabs, result.tabKey)
     }
   }
   const onChange = (activeKey: any) => {
+    if (activeKey === currentTab.tabKey) return
     props.changeCurrentTab(activeKey)
+
+    history.push(`/dataAsset/dataMap/assetDetail/${activeKey}`)
   }
 
   const removeTab = (targetKey: any) => {
-    let newActiveKey = currentTab.key
-    let lastIndex = 0
-    tabs.forEach((pane, i) => {
-      if (pane.key.toString() === targetKey) {
-        lastIndex = i - 1
-      }
-    })
-
-    const newTabs = tabs.filter((pane) => pane.key.toString() != targetKey)
-    if (newTabs.length && newActiveKey.toString() === targetKey) {
-      if (lastIndex > 0) {
-        newActiveKey = newTabs[lastIndex].key
-      } else {
-        newActiveKey = newTabs[0].key
-      }
+    let newActiveKey = currentTab.tabKey
+    const newTabs = tabs.filter((tab) => tab.tabKey !== targetKey)
+    const targetIndex = tabs.findIndex((tab) => tab.tabKey === targetKey)
+    console.log('targetKey', targetKey, currentTab, currentTab.tabKey)
+    if (newTabs.length && targetKey === currentTab.tabKey) {
+      newActiveKey = newTabs[targetIndex === newTabs.length ? targetIndex - 1 : targetIndex].tabKey
     }
+    console.log(newTabs, newActiveKey)
     props.saveTabs(newTabs, newActiveKey)
   }
 
@@ -109,7 +115,6 @@ const AssetDetailTabs = (props: any) => {
     </span>
   )
   const getTabPane = (pane, i) => {
-    console.log('getTabPane', pane)
     return (
       <TabPane tab={Tab(pane)} key={pane.tabKey}>
         <Scrollbars style={{ height: 'calc(100vh - 48px - 36px)', backgroundColor: '#fff' }}>
@@ -146,8 +151,7 @@ const AssetDetailTabs = (props: any) => {
           }}
           className={styles['edit-tabs']}
         >
-          {tabs.map((pane, i) => {  console.log('xxxx', tabs)
-           return getTabPane(pane, i)})}
+          {tabs.map((pane, i) => getTabPane(pane, i))}
         </Tabs>
       ) : null}
     </div>
@@ -160,12 +164,12 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
       type: 'AssetDetail/changeCurrentTab',
       payload: activeKey,
     }),
-  closeTabs: (current: any, key: string) =>
+  closeTabs: (currentTab: any, tabKey: string) =>
     dispatch({
       type: 'AssetDetail/closeTabs',
       payload: {
-        deleteType: key,
-        current,
+        deleteType: tabKey,
+        currentTab,
       },
     }),
   saveTabs: (newTabs: any, newActiveKey: string) =>

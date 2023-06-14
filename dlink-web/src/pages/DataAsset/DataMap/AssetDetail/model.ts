@@ -19,11 +19,10 @@ const Model: ModelType = {
   effects: {},
   reducers: {
     changeCurrentTab(state, { payload }) {
-      payload = parseInt(payload)
       const newTabs = state?.tabs
       let newCurrent = state?.currentTab
       for (let i = 0; i < newTabs.length; i++) {
-        if (newTabs[i].tabKey == payload) {
+        if (newTabs[i].tabKey === payload) {
           newCurrent = newTabs[i]
         }
       }
@@ -34,12 +33,12 @@ const Model: ModelType = {
       }
     },
     closeTabs(state, { payload }) {
-      const { deleteType, current } = payload
+      const { deleteType, currentTab } = payload
       let newTabs = state.tabs
       let newCurrent = newTabs[0]
       if (deleteType == 'CLOSE_OTHER') {
-        const keys = [current.tabKey]
-        newCurrent = current
+        const keys = [currentTab.tabKey]
+        newCurrent = currentTab
         newTabs = newTabs.filter((item) => keys.includes(item.tabKey))
       } else {
         newTabs = []
@@ -48,7 +47,7 @@ const Model: ModelType = {
 
       return {
         ...state,
-        current: { ...newCurrent },
+        currentTab: { ...newCurrent },
         tabs: [...newTabs],
       }
     },
@@ -61,16 +60,16 @@ const Model: ModelType = {
         }
       }
       if (tabs.length == 0) {
+        history.push('/dataAsset/dataMap/dataDirectory')
         return {
           ...state,
-          current: undefined,
+          currentTab: undefined,
           tabs: [],
         }
       }
-      console.log('[...payload.tabs]', [...payload.tabs])
       return {
         ...state,
-        current: { ...newCurrent },
+        currentTab: { ...newCurrent },
         tabs: [...tabs],
       }
     },
