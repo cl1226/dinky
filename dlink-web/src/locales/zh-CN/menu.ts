@@ -64,6 +64,7 @@ export default {
   'menu.dataAsset.metaDataManage.taskManage': '任务管理',
   'menu.dataAsset.metaDataManage.taskMonitoring': '任务监控',
   "menu.dataAsset.metaDataManage.create": '创建',
+  "menu.dataAsset.metaDataManage.detail": '详情',
 
 
   'menu.devops': '运维中心',

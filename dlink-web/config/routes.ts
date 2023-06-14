@@ -256,6 +256,12 @@ export default [
             component: './DataAsset/MetaDataManage/TaskMonitoring',
           },
           {
+            path: '/dataAsset/metaDataManage/detail/:id',
+            name: 'detail',
+            component: './DataAsset/MetaDataManage/Detail',
+            hideInMenu: true,
+          },
+          {
             path: '/dataAsset/metaDataManage/create',
             name: 'create',
             component: './DataAsset/MetaDataManage/Create',
