@@ -4,7 +4,6 @@ import { Row, Checkbox, Table, Button, Space, Popconfirm, Input, Descriptions } 
 import type { CheckboxChangeEvent } from 'antd/es/checkbox'
 import { connect, history } from 'umi'
 import { getDataDirectoryList } from '@/pages/DataAsset/DataMap/service'
-import { SyncOutlined } from '@ant-design/icons'
 import { debounce } from 'lodash'
 
 const getExpandDetail = (record) => {
@@ -26,11 +25,12 @@ const Property = (props) => {
   const { filterForm } = props
   const [loading, setLoading] = useState(false)
   const [searchKey, setSearchKey] = useState('')
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [dataSource, setDataSource] = useState([])
   const [pageNum, setPageNum] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [pageTotal, setPageTotal] = useState(0)
+  
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
   const getDataSourceList = async (extra?: any) => {
     const params = {
@@ -51,12 +51,6 @@ const Property = (props) => {
     setPageSize(ps)
   }
 
-  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    setSelectedRowKeys(newSelectedRowKeys)
-  }
-  const onSelectAllChange = (e: CheckboxChangeEvent) => {
-    console.log(`checked = ${e.target.checked}`)
-  }
   useEffect(() => {
     const sessionJson = sessionStorage.getItem('dataAsset.dataMap.dataDirectory')
     const sessionQuery = JSON.parse(sessionJson || '{}')
@@ -81,7 +75,7 @@ const Property = (props) => {
         pageSize: pageSize,
       }),
     )
-    history.push(`/dataAsset/dataMap/assetDetail/${record.id}`)
+    history.push(`/dataAsset/dataMap/assetDetail/${record.type}/${record.id}`)
   }
   const columns = [
     {
@@ -92,7 +86,7 @@ const Property = (props) => {
         return (
           <>
             <div style={{ width: 40, height: 40, margin: '0 auto' }}>
-              <img src="/dataAsset/dataMap/Table.svg" alt="" />
+              <img src={`/dataAsset/dataMap/${record.type || 'Table'}.svg`} alt="" />
             </div>
             <div style={{ textAlign: 'center' }}>{record.labelName}</div>
           </>
@@ -134,7 +128,13 @@ const Property = (props) => {
     <div className={styles['property-wrap']}>
       <Row justify={'space-between'} style={{ width: '100%' }}>
         {/* <Space>
-          <Checkbox onChange={onSelectAllChange}>全选/反选</Checkbox>
+          <Checkbox
+            onChange={(e: CheckboxChangeEvent) => {
+              console.log(`checked = ${e.target.checked}`)
+            }}
+          >
+            全选/反选
+          </Checkbox>
 
           <Popconfirm
             title="请确认将执行删除操作！"
@@ -170,7 +170,9 @@ const Property = (props) => {
         showHeader={false}
         // rowSelection={{
         //   selectedRowKeys,
-        //   onChange: onSelectChange,
+        //   onChange: (newSelectedRowKeys: React.Key[]) => {
+        //     setSelectedRowKeys(newSelectedRowKeys)
+        //   },
         // }}
         columns={columns}
         expandable={{

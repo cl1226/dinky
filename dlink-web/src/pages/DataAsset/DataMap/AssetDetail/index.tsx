@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react'
 import styles from './index.less'
-import PageWrap from '@/components/Common/PageWrap'
 import { Tabs, Menu, Dropdown, Button } from 'antd'
 import { l } from '@/utils/intl'
-import { connect } from 'umi'
+import { connect, history, useParams } from 'umi'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { Dispatch } from '@@/plugin-dva/connect'
+import { getDataDirectoryDetail } from '@/pages/DataAsset/DataMap/service'
 
 const { TabPane } = Tabs
 
@@ -52,19 +52,24 @@ const getDetailContent = (paneItem) => {
 }
 
 const AssetDetailTabs = (props: any) => {
+  const { itemType, id } = useParams() as any
   const { tabs, currentTab } = props
 
+  useEffect(() => {
+    initDetail()
+  }, [])
+  const initDetail = async () => {
+    const result = await getDataDirectoryDetail(itemType, id)
+    console.log(result)
+    if (result) {
+      props.saveTabs([...(tabs || []), result], result.tabKey)
+    }
+  }
   const onChange = (activeKey: any) => {
     props.changeCurrentTab(activeKey)
   }
 
-  const onEdit = (targetKey: any, action: any) => {
-    if (action === 'remove') {
-      remove(targetKey)
-    }
-  }
-
-  const remove = (targetKey: any) => {
+  const removeTab = (targetKey: any) => {
     let newActiveKey = currentTab.key
     let lastIndex = 0
     tabs.forEach((pane, i) => {
@@ -73,23 +78,19 @@ const AssetDetailTabs = (props: any) => {
       }
     })
 
-    const newPanes = tabs.filter((pane) => pane.key.toString() != targetKey)
-    if (newPanes.length && newActiveKey.toString() === targetKey) {
+    const newTabs = tabs.filter((pane) => pane.key.toString() != targetKey)
+    if (newTabs.length && newActiveKey.toString() === targetKey) {
       if (lastIndex > 0) {
-        newActiveKey = newPanes[lastIndex].key
+        newActiveKey = newTabs[lastIndex].key
       } else {
-        newActiveKey = newPanes[0].key
+        newActiveKey = newTabs[0].key
       }
     }
-    props.saveTabs(newPanes, newActiveKey)
-  }
-
-  const handleClickMenu = (e: any, current) => {
-    props.closeTabs(current, e.key)
+    props.saveTabs(newTabs, newActiveKey)
   }
 
   const menu = (pane) => (
-    <Menu onClick={(e) => handleClickMenu(e, pane)}>
+    <Menu onClick={(e) => props.closeTabs(pane, e.key)}>
       <Menu.Item key="CLOSE_ALL">
         <span>{l('right.menu.closeAll')}</span>
       </Menu.Item>
@@ -100,25 +101,18 @@ const AssetDetailTabs = (props: any) => {
   )
   const Tab = (pane: any) => (
     <span>
-      {pane.key === 0 ? (
-        <>
-          {pane.icon} {pane.title}
-        </>
-      ) : (
-        <Dropdown overlay={menu(pane)} trigger={['contextMenu']}>
-          <span className="ant-dropdown-link">
-            <>
-              {pane.icon} {pane.title}
-            </>
-          </span>
-        </Dropdown>
-      )}
+      <Dropdown overlay={menu(pane)} trigger={['contextMenu']}>
+        <span className="ant-dropdown-link">
+          {pane.icon} {pane.name}
+        </span>
+      </Dropdown>
     </span>
   )
   const getTabPane = (pane, i) => {
+    console.log('getTabPane', pane)
     return (
-      <TabPane tab={Tab(pane)} key={pane.key} closable={pane.closable}>
-        <Scrollbars style={{ height: 'calc(100vh - 48px - 36px)',backgroundColor: '#fff' }}>
+      <TabPane tab={Tab(pane)} key={pane.tabKey}>
+        <Scrollbars style={{ height: 'calc(100vh - 48px - 36px)', backgroundColor: '#fff' }}>
           <div style={{ padding: 20 }}>{getDetailContent(pane)}</div>
         </Scrollbars>
       </TabPane>
@@ -130,7 +124,12 @@ const AssetDetailTabs = (props: any) => {
         <Tabs
           tabBarExtraContent={{
             left: (
-              <div className={styles['page-back-btn']}>
+              <div
+                className={styles['page-back-btn']}
+                onClick={() => {
+                  history.push('/dataAsset/dataMap/dataDirectory')
+                }}
+              >
                 <ArrowLeftOutlined />
               </div>
             ),
@@ -139,11 +138,16 @@ const AssetDetailTabs = (props: any) => {
           type="editable-card"
           size="small"
           onChange={onChange}
-          activeKey={currentTab.key}
-          onEdit={onEdit}
+          activeKey={currentTab.tabKey}
+          onEdit={(targetKey: any, action: any) => {
+            if (action === 'remove') {
+              removeTab(targetKey)
+            }
+          }}
           className={styles['edit-tabs']}
         >
-          {tabs.map((pane, i) => getTabPane(pane, i))}
+          {tabs.map((pane, i) => {  console.log('xxxx', tabs)
+           return getTabPane(pane, i)})}
         </Tabs>
       ) : null}
     </div>
@@ -151,7 +155,7 @@ const AssetDetailTabs = (props: any) => {
 }
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  changeCurrentTab: (activeKey: number) =>
+  changeCurrentTab: (activeKey: string) =>
     dispatch({
       type: 'AssetDetail/changeCurrentTab',
       payload: activeKey,
@@ -164,12 +168,12 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
         current,
       },
     }),
-  saveTabs: (newPanes: any, newActiveKey: number) =>
+  saveTabs: (newTabs: any, newActiveKey: string) =>
     dispatch({
       type: 'AssetDetail/saveTabs',
       payload: {
+        tabs: newTabs,
         activeKey: newActiveKey,
-        panes: newPanes,
       },
     }),
 })

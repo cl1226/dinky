@@ -1,7 +1,8 @@
 import type { FormInstance } from 'antd'
 import { Card, Form, Input, TreeSelect } from 'antd'
 import CatalogueSelect from '../CatalogueSelect'
-import SelectHelp, { EAsyncCode } from '@/components/SelectHelp'
+import SelectHelp from '@/components/SelectHelp'
+import { EAsyncCode } from '@/components/SelectHelp/type.d'
 import style from './index.less'
 
 const { TextArea } = Input

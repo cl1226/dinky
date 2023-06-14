@@ -228,7 +228,7 @@ export default [
             component: './DataAsset/DataMap/DataDirectory',
           },
           {
-            path: '/dataAsset/dataMap/assetDetail/:id',
+            path: '/dataAsset/dataMap/assetDetail/:itemType/:id',
             name: 'assetDetail',
             component: './DataAsset/DataMap/AssetDetail',
             hideInMenu: true,

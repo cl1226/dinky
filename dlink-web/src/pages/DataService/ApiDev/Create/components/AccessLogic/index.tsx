@@ -20,7 +20,8 @@ import {
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-mysql'
 import 'ace-builds/src-noconflict/theme-github'
-import SelectHelp, { EAsyncCode } from '@/components/SelectHelp'
+import SelectHelp from '@/components/SelectHelp'
+import { EAsyncCode } from '@/components/SelectHelp/type.d'
 import type { ProColumns } from '@ant-design/pro-components'
 import { EditableProTable } from '@ant-design/pro-components'
 

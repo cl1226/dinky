@@ -1,9 +1,8 @@
 import type { Reducer } from 'umi'
-
+import { history } from 'umi'
 export type StateType = {
   tabs?: any
   currentTab?: any
-  activeKey?: any
 }
 export type ModelType = {
   namespace: string
@@ -14,21 +13,8 @@ export type ModelType = {
 const Model: ModelType = {
   namespace: 'AssetDetail',
   state: {
-    tabs: [
-      {
-        key: '1',
-        title: '一号',
-      },
-      {
-        key: '2',
-        title: '二号号',
-      },
-    ],
-    currentTab: {
-      key: '1',
-      title: '一号',
-    },
-    activeKey: null,
+    tabs: [],
+    currentTab: undefined,
   },
   effects: {},
   reducers: {
@@ -37,7 +23,7 @@ const Model: ModelType = {
       const newTabs = state?.tabs
       let newCurrent = state?.currentTab
       for (let i = 0; i < newTabs.length; i++) {
-        if (newTabs[i].key == payload) {
+        if (newTabs[i].tabKey == payload) {
           newCurrent = newTabs[i]
         }
       }
@@ -52,37 +38,40 @@ const Model: ModelType = {
       let newTabs = state.tabs
       let newCurrent = newTabs[0]
       if (deleteType == 'CLOSE_OTHER') {
-        const keys = [current.key]
+        const keys = [current.tabKey]
         newCurrent = current
-        newTabs = newTabs.filter((item) => keys.includes(item.key))
+        newTabs = newTabs.filter((item) => keys.includes(item.tabKey))
       } else {
         newTabs = []
+        history.push('/dataAsset/dataMap/dataDirectory')
       }
 
       return {
         ...state,
         current: { ...newCurrent },
-        tabs: newTabs,
+        tabs: [...newTabs],
       }
     },
     saveTabs(state, { payload }) {
+      const { tabs, activeKey } = payload
       let newCurrent = state.currentTab
-      for (let i = 0; i < payload.panes.length; i++) {
-        if (payload.panes[i].key == payload.activeKey) {
-          newCurrent = payload.panes[i]
+      for (let i = 0; i < tabs.length; i++) {
+        if (tabs[i].tabKey == activeKey) {
+          newCurrent = tabs[i]
         }
       }
-      if (payload.panes.length == 0) {
+      if (tabs.length == 0) {
         return {
           ...state,
           current: undefined,
-          tabs: payload.panes,
+          tabs: [],
         }
       }
+      console.log('[...payload.tabs]', [...payload.tabs])
       return {
         ...state,
         current: { ...newCurrent },
-        tabs: payload.panes,
+        tabs: [...tabs],
       }
     },
   },

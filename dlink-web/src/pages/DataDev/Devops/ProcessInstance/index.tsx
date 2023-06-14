@@ -13,7 +13,8 @@ import {
 } from '@/pages/DataDev/Devops/service'
 import { EState, ECommandType } from '@/pages/DataDev/Devops/data.d'
 import { transferEnumToOptions } from '@/utils/utils'
-import SelectHelp, { EAsyncCode } from '@/components/SelectHelp'
+import SelectHelp from '@/components/SelectHelp'
+import { EAsyncCode } from '@/components/SelectHelp/type.d'
 
 const RangePicker: any = DatePicker.RangePicker
 
