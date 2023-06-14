@@ -17,6 +17,7 @@ const Model: ModelType = {
   namespace: 'DataDirectory',
   state: {
     pageLoading: false,
+    filterForm: null,
   },
   effects: {},
   reducers: {

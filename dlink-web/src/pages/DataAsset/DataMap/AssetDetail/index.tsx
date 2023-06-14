@@ -26,6 +26,27 @@ const getDetailContent = (paneItem) => {
           <Button style={{ position: 'absolute', right: 0, top: 0 }}>删除</Button>
         </div>
       </div>
+      <Tabs
+        size={'small'}
+        defaultActiveKey="1"
+        items={[
+          {
+            label: '详情',
+            key: '1',
+            children: <>1111</>,
+          },
+          {
+            label: '表信息',
+            key: '2',
+            children: <>222</>,
+          },
+          {
+            label: '视图信息',
+            key: '3',
+            children: <>333</>,
+          },
+        ]}
+      />
     </div>
   )
 }
@@ -97,7 +118,7 @@ const AssetDetailTabs = (props: any) => {
   const getTabPane = (pane, i) => {
     return (
       <TabPane tab={Tab(pane)} key={pane.key} closable={pane.closable}>
-        <Scrollbars style={{ height: '100%' }}>
+        <Scrollbars style={{ height: 'calc(100vh - 48px - 36px)',backgroundColor: '#fff' }}>
           <div style={{ padding: 20 }}>{getDetailContent(pane)}</div>
         </Scrollbars>
       </TabPane>

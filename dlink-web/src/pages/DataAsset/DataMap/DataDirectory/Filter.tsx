@@ -4,22 +4,28 @@ import { Collapse, Form } from 'antd'
 import CheckGroupHelp from '@/components/SelectHelp/CheckGroupHelp'
 import { EAsyncCode } from '@/components/SelectHelp/type.d'
 import { connect } from 'umi'
-
+import { StateType } from './model'
 const { Panel } = Collapse
 
 const Filter = (props) => {
+  const { filterForm } = props
   const [form] = Form.useForm()
-
   const filterItems = [
     {
-      title: '数据连接',
+      title: '数据源类型',
       key: 'datasourceType',
       children: <CheckGroupHelp checkAll={true} asyncCode={EAsyncCode.DBTYPE} />,
     },
     {
       title: '类型',
       key: 'itemType',
-      children: <CheckGroupHelp single={true} asyncCode={EAsyncCode.ITEMTYPE} />,
+      children: (
+        <CheckGroupHelp
+          afterAsync={(options) => initFilter(options)}
+          single={true}
+          asyncCode={EAsyncCode.ITEMTYPE}
+        />
+      ),
     },
   ]
   const handleValueChange = () => {
@@ -27,6 +33,16 @@ const Filter = (props) => {
       type: 'DataDirectory/saveFilterForm',
       payload: form.getFieldsValue(),
     })
+  }
+  const initFilter = (options) => {
+    if (filterForm) {
+      const { itemType, datasourceType } = filterForm
+      form.setFieldValue('itemType', itemType || [options[0]?.value])
+      datasourceType && form.setFieldValue('datasourceType', datasourceType)
+    } else {
+      form.setFieldValue('itemType', [options[0]?.value])
+      handleValueChange()
+    }
   }
 
   return (
@@ -49,7 +65,6 @@ const Filter = (props) => {
       <div className="filter-items">
         <Form
           form={form}
-          initialValues={{}}
           onValuesChange={(changedValues, allValues) => {
             handleValueChange()
           }}
@@ -72,4 +87,6 @@ const Filter = (props) => {
     </div>
   )
 }
-export default connect(() => ({}))(Filter)
+export default connect(({ DataDirectory }: { DataDirectory: StateType }) => ({
+  filterForm: DataDirectory.filterForm,
+}))(Filter)

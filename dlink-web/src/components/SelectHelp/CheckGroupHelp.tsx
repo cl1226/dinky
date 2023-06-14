@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Checkbox, Row } from 'antd'
-import { getCommonSelectOptions } from '@/components/Common/crud'
 import type { CheckboxGroupProps, CheckboxChangeEvent } from 'antd/es/checkbox'
-
-import type { CheckboxValueType } from 'antd/es/checkbox/Group'
+import { getCommonSelectOptions } from '@/components/Common/crud'
 
 import { EAsyncCode } from './type'
 
@@ -12,6 +10,8 @@ export interface ICheckGroupProps extends CheckboxGroupProps {
   asyncParams?: any
   checkAll?: boolean
   single?: boolean
+  defaultSelectFirst?: boolean
+  afterAsync?: (options?: any) => void
   optionFormatter?: (option: any) => any
 }
 export default (props: ICheckGroupProps) => {
@@ -23,6 +23,8 @@ export default (props: ICheckGroupProps) => {
     onChange,
     checkAll,
     single,
+    defaultSelectFirst,
+    afterAsync,
     ...remainProps
   } = props
   const [options, setOptions] = useState<any>([])
@@ -44,6 +46,10 @@ export default (props: ICheckGroupProps) => {
 
       const formatOptions = optionFormatter(options) || []
       setOptions(formatOptions)
+
+      defaultSelectFirst && onChange && onChange([formatOptions[0]?.value])
+
+      afterAsync && afterAsync(formatOptions)
     })()
   }, [asyncCode, asyncParams && JSON.stringify(asyncParams)])
 

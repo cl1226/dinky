@@ -8,7 +8,7 @@ export interface ISelectProps extends SelectProps {
   asyncParams?: any
   optionFormatter?: (option: any) => any
   defaultSelectFirst?: boolean
-  afterFirstSelect?: (value, option) => void
+  afterAsync?: (options?: any) => void
 }
 export default (props: ISelectProps) => {
   const {
@@ -16,7 +16,7 @@ export default (props: ISelectProps) => {
     asyncParams,
     optionFormatter = (option) => option,
     defaultSelectFirst,
-    afterFirstSelect,
+    afterAsync,
     value,
     onChange,
     ...remainProps
@@ -32,9 +32,7 @@ export default (props: ISelectProps) => {
 
       defaultSelectFirst && onChange && onChange(formatOptions[0]?.value, formatOptions[0])
 
-      defaultSelectFirst &&
-        afterFirstSelect &&
-        afterFirstSelect(formatOptions[0]?.value, formatOptions[0])
+      afterAsync && afterAsync(formatOptions)
     })()
   }, [asyncCode, asyncParams && JSON.stringify(asyncParams)])
 

@@ -195,11 +195,11 @@ const TaskInstance: React.FC = () => {
                 placeholder="请选择"
                 asyncCode={EAsyncCode.rootCatalogue}
                 defaultSelectFirst={true}
-                afterFirstSelect={(value, option) => {
+                afterAsync={(options) => {
                   getTaskList({
                     pageNo: 1,
                     pageSize: 10,
-                    projectCode: value,
+                    projectCode: options[0]?.value,
                   })
                 }}
                 optionFormatter={(options) =>
