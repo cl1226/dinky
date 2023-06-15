@@ -34,6 +34,11 @@ public class StarRocksQuery extends AbstractDBQuery {
     }
 
     @Override
+    public String schemaAllSqlV2() {
+        return "select * from information_schema.SCHEMATA";
+    }
+
+    @Override
     public String tablesSql(String schemaName) {
         return String.format(StarRocksConstant.QUERY_TABLE_BY_SCHEMA, schemaName);
     }

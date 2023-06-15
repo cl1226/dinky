@@ -29,7 +29,12 @@ public class MySqlQuery extends AbstractDBQuery {
 
     @Override
     public String schemaAllSql() {
-        return "show databases";
+        return " show databases ";
+    }
+
+    @Override
+    public String schemaAllSqlV2() {
+        return "select * from information_schema.SCHEMATA";
     }
 
     @Override

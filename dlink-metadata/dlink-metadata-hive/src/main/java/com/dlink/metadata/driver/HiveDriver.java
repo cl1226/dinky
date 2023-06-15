@@ -19,6 +19,7 @@
 
 package com.dlink.metadata.driver;
 
+import cn.hutool.json.JSONObject;
 import com.dlink.assertion.Asserts;
 import com.dlink.metadata.constant.HiveConstant;
 import com.dlink.metadata.convert.HiveTypeConvert;
@@ -112,6 +113,184 @@ public class HiveDriver extends AbstractJdbcDriver implements Driver {
     @Override
     public List<Schema> getSchemasAndTables() {
         return listSchemas();
+    }
+
+    @Override
+    public List<Schema> getSchemasAndTablesV2() {
+        return listSchemas();
+    }
+
+    @Override
+    public JSONObject showDatabase(String name) {
+        PreparedStatement preparedStatement = null;
+        ResultSet results = null;
+        JSONObject jsonObject = new JSONObject();
+        try {
+            String sql = "desc database "+ name;
+            preparedStatement = conn.get().prepareStatement(sql);
+            results = preparedStatement.executeQuery();
+            while (results.next()) {
+                jsonObject.set("db_name", results.getString(1));
+                jsonObject.set("comment", results.getString(2));
+                jsonObject.set("location", results.getString(3));
+                jsonObject.set("owner_name", results.getString(4));
+                jsonObject.set("owner_type", results.getString(5));
+                jsonObject.set("parameters", results.getString(6));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(preparedStatement, results);
+        }
+        return jsonObject;
+    }
+
+    private static Map<String, String> getDescTableModule() {
+        Map<String, String> descTableModule = new HashMap<>();
+
+        descTableModule.put("# col_name", "col_name");
+        descTableModule.put("# Detailed Table Information", "table_info");
+        descTableModule.put("Table Parameters:", "table_param");
+        descTableModule.put("# Storage Information", "storage_info");
+        descTableModule.put("Storage Desc Params:", "storage_desc");
+        descTableModule.put("# Not Null Constraints", "not_null_constraint");
+        descTableModule.put("# Default Constraints", "default_constraint");
+        descTableModule.put("# Partition Information", "partition_info");
+
+        return descTableModule;
+    }
+
+    @Override
+    public Map<String, Object> showFormattedTable(String schemaName, String tableName) {
+        PreparedStatement preparedStatement = null;
+        ResultSet results = null;
+        Map<String, Object> result = new HashMap<>();
+        try {
+            String sql = String.format("describe formatted `%s`.`%s`", schemaName, tableName);
+            preparedStatement = conn.get().prepareStatement(sql);
+            results = preparedStatement.executeQuery();
+
+            // 定义多个集合用于存储hive不同模块的元数据
+            Map<String, String> detailTableInfo = new HashMap<>();
+            Map<String, String> tableParams = new HashMap<>();
+            Map<String, String> storageInfo = new HashMap<>();
+            Map<String, String> storageDescParams = new HashMap<>();
+            Map<String, Map<String, String>> constraints = new HashMap<>();
+            List<Column> columns = new ArrayList<>();
+
+            Map<String, String> moduleMap = getDescTableModule();
+
+            // 解析resultSet获得原始的分块数据
+            String infoModule = "";
+
+            while (results.next()) {
+                String title = results.getString(1).trim();
+                if (("".equals(title) && results.getString(2) == null) || "# Constraints".equals(title)) {
+                    continue;
+                }
+                if (moduleMap.containsKey(title)) {
+                    if ("partition_info".equals(infoModule) && "col_name".equals(moduleMap.get(title))) {
+                        continue;
+                    }
+                    infoModule = moduleMap.get(title);
+                    continue;
+                }
+                String key = null;
+                String value = null;
+                switch (infoModule) {
+                    case "col_name":
+                        Column column = new Column();
+                        column.setName(results.getString(1));
+                        column.setType(results.getString(2));
+                        column.setComment(results.getString(3));
+                        column.setPartition(false);
+                        columns.add(column);
+                        break;
+
+                    case "table_info":
+                        key = results.getString(1).trim().replace(":", "");
+                        value = results.getString(2).trim();
+                        detailTableInfo.put(key, value);
+                        break;
+
+                    case "table_param":
+                        key = results.getString(2).trim().replace(":", "");
+                        value = results.getString(3).trim();
+                        tableParams.put(key, value);
+                        break;
+
+                    case "storage_info":
+                        key = results.getString(1).trim().replace(":", "");
+                        value = results.getString(2).trim();
+                        storageInfo.put(key, value);
+                        break;
+
+                    case "storage_desc":
+                        key = results.getString(2).trim().replace(":", "");
+                        value = results.getString(3).trim();
+                        storageDescParams.put(key, value);
+                        break;
+
+                    case "not_null_constraint":
+                        Map<String, String> notNullMap = constraints.getOrDefault("notnull", new HashMap<>());
+                        if ("Table:".equals(title.trim())) {
+                            results.next();
+                        }
+
+                        String notNullConstraintName = results.getString(2).trim();
+                        results.next();
+
+                        key = results.getString(2).trim();
+                        notNullMap.put(key, notNullConstraintName);
+
+                        constraints.put("notnull", notNullMap);
+                        break;
+
+                    case "default_constraint":
+                        Map<String, String> defaultMap = constraints.getOrDefault("default", new HashMap<>());
+                        if ("Table:".equals(title.trim())) {
+                            results.next();
+                        }
+
+                        String defaultConstraintName = results.getString(2).trim();
+                        results.next();
+
+                        key = results.getString(1).trim().split(":")[1];
+                        value = results.getString(2).trim();
+                        int valueIndex = value.indexOf(":");
+                        value = value.substring(valueIndex + 1);
+
+                        defaultMap.put(key + "_constraintName", defaultConstraintName);
+
+                        constraints.put("default", defaultMap);
+                        break;
+
+                    case "partition_info":
+                        Column column1 = new Column();
+                        column1.setName(results.getString(1));
+                        column1.setType(results.getString(2));
+                        column1.setComment(results.getString(3));
+                        column1.setPartition(true);
+                        columns.add(column1);
+                        break;
+
+                    default:
+                        System.out.print("unknown module,please update method to support it : " + infoModule);
+                }
+            }
+            result.put("columns",columns);
+            result.put("detailTableInfo",detailTableInfo);
+            result.put("tableParams",tableParams);
+            result.put("storageInfo",storageInfo);
+            result.put("storageDescParams",storageDescParams);
+            result.put("constraints",constraints);
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(preparedStatement, results);
+        }
+        return null;
     }
 
     @Override

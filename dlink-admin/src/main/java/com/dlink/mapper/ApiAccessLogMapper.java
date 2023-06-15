@@ -27,7 +27,7 @@ public interface ApiAccessLogMapper extends SuperMapper<ApiAccessLog> {
     @Select("select url,duration from (select url,round(avg(duration)) duration from dlink_api_accesslog where timestamp >= #{start} and timestamp < #{end} group by url) a order by duration desc limit 0,10")
     List<JSONObject> top5duration(@Param("start") String start, @Param("end") String end);
 
-    @Select("select sum( success ) successNum, sum( fail ) failNum from (SELECT case when status=200 then 1 else 0 end as success,case when status!=200 then 1 else 0 end as fail from dlink_api_accesslog where timestamp >= #{start} and timestamp < #{end}) a")
+    @Select("select sum( success ) successNum, sum( fail ) failNum from (SELECT case when status=200 then 1 else 0 end as success,case when status!=200 then 1 else 0 end as fail from dlink_api_accesslog where timestamp >= #{start} and timestamp < #{end}) a having sum(success) is not null")
     List<JSONObject> summary(@Param("start") String start, @Param("end") String end);
 
     @Select("select app_id,num from (select app_id,count(1) num from dlink_api_accesslog where timestamp >= #{start} and timestamp < #{end} and app_id is not null and app_id != '' group by app_id) a order by num desc limit 0,5")

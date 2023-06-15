@@ -19,6 +19,7 @@
 
 package com.dlink.service;
 
+import cn.hutool.json.JSONObject;
 import com.dlink.db.service.ISuperService;
 import com.dlink.metadata.result.JdbcSelectResult;
 import com.dlink.model.Column;
@@ -28,6 +29,7 @@ import com.dlink.model.Schema;
 import com.dlink.model.SqlGeneration;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * DataBaseService
@@ -46,6 +48,12 @@ public interface DataBaseService extends ISuperService<DataBase> {
     List<DataBase> listEnabledAll();
 
     List<Schema> getSchemasAndTables(Integer id);
+
+    List<Schema> getSchemasAndTablesV2(Integer id);
+
+    JSONObject showDatabase(Integer id, String name);
+
+    Map<String, Object> showFormattedTable(Integer id, String schemaName, String tableName);
 
     List<Column> listColumns(Integer id, String schemaName, String tableName);
 
@@ -66,4 +74,5 @@ public interface DataBaseService extends ISuperService<DataBase> {
     String getEnabledFlinkWithSql();
 
     boolean copyDatabase(DataBase database);
+
 }

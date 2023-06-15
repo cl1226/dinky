@@ -28,6 +28,11 @@ package com.dlink.metadata.query;
 public abstract class AbstractDBQuery implements IDBQuery {
 
     @Override
+    public String schemaAllSqlV2() {
+        return null;
+    }
+
+    @Override
     public String createTableSql(String schemaName, String tableName) {
         return "show create table " + schemaName + "." + tableName;
     }

@@ -33,6 +33,11 @@ public interface IDBQuery {
     String schemaAllSql();
 
     /**
+     * 所有数据库详细信息查询 SQL
+     */
+    String schemaAllSqlV2();
+
+    /**
      * 表信息查询 SQL
      */
     String tablesSql(String schemaName);
