@@ -58,11 +58,13 @@ export default {
   'menu.dataAsset.dataMap': '数据地图',
   'menu.dataAsset.dataMap.overview': '总览',
   'menu.dataAsset.dataMap.dataDirectory': '数据目录',
+  'menu.dataAsset.dataMap.assetDetail': '资产详情',
   'menu.dataAsset.metaDataManage': '元数据采集',
   'menu.dataAsset.metaDataManage.overview': '总览',
   'menu.dataAsset.metaDataManage.taskManage': '任务管理',
   'menu.dataAsset.metaDataManage.taskMonitoring': '任务监控',
   "menu.dataAsset.metaDataManage.create": '创建',
+  "menu.dataAsset.metaDataManage.detail": '详情',
 
 
   'menu.devops': '运维中心',

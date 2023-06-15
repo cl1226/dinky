@@ -11,7 +11,8 @@ import {
 import { EState, ECommandType } from '@/pages/DataDev/Devops/data.d'
 
 import { transferEnumToOptions } from '@/utils/utils'
-import SelectHelp, { EAsyncCode } from '@/components/SelectHelp'
+import SelectHelp from '@/components/SelectHelp'
+import { EAsyncCode } from '@/components/SelectHelp/type.d'
 
 const RangePicker: any = DatePicker.RangePicker
 
@@ -195,11 +196,11 @@ const TaskInstance: React.FC = () => {
                 placeholder="请选择"
                 asyncCode={EAsyncCode.rootCatalogue}
                 defaultSelectFirst={true}
-                afterFirstSelect={(value, option) => {
+                afterAsync={(options) => {
                   getTaskList({
                     pageNo: 1,
                     pageSize: 10,
-                    projectCode: value,
+                    projectCode: options[0]?.value,
                   })
                 }}
                 optionFormatter={(options) =>

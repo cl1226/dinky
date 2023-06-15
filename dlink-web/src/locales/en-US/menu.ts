@@ -58,11 +58,13 @@ export default {
   'menu.dataAsset.dataMap': 'Data Map',
   'menu.dataAsset.dataMap.overview': 'Overview',
   'menu.dataAsset.dataMap.dataDirectory': 'Data Directory',
+  'menu.dataAsset.dataMap.assetDetail': 'Asset Detail',
   'menu.dataAsset.metaDataManage': 'Meta Data Manage',
   'menu.dataAsset.metaDataManage.overview': 'Overview',
   'menu.dataAsset.metaDataManage.taskManage': 'Task Manage',
   'menu.dataAsset.metaDataManage.taskMonitoring': 'Task Monitoring',
   "menu.dataAsset.metaDataManage.create": 'Create',
+  "menu.dataAsset.metaDataManage.detail": 'Detail',
 
   
   'menu.devops': 'Devops',

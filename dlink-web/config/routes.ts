@@ -227,6 +227,12 @@ export default [
             name: 'dataDirectory',
             component: './DataAsset/DataMap/DataDirectory',
           },
+          {
+            path: '/dataAsset/dataMap/assetDetail/:itemType/:id',
+            name: 'assetDetail',
+            component: './DataAsset/DataMap/AssetDetail',
+            hideInMenu: true,
+          },
         ],
       },
       {
@@ -248,6 +254,12 @@ export default [
             path: '/dataAsset/metaDataManage/taskMonitoring',
             name: 'taskMonitoring',
             component: './DataAsset/MetaDataManage/TaskMonitoring',
+          },
+          {
+            path: '/dataAsset/metaDataManage/detail/:id',
+            name: 'detail',
+            component: './DataAsset/MetaDataManage/Detail',
+            hideInMenu: true,
           },
           {
             path: '/dataAsset/metaDataManage/create',

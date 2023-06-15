@@ -2,19 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { Select } from 'antd'
 import { getCommonSelectOptions } from '@/components/Common/crud'
 import type { SelectProps } from 'antd/es/select'
-
-export enum EAsyncCode {
-  'datasourceType' = 'datasourceType',
-  'datasourceId' = 'datasourceId',
-  'datasourceDb' = 'datasourceDb',
-  'rootCatalogue' = 'rootCatalogue',
-}
+import { EAsyncCode } from './type'
 export interface ISelectProps extends SelectProps {
   asyncCode: EAsyncCode
   asyncParams?: any
   optionFormatter?: (option: any) => any
   defaultSelectFirst?: boolean
-  afterFirstSelect?: (value, option) => void
+  afterAsync?: (options?: any) => void
 }
 export default (props: ISelectProps) => {
   const {
@@ -22,7 +16,7 @@ export default (props: ISelectProps) => {
     asyncParams,
     optionFormatter = (option) => option,
     defaultSelectFirst,
-    afterFirstSelect,
+    afterAsync,
     value,
     onChange,
     ...remainProps
@@ -38,9 +32,7 @@ export default (props: ISelectProps) => {
 
       defaultSelectFirst && onChange && onChange(formatOptions[0]?.value, formatOptions[0])
 
-      defaultSelectFirst &&
-        afterFirstSelect &&
-        afterFirstSelect(formatOptions[0]?.value, formatOptions[0])
+      afterAsync && afterAsync(formatOptions)
     })()
   }, [asyncCode, asyncParams && JSON.stringify(asyncParams)])
 
