@@ -1,6 +1,58 @@
 import { request2, CODE } from '@/components/Common/crud'
 import { message } from 'antd'
 import { l } from '@/utils/intl'
+import { transferByteSize } from '@/utils/utils'
+
+// 获取数据总览统计
+export const requestStatistics = async () => {
+  return request2('/api/metadata/statistics', {
+    method: 'GET',
+    params: {},
+  })
+}
+
+// 获取详情
+export const getStatistics = async () => {
+  try {
+    const { code, datas } = await requestStatistics()
+    if (code == CODE.SUCCESS) {
+      return datas.map((item) => {
+        const [newSize, newUnit] = transferByteSize(item.dataVol)
+        return {
+          ...item,
+          dataVol: newSize,
+          dataUnit: newUnit,
+        }
+      })
+    } else {
+      return null
+    }
+  } catch (error) {
+    return null
+  }
+}
+
+// 获取总览下拉统计
+export const requestStatisticsDetail = async (params) => {
+  return request2('/api/metadata/statistics/detail', {
+    method: 'GET',
+    params: params,
+  })
+}
+
+// 获取总览下拉统计
+export const getStatisticsDetail = async (type) => {
+  try {
+    const { code, datas } = await requestStatisticsDetail({ type })
+    if (code == CODE.SUCCESS) {
+      return datas
+    } else {
+      return null
+    }
+  } catch (error) {
+    return null
+  }
+}
 
 // 获取列表
 export const requestDataDirectoryList = async (params) => {

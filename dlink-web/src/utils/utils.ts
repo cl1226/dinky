@@ -76,3 +76,15 @@ export const getParentKey = (key: number | string, tree: any): any => {
   }
   return parentKey
 }
+
+// 转换字节
+// bt 参数：表示要被转化的容量大小，以字节为单
+// precision 参数：表示如果转换时出小数，四舍五入保留多少位 默认为2位小数
+export const transferByteSize = (bt, precision = 4) => {
+  if (0 === bt) return '0 Bytes'
+  const transNum = 1024
+  const units = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+  const level = Math.floor(Math.log(bt) / Math.log(transNum))
+
+  return [(bt / Math.pow(transNum, level)).toFixed(precision), units[level]]
+}
