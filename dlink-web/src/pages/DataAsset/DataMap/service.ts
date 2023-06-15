@@ -73,3 +73,32 @@ export const getDataDirectoryDetail = async (itemType, id) => {
     return null
   }
 }
+
+// 获取数据预览
+export const requestDataPreview = async (params) => {
+  return request2('/api/metadata/preview', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+  })
+}
+
+// 获取详情
+export const getDataPreview = async (id) => {
+  try {
+    const { code, datas } = await requestDataPreview({
+      id: Number(id),
+    })
+    if (code == CODE.SUCCESS) {
+      return {
+        columns: datas.columns || [],
+        rowData: datas.rowData || [],
+      }
+    } else {
+      return null
+    }
+  } catch (error) {
+    return null
+  }
+}

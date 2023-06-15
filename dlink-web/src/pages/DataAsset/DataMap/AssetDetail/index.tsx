@@ -1,7 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import styles from './index.less'
-import { connect, history, useParams } from 'umi'
-import { Tabs, Menu, Dropdown, Button, Spin } from 'antd'
+import { connect, history, useParams,useModel } from 'umi'
+import { Tabs, Menu, Dropdown, Spin } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { Dispatch } from '@@/plugin-dva/connect'
@@ -35,34 +35,28 @@ const getDetailContent = (paneItem: IAssetDetail) => {
     })
   } else if (type === 'Table') {
     tabs.push(
-      ...[
-        {
-          label: '列属性',
-          key: '2',
-          children: <ColumnInfoTab basicInfo={paneItem} />,
-        },
-        {
-          label: '血缘',
-          key: '3',
-          children: <LineageTab basicInfo={paneItem} />,
-        },
-        {
-          label: '数据预览',
-          key: '4',
-          children: <DataPreviewTab basicInfo={paneItem} />,
-        },
-      ],
+      {
+        label: '列属性',
+        key: '2',
+        children: <ColumnInfoTab basicInfo={paneItem} />,
+      },
+      {
+        label: '血缘',
+        key: '3',
+        children: <LineageTab basicInfo={paneItem} />,
+      },
+      {
+        label: '数据预览',
+        key: '4',
+        children: <DataPreviewTab basicInfo={paneItem} />,
+      },
     )
   } else if (type === 'Column') {
-    tabs.push(
-      ...[
-        {
-          label: '血缘',
-          key: '2',
-          children: <LineageTab basicInfo={paneItem} />,
-        },
-      ],
-    )
+    tabs.push({
+      label: '血缘',
+      key: '2',
+      children: <LineageTab basicInfo={paneItem} />,
+    })
   }
   return (
     <div className={styles['detail-content']}>
@@ -73,7 +67,7 @@ const getDetailContent = (paneItem: IAssetDetail) => {
           <div className="tip-list">
             <div className="tip-item">{`数据源：${paneItem.datasourceName}`}</div>
 
-            {paneItem.position && <div className="tip-item">{paneItem.position}</div>}
+            {paneItem.position && <div className="tip-item">{`路径：${paneItem.position}`}</div>}
           </div>
         </div>
       </div>
@@ -93,8 +87,6 @@ const AssetDetailTabs = (props) => {
   const onChange = (activeKey: string) => {
     if (activeKey === currentTab.tabKey) return
     props.changeCurrentTab(activeKey)
-
-    history.push(`/dataAsset/dataMap/assetDetail/${activeKey}`)
   }
 
   const removeTab = (targetKey: string) => {
@@ -160,7 +152,7 @@ const AssetDetailTabs = (props) => {
             size="small"
             onChange={onChange}
             activeKey={currentTab.tabKey}
-            onEdit={(targetKey: any, action: any) => {
+            onEdit={(targetKey: any, action: 'add' | 'remove') => {
               if (action === 'remove') {
                 removeTab(targetKey)
               }
