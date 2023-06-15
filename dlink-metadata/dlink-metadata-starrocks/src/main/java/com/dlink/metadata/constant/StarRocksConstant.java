@@ -27,7 +27,7 @@ public interface StarRocksConstant {
     /**
      * 查询所有database
      */
-    String QUERY_ALL_DATABASE = " show databases ";
+    String QUERY_ALL_DATABASE = " select * from information_schema.SCHEMATA ";
     /**
      * 查询所有schema下的所有表
      */

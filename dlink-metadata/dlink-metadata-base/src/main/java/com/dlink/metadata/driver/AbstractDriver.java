@@ -61,6 +61,10 @@ public abstract class AbstractDriver implements Driver {
         return listSchemas().stream().peek(schema -> schema.setTables(listTables(schema.getName()))).sorted().collect(Collectors.toList());
     }
 
+    public List<Schema> getSchemasAndTablesV2() {
+        return listSchemasV2().stream().peek(schema -> schema.setTables(listTables(schema.getName()))).sorted().collect(Collectors.toList());
+    }
+
     public List<Table> getTablesAndColumns(String schema) {
         return listTables(schema).stream().peek(table -> table.setColumns(listColumns(schema, table.getName()))).sorted().collect(Collectors.toList());
     }

@@ -125,14 +125,23 @@ public class ApiConfigServiceImpl extends SuperServiceImpl<ApiConfigMapper, ApiC
         if (dataBase == null) {
             return Result.failed("调试失败， 数据源不存在");
         }
+        DruidPooledConnection connection = null;
         try {
-            DruidPooledConnection connection = PoolUtils.getPooledConnection(dataBase);
+            connection = PoolUtils.getPooledConnection(dataBase);
             Map<String, Object> map = JSON.parseObject(debugDTO.getParams(), Map.class);
             SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(debugDTO.getSql(), map);
             Object data = JdbcUtil.executeSql(connection, sqlMeta.getSql(), sqlMeta.getJdbcParamValues());
             return Result.succeed(data, "调试成功");
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return Result.failed("调试失败");
     }

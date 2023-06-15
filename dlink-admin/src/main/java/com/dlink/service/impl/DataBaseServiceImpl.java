@@ -19,6 +19,7 @@
 
 package com.dlink.service.impl;
 
+import cn.hutool.json.JSONObject;
 import com.dlink.assertion.Asserts;
 import com.dlink.constant.CommonConstant;
 import com.dlink.db.service.impl.SuperServiceImpl;
@@ -38,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -121,6 +123,36 @@ public class DataBaseServiceImpl extends SuperServiceImpl<DataBaseMapper, DataBa
         List<Schema> schemasAndTables = driver.getSchemasAndTables();
         driver.close();
         return schemasAndTables;
+    }
+
+    @Override
+    public List<Schema> getSchemasAndTablesV2(Integer id) {
+        DataBase dataBase = getById(id);
+        Asserts.checkNotNull(dataBase, "该数据源不存在！");
+        Driver driver = Driver.build(dataBase.getDriverConfig());
+        List<Schema> schemasAndTables = driver.getSchemasAndTablesV2();
+        driver.close();
+        return schemasAndTables;
+    }
+
+    @Override
+    public JSONObject showDatabase(Integer id, String name) {
+        DataBase dataBase = getById(id);
+        Asserts.checkNotNull(dataBase, "该数据源不存在！");
+        Driver driver = Driver.build(dataBase.getDriverConfig());
+        JSONObject jsonObject = driver.showDatabase(name);
+        driver.close();
+        return jsonObject;
+    }
+
+    @Override
+    public Map<String, Object> showFormattedTable(Integer id, String schemaName, String tableName) {
+        DataBase dataBase = getById(id);
+        Asserts.checkNotNull(dataBase, "该数据源不存在！");
+        Driver driver = Driver.build(dataBase.getDriverConfig());
+        Map<String, Object> map = driver.showFormattedTable(schemaName, tableName);
+        driver.close();
+        return map;
     }
 
     @Override
@@ -225,4 +257,5 @@ public class DataBaseServiceImpl extends SuperServiceImpl<DataBaseMapper, DataBa
         database.setCreateTime(null);
         return this.save(database);
     }
+
 }

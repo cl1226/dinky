@@ -51,6 +51,7 @@ public class Column implements Serializable {
     private Integer scale;
     private String characterSet;
     private String collation;
+    private boolean partition;
 
     public String getFlinkType() {
         String flinkType = javaType.getFlinkType();

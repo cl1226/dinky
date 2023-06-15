@@ -23,6 +23,7 @@ import static com.dlink.utils.SplitUtil.contains;
 import static com.dlink.utils.SplitUtil.getReValue;
 import static com.dlink.utils.SplitUtil.isSplit;
 
+import cn.hutool.json.JSONObject;
 import com.dlink.assertion.Asserts;
 import com.dlink.constant.CommonConstant;
 import com.dlink.metadata.query.IDBQuery;
@@ -226,6 +227,51 @@ public abstract class AbstractJdbcDriver extends AbstractDriver {
     }
 
     @Override
+    public List<Schema> listSchemasV2() {
+        List<Schema> schemas = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
+        ResultSet results = null;
+        String schemasSql = getDBQuery().schemaAllSqlV2();
+        try {
+            preparedStatement = conn.get().prepareStatement(schemasSql);
+            results = preparedStatement.executeQuery();
+            ResultSetMetaData metaData = results.getMetaData();
+            List<String> columnList = new ArrayList<>();
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                columnList.add(metaData.getColumnLabel(i));
+            }
+            while (results.next()) {
+                String schemaName = results.getString("SCHEMA_NAME");
+                if (Asserts.isNotNullString(schemaName)) {
+                    Schema schema = new Schema(schemaName);
+                    JSONObject jsonObject =  new JSONObject();
+                    for (int i = 0; i < columnList.size(); i++) {
+                        String res = results.getString(columnList.get(i));
+                        jsonObject.set(columnList.get(i), res);
+                    }
+                    schema.setAttributes(jsonObject.toString());
+                    schemas.add(schema);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(preparedStatement, results);
+        }
+        return schemas;
+    }
+
+    @Override
+    public JSONObject showDatabase(String name) {
+        return new JSONObject();
+    }
+
+    @Override
+    public Map<String, Object> showFormattedTable(String schemaName, String tableName) {
+        return null;
+    }
+
+    @Override
     public boolean existSchema(String schemaName) {
         return listSchemas().stream().anyMatch(schemaItem -> Asserts.isEquals(schemaItem.getName(), schemaName));
     }
@@ -331,7 +377,8 @@ public abstract class AbstractJdbcDriver extends AbstractDriver {
                     if (columnType.contains("(")) {
                         String type = columnType.replaceAll("\\(.*\\)", "");
                         if (!columnType.contains(",")) {
-                            Integer length = Integer.valueOf(columnType.replaceAll("\\D", ""));
+                            String s = columnType.replaceAll("\\D", "");
+                            Integer length = Integer.valueOf(s.equals("") ? "0" : s);
                             field.setLength(length);
                         } else {
                             // some database does not have precision
@@ -807,4 +854,5 @@ public abstract class AbstractJdbcDriver extends AbstractDriver {
         }
         return set;
     }
+
 }

@@ -13,6 +13,8 @@ import java.util.List;
 @Data
 public class SearchCondition {
 
+    private Integer id;
+
     private Integer catalogueId;
 
     private Integer appId;
@@ -36,5 +38,9 @@ public class SearchCondition {
     private String endDate;
 
     private Integer status;
+
+    private List<String> datasourceType;
+
+    private String itemType;
 
 }

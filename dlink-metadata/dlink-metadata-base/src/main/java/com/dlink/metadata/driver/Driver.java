@@ -19,6 +19,7 @@
 
 package com.dlink.metadata.driver;
 
+import cn.hutool.json.JSONObject;
 import com.dlink.assertion.Asserts;
 import com.dlink.exception.MetaDataException;
 import com.dlink.exception.SplitTableException;
@@ -143,6 +144,8 @@ public interface Driver extends AutoCloseable {
 
     List<Schema> listSchemas();
 
+    List<Schema> listSchemasV2();
+
     boolean existSchema(String schemaName);
 
     boolean createSchema(String schemaName) throws Exception;
@@ -155,7 +158,13 @@ public interface Driver extends AutoCloseable {
 
     List<Column> listColumnsSortByPK(String schemaName, String tableName);
 
+    JSONObject showDatabase(String name);
+
+    Map<String, Object> showFormattedTable(String schemaName, String tableName);
+
     List<Schema> getSchemasAndTables();
+
+    List<Schema> getSchemasAndTablesV2();
 
     List<Table> getTablesAndColumns(String schemaName);
 
@@ -219,4 +228,5 @@ public interface Driver extends AutoCloseable {
     ;
 
     List<Map<String, String>> getSplitSchemaList();
+
 }
