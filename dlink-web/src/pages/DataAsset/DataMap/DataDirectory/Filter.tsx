@@ -12,7 +12,9 @@ const { Panel } = Collapse
 const Filter = (props) => {
   const { filterForm } = props
   const [form] = Form.useForm()
-  const [cacheItemTypeOptions, setCacheItemTypeOptions] = useState<any>([])
+  const [cacheItemTypeOptions, setCacheItemTypeOptions] = useState<
+    { label: string; value: string }[]
+  >([])
   const filterItems = [
     {
       title: '数据源类型',

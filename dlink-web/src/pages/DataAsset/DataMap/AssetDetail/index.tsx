@@ -8,6 +8,7 @@ import { Dispatch } from '@@/plugin-dva/connect'
 import { getIcon } from '@/pages/DataAsset/DataMap/Icon'
 import { l } from '@/utils/intl'
 import { StateType } from '@/pages/DataAsset/DataMap/model'
+import { IAssetDetail } from '@/pages/DataAsset/DataMap/type.d'
 
 import DetailTab from './DetailTab'
 import TableInfoTab from './TableInfoTab'
@@ -17,7 +18,7 @@ import DataPreviewTab from './DataPreviewTab'
 
 const { TabPane } = Tabs
 
-const getDetailContent = (paneItem) => {
+const getDetailContent = (paneItem: IAssetDetail) => {
   const { type } = paneItem
   const tabs = [
     {
@@ -81,22 +82,22 @@ const getDetailContent = (paneItem) => {
   )
 }
 
-const AssetDetailTabs = (props: any) => {
-  const { itemType, id } = useParams() as any
+const AssetDetailTabs = (props) => {
+  const { itemType, id } = useParams() as { itemType: string; id: string }
   const { tabs, currentTab, pageLoading } = props
 
   useEffect(() => {
     props.asyncOpenTab(itemType, id)
   }, [])
 
-  const onChange = (activeKey: any) => {
+  const onChange = (activeKey: string) => {
     if (activeKey === currentTab.tabKey) return
     props.changeCurrentTab(activeKey)
 
     history.push(`/dataAsset/dataMap/assetDetail/${activeKey}`)
   }
 
-  const removeTab = (targetKey: any) => {
+  const removeTab = (targetKey: string) => {
     let newActiveKey = currentTab.tabKey
     const newTabs = tabs.filter((tab) => tab.tabKey !== targetKey)
     const targetIndex = tabs.findIndex((tab) => tab.tabKey === targetKey)
@@ -108,7 +109,7 @@ const AssetDetailTabs = (props: any) => {
     props.saveTabs(newTabs, newActiveKey)
   }
 
-  const menu = (pane) => (
+  const menu = (pane: IAssetDetail) => (
     <Menu onClick={(e) => props.closeTabs(pane, e.key)}>
       <Menu.Item key="CLOSE_ALL">
         <span>{l('right.menu.closeAll')}</span>
@@ -118,12 +119,11 @@ const AssetDetailTabs = (props: any) => {
       </Menu.Item>
     </Menu>
   )
-  const Tab = (pane: any) => (
+  const Tab = (pane: IAssetDetail) => (
     <span>
       <Dropdown overlay={menu(pane)} trigger={['contextMenu']}>
         <span className={styles['tab-pane-name']}>
           {getIcon(pane.type, 16)}
-
           {pane.name}
         </span>
       </Dropdown>
@@ -167,7 +167,7 @@ const AssetDetailTabs = (props: any) => {
             }}
             className={styles['edit-tabs']}
           >
-            {tabs.map((pane, i) => getTabPane(pane, i))}
+            {tabs.map((tab, i) => getTabPane(tab, i))}
           </Tabs>
         </Spin>
       ) : null}
@@ -176,7 +176,7 @@ const AssetDetailTabs = (props: any) => {
 }
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  asyncOpenTab: (itemType: any, id: any) =>
+  asyncOpenTab: (itemType: string, id: string | number) =>
     dispatch({
       type: 'DataAssetMap/openTab',
       payload: {
@@ -189,7 +189,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
       type: 'DataAssetMap/changeCurrentTab',
       payload: activeKey,
     }),
-  closeTabs: (currentTab: any, tabKey: string) =>
+  closeTabs: (currentTab: IAssetDetail, tabKey: string) =>
     dispatch({
       type: 'DataAssetMap/closeTabs',
       payload: {
@@ -197,7 +197,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
         currentTab,
       },
     }),
-  saveTabs: (newTabs: any, newActiveKey: string) =>
+  saveTabs: (newTabs: IAssetDetail, newActiveKey: string) =>
     dispatch({
       type: 'DataAssetMap/saveTabs',
       payload: {

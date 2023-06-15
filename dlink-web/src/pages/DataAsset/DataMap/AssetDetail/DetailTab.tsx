@@ -1,9 +1,10 @@
 import { Row, Descriptions, Col } from 'antd'
 import styles from './index.less'
-import { history, connect } from 'umi'
+import { connect } from 'umi'
+import { IAssetDetail } from '@/pages/DataAsset/DataMap/type.d'
 
 const DetailTab = (props) => {
-  const { basicInfo } = props
+  const { basicInfo }: { basicInfo: IAssetDetail } = props
   const attributesObj = JSON.parse(basicInfo.attributes || '{}')
 
   return (

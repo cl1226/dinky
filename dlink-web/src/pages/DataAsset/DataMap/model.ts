@@ -1,16 +1,17 @@
 import type { Effect, Reducer } from 'umi'
 import { history } from 'umi'
 import { getDataDirectoryDetail } from '@/pages/DataAsset/DataMap/service'
+import { IAssetDetail } from '@/pages/DataAsset/DataMap/type.d'
 
 export type StateType = {
-  directoryPageLoading?: boolean
+  directoryPageLoading: boolean
   filterForm?: {
     datasourceType?: string
     itemType?: string
   }
-  tabs?: any
-  currentTab?: any
-  detailPageLoading?: boolean
+  tabs: IAssetDetail[]
+  currentTab?: IAssetDetail
+  detailPageLoading: boolean
 }
 export type ModelType = {
   namespace: string
@@ -76,39 +77,39 @@ const Model: ModelType = {
       return {
         ...state,
         directoryPageLoading: payload,
-      }
+      } as StateType
     },
     saveFilterForm(state, { payload }) {
       return {
         ...state,
         filterForm: payload,
-      }
+      } as StateType
     },
 
     toggleDetailLoading(state, { payload }) {
       return {
         ...state,
         detailPageLoading: payload,
-      }
+      } as StateType
     },
     changeCurrentTab(state, { payload }) {
-      const newTabs = state?.tabs
+      const newTabs = state?.tabs || []
       let newCurrent = state?.currentTab
       for (let i = 0; i < newTabs.length; i++) {
         if (newTabs[i].tabKey === payload) {
           newCurrent = newTabs[i]
         }
       }
-      history.push(`/dataAsset/dataMap/assetDetail/${newCurrent.type}/${newCurrent.id}`)
+      history.push(`/dataAsset/dataMap/assetDetail/${newCurrent?.type}/${newCurrent?.id}`)
       return {
         ...state,
         currentTab: { ...newCurrent },
         tabs: newTabs,
-      }
+      } as StateType
     },
     closeTabs(state, { payload }) {
       const { deleteType, currentTab } = payload
-      let newTabs = state?.tabs
+      let newTabs = state?.tabs || []
       let newCurrent = newTabs[0]
       if (deleteType == 'CLOSE_OTHER') {
         const keys = [currentTab.tabKey]
@@ -124,7 +125,7 @@ const Model: ModelType = {
         ...state,
         currentTab: { ...newCurrent },
         tabs: [...newTabs],
-      }
+      } as StateType
     },
     saveTabs(state, { payload }) {
       const { tabs, activeKey } = payload
@@ -140,14 +141,14 @@ const Model: ModelType = {
           ...state,
           currentTab: undefined,
           tabs: [],
-        }
+        } as StateType
       }
-      history.push(`/dataAsset/dataMap/assetDetail/${newCurrent.type}/${newCurrent.id}`)
+      history.push(`/dataAsset/dataMap/assetDetail/${newCurrent?.type}/${newCurrent?.id}`)
       return {
         ...state,
         currentTab: { ...newCurrent },
         tabs: [...tabs],
-      }
+      } as StateType
     },
   },
 }

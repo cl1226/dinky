@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react'
 import styles from './index.less'
 import { Table } from 'antd'
 import { connect } from 'umi'
+import { IAssetDetail } from '@/pages/DataAsset/DataMap/type.d'
 
 const ColumnInfoTab = (props) => {
-  const { basicInfo } = props
+  const { basicInfo }: { basicInfo: IAssetDetail } = props
 
   const getColumn = (datasourceType) => {
     let extraCol: any = []
