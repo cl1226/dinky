@@ -17,61 +17,48 @@
  *
  */
 
-
-import React from 'react';
-import {Tooltip} from 'antd';
+import React from 'react'
+import { Tooltip } from 'antd'
 import {
   FullscreenExitOutlined,
   FullscreenOutlined,
   VerticalAlignBottomOutlined,
-  VerticalAlignTopOutlined
-} from '@ant-design/icons';
-import {l} from "@/utils/intl";
+  VerticalAlignTopOutlined,
+} from '@ant-design/icons'
+import { l } from '@/utils/intl'
 
-const LineageOps = ({
-                      isExpand,
-                      isFold,
-                      onAction,
-                      tableId,
-                    }) => [
-  isExpand ?
-    {
-      tooltip: l('pages.datastudio.label.lineage.expand.lineage'),
-      action: 'shrink',
-      component: <FullscreenExitOutlined/>
+const LineageOps = ({ isExpand, isFold, onAction, tableId }) =>
+  [
+    isExpand
+      ? {
+          tooltip: l('pages.datastudio.label.lineage.expand.lineage'),
+          action: 'shrink',
+          component: <FullscreenExitOutlined />,
+        }
+      : {
+          tooltip: l('pages.datastudio.label.lineage.collapse.lineage'),
+          action: 'expand',
+          component: <FullscreenOutlined />,
+        },
+    isFold
+      ? {
+          tooltip: l('pages.datastudio.label.lineage.expand.field'),
+          action: 'fold',
+          component: <VerticalAlignBottomOutlined />,
+        }
+      : {
+          tooltip: l('pages.datastudio.label.lineage.collapse.field'),
+          action: 'unfold',
+          component: <VerticalAlignTopOutlined />,
+        },
+  ].map((op) => {
+    return {
+      component: (
+        <Tooltip title={op.tooltip}>
+          <span onClick={() => onAction(op.action, tableId)}>{op.component}</span>
+        </Tooltip>
+      ),
     }
-    :
-    {
-      tooltip: l('pages.datastudio.label.lineage.collapse.lineage'),
-      action: 'expand',
-      component: <FullscreenOutlined/>
-    },
-  isFold ?
-    {
-      tooltip: l('pages.datastudio.label.lineage.expand.field'),
-      action: 'fold',
-      component: <VerticalAlignBottomOutlined/>
-    }
-    :
-    {
-      tooltip: l('pages.datastudio.label.lineage.collapse.field'),
-      action: 'unfold',
-      component: <VerticalAlignTopOutlined/>
-    }
-].map(op => {
-  return {
-    component: (
-      <Tooltip
-        title={op.tooltip}
-      >
-        <span onClick={() => onAction(op.action, tableId)}>
-          {
-            op.component
-          }
-        </span>
-      </Tooltip>
-    )
-  }
-});
+  })
 
-export default LineageOps;
+export default LineageOps

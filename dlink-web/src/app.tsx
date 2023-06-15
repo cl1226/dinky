@@ -171,3 +171,12 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     ...initialState?.settings,
   }
 }
+
+export const dva = {
+  config: {
+    onError(e) {
+      e.preventDefault()
+      console.error(e.message)
+    },
+  },
+}

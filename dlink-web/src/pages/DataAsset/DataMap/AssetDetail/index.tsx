@@ -1,15 +1,20 @@
 import React, { useRef, useState, useEffect } from 'react'
 import styles from './index.less'
-import { Tabs, Menu, Dropdown, Button, Spin } from 'antd'
-import { l } from '@/utils/intl'
 import { connect, history, useParams } from 'umi'
+import { Tabs, Menu, Dropdown, Button, Spin } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { Dispatch } from '@@/plugin-dva/connect'
-import { getDataDirectoryDetail } from '@/pages/DataAsset/DataMap/service'
+import { getIcon } from '@/pages/DataAsset/DataMap/Icon'
+import { l } from '@/utils/intl'
+import { StateType } from '@/pages/DataAsset/DataMap/model'
+
 import DetailTab from './DetailTab'
 import TableInfoTab from './TableInfoTab'
 import ColumnInfoTab from './ColumnInfoTab'
+import LineageTab from './LineageTab'
+import DataPreviewTab from './DataPreviewTab'
+
 const { TabPane } = Tabs
 
 const getDetailContent = (paneItem) => {
@@ -35,19 +40,38 @@ const getDetailContent = (paneItem) => {
           key: '2',
           children: <ColumnInfoTab basicInfo={paneItem} />,
         },
+        {
+          label: '血缘',
+          key: '3',
+          children: <LineageTab basicInfo={paneItem} />,
+        },
+        {
+          label: '数据预览',
+          key: '4',
+          children: <DataPreviewTab basicInfo={paneItem} />,
+        },
+      ],
+    )
+  } else if (type === 'Column') {
+    tabs.push(
+      ...[
+        {
+          label: '血缘',
+          key: '2',
+          children: <LineageTab basicInfo={paneItem} />,
+        },
       ],
     )
   }
   return (
     <div className={styles['detail-content']}>
       <div className="top-detail">
-        <div className="left-header">
-          <img src={`/dataAsset/dataMap/${paneItem.type || 'Table'}.svg`} alt="" />
-        </div>
+        <div className="left-header">{getIcon(paneItem.type, 34)}</div>
         <div className="right-header">
           <div className="title">{paneItem.name}</div>
           <div className="tip-list">
-            {`数据源：${paneItem.datasourceName}`}
+            <div className="tip-item">{`数据源：${paneItem.datasourceName}`}</div>
+
             {paneItem.position && <div className="tip-item">{paneItem.position}</div>}
           </div>
         </div>
@@ -65,20 +89,6 @@ const AssetDetailTabs = (props: any) => {
     props.asyncOpenTab(itemType, id)
   }, [])
 
-  // const initDetail = async () => {
-  //   const result = await getDataDirectoryDetail(itemType, id)
-
-  //   if (result) {
-  //     const newTabs = [...tabs]
-  //     const findTabIndex = newTabs.findIndex((tab) => tab.tabKey === result.tabKey)
-  //     if (findTabIndex > -1) {
-  //       newTabs[findTabIndex] = result
-  //     } else {
-  //       newTabs.push(result)
-  //     }
-  //     props.saveTabs(newTabs, result.tabKey)
-  //   }
-  // }
   const onChange = (activeKey: any) => {
     if (activeKey === currentTab.tabKey) return
     props.changeCurrentTab(activeKey)
@@ -111,14 +121,9 @@ const AssetDetailTabs = (props: any) => {
   const Tab = (pane: any) => (
     <span>
       <Dropdown overlay={menu(pane)} trigger={['contextMenu']}>
-        <span>
-          {
-            <img
-              style={{ width: 16, height: 16, marginRight: 5, marginTop: -3 }}
-              src={`/dataAsset/dataMap/${pane.type || 'Table'}.svg`}
-              alt=""
-            />
-          }
+        <span className={styles['tab-pane-name']}>
+          {getIcon(pane.type, 16)}
+
           {pane.name}
         </span>
       </Dropdown>
@@ -173,7 +178,7 @@ const AssetDetailTabs = (props: any) => {
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   asyncOpenTab: (itemType: any, id: any) =>
     dispatch({
-      type: 'AssetDetail/openTab',
+      type: 'DataAssetMap/openTab',
       payload: {
         itemType,
         id,
@@ -181,12 +186,12 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     }),
   changeCurrentTab: (activeKey: string) =>
     dispatch({
-      type: 'AssetDetail/changeCurrentTab',
+      type: 'DataAssetMap/changeCurrentTab',
       payload: activeKey,
     }),
   closeTabs: (currentTab: any, tabKey: string) =>
     dispatch({
-      type: 'AssetDetail/closeTabs',
+      type: 'DataAssetMap/closeTabs',
       payload: {
         deleteType: tabKey,
         currentTab,
@@ -194,7 +199,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     }),
   saveTabs: (newTabs: any, newActiveKey: string) =>
     dispatch({
-      type: 'AssetDetail/saveTabs',
+      type: 'DataAssetMap/saveTabs',
       payload: {
         tabs: newTabs,
         activeKey: newActiveKey,
@@ -203,10 +208,10 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 })
 
 export default connect(
-  ({ AssetDetail }) => ({
-    tabs: AssetDetail.tabs,
-    currentTab: AssetDetail.currentTab,
-    pageLoading: AssetDetail.pageLoading,
+  ({ DataAssetMap }: { DataAssetMap: StateType }) => ({
+    tabs: DataAssetMap.tabs,
+    currentTab: DataAssetMap.currentTab,
+    pageLoading: DataAssetMap.detailPageLoading,
   }),
   mapDispatchToProps,
 )(AssetDetailTabs)

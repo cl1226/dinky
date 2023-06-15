@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import styles from './index.less'
 import { Collapse, Form } from 'antd'
+import { connect } from 'umi'
+
 import CheckGroupHelp from '@/components/SelectHelp/CheckGroupHelp'
 import { EAsyncCode } from '@/components/SelectHelp/type.d'
-import { connect } from 'umi'
-import { StateType } from './model'
+import { StateType } from '@/pages/DataAsset/DataMap/model'
+
 const { Panel } = Collapse
 
 const Filter = (props) => {
@@ -31,7 +33,7 @@ const Filter = (props) => {
   ]
   const handleValueChange = () => {
     props.dispatch({
-      type: 'DataDirectory/saveFilterForm',
+      type: 'DataAssetMap/saveFilterForm',
       payload: form.getFieldsValue(),
     })
   }
@@ -89,6 +91,6 @@ const Filter = (props) => {
     </div>
   )
 }
-export default connect(({ DataDirectory }: { DataDirectory: StateType }) => ({
-  filterForm: DataDirectory.filterForm,
+export default connect(({ DataAssetMap }: { DataAssetMap: StateType }) => ({
+  filterForm: DataAssetMap.filterForm,
 }))(Filter)

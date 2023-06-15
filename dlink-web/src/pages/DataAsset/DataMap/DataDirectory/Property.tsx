@@ -1,20 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styles from './index.less'
+import { connect, history } from 'umi'
 import { Row, Checkbox, Table, Button, Space, Popconfirm, Input, Descriptions } from 'antd'
 import type { CheckboxChangeEvent } from 'antd/es/checkbox'
-import { connect, history } from 'umi'
-import { getDataDirectoryList } from '@/pages/DataAsset/DataMap/service'
 import { debounce } from 'lodash'
+
+import { getDataDirectoryList } from '@/pages/DataAsset/DataMap/service'
+import { getIcon } from '@/pages/DataAsset/DataMap/Icon'
+import { StateType } from '@/pages/DataAsset/DataMap/model'
 
 const Property = (props) => {
   const { filterForm } = props
-  const [loading, setLoading] = useState(false)
   const [searchKey, setSearchKey] = useState('')
   const [dataSource, setDataSource] = useState([])
   const [pageNum, setPageNum] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [pageTotal, setPageTotal] = useState(0)
-  
+
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
   const getDataSourceList = async (extra?: any) => {
@@ -27,9 +29,16 @@ const Property = (props) => {
       ...(extra || {}),
     }
 
-    setLoading(true)
+    props.dispatch({
+      type: 'DataAssetMap/toggleDirectoryLoading',
+      payload: true,
+    })
+
     const { list, total, pn, ps } = await getDataDirectoryList(params)
-    setLoading(false)
+    props.dispatch({
+      type: 'DataAssetMap/toggleDirectoryLoading',
+      payload: false,
+    })
     setDataSource(list)
     setPageTotal(total)
     setPageNum(pn)
@@ -71,7 +80,7 @@ const Property = (props) => {
         return (
           <>
             <div style={{ width: 40, height: 40, margin: '0 auto' }}>
-              <img src={`/dataAsset/dataMap/${record.type || 'Table'}.svg`} alt="" />
+              {getIcon(record.type, 40)}
             </div>
             <div style={{ textAlign: 'center' }}>{record.labelName}</div>
           </>
@@ -149,7 +158,6 @@ const Property = (props) => {
       </Row>
       <Table
         style={{ marginTop: 10 }}
-        loading={loading}
         rowKey="id"
         size="small"
         showHeader={false}
@@ -181,6 +189,6 @@ const Property = (props) => {
   )
 }
 
-export default connect(({ DataDirectory }) => ({
-  filterForm: DataDirectory.filterForm,
+export default connect(({ DataAssetMap }: { DataAssetMap: StateType }) => ({
+  filterForm: DataAssetMap.filterForm,
 }))(Property)

@@ -15,7 +15,7 @@ const TableInfoTab = (props) => {
         <a
           onClick={() => {
             props.dispatch({
-              type: 'AssetDetail/openTab',
+              type: 'DataAssetMap/openTab',
               payload: {
                 itemType: 'Table',
                 id: record.id,
@@ -29,8 +29,8 @@ const TableInfoTab = (props) => {
     },
     {
       title: '表类型',
-      dataIndex: 'type',
-      key: 'type',
+      dataIndex: 'tableType',
+      key: 'tableType',
       width: 200,
     },
     {

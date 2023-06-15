@@ -23,7 +23,7 @@ const DetailTab = (props) => {
                 <a
                   onClick={() => {
                     props.dispatch({
-                      type: 'AssetDetail/openTab',
+                      type: 'DataAssetMap/openTab',
                       payload: {
                         itemType: 'Database',
                         id: basicInfo.dbId,
@@ -40,7 +40,7 @@ const DetailTab = (props) => {
                 <a
                   onClick={() => {
                     props.dispatch({
-                      type: 'AssetDetail/openTab',
+                      type: 'DataAssetMap/openTab',
                       payload: {
                         itemType: 'Table',
                         id: basicInfo.tableId,
@@ -52,7 +52,7 @@ const DetailTab = (props) => {
                 </a>
               </Descriptions.Item>
             )}
-            <Descriptions.Item label="描述">{basicInfo.description}</Descriptions.Item>
+            <Descriptions.Item label="描述">{basicInfo.description || '-'}</Descriptions.Item>
           </Descriptions>
         </Col>
       </Row>
