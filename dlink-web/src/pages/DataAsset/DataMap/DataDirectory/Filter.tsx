@@ -37,15 +37,13 @@ const Filter = (props) => {
     },
   ]
   const handleValueChange = () => {
-    console.log('form.getFieldsValue()', form.getFieldsValue())
     props.dispatch({
       type: 'DataAssetMap/saveFilterForm',
       payload: form.getFieldsValue(),
     })
   }
   const initFilter = (options) => {
-    setCacheItemTypeOptions(options)
-    if (pageQuery && Object.keys(pageQuery)) {
+    if (pageQuery && Object.keys(pageQuery).length) {
       const { itemType, datasourceType } = pageQuery
       form.setFieldValue('itemType', [itemType || options[0]?.value])
       datasourceType && form.setFieldValue('datasourceType', [datasourceType])
