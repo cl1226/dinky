@@ -34,8 +34,13 @@ export default (props: ICheckGroupProps) => {
   }
 
   const onGroupChange = (checkedValue) => {
-    if (single && checkedValue) {
-      checkedValue = checkedValue.filter((item) => (value || []).every((jtem) => jtem !== item))
+    if (single) {
+      if (checkedValue.length) {
+        checkedValue = checkedValue.filter((item) => (value || []).every((jtem) => jtem !== item))
+      } else {
+        checkedValue = value
+        return
+      }
     }
     onChange && onChange(checkedValue)
   }

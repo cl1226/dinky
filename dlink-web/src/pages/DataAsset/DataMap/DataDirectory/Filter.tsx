@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styles from './index.less'
 import { Collapse, Form } from 'antd'
-import { connect } from 'umi'
+import { connect, useLocation } from 'umi'
 
 import CheckGroupHelp from '@/components/SelectHelp/CheckGroupHelp'
 import { EAsyncCode } from '@/components/SelectHelp/type.d'
@@ -10,11 +10,14 @@ import { StateType } from '@/pages/DataAsset/DataMap/model'
 const { Panel } = Collapse
 
 const Filter = (props) => {
+  const { query: pageQuery }: any = useLocation()
+
   const { filterForm } = props
   const [form] = Form.useForm()
   const [cacheItemTypeOptions, setCacheItemTypeOptions] = useState<
     { label: string; value: string }[]
   >([])
+
   const filterItems = [
     {
       title: '数据源类型',
@@ -34,6 +37,7 @@ const Filter = (props) => {
     },
   ]
   const handleValueChange = () => {
+    console.log('form.getFieldsValue()', form.getFieldsValue())
     props.dispatch({
       type: 'DataAssetMap/saveFilterForm',
       payload: form.getFieldsValue(),
@@ -41,13 +45,20 @@ const Filter = (props) => {
   }
   const initFilter = (options) => {
     setCacheItemTypeOptions(options)
-    if (filterForm) {
-      const { itemType, datasourceType } = filterForm
-      form.setFieldValue('itemType', itemType || [options[0]?.value])
-      datasourceType && form.setFieldValue('datasourceType', datasourceType)
-    } else {
-      form.setFieldValue('itemType', [options[0]?.value])
+    if (pageQuery && Object.keys(pageQuery)) {
+      const { itemType, datasourceType } = pageQuery
+      form.setFieldValue('itemType', [itemType || options[0]?.value])
+      datasourceType && form.setFieldValue('datasourceType', [datasourceType])
       handleValueChange()
+    } else {
+      if (filterForm) {
+        const { itemType, datasourceType } = filterForm
+        form.setFieldValue('itemType', itemType || [options[0]?.value])
+        datasourceType && form.setFieldValue('datasourceType', datasourceType)
+      } else {
+        form.setFieldValue('itemType', [options[0]?.value])
+        handleValueChange()
+      }
     }
   }
 

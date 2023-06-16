@@ -4,6 +4,7 @@ import PageWrap from '@/components/Common/PageWrap'
 import { Row, Card, Collapse, Button } from 'antd'
 import { getStatistics, getStatisticsDetail } from '@/pages/DataAsset/DataMap/service'
 import { transferByteSize } from '@/utils/utils'
+import { history } from 'umi'
 
 const CollapseDetail = (props) => {
   const { panels } = props
@@ -29,25 +30,47 @@ const CollapseDetail = (props) => {
         <span style={{ marginLeft: 15 }}>
           <span>数据量</span>
           <span style={{ marginLeft: 5 }}>{`${transferByteSize(panelItem.dataVol)[0]} ${
-                      transferByteSize(panelItem.dataVol)[1]
-                    }`}</span>
+            transferByteSize(panelItem.dataVol)[1]
+          }`}</span>
         </span>
       </>
     )
   }
 
+  const listPageJump = (query) => {
+    history.push({
+      pathname: '/dataAsset/dataMap/dataDirectory',
+      query: query,
+    })
+  }
   return panels && panels.length ? (
     <Collapse style={{ width: '100%' }}>
       {panels.map((panel, index) => (
         <Collapse.Panel
-          header={<a className={styles['link-title']}>{panel.datasourceName}</a>}
+          header={
+            <a
+              className={styles['link-title']}
+              onClick={() => {
+                listPageJump({ datasourceType: panel.datasourceType })
+              }}
+            >
+              {panel.datasourceName}
+            </a>
+          }
           key={index}
           extra={getExtra(panel)}
         >
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
             {panel.dbs.map((db) => (
               <Card.Grid className={styles['grid-box']}>
-                <div className="grid-title">{db.name}</div>
+                <span
+                  className="grid-title"
+                  onClick={() => {
+                    listPageJump({ datasourceType: panel.datasourceType, itemType: 'Database' })
+                  }}
+                >
+                  {db.name}
+                </span>
                 <div className="grid-info">
                   <span style={{ marginRight: 10 }}>
                     <span style={{ marginRight: 3 }}>表</span>

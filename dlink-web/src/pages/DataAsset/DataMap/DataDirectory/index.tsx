@@ -23,7 +23,17 @@ const DirectoryPage = (props) => {
       ),
     },
   ]
-
+  useEffect(() => {
+    return () => {
+      const sessionJson = sessionStorage.getItem('dataAsset.dataMap.dataDirectory')
+      if (!sessionJson) {
+        props.dispatch({
+          type: 'DataAssetMap/saveFilterForm',
+          payload: undefined,
+        })
+      }
+    }
+  }, [])
   return <PageWrap tabs={tabs}></PageWrap>
 }
 
