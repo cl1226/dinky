@@ -4,6 +4,7 @@ import type { ICreateTaskStepComProps } from '../../index.d'
 import SelectHelp from '@/components/SelectHelp'
 import { EAsyncCode } from '@/components/SelectHelp/type.d'
 import style from './index.less'
+import { updateStrategyConfig, deleteStrategyConfig } from '../../const'
 
 const { TextArea } = Input
 
@@ -107,10 +108,11 @@ const BaseSetting = ({ form, initialValues, mode }: ICreateTaskStepComProps) => 
           <Form.Item label="数据源元数据已更新" name="updateStrategy" rules={[{ required: false }]}>
             <Radio.Group>
               <Space direction="vertical">
-                <Radio value="update">仅更新数据目录中的元数据</Radio>
-                <Radio value="add">仅添加新元数据</Radio>
-                <Radio value="all">更新数据目录中的元数据、添加新元数据</Radio>
-                <Radio value="ignore">忽略更新、添加操作</Radio>
+                {Object.keys(updateStrategyConfig).map((i) => (
+                  <Radio value={i} key={i}>
+                    {updateStrategyConfig[i]}
+                  </Radio>
+                ))}
               </Space>
             </Radio.Group>
           </Form.Item>
@@ -121,8 +123,11 @@ const BaseSetting = ({ form, initialValues, mode }: ICreateTaskStepComProps) => 
           >
             <Radio.Group>
               <Space direction="vertical">
-                <Radio value="remove">从数据目录中删除元数据</Radio>
-                <Radio value="ignore">忽略删除</Radio>
+                {Object.keys(deleteStrategyConfig).map((i) => (
+                  <Radio value={i} key={i}>
+                    {deleteStrategyConfig[i]}
+                  </Radio>
+                ))}
               </Space>
             </Radio.Group>
           </Form.Item>

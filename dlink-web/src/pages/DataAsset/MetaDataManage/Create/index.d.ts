@@ -1,4 +1,5 @@
 import type { FormInstance } from 'antd'
+import type { ESchedulerType } from '@/components/XFlow/service'
 
 export type CreatePageMode = 'edit' | 'create'
 
@@ -20,12 +21,13 @@ export interface ITaskItem {
   createTime: string
   cronExpression: string | null
   datasourceId: number
+  datasourceName?: string
   datasourceType: number | string
   deleteStrategy: string
   description: string
   name: string
   path?: string
-  scheduleType: string
+  scheduleType: ESchedulerType
   status: string | number | null
   updateStrategy: string
   updateTime: string

@@ -37,6 +37,11 @@ export enum ESchedulerType {
   'CYCLE' = 'CYCLE',
 }
 
+export enum ESchedulerTypeMap {
+  SINGLE = '单次调度',
+  CYCLE = '周期调度',
+}
+
 /** 后端接口调用 */
 export namespace XFlowApi {
   export const NODE_COMMON_PROPS = {
