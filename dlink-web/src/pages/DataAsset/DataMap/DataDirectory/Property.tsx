@@ -3,7 +3,6 @@ import styles from './index.less'
 import { connect, history } from 'umi'
 import { Row, Checkbox, Table, Button, Space, Popconfirm, Input, Descriptions } from 'antd'
 import type { CheckboxChangeEvent } from 'antd/es/checkbox'
-import { debounce } from 'lodash'
 
 import { getDataDirectoryList } from '@/pages/DataAsset/DataMap/service'
 import { getIcon } from '@/pages/DataAsset/DataMap/Icon'
@@ -11,7 +10,7 @@ import { StateType } from '@/pages/DataAsset/DataMap/model'
 
 const Property = (props) => {
   const { filterForm } = props
-  const [searchKey, setSearchKey] = useState('')
+  const [name, setName] = useState('')
   const [dataSource, setDataSource] = useState([])
   const [pageNum, setPageNum] = useState(1)
   const [pageSize, setPageSize] = useState(10)
@@ -23,7 +22,7 @@ const Property = (props) => {
     const params = {
       pageIndex: pageNum,
       pageSize: pageSize,
-      name: searchKey || '',
+      name: name || '',
       itemType: filterForm?.itemType?.[0] || '',
       datasourceType: filterForm?.datasourceType || [],
       ...(extra || {}),
@@ -49,7 +48,7 @@ const Property = (props) => {
     const sessionJson = sessionStorage.getItem('dataAsset.dataMap.dataDirectory')
     const sessionQuery = JSON.parse(sessionJson || '{}')
     sessionStorage.removeItem('dataAsset.dataMap.dataDirectory')
-
+    setName(sessionQuery.name || '')
     if (filterForm) {
       getDataSourceList({
         pageIndex: 1,
@@ -67,14 +66,15 @@ const Property = (props) => {
       JSON.stringify({
         pageIndex: pageNum,
         pageSize: pageSize,
+        name: name,
       }),
     )
     history.push(`/dataAsset/dataMap/assetDetail/${record.type}/${record.id}`)
   }
   const columns = [
     {
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'id',
+      key: 'id',
       width: 150,
       render: (text, record) => {
         return (
@@ -150,9 +150,10 @@ const Property = (props) => {
               pageSize: 10,
             })
           }}
-          onChange={debounce((e) => {
-            setSearchKey(e.target.value)
-          }, 150)}
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value)
+          }}
           style={{ width: 200 }}
         />
       </Row>

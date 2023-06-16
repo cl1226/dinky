@@ -4,10 +4,10 @@ import PageWrap from '@/components/Common/PageWrap'
 import { Row, Card, Collapse, Button } from 'antd'
 import { getStatistics, getStatisticsDetail } from '@/pages/DataAsset/DataMap/service'
 import { transferByteSize } from '@/utils/utils'
-import { history } from 'umi'
+import { history, connect } from 'umi'
 
 const CollapseDetail = (props) => {
-  const { panels } = props
+  const { panels, dispatch } = props
 
   const getExtra = (panelItem) => {
     return (
@@ -38,10 +38,15 @@ const CollapseDetail = (props) => {
   }
 
   const listPageJump = (query) => {
-    history.push({
-      pathname: '/dataAsset/dataMap/dataDirectory',
-      query: query,
+    dispatch({
+      type: 'DataAssetMap/saveFilterForm',
+      payload: {
+        datasourceType: query.datasourceType,
+        itemType: query.itemType || ['Table'],
+      },
     })
+
+    history.push('/dataAsset/dataMap/dataDirectory')
   }
   return panels && panels.length ? (
     <Collapse style={{ width: '100%' }}>
@@ -51,7 +56,7 @@ const CollapseDetail = (props) => {
             <a
               className={styles['link-title']}
               onClick={() => {
-                listPageJump({ datasourceType: panel.datasourceType })
+                listPageJump({ datasourceType: [panel.datasourceType] })
               }}
             >
               {panel.datasourceName}
@@ -66,7 +71,7 @@ const CollapseDetail = (props) => {
                 <span
                   className="grid-title"
                   onClick={() => {
-                    listPageJump({ datasourceType: panel.datasourceType, itemType: 'Database' })
+                    listPageJump({ datasourceType: [panel.datasourceType], itemType: ['Database'] })
                   }}
                 >
                   {db.name}
@@ -91,7 +96,7 @@ const CollapseDetail = (props) => {
     </Collapse>
   ) : null
 }
-const DataMapOverview = () => {
+const DataMapOverview = (props) => {
   const [statisticsList, setStatisticsList] = useState<any>([])
   const [visible, setVisible] = useState(false)
   const [panels, setPanels] = useState<any>([])
@@ -152,7 +157,7 @@ const DataMapOverview = () => {
           </Row>
           {visible && (
             <Row style={{ marginTop: 30 }}>
-              <CollapseDetail panels={panels}></CollapseDetail>
+              <CollapseDetail panels={panels} dispatch={props.dispatch}></CollapseDetail>
             </Row>
           )}
         </>
@@ -162,4 +167,4 @@ const DataMapOverview = () => {
   return <PageWrap tabs={tabs}></PageWrap>
 }
 
-export default DataMapOverview
+export default connect(() => ({}))(DataMapOverview)

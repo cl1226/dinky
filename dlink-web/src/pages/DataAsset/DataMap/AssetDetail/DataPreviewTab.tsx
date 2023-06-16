@@ -43,6 +43,7 @@ const DataPreviewTab = (props) => {
             size="small"
             columns={columns}
             dataSource={dataSource}
+            scroll={{ x: document.body.clientWidth - 248 }}
             pagination={{
               showTotal: (total) => `共 ${total} 条`,
               showSizeChanger: true,

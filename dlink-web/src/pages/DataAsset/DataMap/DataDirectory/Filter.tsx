@@ -43,20 +43,14 @@ const Filter = (props) => {
     })
   }
   const initFilter = (options) => {
-    if (pageQuery && Object.keys(pageQuery).length) {
-      const { itemType, datasourceType } = pageQuery
-      form.setFieldValue('itemType', [itemType || options[0]?.value])
-      datasourceType && form.setFieldValue('datasourceType', [datasourceType])
-      handleValueChange()
+    setCacheItemTypeOptions(options)
+    if (filterForm) {
+      const { itemType, datasourceType } = filterForm
+      form.setFieldValue('itemType', itemType || [options[0]?.value])
+      datasourceType && form.setFieldValue('datasourceType', datasourceType)
     } else {
-      if (filterForm) {
-        const { itemType, datasourceType } = filterForm
-        form.setFieldValue('itemType', itemType || [options[0]?.value])
-        datasourceType && form.setFieldValue('datasourceType', datasourceType)
-      } else {
-        form.setFieldValue('itemType', [options[0]?.value])
-        handleValueChange()
-      }
+      form.setFieldValue('itemType', [options[0]?.value])
+      handleValueChange()
     }
   }
 
