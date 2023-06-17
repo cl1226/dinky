@@ -241,7 +241,12 @@ public abstract class AbstractJdbcDriver extends AbstractDriver {
                 columnList.add(metaData.getColumnLabel(i));
             }
             while (results.next()) {
-                String schemaName = results.getString("SCHEMA_NAME");
+                String schemaName = "";
+                if (this.config.getType().equals("SqlServer")) {
+                    schemaName = results.getString("table_schema");
+                } else {
+                    schemaName = results.getString("SCHEMA_NAME");
+                }
                 if (Asserts.isNotNullString(schemaName)) {
                     Schema schema = new Schema(schemaName);
                     JSONObject jsonObject =  new JSONObject();

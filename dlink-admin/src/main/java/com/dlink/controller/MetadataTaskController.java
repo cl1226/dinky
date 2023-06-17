@@ -6,7 +6,7 @@ import com.dlink.dto.SearchCondition;
 import com.dlink.model.DataBase;
 import com.dlink.model.MetadataTask;
 import com.dlink.model.MetadataTaskInstance;
-import com.dlink.service.AssetCatalogueService;
+import com.dlink.service.MetadataCatalogueService;
 import com.dlink.service.DataBaseService;
 import com.dlink.service.MetadataTaskInstanceService;
 import com.dlink.service.MetadataTaskService;
@@ -31,7 +31,7 @@ public class MetadataTaskController {
     @Autowired
     private MetadataTaskService metadataTaskService;
     @Autowired
-    private AssetCatalogueService assetCatalogueService;
+    private MetadataCatalogueService metadataCatalogueService;
     @Autowired
     private MetadataTaskInstanceService metadataTaskInstanceService;
     @Autowired
@@ -48,8 +48,11 @@ public class MetadataTaskController {
             }
             DataBase dataBase = dataBaseService.getById(metadataTask.getDatasourceId());
             metadataTask.setDatasourceName(dataBase.getName());
-            List<String> paths = assetCatalogueService.listAbsolutePathById(metadataTask.getCatalogueId());
+            List<String> paths = metadataCatalogueService.listAbsolutePathById(metadataTask.getCatalogueId());
             metadataTask.setPath("/" + paths.stream().map(String::valueOf).collect(Collectors.joining("/")));
+            if (metadataTask.getScheduleType().equals("SINGLE")) {
+                metadataTask.setCronExpression("");
+            }
             metadataTaskService.saveOrUpdate(metadataTask);
             return Result.succeed(metadataTask, "创建成功");
         } catch (Exception e) {

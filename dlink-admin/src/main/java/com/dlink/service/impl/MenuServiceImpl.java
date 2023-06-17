@@ -22,7 +22,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public Result list(String type) {
-        String datasourceType = "Hive,StarRocks,Mysql";
+        String datasourceType = "Hive,StarRocks,SQLServer,Mysql";
         List<Map<String, String>> list = new ArrayList<>();
         Arrays.stream(datasourceType.split(",")).forEach(x -> {
             Map<String, String> map = new HashMap<>();

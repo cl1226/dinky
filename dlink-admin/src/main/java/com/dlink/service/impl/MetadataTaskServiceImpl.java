@@ -194,6 +194,9 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
         metadataTaskInstance.setBeginTime(LocalDateTime.now());
         metadataTaskInstance.setCatalogueId(task.getCatalogueId());
         metadataTaskInstance.setScheduleType(task.getScheduleType());
+        metadataTaskInstance.setDatasourceId(task.getDatasourceId());
+        metadataTaskInstance.setDatasourceName(task.getDatasourceName());
+        metadataTaskInstance.setDatasourceType(task.getDatasourceType());
         metadataTaskInstance.setName(task.getName());
         metadataTaskInstanceService.saveOrUpdate(metadataTaskInstance);
         List<MetadataDb> dbs = new ArrayList<>();
@@ -336,9 +339,27 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
             origin.setDataVol(BigDecimal.valueOf(Double.valueOf(res)));
         } else {
             Driver driver = Driver.build(dataBase.getDriverConfig());
-            String sql = "SELECT sum(data_length) as 'dataVol' FROM information_schema.TABLES";
+            String sql = "";
+            if (task.getDatasourceType().equals("SQLServer")) {
+                sql = "SELECT\n" +
+                        "    SUM(a.total_pages) * 8 * 1024 as dataVol\n" +
+                        "FROM\n" +
+                        "    sys.tables t\n" +
+                        "INNER JOIN\n" +
+                        "    sys.indexes i ON t.OBJECT_ID = i.object_id\n" +
+                        "INNER JOIN\n" +
+                        "    sys.partitions p ON i.object_id = p.OBJECT_ID AND i.index_id = p.index_id\n" +
+                        "INNER JOIN\n" +
+                        "    sys.allocation_units a ON p.partition_id = a.container_id\n" +
+                        "WHERE t.NAME NOT LIKE 'dt%' AND t.is_ms_shipped = 0 AND i.OBJECT_ID > 255";
+            } else {
+                sql = "SELECT sum(data_length) as 'dataVol' FROM information_schema.TABLES";
+            }
             JdbcSelectResult query = driver.query(sql, null);
-            Object dataVol = query.getRowData().get(0).get("dataVol");
+            Object dataVol = null;
+            if (query.getRowData() != null && query.getRowData().size() > 0) {
+                dataVol = query.getRowData().get(0).get("dataVol");
+            }
             if (dataVol != null) {
                 origin.setDataVol(BigDecimal.valueOf(Double.valueOf(String.valueOf(dataVol))));
             }
@@ -394,7 +415,22 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
                 }
             } else {
                 Driver driver = Driver.build(dataBase.getDriverConfig());
-                String sql = "SELECT sum(data_length) as 'dataVol' FROM information_schema.TABLES WHERE table_schema='" + db.getName() + "' ";
+                String sql = "";
+                if (task.getDatasourceType().equals("SQLServer")) {
+                    sql = "SELECT\n" +
+                            "    SUM(a.total_pages) * 8 * 1024 as dataVol\n" +
+                            "FROM\n" +
+                            "    sys.tables t\n" +
+                            "INNER JOIN\n" +
+                            "    sys.indexes i ON t.OBJECT_ID = i.object_id\n" +
+                            "INNER JOIN\n" +
+                            "    sys.partitions p ON i.object_id = p.OBJECT_ID AND i.index_id = p.index_id\n" +
+                            "INNER JOIN\n" +
+                            "    sys.allocation_units a ON p.partition_id = a.container_id\n" +
+                            "WHERE t.NAME NOT LIKE 'dt%' AND t.is_ms_shipped = 0 AND i.OBJECT_ID > 255";
+                } else {
+                    sql = "SELECT sum(data_length) as 'dataVol' FROM information_schema.TABLES WHERE table_schema='" + db.getName() + "' ";
+                }
                 JdbcSelectResult query = driver.query(sql, null);
                 Object dataVol = query.getRowData().get(0).get("dataVol");
                 if (dataVol != null) {
