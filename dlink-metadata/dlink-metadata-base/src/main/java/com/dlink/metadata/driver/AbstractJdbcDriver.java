@@ -384,7 +384,9 @@ public abstract class AbstractJdbcDriver extends AbstractDriver {
                             // some database does not have precision
                             if (dbQuery.precision() != null) {
                                 // 例如浮点类型的长度和精度是一样的，decimal(10,2)
-                                field.setLength(results.getInt(dbQuery.precision()));
+                                if (columnList.contains(dbQuery.precision())) {
+                                    field.setLength(results.getInt(dbQuery.precision()));
+                                }
                             }
                         }
                         field.setType(type);

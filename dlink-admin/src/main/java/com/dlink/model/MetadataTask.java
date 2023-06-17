@@ -26,6 +26,8 @@ public class MetadataTask extends SuperEntity {
 
     private String datasourceType;
 
+    private String datasourceName;
+
     private Integer datasourceId;
 
     private String scheduleType;

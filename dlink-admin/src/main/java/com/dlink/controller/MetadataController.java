@@ -10,6 +10,7 @@ import com.dlink.metadata.result.JdbcSelectResult;
 import com.dlink.model.MetadataDb;
 import com.dlink.service.MetadataColumnService;
 import com.dlink.service.MetadataDbService;
+import com.dlink.service.MetadataService;
 import com.dlink.service.MetadataTableService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class MetadataController {
 
     @Autowired
     private MetadataColumnService metadataColumnService;
+
+    @Autowired
+    private MetadataService metadataService;
 
     @PostMapping("/page")
     public Result page(@RequestBody SearchCondition searchCondition) {
@@ -69,6 +73,24 @@ public class MetadataController {
     public Result preview(@RequestParam Integer id) {
         JdbcSelectResult preview = metadataTableService.preview(id);
         return Result.succeed(preview, "预览成功");
+    }
+
+    @GetMapping("/statistics")
+    public Result statistics() {
+        Result result = metadataService.statistics();
+        return result;
+    }
+
+    @GetMapping("/statistics/detail")
+    public Result statisticsDetail(@RequestParam String type) {
+        Result result = metadataService.statisticsDetail();
+        return result;
+    }
+
+    @PutMapping("/calcLineage")
+    public Result calcLineage(@RequestParam Integer taskId) {
+        Result result = metadataService.calcLineage(taskId);
+        return result;
     }
 
 }

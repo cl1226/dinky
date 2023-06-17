@@ -2,6 +2,7 @@ package com.dlink.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -13,14 +14,9 @@ import com.dlink.dto.SearchCondition;
 import com.dlink.mapper.MetadataTableMapper;
 import com.dlink.metadata.driver.Driver;
 import com.dlink.metadata.result.JdbcSelectResult;
-import com.dlink.model.DataBase;
-import com.dlink.model.MetadataColumn;
-import com.dlink.model.MetadataTable;
-import com.dlink.model.QueryData;
+import com.dlink.model.*;
 import com.dlink.result.AbstractResult;
-import com.dlink.service.DataBaseService;
-import com.dlink.service.MetadataColumnService;
-import com.dlink.service.MetadataTableService;
+import com.dlink.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +35,10 @@ public class MetadataTableServiceImpl extends SuperServiceImpl<MetadataTableMapp
     private MetadataColumnService metadataColumnService;
     @Autowired
     private DataBaseService dataBaseService;
+    @Autowired
+    private MetadataTableLineageService metadataTableLineageService;
+    @Autowired
+    private MetadataColumnLineageService metadataColumnLineageService;
 
     @Override
     public Page<MetadataTableDTO> page(SearchCondition searchCondition) {
@@ -88,6 +88,16 @@ public class MetadataTableServiceImpl extends SuperServiceImpl<MetadataTableMapp
         List<MetadataColumn> metadataColumns = metadataColumnService.list(Wrappers.<MetadataColumn>query().eq("table_id", metadataTable.getId()));
         List<MetadataColumnDTO> metadataColumnDTOS = BeanUtil.copyToList(metadataColumns, MetadataColumnDTO.class, CopyOptions.create(null, true));
         metadataTableDTO.setMetadataColumnDTOS(metadataColumnDTOS);
+
+        LambdaQueryWrapper<MetadataTableLineage> tableWrapper = Wrappers.<MetadataTableLineage>lambdaQuery().eq(MetadataTableLineage::getOriginTableId, metadataTable.getId());
+        tableWrapper.or().eq(MetadataTableLineage::getTargetTableId, metadataTable.getId());
+        List<MetadataTableLineage> tableLineages = metadataTableLineageService.list(tableWrapper);
+
+        LambdaQueryWrapper<MetadataColumnLineage> columnWrapper = Wrappers.<MetadataColumnLineage>lambdaQuery().eq(MetadataColumnLineage::getOriginTableId, metadataTable.getId());
+        columnWrapper.or().eq(MetadataColumnLineage::getTargetTableId, metadataTable.getId());
+        List<MetadataColumnLineage> columnLineages = metadataColumnLineageService.list(columnWrapper);
+        metadataTableDTO.setMetadataTableLineages(tableLineages);
+        metadataTableDTO.setMetadataColumnLineages(columnLineages);
         return metadataTableDTO;
     }
 

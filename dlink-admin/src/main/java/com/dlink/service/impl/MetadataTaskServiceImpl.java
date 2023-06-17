@@ -11,14 +11,19 @@ import com.dlink.common.result.Result;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.SearchCondition;
 import com.dlink.mapper.MetadataTaskMapper;
+import com.dlink.metadata.driver.Driver;
+import com.dlink.metadata.result.JdbcSelectResult;
 import com.dlink.model.*;
 import com.dlink.service.*;
 import com.dlink.utils.QuartzUtil;
+import com.dlink.utils.ShellUtil;
+import com.jcraft.jsch.JSchException;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -46,6 +51,10 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
     private MetadataTaskInstanceService metadataTaskInstanceService;
     @Autowired
     private Scheduler scheduler;
+    @Autowired
+    private ClusterInstanceService clusterInstanceService;
+    @Autowired
+    private MetadataVolumeService metadataVolumeService;
 
     @Override
     public Page<MetadataTask> page(SearchCondition searchCondition) {
@@ -84,9 +93,12 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
                         metadataTask.getCronExpression(),
                         map,
                         null);
+                CronExpression cronExpression = new CronExpression(metadataTask.getCronExpression());
+                Date nextValidTimeAfter = cronExpression.getNextValidTimeAfter(new Date());
                 metadataTask.setScheduleStatus("Success");
+                metadataTask.setNextRunTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(nextValidTimeAfter.getTime()), ZoneId.systemDefault()));
                 this.updateById(metadataTask);
-            } catch (SchedulerException e) {
+            } catch (SchedulerException | ParseException e) {
                 metadataTask.setScheduleStatus("Failed");
                 this.updateById(metadataTask);
                 e.printStackTrace();
@@ -107,9 +119,15 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
             return Result.failed("任务已下线!");
         }
         metadataTask.setStatus(0);
+
+        if (metadataTask.getScheduleType().equals("CYCLE")) {
+            this.deleteJob(metadataTask.getName() + "_元数据采集任务",
+                    "MetaDataJob");
+            metadataTask.setNextRunTime(null);
+            metadataTask.setScheduleStatus(null);
+        }
         this.updateById(metadataTask);
-        this.deleteJob(metadataTask.getName() + "_元数据采集任务",
-                "MetaDataJob");
+
         return Result.succeed(metadataTask, "任务下线成功");
     }
 
@@ -122,7 +140,7 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
         Trigger trigger = TriggerBuilder.newTrigger().withIdentity(jobName, jobGroupName)
                 .startAt(DateBuilder.futureDate(1, DateBuilder.IntervalUnit.SECOND))
                 .withSchedule(CronScheduleBuilder.cronSchedule(cron)).build();
-        if(endTime!=null){
+        if(endTime != null){
             trigger.getTriggerBuilder().endAt(endTime);
         }
         scheduler.scheduleJob(jobDetail, trigger);
@@ -170,6 +188,7 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
         }
         long beginTime = System.currentTimeMillis();
         MetadataTaskInstance metadataTaskInstance = new MetadataTaskInstance();
+        metadataTaskInstance.setTaskId(task.getId());
         metadataTaskInstance.setStatus("Running");
         metadataTaskInstance.setCronExpression(task.getCronExpression());
         metadataTaskInstance.setBeginTime(LocalDateTime.now());
@@ -268,6 +287,7 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
             metadataTaskInstanceService.saveOrUpdate(metadataTaskInstance);
             task.setRunStatus("Success");
             this.saveOrUpdate(task);
+            this.statistics(task, dataBase, dbs, tbls);
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - beginTime;
             metadataTaskInstance.setDuration(duration);
@@ -279,6 +299,139 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
             e.printStackTrace();
         }
         return Result.succeed("采集成功");
+    }
+
+    private void statistics(MetadataTask task, DataBase dataBase, List<MetadataDb> dbs, List<MetadataTable> tbls) throws Exception {
+        // 统计整体数据量
+        QueryWrapper<MetadataVolume> wrapper = Wrappers.<MetadataVolume>query().eq("datasource_id", task.getDatasourceId());
+        wrapper.eq("type", "ALL");
+        MetadataVolume origin = metadataVolumeService.getOne(wrapper);
+        if (origin == null) {
+            origin = new MetadataVolume();
+        }
+        origin.setDatasourceType(task.getDatasourceType());
+        origin.setDatasourceName(dataBase.getName());
+        origin.setDatasourceId(dataBase.getId());
+        origin.setDbNum(dbs.size());
+        origin.setTableNum(tbls.size());
+        origin.setName(dataBase.getName());
+        origin.setDataUnit("Byte");
+        origin.setType("ALL");
+        BigDecimal totalHiveVol = BigDecimal.ZERO;
+        // 统计数据量
+        if (task.getDatasourceType().equals("Hive")) {
+            String url = dataBase.getDriverConfig().getUrl();
+            String[] split = url.split("/|:");
+            String ip = split[4];
+            QueryWrapper<ClusterInstance> queryWrapper = Wrappers.<ClusterInstance>query().eq("ip", ip);
+            queryWrapper.or().eq("host_name", ip);
+            ClusterInstance clusterInstance = clusterInstanceService.getOne(queryWrapper);
+            String res = "0";
+            if (clusterInstance != null) {
+                ShellUtil instance = ShellUtil.getInstance();
+                instance.init(clusterInstance.getIp(), clusterInstance.getPort(), clusterInstance.getUsername(), clusterInstance.getPassword());
+                res = instance.execCmd("hadoop fs -du -v /user/hive/warehouse |awk '{ SUM += $1 } END { print SUM}'");
+            }
+            totalHiveVol = BigDecimal.valueOf(Double.valueOf(res));
+            origin.setDataVol(BigDecimal.valueOf(Double.valueOf(res)));
+        } else {
+            Driver driver = Driver.build(dataBase.getDriverConfig());
+            String sql = "SELECT sum(data_length) as 'dataVol' FROM information_schema.TABLES";
+            JdbcSelectResult query = driver.query(sql, null);
+            Object dataVol = query.getRowData().get(0).get("dataVol");
+            if (dataVol != null) {
+                origin.setDataVol(BigDecimal.valueOf(Double.valueOf(String.valueOf(dataVol))));
+            }
+        }
+        metadataVolumeService.saveOrUpdate(origin);
+        BigDecimal otherHiveVol = BigDecimal.ZERO;
+        // 统计每个库的数据量
+        for (MetadataDb db : dbs) {
+            if (task.getDatasourceType().equals("Hive") && db.getName().equals("default")) {
+                continue;
+            }
+            QueryWrapper<MetadataVolume> queryWrapper = Wrappers.<MetadataVolume>query().eq("datasource_id", task.getDatasourceId());
+            queryWrapper.eq("type", "DB");
+            queryWrapper.eq("name", db.getName());
+            MetadataVolume volume = metadataVolumeService.getOne(queryWrapper);
+            if (volume == null) {
+                volume = new MetadataVolume();
+            }
+            int tableNum = 0;
+            for (MetadataTable table : tbls) {
+                if (table.getDatasourceId().equals(db.getDatasourceId()) && table.getDbName().equals(db.getName())) {
+                    tableNum++;
+                }
+            }
+            volume.setDatasourceType(task.getDatasourceType());
+            volume.setDatasourceName(dataBase.getName());
+            volume.setDatasourceId(dataBase.getId());
+            volume.setDbNum(1);
+            volume.setTableNum(tableNum);
+            volume.setName(db.getName());
+            volume.setDataUnit("Byte");
+            volume.setType("DB");
+            if (task.getDatasourceType().equals("Hive")) {
+                String dbName = "";
+                if (!db.getName().equals("default")) {
+                    dbName = db.getName() + ".db";
+                }
+
+                String url = dataBase.getDriverConfig().getUrl();
+                String[] split = url.split("/|:");
+                String ip = split[4];
+                QueryWrapper<ClusterInstance> q = Wrappers.<ClusterInstance>query().eq("ip", ip);
+                q.or().eq("host_name", ip);
+                ClusterInstance clusterInstance = clusterInstanceService.getOne(q);
+                String r = "0";
+                if (clusterInstance != null) {
+                    ShellUtil instance = ShellUtil.getInstance();
+                    instance.init(clusterInstance.getIp(), clusterInstance.getPort(), clusterInstance.getUsername(), clusterInstance.getPassword());
+                    String str = "hadoop fs -du -v /user/hive/warehouse/" + dbName + " |awk '{ SUM += $1 } END { print SUM}'";
+                    r = instance.execCmd(str);
+                    otherHiveVol = otherHiveVol.add(BigDecimal.valueOf(Double.valueOf(r)));
+                    volume.setDataVol(BigDecimal.valueOf(Double.valueOf(r)));
+                }
+            } else {
+                Driver driver = Driver.build(dataBase.getDriverConfig());
+                String sql = "SELECT sum(data_length) as 'dataVol' FROM information_schema.TABLES WHERE table_schema='" + db.getName() + "' ";
+                JdbcSelectResult query = driver.query(sql, null);
+                Object dataVol = query.getRowData().get(0).get("dataVol");
+                if (dataVol != null) {
+                    volume.setDataVol(BigDecimal.valueOf(Double.valueOf(String.valueOf(dataVol))));
+                }
+            }
+            metadataVolumeService.saveOrUpdate(volume);
+        }
+        for (MetadataDb db : dbs) {
+            if (task.getDatasourceType().equals("Hive") && db.getName().equals("default")) {
+                QueryWrapper<MetadataVolume> queryWrapper = Wrappers.<MetadataVolume>query().eq("datasource_id", task.getDatasourceId());
+                queryWrapper.eq("type", "DB");
+                queryWrapper.eq("name", db.getName());
+                MetadataVolume volume = metadataVolumeService.getOne(queryWrapper);
+                if (volume == null) {
+                    volume = new MetadataVolume();
+                }
+                int tableNum = 0;
+                for (MetadataTable table : tbls) {
+                    if (table.getDatasourceId().equals(db.getDatasourceId()) && table.getDbName().equals(db.getName())) {
+                        tableNum++;
+                    }
+                }
+                volume.setDatasourceType(task.getDatasourceType());
+                volume.setDatasourceName(dataBase.getName());
+                volume.setDatasourceId(dataBase.getId());
+                volume.setDbNum(1);
+                volume.setTableNum(tableNum);
+                volume.setName(db.getName());
+                volume.setDataUnit("Byte");
+                volume.setType("DB");
+                BigDecimal subtract = totalHiveVol.subtract(otherHiveVol);
+                volume.setDataVol(subtract);
+                metadataVolumeService.saveOrUpdate(volume);
+                break;
+            }
+        }
     }
 
     private void saveOrUpdateMetadataDb(MetadataTask task, List<MetadataDb> dbs, List<MetadataTable> tbls, List<MetadataColumn> cols) {
