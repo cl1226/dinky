@@ -39,6 +39,7 @@ import { Scrollbars } from 'react-custom-scrollbars'
 import { debounce } from 'lodash'
 import moment from 'moment'
 import type { ITaskItem } from '../../../Create/index.d'
+import { ESchedulerType, ESchedulerTypeMap } from '@/components/XFlow/service'
 
 interface ITableTaskItem extends ITaskItem {
   id: number
@@ -65,7 +66,7 @@ const RunningStatusConfig = {
   },
   1: {
     type: 'processing',
-    msg: '未运行',
+    msg: '未调度',
   },
   Failed: {
     type: 'error',
@@ -188,16 +189,26 @@ export default (props: IApiListProps) => {
       dataIndex: 'name',
       key: 'name',
       width: 150,
+      ellipsis: {
+        showTitle: false,
+      },
       render: (cellValue, record) => (
-        <Button
-          type="link"
-          onClick={() => {
-            pageJump('detail', record)
-          }}
-        >
-          {cellValue}
-        </Button>
+        <Tooltip placement="topLeft" title={cellValue}>
+          <Button
+            type="link"
+            onClick={() => {
+              pageJump('detail', record)
+            }}
+          >
+            {cellValue}
+          </Button>
+        </Tooltip>
       ),
+    },{
+      title: '数据源',
+      dataIndex: 'datasourceName',
+      key: 'datasourceName',
+      width: 100,
     },
     {
       title: '数据源类型',
@@ -206,12 +217,24 @@ export default (props: IApiListProps) => {
       width: 100,
     },
     {
+      title: '调度类型',
+      dataIndex: 'scheduleType',
+      key: 'scheduleType',
+      width: 100,
+      render(value, record, index) {
+        return ESchedulerTypeMap[value]
+      },
+    },
+    {
       title: '调度状态',
       dataIndex: 'scheduleStatus',
       key: 'scheduleStatus',
       width: 100,
       render(value, record, index) {
         const v = value ?? 1
+        if (record.scheduleType == ESchedulerType.SINGLE) {
+          return ''
+        }
         return <Badge status={RunningStatusConfig[v].type} text={RunningStatusConfig[v].msg} />
       },
     },

@@ -1,40 +1,18 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styles from './index.less'
-import {
-  SyncOutlined,
-  EditOutlined,
-  RiseOutlined,
-  FallOutlined,
-  BugOutlined,
-  DeleteOutlined,
-  PlayCircleOutlined,
-} from '@ant-design/icons'
-import {
-  Button,
-  Card,
-  Col,
-  DatePicker,
-  Form,
-  Row,
-  Input,
-  Popconfirm,
-  Table,
-  Space,
-  Tooltip,
-  message,
-  Badge,
-  Divider,
-} from 'antd'
+import { SyncOutlined } from '@ant-design/icons'
+import { Button, Row, Input, Table, Space, Badge, Divider, message } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 
-import { history } from 'umi'
 import { getApiConfigList } from './service'
 import type { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { debounce } from 'lodash'
 import moment from 'moment'
 import type { IGetListParams } from './service'
-import { ESchedulerType, ESchedulerTypeMap } from '@/components/XFlow/service'
+import type { ESchedulerType } from '@/components/XFlow/service'
+import { ESchedulerTypeMap } from '@/components/XFlow/service'
+import { ExecuteTask } from '@/pages/DataAsset/MetaDataManage/TaskManage/service'
 
 const { Search } = Input
 
@@ -58,7 +36,9 @@ interface ListDataType {
   duration: number
   endTime: string
   scheduleType: ESchedulerType
-  status: 'Success' | 'Fail'
+  taskId: number
+  datasourceName: string
+  status: 'Success' | 'Failed'
   updateTime: string
 }
 
@@ -114,7 +94,23 @@ export default (props: IApiListProps) => {
   }
 
   const handleReRun = (record) => {
-    console.log('handleReRun')
+    if (starting) return
+    setstarting(true)
+    message.info('任务已提交, 请稍后')
+    ExecuteTask(record.taskId)
+      .then((res) => {
+        setstarting(false)
+        if (res.code == 0) {
+          message.success(res.msg)
+          getList()
+        } else {
+          message.error(res.msg)
+        }
+      })
+      .catch((err) => {
+        setstarting(false)
+        message.error(err)
+      })
   }
   const handleLog = (record) => {
     console.log('handleLog')
@@ -132,6 +128,12 @@ export default (props: IApiListProps) => {
       dataIndex: 'name',
       key: 'name',
       width: 150,
+    },
+    {
+      title: '数据源',
+      dataIndex: 'datasourceName',
+      key: 'datasourceName',
+      width: 100,
     },
     {
       title: '实例状态',
@@ -173,17 +175,20 @@ export default (props: IApiListProps) => {
       render: (value) => value && moment(value).format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      title: '运行时间(min)',
+      title: '运行时间(s)',
       dataIndex: 'duration',
       width: 120,
       key: 'duration',
+      render(value, record, index) {
+        return Math.round(value / 60)
+      },
     },
     {
       title: '操作',
       width: 80,
       key: 'action',
       render: (cellValue, record) => (
-        <Space size={0} split={<Divider type="vertical" style={{margin: 2}}/>}>
+        <Space size={0} split={<Divider type="vertical" style={{ margin: 2 }} />}>
           <Button
             size="small"
             type="link"
