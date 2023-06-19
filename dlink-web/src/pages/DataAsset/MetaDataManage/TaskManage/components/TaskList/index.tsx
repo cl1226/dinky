@@ -37,22 +37,21 @@ import {
 import type { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { debounce } from 'lodash'
-import { EAccessType } from '@/utils/enum'
+import moment from 'moment'
+import type { ITaskItem } from '../../../Create/index.d'
+import { ESchedulerType, ESchedulerTypeMap } from '@/components/XFlow/service'
+
+interface ITableTaskItem extends ITaskItem {
+  id: number
+  runStatus: string | null
+  scheduleStatus: string | null
+}
 
 const { Search } = Input
-const { RangePicker } = DatePicker
 
 export type IApiListProps = {
   catalogue: TreeDataNode | undefined
   tableProps?: {}
-}
-
-export interface DataType {
-  id: number
-  name: string
-  path: string
-  updateTime: string
-  status: number
 }
 
 export enum EDebugStatus {
@@ -61,17 +60,17 @@ export enum EDebugStatus {
 }
 
 const RunningStatusConfig = {
-  0: {
+  Success: {
     type: 'success',
-    msg: '运行成功',
+    msg: '成功',
   },
   1: {
     type: 'processing',
-    msg: '正在运行',
+    msg: '未调度',
   },
-  2: {
+  Failed: {
     type: 'error',
-    msg: '运行失败',
+    msg: '失败',
   },
 }
 
@@ -84,6 +83,7 @@ export default (props: IApiListProps) => {
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [loading, setLoading] = useState(false)
+  const [starting, setstarting] = useState(false)
   const [apiData, setApiData] = useState([])
   const { catalogue, tableProps = {} } = props
 
@@ -133,11 +133,12 @@ export default (props: IApiListProps) => {
   }
 
   const handleStart = (record) => {
-    if (loading) return
-    setLoading(true)
+    if (starting) return
+    setstarting(true)
+    message.info('任务已提交, 请稍后')
     ExecuteTask(record.id)
       .then((res) => {
-        setLoading(false)
+        setstarting(false)
         if (res.code == 0) {
           message.success(res.msg)
           getApiList()
@@ -146,7 +147,7 @@ export default (props: IApiListProps) => {
         }
       })
       .catch((err) => {
-        setLoading(false)
+        setstarting(false)
         message.error(err)
       })
   }
@@ -182,22 +183,32 @@ export default (props: IApiListProps) => {
     }
   }, [catalogue])
 
-  const columns: ColumnsType<DataType> = [
+  const columns: ColumnsType<ITableTaskItem> = [
     {
       title: '任务名称',
       dataIndex: 'name',
       key: 'name',
       width: 150,
+      ellipsis: {
+        showTitle: false,
+      },
       render: (cellValue, record) => (
-        <Button
-          type="link"
-          onClick={() => {
-            pageJump('detail', record)
-          }}
-        >
-          {cellValue}
-        </Button>
+        <Tooltip placement="topLeft" title={cellValue}>
+          <Button
+            type="link"
+            onClick={() => {
+              pageJump('detail', record)
+            }}
+          >
+            {cellValue}
+          </Button>
+        </Tooltip>
       ),
+    },{
+      title: '数据源',
+      dataIndex: 'datasourceName',
+      key: 'datasourceName',
+      width: 100,
     },
     {
       title: '数据源类型',
@@ -206,14 +217,25 @@ export default (props: IApiListProps) => {
       width: 100,
     },
     {
-      title: '调度状态',
-      dataIndex: 'status',
-      key: 'status',
+      title: '调度类型',
+      dataIndex: 'scheduleType',
+      key: 'scheduleType',
       width: 100,
       render(value, record, index) {
-        return (
-          <Badge status={RunningStatusConfig[value].type} text={RunningStatusConfig[value].msg} />
-        )
+        return ESchedulerTypeMap[value]
+      },
+    },
+    {
+      title: '调度状态',
+      dataIndex: 'scheduleStatus',
+      key: 'scheduleStatus',
+      width: 100,
+      render(value, record, index) {
+        const v = value ?? 1
+        if (record.scheduleType == ESchedulerType.SINGLE) {
+          return ''
+        }
+        return <Badge status={RunningStatusConfig[v].type} text={RunningStatusConfig[v].msg} />
       },
     },
     {
@@ -227,13 +249,21 @@ export default (props: IApiListProps) => {
       width: 150,
       dataIndex: 'description',
       key: 'description',
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (value, record, index) => (
+        <Tooltip placement="topLeft" title={value}>
+          {value}
+        </Tooltip>
+      ),
     },
     {
-      title: '最近运行时间',
-      // TODO xx
-      dataIndex: 'xx',
+      title: '下次运行时间',
+      dataIndex: 'nextRunTime',
       width: 120,
-      key: 'xx',
+      key: 'nextRunTime',
+      render: (value) => value && moment(value).format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       title: '操作',
@@ -245,7 +275,7 @@ export default (props: IApiListProps) => {
             <Button
               size="small"
               type="text"
-              disabled={record.status == 0}
+              disabled={record.status == 0 || record.runStatus == 'Running' || starting}
               onClick={() => {
                 handleStart(record)
               }}

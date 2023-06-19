@@ -3,9 +3,11 @@ package com.dlink.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
 import com.dlink.dto.SearchCondition;
+import com.dlink.model.DataBase;
 import com.dlink.model.MetadataTask;
 import com.dlink.model.MetadataTaskInstance;
-import com.dlink.service.AssetCatalogueService;
+import com.dlink.service.MetadataCatalogueService;
+import com.dlink.service.DataBaseService;
 import com.dlink.service.MetadataTaskInstanceService;
 import com.dlink.service.MetadataTaskService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +31,11 @@ public class MetadataTaskController {
     @Autowired
     private MetadataTaskService metadataTaskService;
     @Autowired
-    private AssetCatalogueService assetCatalogueService;
+    private MetadataCatalogueService metadataCatalogueService;
     @Autowired
     private MetadataTaskInstanceService metadataTaskInstanceService;
+    @Autowired
+    private DataBaseService dataBaseService;
 
     /**
      * 新增或者更新
@@ -41,6 +45,13 @@ public class MetadataTaskController {
         try {
             if (metadataTask.getId() == null) {
                 metadataTask.setStatus(0);
+            }
+            DataBase dataBase = dataBaseService.getById(metadataTask.getDatasourceId());
+            metadataTask.setDatasourceName(dataBase.getName());
+            List<String> paths = metadataCatalogueService.listAbsolutePathById(metadataTask.getCatalogueId());
+            metadataTask.setPath("/" + paths.stream().map(String::valueOf).collect(Collectors.joining("/")));
+            if (metadataTask.getScheduleType().equals("SINGLE")) {
+                metadataTask.setCronExpression("");
             }
             metadataTaskService.saveOrUpdate(metadataTask);
             return Result.succeed(metadataTask, "创建成功");
@@ -53,8 +64,6 @@ public class MetadataTaskController {
     @GetMapping(value = "/detail")
     public Result detail(@RequestParam Integer id) {
         MetadataTask metadataTask = metadataTaskService.getById(id);
-        List<String> paths = assetCatalogueService.listAbsolutePathById(metadataTask.getCatalogueId());
-        metadataTask.setPath("/" + paths.stream().map(String::valueOf).collect(Collectors.joining("/")));
         return Result.succeed(metadataTask, "获取成功");
     }
 

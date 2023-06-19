@@ -3,9 +3,9 @@ package com.dlink.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.dlink.db.service.impl.SuperServiceImpl;
-import com.dlink.mapper.AssetCatalogueMapper;
-import com.dlink.model.AssetCatalogue;
-import com.dlink.service.AssetCatalogueService;
+import com.dlink.mapper.MetadataCatalogueMapper;
+import com.dlink.model.MetadataCatalogue;
+import com.dlink.service.MetadataCatalogueService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,19 +20,19 @@ import static com.dlink.assertion.Asserts.isNull;
  * @since 2023/6/8 16:01
  **/
 @Service
-public class AssetCatalogueServiceImpl extends SuperServiceImpl<AssetCatalogueMapper, AssetCatalogue> implements AssetCatalogueService {
+public class MetadataCatalogueServiceImpl extends SuperServiceImpl<MetadataCatalogueMapper, MetadataCatalogue> implements MetadataCatalogueService {
     @Override
-    public List<AssetCatalogue> getAllData() {
+    public List<MetadataCatalogue> getAllData() {
         return this.list();
     }
 
     @Override
-    public AssetCatalogue findByParentIdAndName(Integer parentId, String name) {
-        return baseMapper.selectOne(Wrappers.<AssetCatalogue>query().eq("parent_id", parentId).eq("name", name));
+    public MetadataCatalogue findByParentIdAndName(Integer parentId, String name) {
+        return baseMapper.selectOne(Wrappers.<MetadataCatalogue>query().eq("parent_id", parentId).eq("name", name));
     }
 
     @Override
-    public AssetCatalogue createCatalogue(AssetCatalogue catalogue) {
+    public MetadataCatalogue createCatalogue(MetadataCatalogue catalogue) {
         this.saveOrUpdate(catalogue);
         return catalogue;
     }
@@ -40,11 +40,11 @@ public class AssetCatalogueServiceImpl extends SuperServiceImpl<AssetCatalogueMa
     @Override
     public List<String> removeCatalogueId(Integer id) {
         List<String> errors = new ArrayList<>();
-        AssetCatalogue catalogue = this.getById(id);
+        MetadataCatalogue catalogue = this.getById(id);
         if (isNull(catalogue)) {
             errors.add(id + "不存在！");
         } else {
-            long count = this.count(new LambdaQueryWrapper<AssetCatalogue>().eq(AssetCatalogue::getParentId, catalogue.getId()));
+            long count = this.count(new LambdaQueryWrapper<MetadataCatalogue>().eq(MetadataCatalogue::getParentId, catalogue.getId()));
             if (count > 0) {
                 errors.add("该目录下存在子目录，不允许删除");
             } else {
@@ -55,8 +55,8 @@ public class AssetCatalogueServiceImpl extends SuperServiceImpl<AssetCatalogueMa
     }
 
     @Override
-    public boolean toRename(AssetCatalogue catalogue) {
-        AssetCatalogue oldCatalogue = this.getById(catalogue.getId());
+    public boolean toRename(MetadataCatalogue catalogue) {
+        MetadataCatalogue oldCatalogue = this.getById(catalogue.getId());
         if (isNull(oldCatalogue)) {
             return false;
         } else {
@@ -69,7 +69,7 @@ public class AssetCatalogueServiceImpl extends SuperServiceImpl<AssetCatalogueMa
         if (id == 0) {
             return;
         }
-        AssetCatalogue apiCatalogue = this.getById(id);
+        MetadataCatalogue apiCatalogue = this.getById(id);
         if (apiCatalogue != null){
             paths.add(apiCatalogue.getName());
             this.getParentById(paths, apiCatalogue.getParentId());

@@ -209,8 +209,11 @@ export default [
     routes: [
       {
         path: '/dataAsset',
-        // TODO change
-        redirect: '/dataAsset/metaDataManage/overview',
+        redirect: '/dataAsset/dataMap',
+      },
+      {
+        path: '/dataAsset/dataMap',
+        redirect: '/dataAsset/dataMap/overview',
       },
       {
         path: '/dataAsset/dataMap',
@@ -234,6 +237,10 @@ export default [
             hideInMenu: true,
           },
         ],
+      },
+      {
+        path: '/dataAsset/metaDataManage',
+        redirect: '/dataAsset/metaDataManage/overview',
       },
       {
         path: '/dataAsset/metaDataManage',

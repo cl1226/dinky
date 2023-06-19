@@ -1,8 +1,8 @@
 package com.dlink.controller;
 
 import com.dlink.common.result.Result;
-import com.dlink.model.AssetCatalogue;
-import com.dlink.service.AssetCatalogueService;
+import com.dlink.model.MetadataCatalogue;
+import com.dlink.service.MetadataCatalogueService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,17 +19,17 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/asset/catalogue")
-public class AssetCatalogueController {
+public class MetadataCatalogueController {
 
     @Autowired
-    private AssetCatalogueService assetCatalogueService;
+    private MetadataCatalogueService metadataCatalogueService;
 
     /**
      * 获取所有目录
      */
     @GetMapping("/getCatalogueTreeData")
     public Result getCatalogueTreeData() throws Exception {
-        List<AssetCatalogue> catalogues = assetCatalogueService.getAllData();
+        List<MetadataCatalogue> catalogues = metadataCatalogueService.getAllData();
         return Result.succeed(catalogues, "获取成功");
     }
 
@@ -37,9 +37,9 @@ public class AssetCatalogueController {
      * 新增或者更新
      */
     @PutMapping
-    public Result saveOrUpdate(@RequestBody AssetCatalogue catalogue) throws Exception {
+    public Result saveOrUpdate(@RequestBody MetadataCatalogue catalogue) throws Exception {
         try {
-            AssetCatalogue assetCatalogue = assetCatalogueService.createCatalogue(catalogue);
+            MetadataCatalogue assetCatalogue = metadataCatalogueService.createCatalogue(catalogue);
             return Result.succeed(assetCatalogue, "创建成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -55,7 +55,7 @@ public class AssetCatalogueController {
         if (id != null) {
             boolean isAdmin = false;
             List<String> error = new ArrayList<>();
-            List<String> ids = assetCatalogueService.removeCatalogueId(id);
+            List<String> ids = metadataCatalogueService.removeCatalogueId(id);
             if (!ids.isEmpty()) {
                 error.addAll(ids);
             }
@@ -74,7 +74,7 @@ public class AssetCatalogueController {
      */
     @GetMapping("/getOneById")
     public Result getOneById(@RequestParam Integer id) throws Exception {
-        AssetCatalogue catalogue = assetCatalogueService.getById(id);
+        MetadataCatalogue catalogue = metadataCatalogueService.getById(id);
         return Result.succeed(catalogue, "获取成功");
     }
 
@@ -82,8 +82,8 @@ public class AssetCatalogueController {
      * 重命名节点和作业
      */
     @PutMapping("/toRename")
-    public Result toRename(@RequestBody AssetCatalogue catalogue) throws Exception {
-        if (assetCatalogueService.toRename(catalogue)) {
+    public Result toRename(@RequestBody MetadataCatalogue catalogue) throws Exception {
+        if (metadataCatalogueService.toRename(catalogue)) {
             return Result.succeed("重命名成功");
         } else {
             return Result.failed("重命名失败");

@@ -13,8 +13,8 @@ import lombok.EqualsAndHashCode;
  **/
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("dlink_asset_catalogue")
-public class AssetCatalogue extends SuperEntity {
+@TableName("dlink_metadata_catalogue")
+public class MetadataCatalogue extends SuperEntity {
 
     private Integer tenantId;
 

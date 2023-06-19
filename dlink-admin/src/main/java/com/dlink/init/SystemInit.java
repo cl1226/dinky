@@ -19,6 +19,8 @@
 
 package com.dlink.init;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.dlink.assertion.Asserts;
 import com.dlink.context.TenantContextHolder;
 import com.dlink.daemon.task.DaemonFactory;
@@ -26,21 +28,26 @@ import com.dlink.daemon.task.DaemonTaskConfig;
 import com.dlink.function.pool.UdfCodePool;
 import com.dlink.job.FlinkJobTask;
 import com.dlink.model.JobInstance;
+import com.dlink.model.MetadataTask;
 import com.dlink.model.Tenant;
 import com.dlink.scheduler.client.ProjectClient;
 import com.dlink.scheduler.config.DolphinSchedulerProperties;
 import com.dlink.scheduler.exception.SchedulerException;
 import com.dlink.scheduler.model.Project;
-import com.dlink.service.JobInstanceService;
-import com.dlink.service.SysConfigService;
-import com.dlink.service.TaskService;
-import com.dlink.service.TenantService;
+import com.dlink.service.*;
+import com.dlink.utils.QuartzUtil;
 import com.dlink.utils.UDFUtils;
 
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +80,10 @@ public class SystemInit implements ApplicationRunner {
     @Autowired
     private DolphinSchedulerProperties dolphinSchedulerProperties;
     private static Project project;
+    @Autowired
+    private MetadataTaskService metadataTaskService;
+    @Autowired
+    private Scheduler scheduler;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -84,6 +95,28 @@ public class SystemInit implements ApplicationRunner {
         initTaskMonitor();
         initDolphinScheduler();
         registerUDF();
+        initMetadataTask();
+    }
+
+    private void initMetadataTask() throws org.quartz.SchedulerException, ParseException {
+        LambdaQueryWrapper<MetadataTask> wrapper = Wrappers.<MetadataTask>lambdaQuery().eq(MetadataTask::getScheduleType, "CYCLE")
+                .isNotNull(MetadataTask::getCronExpression)
+                .eq(MetadataTask::getStatus, 1);
+        List<MetadataTask> metadataTasks = metadataTaskService.list(wrapper);
+        for (MetadataTask task : metadataTasks) {
+            JobDetail jobDetail = JobBuilder.newJob(QuartzUtil.class).withIdentity(task.getName() + "_元数据采集任务", "MetaDataJob").build();
+            Trigger trigger = TriggerBuilder.newTrigger().withIdentity(task.getName() + "_元数据采集任务", "MetaDataJob")
+                    .startAt(DateBuilder.futureDate(1, DateBuilder.IntervalUnit.SECOND))
+                    .withSchedule(CronScheduleBuilder.cronSchedule(task.getCronExpression())).build();
+            scheduler.scheduleJob(jobDetail, trigger);
+            task.setScheduleStatus("Success");
+            CronExpression cronExpression = new CronExpression(task.getCronExpression());
+            Date nextValidTimeAfter = cronExpression.getNextValidTimeAfter(new Date());
+            task.setScheduleStatus("Success");
+            task.setNextRunTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(nextValidTimeAfter.getTime()), ZoneId.systemDefault()));
+            metadataTaskService.saveOrUpdate(task);
+            log.info(task.getName() + "_元数据采集任务，开启调度");
+        }
     }
 
     /**

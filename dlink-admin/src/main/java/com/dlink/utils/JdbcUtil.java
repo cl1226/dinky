@@ -51,9 +51,12 @@ public class JdbcUtil {
                 });
                 list.add(jo);
             }
+            rs.close();
+            statement.close();
             return list;
         } else {
             int updateCount = statement.getUpdateCount();
+            statement.close();
             return updateCount + " rows affected";
         }
 

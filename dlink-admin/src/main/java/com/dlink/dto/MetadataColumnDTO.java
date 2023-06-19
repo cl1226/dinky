@@ -1,8 +1,11 @@
 package com.dlink.dto;
 
+import com.dlink.model.MetadataColumnLineage;
+import com.dlink.model.MetadataTableLineage;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * MetadataColumnDTO
@@ -70,5 +73,9 @@ public class MetadataColumnDTO {
     private String characterSet;
 
     private String collationStr;
+
+    private List<MetadataTableLineage> metadataTableLineages;
+
+    private List<MetadataColumnLineage> metadataColumnLineages;
 
 }

@@ -249,7 +249,7 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
 
   return simple ? (
     <DirectoryTree
-      className={styles['simple-tree']}
+      className={styles['catalogue-tree']}
       multiple
       onRightClick={handleContextMenu}
       onSelect={onSelect}
@@ -306,9 +306,7 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
           <UpdateCatalogueForm
             onSubmit={async (value) => {
               const success = await handleAddOrUpdateCatalogue(
-                isCreateCatalogue
-                  ? '/api/asset/catalogue'
-                  : '/api/asset/catalogue/toRename',
+                isCreateCatalogue ? '/api/asset/catalogue' : '/api/asset/catalogue/toRename',
                 value,
               )
               if (success) {

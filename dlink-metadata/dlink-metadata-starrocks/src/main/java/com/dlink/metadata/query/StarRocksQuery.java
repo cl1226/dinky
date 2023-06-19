@@ -50,7 +50,7 @@ public class StarRocksQuery extends AbstractDBQuery {
 
     @Override
     public String schemaName() {
-        return "Database";
+        return "SCHEMA";
     }
 
     @Override
@@ -93,37 +93,15 @@ public class StarRocksQuery extends AbstractDBQuery {
     }
 
     @Override
-    public String characterSet() {
+    public String defaultValue() {
         return "Default";
     }
 
     @Override
     public String collation() {
-        return "Default";
+        return "Collation";
     }
 
-    @Override
-    public String columnPosition() {
-        return "Default";
-    }
 
-    @Override
-    public String precision() {
-        return "Default";
-    }
 
-    @Override
-    public String scale() {
-        return "Default";
-    }
-
-    @Override
-    public String autoIncrement() {
-        return "Default";
-    }
-
-    @Override
-    public String isPK() {
-        return "YES";
-    }
 }
