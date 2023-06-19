@@ -188,6 +188,7 @@ export default (props: IApiListProps) => {
       title: '任务名称',
       dataIndex: 'name',
       key: 'name',
+      fixed: 'left',
       width: 150,
       ellipsis: {
         showTitle: false,
@@ -261,7 +262,7 @@ export default (props: IApiListProps) => {
     {
       title: '下次运行时间',
       dataIndex: 'nextRunTime',
-      width: 120,
+      width: 130,
       key: 'nextRunTime',
       render: (value) => value && moment(value).format('YYYY-MM-DD HH:mm:ss'),
     },
@@ -269,6 +270,7 @@ export default (props: IApiListProps) => {
       title: '操作',
       width: 160,
       key: 'action',
+      fixed: 'right',
       render: (cellValue, record) => (
         <Space size="middle">
           <Tooltip title={'运行'}>
@@ -390,6 +392,7 @@ export default (props: IApiListProps) => {
             className={styles['api-table']}
             loading={loading}
             rowKey="id"
+            scroll={{ x: 1300 }}
             size="small"
             rowSelection={{
               selectedRowKeys,

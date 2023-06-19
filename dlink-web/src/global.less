@@ -31,7 +31,7 @@ body,
 
 .ant-layout {
   // min-height: 100vh;
-  .ant-pro-top-nav-header-main-left{
+  .ant-pro-top-nav-header-main-left {
     margin-right: 10px;
   }
   overflow: hidden;
@@ -99,10 +99,30 @@ div .ant-page-header {
   padding-top: 0px;
 }
 
-.ant-tabs-top > .ant-tabs-nav, .ant-tabs-bottom > .ant-tabs-nav, .ant-tabs-top > div > .ant-tabs-nav, .ant-tabs-bottom > div > .ant-tabs-nav {
+.ant-tabs-top > .ant-tabs-nav,
+.ant-tabs-bottom > .ant-tabs-nav,
+.ant-tabs-top > div > .ant-tabs-nav,
+.ant-tabs-bottom > div > .ant-tabs-nav {
   margin: 0 0 0px 0 !important;
 }
 
-div.mt-20{
+div.mt-20 {
   margin-top: 20px;
+}
+
+// table scrollbar
+.ant-table-content {
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #0003;
+    border-radius: 5px;
+    // -webkit-box-shadow: inset 0 0 5px rgba(177, 173, 173, 0.934);
+  }
+  &::-webkit-scrollbar-track {
+    background: #b6b6bc0f;
+    border-radius: 0;
+    -webkit-box-shadow: none;
+  }
 }

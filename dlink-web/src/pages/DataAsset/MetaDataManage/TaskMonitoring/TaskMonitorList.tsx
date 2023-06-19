@@ -127,6 +127,7 @@ export default (props: IApiListProps) => {
       title: '任务名称',
       dataIndex: 'name',
       key: 'name',
+      fixed: 'left',
       width: 150,
     },
     {
@@ -187,6 +188,7 @@ export default (props: IApiListProps) => {
       title: '操作',
       width: 80,
       key: 'action',
+      fixed:'right',
       render: (cellValue, record) => (
         <Space size={0} split={<Divider type="vertical" style={{ margin: 2 }} />}>
           <Button
@@ -240,6 +242,7 @@ export default (props: IApiListProps) => {
             className={styles['api-table']}
             loading={loading}
             rowKey="id"
+            scroll={{ x: 1300 }}
             size="small"
             columns={columns}
             dataSource={listData}
