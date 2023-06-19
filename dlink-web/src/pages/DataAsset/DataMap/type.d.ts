@@ -32,6 +32,8 @@ export interface IAssetDetail {
   tableType?: string
   dbId?: number
   dbName?: string
+  metadataColumnLineages?: any
+  metadataTableLineages?: any
 
   /**column */
   autoIncrement?: boolean

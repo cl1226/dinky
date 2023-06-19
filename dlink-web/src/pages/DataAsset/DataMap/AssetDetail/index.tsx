@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import styles from './index.less'
-import { connect, history, useParams,useModel } from 'umi'
+import { connect, history, useParams } from 'umi'
 import { Tabs, Menu, Dropdown, Spin } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { Scrollbars } from 'react-custom-scrollbars'
@@ -18,68 +18,10 @@ import DataPreviewTab from './DataPreviewTab'
 
 const { TabPane } = Tabs
 
-const getDetailContent = (paneItem: IAssetDetail) => {
-  const { type } = paneItem
-  const tabs = [
-    {
-      label: '详情',
-      key: '1',
-      children: <DetailTab basicInfo={paneItem} />,
-    },
-  ]
-  if (type === 'Database') {
-    tabs.push({
-      label: '表信息',
-      key: '2',
-      children: <TableInfoTab basicInfo={paneItem} />,
-    })
-  } else if (type === 'Table') {
-    tabs.push(
-      {
-        label: '列属性',
-        key: '2',
-        children: <ColumnInfoTab basicInfo={paneItem} />,
-      },
-      {
-        label: '血缘',
-        key: '3',
-        children: <LineageTab basicInfo={paneItem} />,
-      },
-      {
-        label: '数据预览',
-        key: '4',
-        children: <DataPreviewTab basicInfo={paneItem} />,
-      },
-    )
-  } else if (type === 'Column') {
-    tabs.push({
-      label: '血缘',
-      key: '2',
-      children: <LineageTab basicInfo={paneItem} />,
-    })
-  }
-  return (
-    <div className={styles['detail-content']}>
-      <div className="top-detail">
-        <div className="left-header">{getIcon(paneItem.type, 34)}</div>
-        <div className="right-header">
-          <div className="title">{paneItem.name}</div>
-          <div className="tip-list">
-            <div className="tip-item">{`数据源：${paneItem.datasourceName}`}</div>
-
-            {paneItem.position && <div className="tip-item">{`路径：${paneItem.position}`}</div>}
-          </div>
-        </div>
-      </div>
-      <Tabs size={'small'} defaultActiveKey="1" items={tabs} />
-    </div>
-  )
-}
-
 const AssetDetailTabs = (props) => {
   const { itemType, id } = useParams() as { itemType: string; id: string }
   const { tabs, currentTab, pageLoading } = props
-
+  const [tabKey, setTabKey] = useState('detail')
   useEffect(() => {
     props.asyncOpenTab(itemType, id)
   }, [])
@@ -99,6 +41,70 @@ const AssetDetailTabs = (props) => {
     }
 
     props.saveTabs(newTabs, newActiveKey)
+  }
+
+  const getDetailContent = (paneItem: IAssetDetail) => {
+    const { type } = paneItem
+    const tabs = [
+      {
+        label: '详情',
+        key: 'detail',
+        children: <DetailTab basicInfo={paneItem} />,
+      },
+    ]
+    if (type === 'Database') {
+      tabs.push({
+        label: '表信息',
+        key: 'tableInfo',
+        children: <TableInfoTab basicInfo={paneItem} />,
+      })
+    } else if (type === 'Table') {
+      tabs.push(
+        {
+          label: '列属性',
+          key: 'columnInfo',
+          children: <ColumnInfoTab basicInfo={paneItem} />,
+        },
+        {
+          label: '血缘',
+          key: 'lineage',
+          children: <LineageTab basicInfo={paneItem} currentKey={tabKey} />,
+        },
+        {
+          label: '数据预览',
+          key: 'dataPreview',
+          children: <DataPreviewTab basicInfo={paneItem} />,
+        },
+      )
+    } else if (type === 'Column') {
+      tabs.push({
+        label: '血缘',
+        key: 'lineage',
+        children: <LineageTab basicInfo={paneItem} currentKey={tabKey} />,
+      })
+    }
+
+    return (
+      <div className={styles['detail-content']}>
+        <div className="top-detail">
+          <div className="left-header">{getIcon(paneItem.type, 34)}</div>
+          <div className="right-header">
+            <div className="title">{paneItem.name}</div>
+            <div className="tip-list">
+              <div className="tip-item">{`数据源：${paneItem.datasourceName}`}</div>
+
+              {paneItem.position && <div className="tip-item">{`路径：${paneItem.position}`}</div>}
+            </div>
+          </div>
+        </div>
+        <Tabs
+          size={'small'}
+          onChange={(key: string) => setTabKey(`${currentTab.type}/${currentTab.id}/${key}`)}
+          defaultActiveKey="detail"
+          items={tabs}
+        />
+      </div>
+    )
   }
 
   const menu = (pane: IAssetDetail) => (
