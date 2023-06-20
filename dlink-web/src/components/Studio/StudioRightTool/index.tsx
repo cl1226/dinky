@@ -17,181 +17,243 @@
  *
  */
 
+import { Tabs, Row, Col, Tooltip, Button } from 'antd'
+import {
+  ContainerOutlined,
+  ScheduleOutlined,
+  SettingOutlined,
+  RightSquareOutlined,
+} from '@ant-design/icons'
+import { StateType } from '@/pages/DataStudio/model'
+import { connect } from 'umi'
+import StudioConfig from './StudioConfig'
+import StudioSetting from './StudioSetting'
+import StudioSavePoint from './StudioSavePoint'
+import StudioHistory from './StudioHistory'
+import StudioEnvSetting from './StudioEnvSetting'
+import StudioSqlConfig from './StudioSqlConfig'
+import StudioUDFInfo from './StudioUDFInfo'
+import StudioJarSetting from './StudioJarSetting'
+import StudioTaskInfo from './StudioTaskInfo'
+import { DIALECT, isSql } from '@/components/Studio/conf'
+import StudioKubernetesConfig from '@/components/Studio/StudioRightTool/StudioKubernetesConfig'
+import styles from './index.less'
+import { l } from '@/utils/intl'
+import { useState } from 'react'
 
-import {Tabs, Empty} from "antd";
-import {ContainerOutlined, ScheduleOutlined, SettingOutlined, CodeOutlined, TableOutlined} from "@ant-design/icons";
-import {StateType} from "@/pages/DataStudio/model";
-import {connect} from "umi";
-import StudioConfig from "./StudioConfig";
-import StudioSetting from "./StudioSetting";
-import StudioSavePoint from "./StudioSavePoint";
-import StudioHistory from "./StudioHistory";
-import StudioEnvSetting from "./StudioEnvSetting";
-import StudioSqlConfig from "./StudioSqlConfig";
-import StudioUDFInfo from "./StudioUDFInfo";
-import StudioJarSetting from "./StudioJarSetting";
-import StudioGuide from "./StudioGuide";
-import StudioTaskInfo from "./StudioTaskInfo";
-import {DIALECT, isSql} from "@/components/Studio/conf";
-import StudioKubernetesConfig from "@/components/Studio/StudioRightTool/StudioKubernetesConfig";
-import './index.less'
-import {l} from "@/utils/intl";
-import { useState } from "react";
-import { Scrollbars } from 'react-custom-scrollbars'
-import StudioMsg from "../StudioConsole/StudioMsg"
-import StudioTable from "../StudioConsole/StudioTable"
-
-const {TabPane} = Tabs;
+const { TabPane } = Tabs
 
 const StudioRightTool = (props: any) => {
+  const { current, form } = props
 
-  const {current, form, toolHeight} = props;
+  const [showTabPane, setShowTabPane] = useState(false)
 
-  const [showTabPane, setshowTabPane] = useState(false)
-
-  const renderContent = () => {
-    if (isSql(current.task.dialect)) {
-      return renderSqlContent();
-    }
-    if (DIALECT.FLINKJAR === current.task.dialect) {
-      return renderJarContent();
-    }
-    if (DIALECT.FLINKSQLENV === current.task.dialect) {
-      return renderEnvContent();
-    }
-    if (DIALECT.JAVA === current.task.dialect) {
-      return renderUDFContent();
-    }
-    if (DIALECT.SCALA === current.task.dialect) {
-      return renderUDFContent();
-    }
-    if (DIALECT.PYTHON === current.task.dialect) {
-      return renderUDFContent();
-    }
-    if (DIALECT.KUBERNETES_APPLICATION === current.task.dialect) {
-      return renderKubernetesContent();
-    }
-    return renderFlinkSqlContent();
-  };
+  const renderPaneTop = () => (
+    <Row>
+      <Col span={24}>
+        <div style={{ float: 'right' }}>
+          <Tooltip title={l('component.minimize')}>
+            <Button
+              onClick={() => setShowTabPane(false)}
+              type="text"
+              icon={<RightSquareOutlined />}
+            />
+          </Tooltip>
+        </div>
+      </Col>
+    </Row>
+  )
 
   const renderTaskInfoContent = () => {
     return (
-      <TabPane tab={<span><ContainerOutlined/> {l('pages.datastudio.label.jobInfo')}</span>} key="StudioTaskInfo">
-        <StudioTaskInfo form={form}/>
-      </TabPane>
-    )
-  };
-
-  const renderConsoleMsg = () => {
-    return (
       <TabPane
         tab={
           <span>
-          <CodeOutlined/>
-            {l('pages.datastudio.label.info')}
-        </span>
+            <ContainerOutlined /> {l('pages.datastudio.label.jobInfo')}
+          </span>
         }
-        key="StudioMsg"
+        key="StudioTaskInfo"
       >
-        <Scrollbars style={{height: '500px'}}>
-          <StudioMsg/>
-        </Scrollbars>
+        {renderPaneTop()}
+        <StudioTaskInfo form={form} />
       </TabPane>
     )
   }
 
-  const renderStudioTable = () => {
-    return (
-      <TabPane
-        tab={
-          <span>
-          <TableOutlined/>
-            {l('pages.datastudio.label.result')}
-        </span>
-        }
-        key="StudioTable"
-      >
-        <Scrollbars style={{height: '500px'}}>
-          {current ? <StudioTable/> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>}
-        </Scrollbars>
+  const renderContent = () => {
+    const tabPanes: any = getRenderTabPanes()
+    return tabPanes.map((paneItem) => (
+      <TabPane tab={paneItem.tab} key={paneItem.key}>
+        {renderPaneTop()}
+        {paneItem.com}
       </TabPane>
-    )
+    ))
   }
+  const getRenderSql = () => {
+    return [
+      {
+        tab: (
+          <span>
+            <SettingOutlined /> {l('pages.datastudio.label.execConfig')}
+          </span>
+        ),
+        key: 'StudioSqlConfig',
+        com: <StudioSqlConfig form={form} />,
+      },
+    ]
+  }
+  const getRenderJar = () => {
+    return [
+      {
+        tab: (
+          <span>
+            <SettingOutlined /> {l('pages.datastudio.label.jobConfig')}
+          </span>
+        ),
+        key: 'StudioJarSetting',
+        com: <StudioJarSetting form={form} />,
+      },
+    ]
+  }
+  const getRenderEnv = () => {
+    return [
+      {
+        tab: (
+          <span>
+            <SettingOutlined /> {l('pages.datastudio.label.jobConfig')}
+          </span>
+        ),
+        key: 'StudioEnvSetting',
+        com: <StudioEnvSetting form={form} />,
+      },
+    ]
+  }
+  const getRenderUDF = () => {
+    return [
+      {
+        tab: (
+          <span>
+            <SettingOutlined /> {l('pages.datastudio.label.udfInfo')}
+          </span>
+        ),
+        key: 'StudioUDFInfo',
+        com: <StudioUDFInfo form={form} />,
+      },
+    ]
+  }
+  const getRenderKubernetes = () => {
+    return [
+      {
+        tab: (
+          <span>
+            <SettingOutlined /> {l('pages.datastudio.label.execConfig')}
+          </span>
+        ),
+        key: 'StudioSqlConfig',
+        com: <StudioKubernetesConfig form={form} />,
+      },
+      {
+        tab: (
+          <span>
+            <ScheduleOutlined /> {l('pages.datastudio.label.savepoint')}
+          </span>
+        ),
+        key: 'StudioSavePoint',
+        com: <StudioSavePoint />,
+      },
+    ]
+  }
+  const getRenderFlinkSql = () => {
+    return [
+      {
+        tab: (
+          <span>
+            <SettingOutlined /> {l('pages.datastudio.label.jobConfig')}
+          </span>
+        ),
+        key: 'StudioSetting',
+        com: <StudioSetting form={form} />,
+      },
+      {
+        tab: (
+          <span>
+            <SettingOutlined /> {l('pages.datastudio.label.execConfig')}
+          </span>
+        ),
+        key: 'StudioConfig',
+        com: <StudioConfig form={form} />,
+      },
+      {
+        tab: (
+          <span>
+            <ScheduleOutlined /> {l('pages.datastudio.label.savepoint')}
+          </span>
+        ),
+        key: 'StudioSavePoint',
+        com: <StudioSavePoint />,
+      },
+      {
+        tab: (
+          <span>
+            <ScheduleOutlined /> {l('pages.datastudio.label.version')}
+          </span>
+        ),
+        key: 'StudioHistory',
+        com: <StudioHistory />,
+      },
+    ]
+  }
+  const getRenderTabPanes = () => {
+    if (isSql(current.task.dialect)) {
+      return getRenderSql()
+    }
+    if (DIALECT.FLINKJAR === current.task.dialect) {
+      return getRenderJar()
+    }
+    if (DIALECT.FLINKSQLENV === current.task.dialect) {
+      return getRenderEnv
+    }
+    if (
+      DIALECT.JAVA === current.task.dialect ||
+      DIALECT.SCALA === current.task.dialect ||
+      DIALECT.PYTHON === current.task.dialect
+    ) {
+      return getRenderUDF()
+    }
 
-  const renderSqlContent = () => {
-    return (<>
-      <TabPane tab={<span><SettingOutlined/> {l('pages.datastudio.label.execConfig')}</span>} key="StudioSqlConfig">
-        <StudioSqlConfig form={form}/>
-      </TabPane>
-    </>)
-  };
-
-  const renderKubernetesContent = () => {
-    return (<>
-      <TabPane tab={<span><SettingOutlined/> {l('pages.datastudio.label.execConfig')}</span>} key="StudioSqlConfig">
-        <StudioKubernetesConfig form={form}/>
-      </TabPane>
-      <TabPane tab={<span><ScheduleOutlined/> {l('pages.datastudio.label.savepoint')}</span>} key="StudioSavePoint">
-        <StudioSavePoint/>
-      </TabPane>
-    </>)
-  };
-
-  const renderJarContent = () => {
-    return (<>
-      <TabPane tab={<span><SettingOutlined/> {l('pages.datastudio.label.jobConfig')}</span>} key="StudioJarSetting">
-        <StudioJarSetting form={form}/>
-      </TabPane>
-    </>)
-  };
-
-  const renderEnvContent = () => {
-    return (<>
-      <TabPane tab={<span><SettingOutlined/> {l('pages.datastudio.label.jobConfig')}</span>} key="StudioEnvSetting">
-        <StudioEnvSetting form={form}/>
-      </TabPane>
-    </>)
-  };
-
-  const renderUDFContent = () => {
-    return (<>
-      <TabPane tab={<span><SettingOutlined/> {l('pages.datastudio.label.udfInfo')}</span>} key="StudioUDFInfo">
-        <StudioUDFInfo form={form}/>
-      </TabPane>
-    </>)
-  };
-
-  const renderFlinkSqlContent = () => {
-    return (<><TabPane tab={<span><SettingOutlined/> {l('pages.datastudio.label.jobConfig')}</span>} key="StudioSetting">
-      <StudioSetting form={form}/>
-    </TabPane>
-      <TabPane tab={<span><SettingOutlined/> {l('pages.datastudio.label.execConfig')}</span>} key="StudioConfig">
-        <StudioConfig form={form}/>
-      </TabPane>
-      <TabPane tab={<span><ScheduleOutlined/> {l('pages.datastudio.label.savepoint')}</span>} key="StudioSavePoint">
-        <StudioSavePoint/>
-      </TabPane>
-      <TabPane tab={<span><ScheduleOutlined/> {l('pages.datastudio.label.version')}</span>} key="StudioHistory">
-        <StudioHistory/>
-      </TabPane>
-    </>)
-  };
+    if (DIALECT.KUBERNETES_APPLICATION === current.task.dialect) {
+      return getRenderKubernetes()
+    }
+    return getRenderFlinkSql()
+  }
 
   return (
     <>
-      {current?.task ?
-        <Tabs className={`righttools-tabcontent-wrap righttools-tabcontent-wrap${showTabPane && '-show'}`} onTabClick={() => setshowTabPane(!showTabPane)} defaultActiveKey="1" size="small" tabPosition="right" >
+      {current?.task ? (
+        <Tabs
+          className={[
+            styles['tabcontent-wrap'],
+            showTabPane ? styles['tabcontent-wrap-show'] : '',
+          ].join(' ')}
+          onChange={() => {
+            setShowTabPane(true)
+          }}
+          onTabClick={() => setShowTabPane(!showTabPane)}
+          defaultActiveKey="1"
+          size="small"
+          tabPosition="right"
+        >
           {renderContent()}
           {renderTaskInfoContent()}
-          {/* {renderConsoleMsg()} */}
-          {/* {renderStudioTable()} */}
-        </Tabs> : <></>}
+        </Tabs>
+      ) : (
+        <></>
+      )}
     </>
-  );
-};
+  )
+}
 
-export default connect(({Studio}: { Studio: StateType }) => ({
+export default connect(({ Studio }: { Studio: StateType }) => ({
   sql: Studio.sql,
-  toolHeight: Studio.toolHeight,
   current: Studio.current,
-}))(StudioRightTool);
+}))(StudioRightTool)

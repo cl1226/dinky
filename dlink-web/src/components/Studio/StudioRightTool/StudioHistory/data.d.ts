@@ -19,7 +19,7 @@
 
 
 export type TaskHistoryTableListItem = {
-  id: number,
+  id?: number,
   versionId: number,
   statement: string,
   createTime: Date,

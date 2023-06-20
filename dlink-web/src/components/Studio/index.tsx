@@ -18,7 +18,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
-import { connect } from 'umi'
+import { connect, useModel } from 'umi'
 import styles from './index.less'
 import StudioMenu from './StudioMenu'
 import { Card, Col, Form, Row, Tooltip, Spin } from 'antd'
@@ -46,27 +46,16 @@ import DraggleLayout from '@/components/DraggleLayout'
 import { loadSettings } from '@/pages/SettingCenter/FlinkSettings/function'
 
 const Studio = (props: any) => {
-  const {
-    pageLoading,
-    isFullScreen,
-    rightClickMenu,
-    toolHeight,
-    toolLeftWidth,
-    toolRightWidth,
-    dispatch,
-  } = props
+  const { initialState }: any = useModel('@@initialState')
+  const { pageLoading, rightClickMenu, toolHeight, toolLeftWidth, dispatch } = props
   const [form] = Form.useForm()
   const VIEW = {
-    leftToolWidth: 300,
-    marginTop: 84,
-    topHeight: 35.6,
-    bottomHeight: 40,
+    topHeight: 32, // 顶部menu高度
     rightMargin: 32,
     leftMargin: 36,
     midMargin: 46,
   }
 
-  const [bottomHeight, setBottomHeight] = useState(40)
   const [size, setSize] = useState({
     width: document.documentElement.clientWidth,
     height: document.documentElement.clientHeight,
@@ -111,46 +100,14 @@ const Studio = (props: any) => {
     }
   }
 
-  const backup = () => {
-    setBottomHeight(300)
-  }
-
-  const min = () => {
-    setBottomHeight(40)
-  }
-
-  const operations = (
-    <>
-      <Tooltip title="最小化">
-        <MinusOutlined
-          onClick={() => min()}
-          style={{ cursor: 'pointer', 'margin-right': '15px' }}
-        />
-      </Tooltip>
-      <Tooltip title="还原">
-        <SwitcherOutlined
-          onClick={() => backup()}
-          tooltip="还原"
-          style={{ cursor: 'pointer', 'margin-right': '15px' }}
-        />
-      </Tooltip>
-    </>
-  )
-
   return (
     <div onClick={onClick} style={{ margin: '-24px' }}>
-      <StudioMenu form={form} width={size.width} height={size.height} />
-      <Card
-        bordered={false}
-        className={styles.card}
-        size="small"
-        id="studio_card"
-        style={{ marginBottom: 0 }}
-      >
+      <StudioMenu />
+      <Card bordered={false} className={styles.card} size="small" id="studio_card">
         <Row>
           <DraggleLayout
-            containerWidth={size.width - 240}
-            containerHeight={size.height - 85}
+            containerWidth={size.width - (initialState.collapsed ? 48 : 208)}
+            containerHeight={size.height - 80}
             min={VIEW.leftMargin}
             max={size.width - VIEW.rightMargin - VIEW.midMargin}
             initLeftWidth={toolLeftWidth}
@@ -165,14 +122,29 @@ const Studio = (props: any) => {
               />
             }
           >
-            <Col className={styles['vertical-tabs']} style={{ width: toolLeftWidth }}>
-              <Row style={{ width: toolLeftWidth }}>
-                <StudioTree width={toolLeftWidth} />
-              </Row>
+            <Col style={{ width: toolLeftWidth }}>
+              <StudioTree width={toolLeftWidth} />
             </Col>
             <Spin spinning={pageLoading}>
-              <Col>
-                {/* <DraggleVerticalLayout
+              <Row style={{ height: size.height - 48 - VIEW.topHeight }}>
+                <Col style={{ width: 'calc(100% - 32px)' }}>
+                  <Row style={{ height: size.height - 48 - VIEW.topHeight - toolHeight }}>
+                    <Col span={24} style={{ height: '100%' }}>
+                      <StudioTabs />
+                    </Col>
+                  </Row>
+                  <Row style={{ height: toolHeight }}>
+                    <Col span={24}>
+                      <StudioConsole height={toolHeight} />
+                    </Col>
+                  </Row>
+                </Col>
+                <Col className={styles['vertical-tabs']} style={{ bottom: toolHeight }}>
+                  <StudioRightTool form={form} />
+                </Col>
+              </Row>
+
+              {/* <DraggleVerticalLayout
                 containerWidth={size.width - toolLeftWidth - 250}
                 containerHeight={(size.height - VIEW.marginTop)}
                 min={(VIEW.topHeight)}
@@ -187,26 +159,11 @@ const Studio = (props: any) => {
                     }}
                   />
                 }
-              > */}
-                <Row style={{ height: size.height - VIEW.topHeight - bottomHeight - 50 }}>
-                  <Col span={24} style={{ height: '100%' }}>
-                    {!isFullScreen ? (
-                      <StudioTabs height={'100%'} width={size.width - toolLeftWidth} />
-                    ) : undefined}
-                  </Col>
-                </Row>
-                <Row style={{ height: bottomHeight }}>
-                  <Col span={24}>
-                    <StudioConsole height={bottomHeight} operations={operations} />
-                  </Col>
-                </Row>
-                {/* </DraggleVerticalLayout> */}
-              </Col>
+              >
+
+                </DraggleVerticalLayout> */}
             </Spin>
           </DraggleLayout>
-          <Col id="StudioRightTool" className={styles['vertical-tabs']}>
-            <StudioRightTool form={form} />
-          </Col>
         </Row>
       </Card>
     </div>
@@ -215,9 +172,7 @@ const Studio = (props: any) => {
 
 export default connect(({ Studio }: { Studio: StateType }) => ({
   pageLoading: Studio.pageLoading,
-  isFullScreen: Studio.isFullScreen,
   rightClickMenu: Studio.rightClickMenu,
   toolHeight: Studio.toolHeight,
   toolLeftWidth: Studio.toolLeftWidth,
-  toolRightWidth: Studio.toolRightWidth,
 }))(Studio)

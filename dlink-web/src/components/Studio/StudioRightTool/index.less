@@ -17,31 +17,43 @@
  *
  */
 
-
-.righttools-tabcontent-wrap {
-    position: relative;
-    top: 32px;
-    .ant-tabs-content-holder{
-        position: absolute;
-        transform: translateX(0px);
-        border: 1px solid #CCC;
-        transition: all 0.5s;
-        background-color: white;
-        background-clip: padding-box;
-        border-radius: 8px;
-        z-index: -1;
-        box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
-        width: 30vw;
-
+.tabcontent-wrap {
+  position: relative;
+  height: 100%;
+  :global {
+    .ant-tabs-content-holder {
+      position: absolute;
+      width: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: white;
+      background-clip: padding-box;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+        0 9px 28px 8px rgba(0, 0, 0, 0.05);
+      transform: translateX(0px);
+      .ant-tabs-content {
+        height: 100%;
+        .ant-tabs-tabpane {
+          height: 100%;
+        }
+      }
     }
     .ant-tabs-nav {
-        background-color: white;
-        z-index: 2;
+      z-index: 2;
+      background-color: white;
     }
+  }
 }
-.righttools-tabcontent-wrap-show{
-    div.ant-tabs-content-holder{
-        transform: translateX(-100%);
-        z-index: 1;
+.tabcontent-wrap-show {
+  :global {
+    .ant-tabs-content-holder {
+      width: 30vw;
+      min-width: 360px;
+      max-width: 600px;
+      transform: translateX(-100%);
+      transition: all 0.5s;
     }
+  }
 }

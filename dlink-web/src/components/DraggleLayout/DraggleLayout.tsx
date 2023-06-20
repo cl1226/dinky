@@ -54,12 +54,6 @@ function DraggleLayout({
               type: 'Studio/saveToolLeftWidth',
               payload: _x,
             })
-        } else {
-          dispatch &&
-            dispatch({
-              type: 'Studio/saveToolRightWidth',
-              payload: containerWidth - _x,
-            })
         }
       },
     },

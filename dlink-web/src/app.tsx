@@ -138,7 +138,7 @@ export const request: RequestConfig = {
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
-export const layout: RunTimeLayoutConfig = ({ initialState }) => {
+export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   return {
     rightContentRender: () => <RightContent />,
     disableContentMargin: false,
@@ -166,6 +166,10 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
         ]
       : [],
     menuHeaderRender: undefined,
+    onCollapse: (collapsed: boolean) => {
+      setInitialState({ ...initialState, collapsed })
+    },
+    collapsed: initialState?.collapsed,
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
     ...initialState?.settings,

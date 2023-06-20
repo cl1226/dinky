@@ -17,108 +17,101 @@
  *
  */
 
+import { connect } from 'umi'
+import { StateType } from '@/pages/DataStudio/model'
+import { Col, Form, InputNumber, Row, Select, Tag } from 'antd'
+import styles from './index.less'
+import { Scrollbars } from 'react-custom-scrollbars'
+import { l } from '@/utils/intl'
 
-import {connect} from "umi";
-import {StateType} from "@/pages/DataStudio/model";
-import {Button, Col, Form, InputNumber, Row, Select, Tag, Tooltip,} from "antd";
-import {MinusSquareOutlined} from "@ant-design/icons";
-import styles from "./index.less";
-import {Scrollbars} from 'react-custom-scrollbars';
-import {l} from "@/utils/intl";
-
-const {Option} = Select;
+const { Option } = Select
 
 const StudioSqlConfig = (props: any) => {
+  const { current, form, dispatch, tabs, database } = props
 
-  const {current, form, dispatch, tabs, database, toolHeight} = props;
-
-  form.setFieldsValue(current.task);
+  form.setFieldsValue(current.task)
 
   const onValuesChange = (change: any, all: any) => {
-    let newTabs = tabs;
+    let newTabs = tabs
     for (let i = 0; i < newTabs.panes.length; i++) {
       if (newTabs.panes[i].key == newTabs.activeKey) {
         for (let key in change) {
-          newTabs.panes[i].task[key] = change[key];
+          newTabs.panes[i].task[key] = change[key]
         }
-        break;
+        break
       }
     }
 
-    dispatch && dispatch({
-      type: "Studio/saveTabs",
-      payload: newTabs,
-    });
-  };
-
+    dispatch &&
+      dispatch({
+        type: 'Studio/saveTabs',
+        payload: newTabs,
+      })
+  }
 
   const getDataBaseOptions = () => {
-    const itemList = [];
+    const itemList: any = []
     for (const item of database) {
       if (item.type.toUpperCase() === current.task.dialect.toUpperCase()) {
-        const tag = (<><Tag
-          color={item.enabled ? "processing" : "error"}>{item.type}</Tag>{item.alias === "" ? item.name : item.alias}</>);
-        itemList.push(<Option key={item.id} value={item.id} label={tag}>
-          {tag}
-        </Option>)
+        const tag = (
+          <>
+            <Tag color={item.enabled ? 'processing' : 'error'}>{item.type}</Tag>
+            {item.alias === '' ? item.name : item.alias}
+          </>
+        )
+        itemList.push(
+          <Option key={item.id} value={item.id} label={tag}>
+            {tag}
+          </Option>,
+        )
       }
     }
-    return itemList;
-  };
+    return itemList
+  }
 
   return (
-    <>
-      <Row>
-        <Col span={24}>
-          <div style={{float: "right"}}>
-            <Tooltip title={l('component.minimize')}>
-              <Button
-                type="text"
-                icon={<MinusSquareOutlined/>}
-              />
-            </Tooltip>
-          </div>
-        </Col>
-      </Row>
-      <Scrollbars style={{height: (toolHeight - 32)}}>
-        <Form
-          form={form}
-          layout="vertical"
-          className={styles.form_setting}
-          onValuesChange={onValuesChange}
-        >
-          <Row>
-            <Col span={24}>
-              <Form.Item label={l('pages.datastudio.label.datasource')} tooltip={l('pages.datastudio.label.execConfig.selectDatabase.tip')}
-                         name="databaseId"
-                         className={styles.form_item}>
-                <Select
-                  style={{width: '100%'}}
-                  placeholder={l('pages.datastudio.label.execConfig.selectDatabase')}
-                  optionLabelProp="label"
-                >
-                  {getDataBaseOptions()}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={24}>
-              <Form.Item
-                label={l('pages.datastudio.label.maxrows')} className={styles.form_item} name="maxRowNum"
-                tooltip={l('pages.datastudio.label.execConfig.maxrow.tip')}
+    <Scrollbars style={{ height: 'calc(100% - 32px)' }}>
+      <Form
+        form={form}
+        layout="vertical"
+        className={styles.form_setting}
+        onValuesChange={onValuesChange}
+      >
+        <Row>
+          <Col span={24}>
+            <Form.Item
+              label={l('pages.datastudio.label.datasource')}
+              tooltip={l('pages.datastudio.label.execConfig.selectDatabase.tip')}
+              name="databaseId"
+              className={styles.form_item}
+            >
+              <Select
+                style={{ width: '100%' }}
+                placeholder={l('pages.datastudio.label.execConfig.selectDatabase')}
+                optionLabelProp="label"
               >
-                <InputNumber min={1} max={9999} defaultValue={100}/>
-              </Form.Item>
-            </Col>
-          </Row>
-        </Form>
-      </Scrollbars>
-    </>
-  );
-};
+                {getDataBaseOptions()}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item
+              label={l('pages.datastudio.label.maxrows')}
+              className={styles.form_item}
+              name="maxRowNum"
+              tooltip={l('pages.datastudio.label.execConfig.maxrow.tip')}
+            >
+              <InputNumber min={1} max={9999} defaultValue={100} />
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
+    </Scrollbars>
+  )
+}
 
-export default connect(({Studio}: { Studio: StateType }) => ({
+export default connect(({ Studio }: { Studio: StateType }) => ({
   database: Studio.database,
   current: Studio.current,
   tabs: Studio.tabs,
-  toolHeight: Studio.toolHeight,
-}))(StudioSqlConfig);
+}))(StudioSqlConfig)

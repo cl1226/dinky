@@ -17,86 +17,73 @@
  *
  */
 
-
-import {connect} from "umi";
-import {StateType} from "@/pages/DataStudio/model";
-import {Button, Col, Form, Row, Switch, Tooltip} from "antd";
-import {InfoCircleOutlined, MinusSquareOutlined} from "@ant-design/icons";
-import styles from "./index.less";
-import {useEffect} from "react";
-import {JarStateType} from "@/pages/RegistrationCenter/Jar/model";
-import {Scrollbars} from "react-custom-scrollbars";
-import {l} from "@/utils/intl";
+import { connect } from 'umi'
+import { StateType } from '@/pages/DataStudio/model'
+import { Col, Form, Row, Switch } from 'antd'
+import { InfoCircleOutlined } from '@ant-design/icons'
+import styles from './index.less'
+import { useEffect } from 'react'
+import { JarStateType } from '@/pages/RegistrationCenter/Jar/model'
+import { Scrollbars } from 'react-custom-scrollbars'
+import { l } from '@/utils/intl'
 
 const StudioEnvSetting = (props: any) => {
-
-  const {current, form, dispatch, tabs, toolHeight} = props;
+  const { current, form, dispatch, tabs } = props
 
   useEffect(() => {
-    form.setFieldsValue(current.task);
-  }, [current.task]);
-
+    form.setFieldsValue(current.task)
+  }, [current.task])
 
   const onValuesChange = (change: any, all: any) => {
-    const newTabs = tabs;
+    const newTabs = tabs
     for (let i = 0; i < newTabs.panes.length; i++) {
       if (newTabs.panes[i].key === newTabs.activeKey) {
         for (const key in change) {
-          newTabs.panes[i].task[key] = all[key];
+          newTabs.panes[i].task[key] = all[key]
         }
-        break;
+        break
       }
     }
     dispatch({
-      type: "Studio/saveTabs",
+      type: 'Studio/saveTabs',
       payload: newTabs,
-    });
-  };
+    })
+  }
 
   return (
-    <>
-      <Row>
-        <Col span={24}>
-          <div style={{float: "right"}}>
-            <Tooltip title={l('component.minimize')}>
-              <Button
-                type="text"
-                icon={<MinusSquareOutlined/>}
+    <Scrollbars style={{ height: 'calc(100% - 32px)' }}>
+      <Form
+        form={form}
+        layout="vertical"
+        className={styles.form_setting}
+        onValuesChange={onValuesChange}
+      >
+        <Row>
+          <Col span={12}>
+            <Form.Item
+              label={l('pages.datastudio.label.jobConfig.fragment')}
+              className={styles.form_item}
+              name="fragment"
+              valuePropName="checked"
+              tooltip={{
+                title: l('pages.datastudio.label.jobConfig.fragment.tip'),
+                icon: <InfoCircleOutlined />,
+              }}
+            >
+              <Switch
+                checkedChildren={l('button.enable')}
+                unCheckedChildren={l('button.disable')}
               />
-            </Tooltip>
-          </div>
-        </Col>
-      </Row>
-      <Scrollbars style={{height: (toolHeight - 32)}}>
-        <Form
-          form={form}
-          layout="vertical"
-          className={styles.form_setting}
-          onValuesChange={onValuesChange}
-        >
-          <Row>
-            <Col span={12}>
-              <Form.Item
-                label={l('pages.datastudio.label.jobConfig.fragment')} className={styles.form_item} name="fragment" valuePropName="checked"
-                tooltip={{
-                  title: l('pages.datastudio.label.jobConfig.fragment.tip'),
-                  icon: <InfoCircleOutlined/>
-                }}
-              >
-                <Switch  checkedChildren={l('button.enable')} unCheckedChildren={l('button.disable')}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-        </Form>
-      </Scrollbars>
-    </>
-  );
-};
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
+    </Scrollbars>
+  )
+}
 
-export default connect(({Studio, Jar}: { Studio: StateType, Jar: JarStateType }) => ({
+export default connect(({ Studio, Jar }: { Studio: StateType; Jar: JarStateType }) => ({
   current: Studio.current,
   tabs: Studio.tabs,
-  toolHeight: Studio.toolHeight,
   jars: Jar.jars,
-}))(StudioEnvSetting);
+}))(StudioEnvSetting)

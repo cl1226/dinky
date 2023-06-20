@@ -3,6 +3,7 @@ import styles from './index.less'
 import { connect, history } from 'umi'
 import { Row, Checkbox, Table, Button, Space, Popconfirm, Input, Descriptions } from 'antd'
 import type { CheckboxChangeEvent } from 'antd/es/checkbox'
+import moment from 'moment'
 
 import { getDataDirectoryList } from '@/pages/DataAsset/DataMap/service'
 import { getIcon } from '@/pages/DataAsset/DataMap/Icon'
@@ -108,7 +109,7 @@ const Property = (props) => {
         return (
           <Row justify={'start'}>
             <span style={{ marginRight: 20 }}>创建时间</span>
-            <span>{text || '-'}</span>
+            <span>{text ? moment(text).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>
           </Row>
         )
       },

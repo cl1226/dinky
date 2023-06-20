@@ -23,6 +23,7 @@ import { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { debounce } from 'lodash'
 import { EAccessType } from '@/utils/enum'
+import moment from 'moment'
 
 const { Search } = Input
 
@@ -136,6 +137,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
         dataIndex: 'updateTime',
         key: 'updateTime',
         width: 200,
+        render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss'),
       },
       {
         title: '状态',
@@ -183,6 +185,7 @@ const ApiList: React.FC<IApiListProps> = (props: IApiListProps) => {
         dataIndex: 'createTime',
         key: 'createTime',
         width: 200,
+        render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss'),
       },
     ],
   }

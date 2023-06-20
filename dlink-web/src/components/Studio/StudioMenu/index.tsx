@@ -18,30 +18,21 @@
  */
 
 import styles from './index.less'
-import { Col, Menu, message, Modal, notification, Row, Tooltip } from 'antd'
+import { Col, message, Modal, notification, Row, Tooltip } from 'antd'
 import {
-  ApiTwoTone,
   CameraTwoTone,
   CarryOutTwoTone,
-  ClearOutlined,
   ClusterOutlined,
-  CodeTwoTone,
   DeleteTwoTone,
   EditTwoTone,
   EnvironmentOutlined,
-  FileAddTwoTone,
   FlagTwoTone,
-  FolderOpenTwoTone,
   MessageOutlined,
   PauseCircleTwoTone,
   PlayCircleTwoTone,
-  QuestionCircleTwoTone,
-  RestTwoTone,
   RocketTwoTone,
   SafetyCertificateTwoTone,
   SaveTwoTone,
-  SendOutlined,
-  ShrinkOutlined,
   SmileOutlined,
   SnippetsTwoTone,
 } from '@ant-design/icons'
@@ -51,17 +42,13 @@ import Breadcrumb from 'antd/es/breadcrumb/Breadcrumb'
 import { StateType } from '@/pages/DataStudio/model'
 import { connect } from 'umi'
 import { CODE, postDataArray } from '@/components/Common/crud'
-import { executeSql, getJobPlan, getTaskDefinition } from '@/pages/DataStudio/service'
-import TaskAPI from '@/pages/API/TaskAPI'
-import StudioHelp from './StudioHelp'
+import { executeSql, getJobPlan } from '@/pages/DataStudio/service'
 import StudioGraph from './StudioGraph'
 import {
   cancelTask,
-  clearConsole,
   developTask,
   offLineTask,
   onLineTask,
-  recoveryTask,
   releaseTask,
   showCluster,
   showTables,
@@ -79,37 +66,15 @@ import {
 import { ModalForm } from '@ant-design/pro-form'
 import SqlExport from '@/pages/DataStudio/SqlExport'
 import { Dispatch } from '@@/plugin-dva/connect'
-import StudioTabs from '@/components/Studio/StudioTabs'
 import { isDeletedTask, JOB_LIFE_CYCLE } from '@/components/Common/JobLifeCycle'
-import DolphinPush from '@/components/Studio/StudioMenu/DolphinPush'
 import { l } from '@/utils/intl'
 
 const StudioMenu = (props: any) => {
-  const {
-    isFullScreen,
-    tabs,
-    current,
-    currentPath,
-    form,
-    width,
-    height,
-    refs,
-    dispatch,
-    currentSession,
-  } = props
+  const { tabs, current, currentPath, refs, dispatch, currentSession } = props
   const [modalVisible, handleModalVisible] = useState<boolean>(false)
   const [exportModalVisible, handleExportModalVisible] = useState<boolean>(false)
   const [graphModalVisible, handleGraphModalVisible] = useState<boolean>(false)
-  const [dolphinModalVisible, handleDolphinModalVisible] = useState<boolean>(false)
-  // const [editModalVisible, handleEditModalVisible] = useState<boolean>(false);
   const [graphData, setGraphData] = useState()
-  const [dolphinData, setDolphinData] = useState()
-
-  const menu = (
-    <Menu>
-      <Menu.Item>{l('global.stay.tuned')}</Menu.Item>
-    </Menu>
-  )
 
   const onKeyDown = useCallback(
     (e) => {
@@ -122,7 +87,6 @@ const StudioMenu = (props: any) => {
       if (e.keyCode === 113) {
         e.preventDefault()
         if (current) {
-          // handleEditModalVisible(true);
           props.changeFullScreen(true)
         }
       }
@@ -232,10 +196,6 @@ const StudioMenu = (props: any) => {
     })
   }
 
-  const onCheckSql = () => {
-    handleModalVisible(true)
-  }
-
   const onGetStreamGraph = () => {
     let selectsql = null
     if (current.monaco.current) {
@@ -264,21 +224,6 @@ const StudioMenu = (props: any) => {
       }
     })
   }
-
-  //获取当前task关联的海豚数据
-  const viewDolphinCon = () => {
-    const res = getTaskDefinition(current.task.id)
-    res.then((result) => {
-      if (result.code == CODE.SUCCESS) {
-        setDolphinData(result.datas)
-      } else {
-        message.error(l('pages.datastudio.editor.query.ds.error', '', { msg: result.msg }))
-        setDolphinData(undefined)
-      }
-      handleDolphinModalVisible(true)
-    })
-  }
-
   const buildGraphData = (data) => {
     let edges: any = []
     for (let i in data.nodes) {
@@ -308,7 +253,6 @@ const StudioMenu = (props: any) => {
     data.edges = edges
     return data
   }
-
   const getRangeText: any = (str: string) => {
     str = escape2Html(str)
     var canvas = getRangeText.canvas || (getRangeText.canvas = document.createElement('canvas'))
@@ -327,37 +271,11 @@ const StudioMenu = (props: any) => {
     return result
   }
 
-  const getTextWidth: any = (text: string, font: string) => {
-    var canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement('canvas'))
-    var context = canvas.getContext('2d')
-    context.font = font
-    var metrics = context.measureText(text)
-    return metrics.width
-  }
-
   const escape2Html = (str: string) => {
     let arrEntities = { lt: '<', gt: '>', nbsp: ' ', amp: '&', quot: '"' }
     return str.replace(/&(lt|gt|nbsp|amp|quot);/gi, function (all, t) {
       return arrEntities[t]
     })
-  }
-
-  const toFullScreen = () => {
-    if (current) {
-      props.changeFullScreen(true)
-    }
-  }
-
-  const toClearConsole = () => {
-    clearConsole()
-  }
-
-  const saveSqlAndSettingToTask = () => {
-    props.saveTask(current)
-  }
-
-  const exportSql = () => {
-    handleExportModalVisible(true)
   }
 
   const toReleaseTask = () => {
@@ -518,30 +436,6 @@ const StudioMenu = (props: any) => {
     })
   }
 
-  const toRecoveryTask = () => {
-    Modal.confirm({
-      title: l('pages.datastudio.editor.recovery.job'),
-      content: l('pages.datastudio.editor.recovery.jobConfirm', '', {
-        jobName: current.task.alias,
-      }),
-      okText: l('button.confirm'),
-      cancelText: l('button.cancel'),
-      onOk: async () => {
-        const res = recoveryTask(current.task.id)
-        res.then((result) => {
-          result.datas && props.changeTaskStep(current.task.id, JOB_LIFE_CYCLE.DEVELOP)
-          if (result.code == CODE.SUCCESS) {
-            message.success(
-              l('pages.datastudio.editor.recovery.job.success', '', {
-                jobName: current.task.alias,
-              }),
-            )
-          }
-        })
-      },
-    })
-  }
-
   const isShowGetStreamGraphBtn = () => {
     return !current.task.dialect || current.task.dialect === DIALECT.FLINKSQL
   }
@@ -570,13 +464,6 @@ const StudioMenu = (props: any) => {
     )
   }
 
-  const runMenu = (
-    <Menu>
-      <Menu.Item onClick={execute}>{l('pages.datastudio.sql.query')}</Menu.Item>
-      <Menu.Item onClick={submit}>{l('pages.datastudio.submit.job')}</Menu.Item>
-    </Menu>
-  )
-
   const getPathItem = (paths) => {
     let itemList: any = []
     for (let item of paths) {
@@ -585,53 +472,8 @@ const StudioMenu = (props: any) => {
     return itemList
   }
 
-  const showAPI = () => {
-    Modal.info({
-      title: current.task.alias + l('pages.datastudio.editor.api.doc'),
-      width: 1000,
-      content: <TaskAPI task={current.task} />,
-      onOk() {},
-    })
-  }
-
-  const showHelp = () => {
-    Modal.info({
-      title: l('pages.datastudio.editor.usehelp'),
-      width: 1000,
-      content: <StudioHelp />,
-      onOk() {},
-    })
-  }
-
   return (
     <Row className={styles.container}>
-      {/*<Col span={24}>
-        <div>
-          <Space>
-            <Dropdown overlay={menu}>
-              <Button type="text" onClick={e => e.preventDefault()}>
-                文件
-              </Button>
-            </Dropdown>
-            <Dropdown overlay={menu}>
-              <Button type="text" onClick={e => e.preventDefault()}>
-                编辑
-              </Button>
-            </Dropdown>
-            <Dropdown overlay={runMenu}>
-              <Button type="text" onClick={e => e.preventDefault()}>
-                执行
-              </Button>
-            </Dropdown>
-            <Dropdown overlay={menu}>
-              <Button type="text" onClick={e => e.preventDefault()}>
-                帮助
-              </Button>
-            </Dropdown>
-          </Space>
-        </div>
-      </Col>*/}
-      <Divider className={styles['ant-divider-horizontal-0']} />
       <Col span={24}>
         <Row>
           <Col span={18}>
@@ -655,139 +497,108 @@ const StudioMenu = (props: any) => {
               </Breadcrumb>
             )}
           </Col>
-          {
-            current?.task ? (
-              <Col span={6}>
-                {/* <Tooltip title={l('pages.datastudio.editor.clearConsole')}>
-                  <Button
-                    type="text"
-                    icon={<ClearOutlined style={{ color: '#1890ff' }} />}
-                    onClick={toClearConsole}
-                  />
-                </Tooltip> */}
-                {/* <Tooltip title={l('pages.datastudio.editor.fullScreen')}>
-                  <Button type="text" icon={<CodeTwoTone />} onClick={toFullScreen} />
-                </Tooltip> */}
-                {/* <Button type="text" icon={<FileAddTwoTone twoToneColor="#ddd" />} /> */}
-                {/* <Button type="text" icon={<FolderOpenTwoTone twoToneColor="#ddd" />} /> */}
-                <Tooltip title={l('pages.datastudio.editor.save')}>
-                  <Button type="text" icon={<SaveTwoTone />} onClick={saveSqlAndSettingToTask} />
-                </Tooltip>
-                <Tooltip title={l('pages.datastudio.editor.export')}>
-                  <Button type="text" icon={<SnippetsTwoTone />} onClick={exportSql} />
-                </Tooltip>
-                <Divider type="vertical" />
-                <Tooltip title={l('pages.datastudio.editor.check')}>
-                  <Button type="text" icon={<SafetyCertificateTwoTone />} onClick={onCheckSql} />
-                </Tooltip>
-                {isShowGetStreamGraphBtn() && (
-                  <Tooltip title={l('pages.datastudio.editor.explan')}>
-                    <Button type="text" icon={<FlagTwoTone />} onClick={onGetStreamGraph} />
-                  </Tooltip>
-                )}
-                {isShowExecuteBtn() && (
-                  <Tooltip title={l('pages.datastudio.editor.exec')}>
-                    <Button
-                      type="text"
-                      icon={<PlayCircleTwoTone />}
-                      //loading={loadings[2]}
-                      onClick={execute}
-                    />
-                  </Tooltip>
-                )}
-                {isShowSubmitBtn() && (
-                  <>
-                    <Tooltip title={l('pages.datastudio.editor.exec.tip')}>
-                      <Button type="text" icon={<RocketTwoTone />} onClick={submit} />
-                    </Tooltip>
-                  </>
-                )}
-                {/* {isShowSubmitBtn() && (
-                  <>
-                    <Tooltip title={l('pages.datastudio.editor.push.ds')}>
-                      <Button
-                        type="text"
-                        style={{ color: '#248FFF' }}
-                        icon={<SendOutlined />}
-                        onClick={viewDolphinCon}
-                      />
-                    </Tooltip>
-                  </>
-                )} */}
-                {isShowCancelTaskBtn() && (
-                  <Tooltip title={l('pages.datastudio.editor.stop')}>
-                    <Button
-                      type="text"
-                      icon={<PauseCircleTwoTone />}
-                      onClick={() => handleCancelTask('canceljob')}
-                    />
-                  </Tooltip>
-                )}
-                <Divider type="vertical" />
-                {current.task.step == JOB_LIFE_CYCLE.DEVELOP ? (
-                  <Tooltip title={l('pages.datastudio.editor.release')}>
-                    <Button type="text" icon={<CameraTwoTone />} onClick={toReleaseTask} />
-                  </Tooltip>
-                ) : undefined}
-                {current.task.step == JOB_LIFE_CYCLE.RELEASE ? (
-                  <>
-                    <Tooltip title={l('pages.datastudio.editor.edit')}>
-                      <Button type="text" icon={<EditTwoTone />} onClick={toDevelopTask} />
-                    </Tooltip>
-                    <Tooltip title={l('pages.datastudio.editor.online')}>
-                      <Button type="text" icon={<CarryOutTwoTone />} onClick={toOnLineTask} />
-                    </Tooltip>
-                  </>
-                ) : undefined}
-                {current.task.step == JOB_LIFE_CYCLE.ONLINE ? (
-                  <Tooltip title={l('pages.datastudio.editor.offline')}>
-                    <Button
-                      type="text"
-                      icon={<PauseCircleTwoTone />}
-                      onClick={() => toOffLineTask('cancel')}
-                    />
-                  </Tooltip>
-                ) : undefined}
-                {current.task.step != JOB_LIFE_CYCLE.ONLINE &&
-                current.task.step != JOB_LIFE_CYCLE.CANCEL ? (
-                  <Tooltip title={l('pages.datastudio.editor.delete')}>
-                    <Button type="text" icon={<DeleteTwoTone />} onClick={toCancelTask} />
-                  </Tooltip>
-                ) : undefined}
-                {/* {current.task.step == JOB_LIFE_CYCLE.CANCEL ? (
-                  <Tooltip title={l('pages.datastudio.editor.recovery')}>
-                    <Button type="text" icon={<RestTwoTone />} onClick={toRecoveryTask} />
-                  </Tooltip>
-                ) : undefined} */}
-                {/* <Tooltip title={l('pages.datastudio.editor.api')}>
-                  <Button type="text" icon={<ApiTwoTone />} onClick={showAPI} />
-                </Tooltip> */}
-                {/* <Tooltip title={l('pages.datastudio.editor.help')}>
+          {current?.task ? (
+            <Col span={6}>
+              <Tooltip title={l('pages.datastudio.editor.save')}>
                 <Button
                   type="text"
-                  icon={<QuestionCircleTwoTone/>}
-                  onClick={showHelp}
+                  icon={<SaveTwoTone />}
+                  onClick={() => {
+                    props.saveTask(current)
+                  }}
                 />
-              </Tooltip> */}
-              </Col>
-            ) : null
-
-            // <Col span={8}><Tooltip title={l('pages.datastudio.editor.help')}>
-            //   <Button
-            //     type="text"
-            //     icon={<QuestionCircleTwoTone/>}
-            //     onClick={showHelp}
-            //   />
-            // </Tooltip></Col>
-          }
+              </Tooltip>
+              <Tooltip title={l('pages.datastudio.editor.export')}>
+                <Button
+                  type="text"
+                  icon={<SnippetsTwoTone />}
+                  onClick={() => {
+                    handleExportModalVisible(true)
+                  }}
+                />
+              </Tooltip>
+              <Divider type="vertical" />
+              <Tooltip title={l('pages.datastudio.editor.check')}>
+                <Button
+                  type="text"
+                  icon={<SafetyCertificateTwoTone />}
+                  onClick={() => handleModalVisible(true)}
+                />
+              </Tooltip>
+              {isShowGetStreamGraphBtn() && (
+                <Tooltip title={l('pages.datastudio.editor.explan')}>
+                  <Button type="text" icon={<FlagTwoTone />} onClick={onGetStreamGraph} />
+                </Tooltip>
+              )}
+              {isShowExecuteBtn() && (
+                <Tooltip title={l('pages.datastudio.editor.exec')}>
+                  <Button
+                    type="text"
+                    icon={<PlayCircleTwoTone />}
+                    //loading={loadings[2]}
+                    onClick={execute}
+                  />
+                </Tooltip>
+              )}
+              {isShowSubmitBtn() && (
+                <>
+                  <Tooltip title={l('pages.datastudio.editor.exec.tip')}>
+                    <Button type="text" icon={<RocketTwoTone />} onClick={submit} />
+                  </Tooltip>
+                </>
+              )}
+              {isShowCancelTaskBtn() && (
+                <Tooltip title={l('pages.datastudio.editor.stop')}>
+                  <Button
+                    type="text"
+                    icon={<PauseCircleTwoTone />}
+                    onClick={() => handleCancelTask('canceljob')}
+                  />
+                </Tooltip>
+              )}
+              <Divider type="vertical" />
+              {current.task.step == JOB_LIFE_CYCLE.DEVELOP ? (
+                <Tooltip title={l('pages.datastudio.editor.release')}>
+                  <Button type="text" icon={<CameraTwoTone />} onClick={toReleaseTask} />
+                </Tooltip>
+              ) : undefined}
+              {current.task.step == JOB_LIFE_CYCLE.RELEASE ? (
+                <>
+                  <Tooltip title={l('pages.datastudio.editor.edit')}>
+                    <Button type="text" icon={<EditTwoTone />} onClick={toDevelopTask} />
+                  </Tooltip>
+                  <Tooltip title={l('pages.datastudio.editor.online')}>
+                    <Button type="text" icon={<CarryOutTwoTone />} onClick={toOnLineTask} />
+                  </Tooltip>
+                </>
+              ) : undefined}
+              {current.task.step == JOB_LIFE_CYCLE.ONLINE ? (
+                <Tooltip title={l('pages.datastudio.editor.offline')}>
+                  <Button
+                    type="text"
+                    icon={<PauseCircleTwoTone />}
+                    onClick={() => toOffLineTask('cancel')}
+                  />
+                </Tooltip>
+              ) : undefined}
+              {current.task.step != JOB_LIFE_CYCLE.ONLINE &&
+              current.task.step != JOB_LIFE_CYCLE.CANCEL ? (
+                <Tooltip title={l('pages.datastudio.editor.delete')}>
+                  <Button type="text" icon={<DeleteTwoTone />} onClick={toCancelTask} />
+                </Tooltip>
+              ) : undefined}
+            </Col>
+          ) : null}
         </Row>
       </Col>
+      {/* 检查当前d的sql */}
       <StudioExplain
         modalVisible={modalVisible}
         onClose={() => {
           handleModalVisible(false)
         }}
       />
+      {/* 获取当前的 FlinkSql 的执行图 */}
       <Modal
         width={1000}
         bodyStyle={{ padding: '32px 40px 48px' }}
@@ -798,21 +609,8 @@ const StudioMenu = (props: any) => {
       >
         <StudioGraph data={graphData} />
       </Modal>
-      <Modal
-        width={700}
-        bodyStyle={{ padding: '32px 40px 48px' }}
-        destroyOnClose
-        title={l('pages.datastudio.editor.push.ds')}
-        visible={dolphinModalVisible}
-        onCancel={() => handleDolphinModalVisible(false)}
-        footer={[]}
-      >
-        <DolphinPush
-          data={dolphinData}
-          taskCur={current}
-          handleDolphinModalVisible={handleDolphinModalVisible}
-        />
-      </Modal>
+
+      {/* 导出当前的 Sql 及配置 */}
       {current?.task ? (
         <ModalForm
           title={`${current.task.alias} 的 ${current.task.dialect} 导出`}
@@ -836,34 +634,6 @@ const StudioMenu = (props: any) => {
           <SqlExport id={current.task.id} />
         </ModalForm>
       ) : undefined}
-      {current && isFullScreen ? (
-        <Modal
-          width={width}
-          bodyStyle={{ padding: 0 }}
-          style={{ top: 0, padding: 0, margin: 0, maxWidth: '100vw' }}
-          destroyOnClose
-          maskClosable={false}
-          closable={true}
-          closeIcon={
-            <Tooltip title={l('pages.datastudio.editor.fullScreen.exit')}>
-              <Button
-                icon={<ShrinkOutlined />}
-                type="primary"
-                style={{ position: 'fixed', right: '0' }}
-              >
-                {l('button.exit')}
-              </Button>
-            </Tooltip>
-          }
-          visible={isFullScreen}
-          footer={null}
-          onCancel={() => {
-            props.changeFullScreen(false)
-          }}
-        >
-          <StudioTabs width={width} height={height} />
-        </Modal>
-      ) : undefined}
     </Row>
   )
 }
@@ -878,11 +648,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch({
       type: 'Studio/saveTabs',
       payload: tabs,
-    }),
-  changeFullScreen: (isFull: boolean) =>
-    dispatch({
-      type: 'Studio/changeFullScreen',
-      payload: isFull,
     }),
   changeTaskStep: (id: number, step: number) =>
     dispatch({
@@ -904,7 +669,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 
 export default connect(
   ({ Studio }: { Studio: StateType }) => ({
-    isFullScreen: Studio.isFullScreen,
     current: Studio.current,
     currentPath: Studio.currentPath,
     tabs: Studio.tabs,

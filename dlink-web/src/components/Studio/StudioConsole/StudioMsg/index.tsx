@@ -17,44 +17,43 @@
  *
  */
 
-import {StateType} from "@/pages/DataStudio/model";
-import {connect} from "umi";
-import React, {useEffect, useState} from "react";
-import CodeShow from "@/components/Common/CodeShow";
-import {getConsoleInfo} from "@/pages/SettingCenter/ProcessList/service";
-import { clearConsole } from "../../StudioEvent/DDL";
-import {l} from "@/utils/intl";
+import { StateType } from '@/pages/DataStudio/model'
+import { connect } from 'umi'
+import React, { useEffect, useState } from 'react'
+import CodeShow from '@/components/Common/CodeShow'
+import { getConsoleInfo } from '@/pages/SettingCenter/ProcessList/service'
+import { clearConsole } from '../../StudioEvent/DDL'
+import { l } from '@/utils/intl'
 
 const StudioMsg = (props: any) => {
-
-  const {current, height, isActive} = props;
-  const [consoleInfo, setConsoleInfo] = useState<string>("");
+  const { current, height, isActive } = props
+  const [consoleInfo, setConsoleInfo] = useState<string>('')
 
   const options = {
-        selectOnLineNumbers: true,
-        renderSideBySide: false,
-        autoIndent:'None',
-        automaticLayout: true,
-        renderLineHighlight: 'gutter',
-        minimap: {
-          enabled: false // 是否启用预览图
-        }
-      }
+    selectOnLineNumbers: true,
+    renderSideBySide: false,
+    autoIndent: 'None',
+    automaticLayout: true,
+    renderLineHighlight: 'gutter',
+    minimap: {
+      enabled: false, // 是否启用预览图
+    },
+  }
 
   useEffect(() => {
-    refreshConsoleInfo();
-    let dataPolling = setInterval(refreshConsoleInfo, 3000);
+    refreshConsoleInfo()
+    let dataPolling = setInterval(refreshConsoleInfo, 3000)
     return () => {
-      clearInterval(dataPolling);
-    };
-  }, [isActive]);
+      clearInterval(dataPolling)
+    }
+  }, [isActive])
 
   const refreshConsoleInfo = () => {
     if (true) {
-      const res = getConsoleInfo();
+      const res = getConsoleInfo()
       res.then((result) => {
-        result.datas && setConsoleInfo(result.datas);
-      });
+        result.datas && setConsoleInfo(result.datas)
+      })
     }
   }
 
@@ -65,22 +64,27 @@ const StudioMsg = (props: any) => {
       contextMenuGroupId: '9_cutcopypaste', // menu group
       run: () => {
         clearConsole().then((result) => {
-          setConsoleInfo("")
+          setConsoleInfo('')
           refreshConsoleInfo()
-        });
+        })
       }, // 点击后执行的操作
     })
-  };
-
-
+  }
 
   return (
     <>
-      <CodeShow code={consoleInfo} language='java' height={height} theme="vs" options={options} editorDidMountHandle={editorDidMountHandle}/>
+      <CodeShow
+        code={consoleInfo}
+        language="java"
+        height={height}
+        theme="vs"
+        options={options}
+        editorDidMountHandle={editorDidMountHandle}
+      />
     </>
-  );
-};
+  )
+}
 
-export default connect(({Studio}: { Studio: StateType }) => ({
+export default connect(({ Studio }: { Studio: StateType }) => ({
   current: Studio.current,
-}))(StudioMsg);
+}))(StudioMsg)

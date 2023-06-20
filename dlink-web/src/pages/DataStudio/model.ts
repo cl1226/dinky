@@ -181,11 +181,9 @@ export type MetaStoreColumnType = {
 
 export type StateType = {
   pageLoading?: boolean
-  isFullScreen: boolean
+  isFullScreen?: boolean
   toolHeight?: number
-  toolRightWidth?: number
   toolLeftWidth?: number
-  bottomHeight?: number
   operations?: string
   cluster?: ClusterType[]
   sessionCluster?: ClusterType[]
@@ -216,7 +214,6 @@ export type ModelType = {
     changeFullScreen: Reducer<StateType>
     changePageLoading: Reducer<StateType>
     saveToolHeight: Reducer<StateType>
-    saveToolRightWidth: Reducer<StateType>
     saveToolLeftWidth: Reducer<StateType>
     saveSql: Reducer<StateType>
     saveCurrentPath: Reducer<StateType>
@@ -225,6 +222,7 @@ export type ModelType = {
     saveMetaStore: Reducer<StateType>
     saveMetaStoreTable: Reducer<StateType>
     saveTabs: Reducer<StateType>
+    deleteTabByKey: Reducer<StateType>
     closeTabs: Reducer<StateType>
     changeActiveKey: Reducer<StateType>
     saveTaskData: Reducer<StateType>
@@ -249,8 +247,7 @@ const Model: ModelType = {
   state: {
     pageLoading: false,
     isFullScreen: false,
-    toolHeight: 400,
-    toolRightWidth: 300,
+    toolHeight: 32,
     toolLeftWidth: 250,
     cluster: [],
     sessionCluster: [],
@@ -293,7 +290,7 @@ const Model: ModelType = {
       return {
         ...state,
         pageLoading: payload,
-      }
+      } as StateType
     },
     changeFullScreen(state, { payload }) {
       return {
@@ -305,23 +302,17 @@ const Model: ModelType = {
       return {
         ...state,
         toolHeight: payload,
-      }
-    },
-    saveToolRightWidth(state, { payload }) {
-      return {
-        ...state,
-        toolRightWidth: payload,
-      }
+      } as StateType
     },
     saveToolLeftWidth(state, { payload }) {
       return {
         ...state,
         toolLeftWidth: payload,
-      }
+      } as StateType
     },
     saveSql(state, { payload }) {
-      const newTabs = state.tabs
-      let newCurrent = state.current
+      const newTabs: any = state?.tabs
+      let newCurrent: any = state?.current
       newCurrent.value = payload
       for (let i = 0; i < newTabs.panes.length; i++) {
         if (newTabs.panes[i].key == newTabs.activeKey) {
@@ -333,13 +324,13 @@ const Model: ModelType = {
         ...state,
         current: { ...newCurrent },
         tabs: { ...newTabs },
-      }
+      } as StateType
     },
     saveCurrentPath(state, { payload }) {
       return {
         ...state,
         currentPath: payload,
-      }
+      } as StateType
     },
     /*saveMonaco(state, {payload}) {
       return {
@@ -348,8 +339,8 @@ const Model: ModelType = {
       };
     },*/
     saveSqlMetaData(state, { payload }) {
-      let newCurrent = state.current
-      const newTabs = state.tabs
+      let newCurrent: any = state?.current
+      const newTabs: any = state?.tabs
       if (newCurrent.key == payload.activeKey) {
         newCurrent.sqlMetaData = { ...payload.sqlMetaData }
         newCurrent.isModified = payload.isModified
@@ -365,11 +356,11 @@ const Model: ModelType = {
         ...state,
         current: { ...newCurrent },
         tabs: { ...newTabs },
-      }
+      } as StateType
     },
     saveMetaStore(state, { payload }) {
-      let newCurrent = state.current
-      const newTabs = state.tabs
+      let newCurrent: any = state?.current
+      const newTabs: any = state?.tabs
       if (newCurrent.key == payload.activeKey) {
         newCurrent.metaStore = [...payload.metaStore]
       }
@@ -383,11 +374,11 @@ const Model: ModelType = {
         ...state,
         current: { ...newCurrent },
         tabs: { ...newTabs },
-      }
+      } as StateType
     },
     saveMetaStoreTable(state, { payload }) {
-      let newCurrent = state.current
-      const newTabs = state.tabs
+      let newCurrent: any = state?.current
+      const newTabs: any = state?.tabs
       if (newCurrent.key == payload.activeKey) {
         for (let i = 0; i < newCurrent.metaStore.length; i++) {
           if (newCurrent.metaStore[i].name === payload.catalog) {
@@ -409,10 +400,10 @@ const Model: ModelType = {
         ...state,
         current: { ...newCurrent },
         tabs: { ...newTabs },
-      }
+      } as StateType
     },
     saveTabs(state, { payload }) {
-      let newCurrent = state.current
+      let newCurrent = state?.current
       for (let i = 0; i < payload.panes.length; i++) {
         if (payload.panes[i].key == payload.activeKey) {
           newCurrent = payload.panes[i]
@@ -424,7 +415,7 @@ const Model: ModelType = {
           current: undefined,
           tabs: payload,
           currentPath: ['Guide Page'],
-        }
+        } as StateType
       }
       return {
         ...state,
@@ -433,24 +424,24 @@ const Model: ModelType = {
           isModified: false,
         },
         tabs: { ...payload },
-        currentPath: newCurrent.path,
-      }
+        currentPath: newCurrent?.path,
+      } as StateType
     },
     deleteTabByKey(state, { payload }) {
-      const newTabs = state.tabs
+      const newTabs: any = state?.tabs
       for (let i = 0; i < newTabs.panes.length; i++) {
         if (newTabs.panes[i].key == payload) {
           newTabs.panes.splice(i, 1)
           break
         }
       }
-      let newCurrent = undefined
+      let newCurrent: any = undefined
       if (newTabs.panes.length > 0) {
         if (newTabs.activeKey == payload) {
           newCurrent = newTabs.panes[newTabs.panes.length - 1]
           newTabs.activeKey = newCurrent.key
         } else {
-          newCurrent = state.current
+          newCurrent = state?.current
         }
       } else {
         newTabs.activeKey = undefined
@@ -459,12 +450,12 @@ const Model: ModelType = {
         ...state,
         current: { ...newCurrent },
         tabs: { ...newTabs },
-      }
+      } as StateType
     },
     closeTabs(state, { payload }) {
       const { deleteType, current } = payload
-      const newTabs = state.tabs
-      let newCurrent = newTabs.panes[0]
+      const newTabs: any = state?.tabs
+      let newCurrent = newTabs?.panes?.[0]
       if (deleteType == 'CLOSE_OTHER') {
         const keys = [current.key]
         newCurrent = current
@@ -478,12 +469,12 @@ const Model: ModelType = {
         ...state,
         current: { ...newCurrent },
         tabs: { ...newTabs },
-      }
+      } as StateType
     },
     changeActiveKey(state, { payload }) {
       payload = parseInt(payload)
-      const newTabs = state?.tabs
-      let newCurrent = state?.current
+      const newTabs: any = state?.tabs
+      let newCurrent: any = state?.current
       for (let i = 0; i < newTabs.panes.length; i++) {
         if (newTabs.panes[i].key == payload) {
           newTabs.activeKey = payload
@@ -495,11 +486,11 @@ const Model: ModelType = {
         current: { ...newCurrent },
         tabs: { ...newTabs },
         currentPath: newCurrent.path,
-      }
+      } as StateType
     },
     saveTaskData(state, { payload }) {
-      const newTabs = state.tabs
-      let newCurrent = state.current
+      const newTabs: any = state?.tabs
+      let newCurrent: any = state?.current
       for (let i = 0; i < newTabs.panes.length; i++) {
         if (newTabs.panes[i].key == payload.key) {
           newTabs.panes[i].task = payload
@@ -513,19 +504,19 @@ const Model: ModelType = {
         ...state,
         current: { ...newCurrent },
         tabs: { ...newTabs },
-      }
+      } as StateType
     },
     saveSession(state, { payload }) {
       return {
         ...state,
         session: [...payload],
-      }
+      } as StateType
     },
     showRightClickMenu(state, { payload }) {
       return {
         ...state,
         rightClickMenu: payload,
-      }
+      } as StateType
     },
     refreshCurrentSession(state, { payload }) {
       return {
@@ -534,7 +525,7 @@ const Model: ModelType = {
           ...state?.currentSession,
           ...payload,
         },
-      }
+      } as StateType
     },
     quitCurrentSession(state) {
       return {
@@ -542,11 +533,11 @@ const Model: ModelType = {
         currentSession: {
           connectors: [],
         },
-      }
+      } as StateType
     },
     saveResult(state, { payload }) {
-      const newTabs = state?.tabs
-      let newCurrent = state?.current
+      const newTabs: any = state?.tabs
+      let newCurrent: any = state?.current
       for (let i = 0; i < newTabs.panes.length; i++) {
         if (newTabs.panes[i].key == payload.key) {
           newTabs.panes[i].console.result.result = payload.datas
@@ -560,41 +551,41 @@ const Model: ModelType = {
         ...state,
         current: { ...newCurrent },
         tabs: { ...newTabs },
-      }
+      } as StateType
     },
     saveCluster(state, { payload }) {
       return {
         ...state,
         cluster: [...payload],
-      }
+      } as StateType
     },
     saveSessionCluster(state, { payload }) {
       return {
         ...state,
         sessionCluster: [...payload],
-      }
+      } as StateType
     },
     saveClusterConfiguration(state, { payload }) {
       return {
         ...state,
         clusterConfiguration: [...payload],
-      }
+      } as StateType
     },
     saveDataBase(state, { payload }) {
       return {
         ...state,
         database: [...payload],
-      }
+      } as StateType
     },
     saveEnv(state, { payload }) {
       return {
         ...state,
         env: [...payload],
-      }
+      } as StateType
     },
     saveChart(state, { payload }) {
-      let newTabs = state?.tabs
-      let newCurrent = state?.current
+      let newTabs: any = state?.tabs
+      let newCurrent: any = state?.current
       for (let i = 0; i < newTabs.panes.length; i++) {
         if (newTabs.panes[i].key == newTabs.activeKey) {
           newTabs.panes[i].console.chart = payload
@@ -606,11 +597,11 @@ const Model: ModelType = {
         ...state,
         current: { ...newCurrent },
         tabs: { ...newTabs },
-      }
+      } as StateType
     },
     changeTaskStep(state, { payload }) {
-      const newTabs = state.tabs
-      let newCurrent = state.current
+      const newTabs: any = state?.tabs
+      let newCurrent: any = state?.current
       for (let i = 0; i < newTabs.panes.length; i++) {
         if (newTabs.panes[i].task.id == payload.id) {
           newTabs.panes[i].task.step = payload.step
@@ -626,8 +617,8 @@ const Model: ModelType = {
       }
     },
     changeTaskJobInstance(state, { payload }) {
-      const newTabs = state.tabs
-      let newCurrent = state.current
+      const newTabs: any = state?.tabs
+      let newCurrent: any = state?.current
       for (let i = 0; i < newTabs.panes.length; i++) {
         if (newTabs.panes[i].task.id == payload.id) {
           newTabs.panes[i].task.jobInstanceId = payload.jobInstanceId
@@ -640,11 +631,11 @@ const Model: ModelType = {
         ...state,
         current: { ...newCurrent },
         tabs: { ...newTabs },
-      }
+      } as StateType
     },
     renameTab(state, { payload }) {
-      const newTabs = state.tabs
-      let newCurrent = state.current
+      const newTabs: any = state?.tabs
+      let newCurrent: any = state?.current
       for (let i = 0; i < newTabs.panes.length; i++) {
         if (newTabs.panes[i].key == payload.key) {
           newTabs.panes[i].title = payload.title
@@ -665,7 +656,7 @@ const Model: ModelType = {
           current: undefined,
           tabs: { ...newTabs },
           currentPath: ['Guide Page'],
-        }
+        } as StateType
       }
       return {
         ...state,
@@ -674,7 +665,7 @@ const Model: ModelType = {
         },
         tabs: { ...newTabs },
         currentPath: newCurrent.path,
-      }
+      } as StateType
     },
   },
 }

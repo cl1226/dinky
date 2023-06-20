@@ -60,7 +60,6 @@ type StudioTreeProps = {
   dispatch: any
   tabs: StateType['tabs']
   current: StateType['current']
-  toolHeight: number
   refs: any
   width: number
 }
@@ -121,7 +120,7 @@ const { DirectoryTree } = Tree
 const { Search } = Input
 
 const StudioTree: React.FC<StudioTreeProps> = (props) => {
-  const { rightClickMenu, dispatch, tabs, refs, toolHeight, width, current } = props
+  const { rightClickMenu, dispatch, tabs, refs, width, current } = props
   const [treeData, setTreeData] = useState<TreeDataNode[]>()
   const [expandedKeys, setExpandedKeys] = useState<Key[]>()
   const [defaultExpandedKeys, setDefaultExpandedKeys] = useState<any[]>([])
@@ -255,11 +254,6 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
   }
 
   const activeTabCall = (node: TreeDataNode) => {
-    dispatch &&
-      dispatch({
-        type: 'Studio/saveToolHeight',
-        payload: toolHeight - 0.0001,
-      })
     dispatch &&
       dispatch({
         type: 'Studio/changeActiveKey',
@@ -634,7 +628,7 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
       })
       toOpen(e.node)
     }
-    let taskIds = []
+    let taskIds: any = []
     for (let i = 0; i < e.selectedNodes?.length; i++) {
       if (e.selectedNodes[i].isLeaf) {
         taskIds.push(e.selectedNodes[i].taskId)
@@ -841,5 +835,4 @@ export default connect(({ Studio }: { Studio: StateType }) => ({
   tabs: Studio.tabs,
   rightClickMenu: Studio.rightClickMenu,
   refs: Studio.refs,
-  toolHeight: Studio.toolHeight,
 }))(StudioTree)

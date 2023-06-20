@@ -22,50 +22,64 @@ import { PlusOutlined } from '@ant-design/icons'
 import { history } from 'umi'
 
 const StudioHome = (props: any) => {
-  const list = [{
-    name: '新建脚本',
-    imageUrl: '/schedule/develop.png',
-    description: '对脚本进行在线开发、调试和执行，开发完成的脚本也可以在作业中执行',
-    type: '新建脚本',
-    url: '/dataDev/develop/dataStudio'
-  }, {
-    name: '新建作业',
-    imageUrl: '/schedule/workflow.png',
-    description: '拖拽所需节点至画布中，连接节点，轻松实现作业开发',
-    type: '新建作业',
-    url: '/dataDev/develop/scheduler'
-  }, {
-    name: '新建数据连接',
-    imageUrl: '/schedule/project.png',
-    description: '通过配置数据源信息、建立数据连接，配置的数据连接会在脚本和作业的开发过程中用到，用于访问数据源',
-    type: '新建数据连接',
-    url: '/registration/database'
-  }]
+  const list = [
+    {
+      name: '新建脚本',
+      imageUrl: '/schedule/develop.png',
+      description: '对脚本进行在线开发、调试和执行，开发完成的脚本也可以在作业中执行',
+      type: '新建脚本',
+      url: '/dataDev/develop/dataStudio',
+    },
+    {
+      name: '新建作业',
+      imageUrl: '/schedule/workflow.png',
+      description: '拖拽所需节点至画布中，连接节点，轻松实现作业开发',
+      type: '新建作业',
+      url: '/dataDev/develop/scheduler',
+    },
+    {
+      name: '新建数据连接',
+      imageUrl: '/schedule/project.png',
+      description:
+        '通过配置数据源信息、建立数据连接，配置的数据连接会在脚本和作业的开发过程中用到，用于访问数据源',
+      type: '新建数据连接',
+      url: '/registration/database',
+    },
+  ]
 
   return (
     <List
-      className="demo-loadmore-list"
+      style={{ width: '100%' }}
       itemLayout="horizontal"
-      size={"large"}
+      size={'large'}
       dataSource={list}
       renderItem={(item) => (
-        <List.Item style={{height: '150px'}}>
+        <List.Item style={{ height: '150px' }}>
           <List.Item.Meta
-            avatar={<Avatar shape="square" style={{'width': '100px', 'height': '100px'}} src={item.imageUrl} />}
+            avatar={
+              <Avatar
+                shape="square"
+                style={{ width: '100px', height: '100px' }}
+                src={item.imageUrl}
+              />
+            }
             title={item.name}
             description={item.description}
           />
           <Row>
-            <Button icon={<PlusOutlined />}
-            onClick={() => {
-              history.push(item.url)
-            }}
-            >{item.type}</Button>
+            <Button
+              icon={<PlusOutlined />}
+              onClick={() => {
+                history.push(item.url)
+              }}
+            >
+              {item.type}
+            </Button>
           </Row>
         </List.Item>
       )}
     />
   )
-};
+}
 
 export default StudioHome

@@ -17,32 +17,28 @@
  *
  */
 
+import React, { useRef, useState } from 'react'
+import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table'
+import { Drawer } from 'antd'
+import ProDescriptions from '@ant-design/pro-descriptions'
+import { queryData } from '@/components/Common/crud'
+import { SavePointTableListItem } from '@/components/Studio/StudioRightTool/StudioSavePoint/data'
+import { StateType } from '@/pages/DataStudio/model'
+import { connect } from 'umi'
+import { Scrollbars } from 'react-custom-scrollbars'
+import { l } from '@/utils/intl'
 
-import React, {useRef, useState} from "react";
-import {MinusSquareOutlined} from '@ant-design/icons';
-import ProTable, {ActionType, ProColumns} from "@ant-design/pro-table";
-import {Button, Col, Drawer, Row, Tooltip} from 'antd';
-import ProDescriptions from '@ant-design/pro-descriptions';
-import {queryData} from "@/components/Common/crud";
-import {SavePointTableListItem} from "@/components/Studio/StudioRightTool/StudioSavePoint/data";
-import {StateType} from "@/pages/DataStudio/model";
-import {connect} from "umi";
-import {Scrollbars} from 'react-custom-scrollbars';
-import {l} from "@/utils/intl";
-
-const url = '/api/savepoints';
+const url = '/api/savepoints'
 const StudioSavePoint = (props: any) => {
-
-  const {current, toolHeight, dispatch} = props;
-  const [row, setRow] = useState<SavePointTableListItem>();
-  const actionRef = useRef<ActionType>();
+  const { current, dispatch } = props
+  const [row, setRow] = useState<SavePointTableListItem>()
+  const actionRef = useRef<ActionType>()
 
   if (current.key) {
-    actionRef.current?.reloadAndRest?.();
+    actionRef.current?.reloadAndRest?.()
   }
 
   const columns: ProColumns<SavePointTableListItem>[] = [
-
     {
       title: l('pages.task.savePointPath'),
       dataIndex: 'path',
@@ -57,61 +53,48 @@ const StudioSavePoint = (props: any) => {
       hideInForm: true,
       hideInSearch: true,
       render: (dom, entity) => {
-        return <a onClick={() => setRow(entity)}>{dom}</a>;
+        return <a onClick={() => setRow(entity)}>{dom}</a>
       },
     },
-  ];
+  ]
 
   return (
-    <>
-      <Row>
-        <Col span={24}>
-          <div style={{float: "right"}}>
-            <Tooltip title={l('component.minimize')}>
-              <Button
-                type="text"
-                icon={<MinusSquareOutlined/>}
-              />
-            </Tooltip>
-          </div>
-        </Col>
-      </Row>
-      <Scrollbars style={{height: (toolHeight - 32)}}>
-        <ProTable<SavePointTableListItem>
-          actionRef={actionRef}
-          rowKey="id"
-          request={(params, sorter, filter) => queryData(url, {taskId: current.key, ...params, sorter, filter})}
-          columns={columns}
-          search={false}
-        />
-        <Drawer
-          width={600}
-          visible={!!row}
-          onClose={() => {
-            setRow(undefined);
-          }}
-          closable={false}
-        >
-          {row?.name && (
-            <ProDescriptions<SavePointTableListItem>
-              column={2}
-              title={row?.name}
-              request={async () => ({
-                data: row || {},
-              })}
-              params={{
-                id: row?.name,
-              }}
-              columns={columns}
-            />
-          )}
-        </Drawer>
-      </Scrollbars>
-    </>
-  );
-};
+    <Scrollbars style={{ height: 'calc(100% - 32px)' }}>
+      <ProTable<SavePointTableListItem>
+        actionRef={actionRef}
+        rowKey="id"
+        request={(params, sorter, filter) =>
+          queryData(url, { taskId: current.key, ...params, sorter, filter })
+        }
+        columns={columns}
+        search={false}
+      />
+      <Drawer
+        width={600}
+        visible={!!row}
+        onClose={() => {
+          setRow(undefined)
+        }}
+        closable={false}
+      >
+        {row?.name && (
+          <ProDescriptions<SavePointTableListItem>
+            column={2}
+            title={row?.name}
+            request={async () => ({
+              data: row || {},
+            })}
+            params={{
+              id: row?.name,
+            }}
+            columns={columns}
+          />
+        )}
+      </Drawer>
+    </Scrollbars>
+  )
+}
 
-export default connect(({Studio}: { Studio: StateType }) => ({
+export default connect(({ Studio }: { Studio: StateType }) => ({
   current: Studio.current,
-  toolHeight: Studio.toolHeight,
-}))(StudioSavePoint);
+}))(StudioSavePoint)

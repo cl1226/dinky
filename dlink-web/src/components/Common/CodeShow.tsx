@@ -17,21 +17,19 @@
  *
  */
 
-
-import MonacoEditor from "react-monaco-editor";
+import MonacoEditor from 'react-monaco-editor'
 
 export type CodeShowFormProps = {
-  height?: string;
-  width?: string;
-  language?: string;
-  theme?: string;
-  options?: any;
-  code: string;
-  editorDidMountHandle: any;
-};
+  height?: string
+  width?: string
+  language?: string
+  theme?: string
+  options?: any
+  code: string
+  editorDidMountHandle: any
+}
 
 const CodeShow = (props: CodeShowFormProps) => {
-
   const {
     height = '100%',
     width = '100%',
@@ -46,19 +44,21 @@ const CodeShow = (props: CodeShowFormProps) => {
     },
     code,
     editorDidMountHandle,
-  } = props;
+  } = props
 
-  return (<>
-    <MonacoEditor
-      width={width}
-      height={height}
-      language={language}
-      value={code}
-      options={options}
-      theme='vs'
-      editorDidMount={editorDidMountHandle}
-    />
-  </>)
-};
+  return (
+    <>
+      <MonacoEditor
+        width={width}
+        height={height}
+        language={language}
+        value={code}
+        options={options}
+        theme="vs"
+        editorDidMount={editorDidMountHandle}
+      />
+    </>
+  )
+}
 
-export default CodeShow;
+export default CodeShow

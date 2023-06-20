@@ -17,104 +17,135 @@
  *
  */
 
-
-import {connect} from "umi";
-import {StateType} from "@/pages/DataStudio/model";
-import {Button, Col, Form, Input, InputNumber, message, Row, Select, Space, Tag, Tooltip, Upload} from "antd";
+import { connect } from 'umi'
+import { StateType } from '@/pages/DataStudio/model'
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Row,
+  Select,
+  Space,
+  Tag,
+  Tooltip,
+  Upload,
+} from 'antd'
 import {
   InfoCircleOutlined,
   MinusCircleOutlined,
   MinusSquareOutlined,
   PlusOutlined,
-  UploadOutlined
-} from "@ant-design/icons";
-import styles from "./index.less";
-import React, {useEffect, useState} from "react";
-import {JarStateType} from "@/pages/RegistrationCenter/Jar/model";
-import {Scrollbars} from "react-custom-scrollbars";
-import {RUN_MODE} from "@/components/Studio/conf";
-import {CODE} from "@/components/Common/crud";
-import {
-  getHadoopConfigPathFromClusterConfigurationsById
-} from "@/pages/RegistrationCenter/ClusterManage/ClusterConfiguration/function";
-import {l} from "@/utils/intl";
-import {AlertStateType} from "@/pages/RegistrationCenter/AlertManage/AlertInstance/model";
+  UploadOutlined,
+} from '@ant-design/icons'
+import styles from './index.less'
+import React, { useEffect, useState } from 'react'
+import { JarStateType } from '@/pages/RegistrationCenter/Jar/model'
+import { Scrollbars } from 'react-custom-scrollbars'
+import { RUN_MODE } from '@/components/Studio/conf'
+import { CODE } from '@/components/Common/crud'
+import { getHadoopConfigPathFromClusterConfigurationsById } from '@/pages/RegistrationCenter/ClusterManage/ClusterConfiguration/function'
+import { l } from '@/utils/intl'
+import { AlertStateType } from '@/pages/RegistrationCenter/AlertManage/AlertInstance/model'
 
-const {Option} = Select;
+const { Option } = Select
 
 const StudioJarSetting = (props: any) => {
-
-  const {clusterConfiguration, current, form, dispatch, tabs, jars, group, toolHeight} = props;
-  const [hadoopConfigPath, setHadoopConfigPath] = useState<string | undefined>(undefined);
-  const [jarPath, setJarPath] = useState<string | undefined>(undefined);
+  const { clusterConfiguration, current, form, dispatch, tabs, jars, group } = props
+  const [hadoopConfigPath, setHadoopConfigPath] = useState<string | undefined>(undefined)
+  const [jarPath, setJarPath] = useState<string | undefined>(undefined)
 
   const getClusterConfigurationOptions = () => {
-    const itemList = [];
+    const itemList: any = []
     for (const item of clusterConfiguration) {
-      const tag = (<><Tag
-        color={item.enabled ? "processing" : "error"}>{item.type}</Tag>{item.alias === "" ? item.name : item.alias}</>);
-      itemList.push(<Option key={item.id} value={item.id} label={tag}>
-        {tag}
-      </Option>)
+      const tag = (
+        <>
+          <Tag color={item.enabled ? 'processing' : 'error'}>{item.type}</Tag>
+          {item.alias === '' ? item.name : item.alias}
+        </>
+      )
+      itemList.push(
+        <Option key={item.id} value={item.id} label={tag}>
+          {tag}
+        </Option>,
+      )
     }
-    return itemList;
-  };
+    return itemList
+  }
 
   const getJarOptions = () => {
-    const itemList = [];
+    const itemList: any = []
     for (const item of jars) {
-      const tag = (<><Tag
-        color={item.enabled ? "processing" : "error"}>{item.type}</Tag>{item.alias === "" ? item.name : item.alias}</>);
-      itemList.push(<Option key={item.id} value={item.id} label={tag}>
-        {tag}
-      </Option>)
+      const tag = (
+        <>
+          <Tag color={item.enabled ? 'processing' : 'error'}>{item.type}</Tag>
+          {item.alias === '' ? item.name : item.alias}
+        </>
+      )
+      itemList.push(
+        <Option key={item.id} value={item.id} label={tag}>
+          {tag}
+        </Option>,
+      )
     }
-    return itemList;
-  };
+    return itemList
+  }
 
   useEffect(() => {
-    form.setFieldsValue(current.task);
-    setHadoopConfigPath(getHadoopConfigPathFromClusterConfigurationsById(current.task.clusterConfigurationId, clusterConfiguration));
+    form.setFieldsValue(current.task)
+    setHadoopConfigPath(
+      getHadoopConfigPathFromClusterConfigurationsById(
+        current.task.clusterConfigurationId,
+        clusterConfiguration,
+      ),
+    )
     for (let i in jars) {
       if (jars[i].id == current.task.jarId) {
-        setJarPath(jars[i].path);
-        break;
+        setJarPath(jars[i].path)
+        break
       }
     }
-  }, [current.task]);
+  }, [current.task])
 
   const onValuesChange = (change: any, all: any) => {
-    const newTabs = tabs;
+    const newTabs = tabs
     for (let i = 0; i < newTabs.panes.length; i++) {
       if (newTabs.panes[i].key === newTabs.activeKey) {
         for (const key in change) {
-          newTabs.panes[i].task[key] = all[key];
+          newTabs.panes[i].task[key] = all[key]
         }
-        break;
+        break
       }
     }
     dispatch({
-      type: "Studio/saveTabs",
+      type: 'Studio/saveTabs',
       payload: newTabs,
-    });
-    let clusterConfigurationId = all['clusterConfigurationId'];
-    let jarId = all['jarId'];
-    setHadoopConfigPath(getHadoopConfigPathFromClusterConfigurationsById(clusterConfigurationId, clusterConfiguration));
+    })
+    let clusterConfigurationId = all['clusterConfigurationId']
+    let jarId = all['jarId']
+    setHadoopConfigPath(
+      getHadoopConfigPathFromClusterConfigurationsById(
+        clusterConfigurationId,
+        clusterConfiguration,
+      ),
+    )
     for (let i in jars) {
       if (jars[i].id == jarId) {
-        setJarPath(jars[i].path);
-        break;
+        setJarPath(jars[i].path)
+        break
       }
     }
-  };
+  }
 
   const getUploadHdfsProps = () => {
-    let dir = '';
+    let dir = ''
     if (jarPath) {
       if (jarPath.indexOf('.jar') > -1) {
-        dir = jarPath.substring(0, jarPath.lastIndexOf('/'));
+        dir = jarPath.substring(0, jarPath.lastIndexOf('/'))
       } else {
-        dir = jarPath;
+        dir = jarPath
       }
     }
     return {
@@ -125,196 +156,199 @@ const StudioJarSetting = (props: any) => {
       },
       data: {
         dir,
-        hadoopConfigPath
+        hadoopConfigPath,
       },
       showUploadList: true,
       onChange(info) {
         if (info.file.status === 'done') {
           if (info.file.response.code == CODE.SUCCESS) {
-            message.success(info.file.response.msg);
+            message.success(info.file.response.msg)
           } else {
-            message.warn(info.file.response.msg);
+            message.warn(info.file.response.msg)
           }
         } else if (info.file.status === 'error') {
-          message.error(`${info.file.name}` + l('app.request.upload.failed'));
+          message.error(`${info.file.name}` + l('app.request.upload.failed'))
         }
       },
     }
-  };
+  }
 
   const getGroupOptions = () => {
-    const itemList = [<Option key={0} value={0} label={l('button.disable')}>
-      {l('button.disable')}
-    </Option>];
+    const itemList = [
+      <Option key={0} value={0} label={l('button.disable')}>
+        {l('button.disable')}
+      </Option>,
+    ]
     for (const item of group) {
-      itemList.push(<Option key={item.id} value={item.id} label={item.name}>
-        {item.name}
-      </Option>)
+      itemList.push(
+        <Option key={item.id} value={item.id} label={item.name}>
+          {item.name}
+        </Option>,
+      )
     }
-    return itemList;
-  };
+    return itemList
+  }
 
   return (
-    <>
-      <Row>
-        <Col span={24}>
-          <div style={{float: "right"}}>
-            <Tooltip title={l('component.minimize')}>
-              <Button
-                type="text"
-                icon={<MinusSquareOutlined/>}
-              />
-            </Tooltip>
-          </div>
-        </Col>
-      </Row>
-      <Scrollbars style={{height: (toolHeight - 32)}}>
-        <Form
-          form={form}
-          layout="vertical"
-          className={styles.form_setting}
-          onValuesChange={onValuesChange}
+    <Scrollbars style={{ height: 'calc(100% - 32px)' }}>
+      <Form
+        form={form}
+        layout="vertical"
+        className={styles.form_setting}
+        onValuesChange={onValuesChange}
+      >
+        <Form.Item
+          label={l('global.table.execmode')}
+          className={styles.form_item}
+          name="type"
+          tooltip={l('pages.datastudio.label.jobConfig.execmode.tip')}
         >
-          <Form.Item
-            label={l('global.table.execmode')} className={styles.form_item} name="type"
-            tooltip={l('pages.datastudio.label.jobConfig.execmode.tip')}
-          >
-            <Select defaultValue={RUN_MODE.YARN_APPLICATION} value={RUN_MODE.YARN_APPLICATION}>
-              <Option value={RUN_MODE.YARN_APPLICATION}>Yarn Application</Option>
-            </Select>
-          </Form.Item>
-          <Row>
-            <Col span={24}>
-              <Form.Item label={l('pages.datastudio.label.jobConfig.clusterConfig')}
-                         tooltip={l('pages.datastudio.label.jobConfig.clusterConfig.tip1', '', {
-                           type: current.task.type
-                         })}
-                         name="clusterConfigurationId"
-                         className={styles.form_item}>
-                <Select
-                  style={{width: '100%'}}
-                  placeholder={l('pages.datastudio.label.jobConfig.clusterConfig.tip2')}
-                  optionLabelProp="label"
-                >
-                  {getClusterConfigurationOptions()}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item label={<>{l('pages.datastudio.label.jobConfig.jar')} </>}
-                     tooltip={l('pages.datastudio.label.jobConfig.jar.tip1', '', {
-                       type: current.task.type
-                     })}
-                     className={styles.form_item}>
-            <Form.Item name="jarId" noStyle>
+          <Select defaultValue={RUN_MODE.YARN_APPLICATION} value={RUN_MODE.YARN_APPLICATION}>
+            <Option value={RUN_MODE.YARN_APPLICATION}>Yarn Application</Option>
+          </Select>
+        </Form.Item>
+        <Row>
+          <Col span={24}>
+            <Form.Item
+              label={l('pages.datastudio.label.jobConfig.clusterConfig')}
+              tooltip={l('pages.datastudio.label.jobConfig.clusterConfig.tip1', '', {
+                type: current.task.type,
+              })}
+              name="clusterConfigurationId"
+              className={styles.form_item}
+            >
               <Select
-                style={{width: '80%'}}
-                placeholder={l('pages.datastudio.label.jobConfig.jar.tip2')}
-                allowClear
+                style={{ width: '100%' }}
+                placeholder={l('pages.datastudio.label.jobConfig.clusterConfig.tip2')}
                 optionLabelProp="label"
               >
-                {getJarOptions()}
+                {getClusterConfigurationOptions()}
               </Select>
             </Form.Item>
-            <Upload {...getUploadHdfsProps()} multiple>
-              <UploadOutlined/>
-            </Upload>
-          </Form.Item>
-          <Row>
-            <Col span={12}>
-              <Form.Item
-                label={l('pages.datastudio.label.jobConfig.parallelism')} className={styles.form_item}
-                name="parallelism"
-                tooltip={l('pages.datastudio.label.jobConfig.parallelism.tip')}
-              >
-                <InputNumber min={1} max={9999} defaultValue={1}/>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item
-            label={l('pages.datastudio.label.jobConfig.savePointStrategy')} className={styles.form_item}
-            name="savePointStrategy"
-            tooltip={l('pages.datastudio.label.jobConfig.savePointStrategy.tip')}
-          >
-            <Select defaultValue={0}>
-              <Option value={0}>{l('global.savepoint.strategy.disabled')}</Option>
-              <Option value={1}>{l('global.savepoint.strategy.latest')}</Option>
-              <Option value={2}>{l('global.savepoint.strategy.earliest')}</Option>
-              <Option value={3}>{l('global.savepoint.strategy.custom')}</Option>
-            </Select>
-          </Form.Item>
-          {current.task.savePointStrategy === 3 ?
-            (<Form.Item
-              label={l('pages.datastudio.label.jobConfig.savePointpath')} className={styles.form_item}
-              name="savePointPath"
-              tooltip={l('pages.datastudio.label.jobConfig.savePointpath.tip1')}
-            >
-              <Input placeholder={l('pages.datastudio.label.jobConfig.savePointpath.tip2')}/>
-            </Form.Item>) : ''
-          }
-          <Form.Item label={l('pages.datastudio.label.jobConfig.alertGroup')} name="alertGroupId"
-                     className={styles.form_item}>
+          </Col>
+        </Row>
+        <Form.Item
+          label={<>{l('pages.datastudio.label.jobConfig.jar')} </>}
+          tooltip={l('pages.datastudio.label.jobConfig.jar.tip1', '', {
+            type: current.task.type,
+          })}
+          className={styles.form_item}
+        >
+          <Form.Item name="jarId" noStyle>
             <Select
-              style={{width: '100%'}}
-              placeholder={l('pages.datastudio.label.jobConfig.alertGroup.tip')}
+              style={{ width: '80%' }}
+              placeholder={l('pages.datastudio.label.jobConfig.jar.tip2')}
+              allowClear
               optionLabelProp="label"
-              defaultValue={0}
             >
-              {getGroupOptions()}
+              {getJarOptions()}
             </Select>
           </Form.Item>
-          <Form.Item
-            label={l('pages.datastudio.label.jobConfig.other')} className={styles.form_item}
-            tooltip={{title: l('pages.datastudio.label.jobConfig.other.tip'), icon: <InfoCircleOutlined/>}}
-          >
-
-            <Form.List name="config"
+          <Upload {...getUploadHdfsProps()} multiple>
+            <UploadOutlined />
+          </Upload>
+        </Form.Item>
+        <Row>
+          <Col span={12}>
+            <Form.Item
+              label={l('pages.datastudio.label.jobConfig.parallelism')}
+              className={styles.form_item}
+              name="parallelism"
+              tooltip={l('pages.datastudio.label.jobConfig.parallelism.tip')}
             >
-              {(fields, {add, remove}) => (
-                <>
-                  {fields.map(({key, name, fieldKey, ...restField}) => (
-                    <Space key={key} style={{display: 'flex'}} align="baseline">
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'key']}
-                        style={{marginBottom: '5px'}}
-                      >
-                        <Input placeholder={l('pages.datastudio.label.jobConfig.addConfig.params')}/>
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'value']}
-                        style={{marginBottom: '5px'}}
-                      >
-                        <Input placeholder={l('pages.datastudio.label.jobConfig.addConfig.value')}/>
-                      </Form.Item>
-                      <MinusCircleOutlined onClick={() => remove(name)}/>
-                    </Space>
-                  ))}
-                  <Form.Item>
-                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined/>}>
-                      {l('pages.datastudio.label.jobConfig.addConfig')}
-                    </Button>
-                  </Form.Item>
-                </>
-              )}
-            </Form.List>
+              <InputNumber min={1} max={9999} defaultValue={1} />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Form.Item
+          label={l('pages.datastudio.label.jobConfig.savePointStrategy')}
+          className={styles.form_item}
+          name="savePointStrategy"
+          tooltip={l('pages.datastudio.label.jobConfig.savePointStrategy.tip')}
+        >
+          <Select defaultValue={0}>
+            <Option value={0}>{l('global.savepoint.strategy.disabled')}</Option>
+            <Option value={1}>{l('global.savepoint.strategy.latest')}</Option>
+            <Option value={2}>{l('global.savepoint.strategy.earliest')}</Option>
+            <Option value={3}>{l('global.savepoint.strategy.custom')}</Option>
+          </Select>
+        </Form.Item>
+        {current.task.savePointStrategy === 3 ? (
+          <Form.Item
+            label={l('pages.datastudio.label.jobConfig.savePointpath')}
+            className={styles.form_item}
+            name="savePointPath"
+            tooltip={l('pages.datastudio.label.jobConfig.savePointpath.tip1')}
+          >
+            <Input placeholder={l('pages.datastudio.label.jobConfig.savePointpath.tip2')} />
           </Form.Item>
-        </Form>
-      </Scrollbars>
-    </>
-  );
-};
+        ) : (
+          ''
+        )}
+        <Form.Item
+          label={l('pages.datastudio.label.jobConfig.alertGroup')}
+          name="alertGroupId"
+          className={styles.form_item}
+        >
+          <Select
+            style={{ width: '100%' }}
+            placeholder={l('pages.datastudio.label.jobConfig.alertGroup.tip')}
+            optionLabelProp="label"
+            defaultValue={0}
+          >
+            {getGroupOptions()}
+          </Select>
+        </Form.Item>
+        <Form.Item
+          label={l('pages.datastudio.label.jobConfig.other')}
+          className={styles.form_item}
+          tooltip={{
+            title: l('pages.datastudio.label.jobConfig.other.tip'),
+            icon: <InfoCircleOutlined />,
+          }}
+        >
+          <Form.List name="config">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, fieldKey, ...restField }) => (
+                  <Space key={key} style={{ display: 'flex' }} align="baseline">
+                    <Form.Item {...restField} name={[name, 'key']} style={{ marginBottom: '5px' }}>
+                      <Input placeholder={l('pages.datastudio.label.jobConfig.addConfig.params')} />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'value']}
+                      style={{ marginBottom: '5px' }}
+                    >
+                      <Input placeholder={l('pages.datastudio.label.jobConfig.addConfig.value')} />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                  </Space>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    {l('pages.datastudio.label.jobConfig.addConfig')}
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+        </Form.Item>
+      </Form>
+    </Scrollbars>
+  )
+}
 
-export default connect(({Studio, Jar, Alert}: { Studio: StateType, Jar: JarStateType, Alert: AlertStateType }) => ({
-  sessionCluster: Studio.sessionCluster,
-  clusterConfiguration: Studio.clusterConfiguration,
-  current: Studio.current,
-  tabs: Studio.tabs,
-  session: Studio.session,
-  currentSession: Studio.currentSession,
-  toolHeight: Studio.toolHeight,
-  jars: Jar.jars,
-  env: Studio.env,
-  group: Alert.group,
-}))(StudioJarSetting);
+export default connect(
+  ({ Studio, Jar, Alert }: { Studio: StateType; Jar: JarStateType; Alert: AlertStateType }) => ({
+    sessionCluster: Studio.sessionCluster,
+    clusterConfiguration: Studio.clusterConfiguration,
+    current: Studio.current,
+    tabs: Studio.tabs,
+    session: Studio.session,
+    currentSession: Studio.currentSession,
+    jars: Jar.jars,
+    env: Studio.env,
+    group: Alert.group,
+  }),
+)(StudioJarSetting)

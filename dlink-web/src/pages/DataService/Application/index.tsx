@@ -7,6 +7,7 @@ import { Scrollbars } from 'react-custom-scrollbars'
 import { debounce } from 'lodash'
 import type { ColumnsType } from 'antd/es/table'
 import { history } from 'umi'
+import moment from 'moment'
 
 import UpdateAppForm from '@/pages/DataService/Application/components/UpdateAppForm'
 import {
@@ -114,6 +115,7 @@ const Application: React.FC<{}> = (props: any) => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 200,
+      render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       title: 'Token过期时间',
