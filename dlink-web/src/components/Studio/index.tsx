@@ -122,7 +122,7 @@ const Studio = (props: any) => {
               />
             }
           >
-            <Col style={{ width: toolLeftWidth }}>
+            <Col style={{ width: toolLeftWidth, height: '100%' }}>
               <StudioTree width={toolLeftWidth} />
             </Col>
             <Spin spinning={pageLoading}>

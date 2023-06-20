@@ -34,7 +34,7 @@ import {
   getTreeNodeByKey,
   TreeDataNode,
 } from '@/components/Studio/StudioTree/Function'
-import style from './index.less'
+import styles from './index.less'
 import { StateType } from '@/pages/DataStudio/model'
 import {
   CODE,
@@ -574,7 +574,7 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
       <Menu
         onClick={({ key }) => handleMenuClick(key)}
         style={tmpStyle}
-        className={style.right_click_menu}
+        className={styles.right_click_menu}
       >
         {menuItems}
       </Menu>
@@ -657,7 +657,7 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
         index > -1 ? (
           <span>
             {beforeStr}
-            <span className={style['site-tree-search-value']}>{searchValue}</span>
+            <span className={styles['site-tree-search-value']}>{searchValue}</span>
             {afterStr}
           </span>
         ) : (
@@ -718,7 +718,7 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
   })
 
   return (
-    <div className={style.tree_div}>
+    <div className={styles.tree_div}>
       <Row>
         <Col span={24}>
           <Tooltip title={l('right.menu.createRootCatalogue')}>
@@ -738,14 +738,13 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
         </Col>
       </Row>
       <Search
-        style={{ marginBottom: 8, width: width - 10 }}
+        style={{ marginBottom: 8 }}
         placeholder="Search"
         onChange={onChange}
         allowClear={true}
       />
-      <Scrollbars style={{ height: size.height - 180 }} ref={sref}>
+      <Scrollbars style={{ height: 'calc(100% - 72px)' }} ref={sref}>
         <DirectoryTree
-          style={{ width: width - 10 }}
           multiple
           onRightClick={handleContextMenu}
           onSelect={onSelect}
