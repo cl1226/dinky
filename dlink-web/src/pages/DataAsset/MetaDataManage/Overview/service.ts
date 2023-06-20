@@ -1,7 +1,4 @@
 import { request2, CODE } from '@/components/Common/crud'
-import { message } from 'antd'
-import { l } from '@/utils/intl'
-
 
 // 获取访问量趋势
 export const getOldStatistic = (params) => {
@@ -13,23 +10,16 @@ export const getOldStatistic = (params) => {
   })
 }
 
-// 获取App详情
-export const requestAppDetail = (id: number) => {
-  return request2('/api/app/config/detail', {
+// 元数据Top5
+export const getMetaDataStatistic = () => {
+  return request2('/api/metadata/task/statistics/metadata', {
     method: 'GET',
-    params: {
-      id: id,
-    },
   })
 }
 
 // 获取app列表
-export async function requestAppList(params) {
-  return request2('/api/app/config/page', {
-    method: 'POST',
-    data: {
-      ...params,
-    },
+export async function getTaskInstanceStatistic() {
+  return request2('/api/metadata/task/statistics/taskInstance', {
+    method: 'GET',
   })
 }
-

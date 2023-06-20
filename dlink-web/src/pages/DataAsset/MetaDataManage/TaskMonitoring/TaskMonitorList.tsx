@@ -181,7 +181,7 @@ export default (props: IApiListProps) => {
       width: 120,
       key: 'duration',
       render(value, record, index) {
-        return Math.round(value / 60)
+        return Math.round(value / 1000)
       },
     },
     {
@@ -194,13 +194,14 @@ export default (props: IApiListProps) => {
           <Button
             size="small"
             type="link"
+            disabled={starting}
             onClick={() => {
               handleReRun(record)
             }}
           >
             重跑
           </Button>
-          <Button
+          {/* <Button
             size="small"
             type="link"
             onClick={() => {
@@ -208,7 +209,7 @@ export default (props: IApiListProps) => {
             }}
           >
             日志
-          </Button>
+          </Button> */}
         </Space>
       ),
     },
