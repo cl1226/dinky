@@ -127,6 +127,7 @@ export default (props: IApiListProps) => {
       title: '任务名称',
       dataIndex: 'name',
       key: 'name',
+      fixed: 'left',
       width: 150,
     },
     {
@@ -180,25 +181,27 @@ export default (props: IApiListProps) => {
       width: 120,
       key: 'duration',
       render(value, record, index) {
-        return Math.round(value / 60)
+        return Math.round(value / 1000)
       },
     },
     {
       title: '操作',
       width: 80,
       key: 'action',
+      fixed:'right',
       render: (cellValue, record) => (
         <Space size={0} split={<Divider type="vertical" style={{ margin: 2 }} />}>
           <Button
             size="small"
             type="link"
+            disabled={starting}
             onClick={() => {
               handleReRun(record)
             }}
           >
             重跑
           </Button>
-          <Button
+          {/* <Button
             size="small"
             type="link"
             onClick={() => {
@@ -206,7 +209,7 @@ export default (props: IApiListProps) => {
             }}
           >
             日志
-          </Button>
+          </Button> */}
         </Space>
       ),
     },
@@ -240,6 +243,7 @@ export default (props: IApiListProps) => {
             className={styles['api-table']}
             loading={loading}
             rowKey="id"
+            scroll={{ x: 1300 }}
             size="small"
             columns={columns}
             dataSource={listData}

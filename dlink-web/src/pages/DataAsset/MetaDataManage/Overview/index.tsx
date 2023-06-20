@@ -12,7 +12,7 @@ export default () => {
   const stepList: IStepItem[] = [
     {
       title: '新建任务',
-      url: '/dataAsset/devApi/catalogue',
+      url: '/dataAsset/metaDataManage/create',
       image: '/dataAsset/1.png',
       detail: '点击任务管理的新建，即可创建新任务。',
     },
@@ -28,7 +28,7 @@ export default () => {
     },
     {
       title: '任务监控',
-      url: '/dataAsset/serviceDashboard',
+      url: '/dataAsset/metaDataManage/taskMonitoring',
       image: '/dataAsset/4.png',
       detail: '监控任务运行情况，查看采集日志，支持采集任务重跑等操作。',
     },
@@ -39,10 +39,10 @@ export default () => {
       key: 'tab1',
       tab: '当日统计',
     },
-    {
-      key: 'tab2',
-      tab: '历史统计',
-    },
+    // {
+    //   key: 'tab2',
+    //   tab: '历史统计',
+    // },
   ]
 
   const contentList: Record<string, React.ReactNode> = {
@@ -51,8 +51,6 @@ export default () => {
   }
 
   const onTabChange = (key: string) => {
-    console.log(key, 'key')
-
     setactiveTabKey(key)
   }
   return (
