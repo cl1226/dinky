@@ -28,6 +28,7 @@ import { connect } from 'umi'
 import { StateType } from '@/pages/Scheduler/model'
 import styles from './index.less'
 import SchedulerEdit from '../SchedulerEdit'
+import { XFlowEditor } from '@/components/XFlow'
 import SchedulerHome from '@/components/Scheduler/SchedulerHome'
 import { Dispatch } from '@@/plugin-dva/connect'
 import { l } from '@/utils/intl'
@@ -36,6 +37,7 @@ const { TabPane } = Tabs
 
 const EditorTabs = (props: any) => {
   const { tabs, current } = props
+
   const onChange = (activeKey: any) => {
     props.changeActiveKey(activeKey)
   }
@@ -103,7 +105,7 @@ const EditorTabs = (props: any) => {
   const getTabPane = (pane, i) => {
     return (
       <TabPane tab={Tab(pane)} key={pane.key} closable={pane.closable}>
-        <SchedulerEdit tabkey={pane.key} tabName={pane.title} activeKey={current.key} />
+        <SchedulerEdit tabkey={pane.key} activeKey={current.key} />
       </TabPane>
     )
   }

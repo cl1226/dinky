@@ -84,12 +84,6 @@ const StudioMenu = (props: any) => {
           props.saveTask(current)
         }
       }
-      if (e.keyCode === 113) {
-        e.preventDefault()
-        if (current) {
-          props.changeFullScreen(true)
-        }
-      }
     },
     [current],
   )

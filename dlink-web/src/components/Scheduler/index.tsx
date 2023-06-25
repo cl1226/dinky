@@ -17,39 +17,44 @@
  *
  */
 
-import { connect } from 'umi'
-import {useCallback, useEffect, useState} from "react";
+import { connect, useModel } from 'umi'
+import { useCallback, useEffect, useState } from 'react'
 import styles from './index.less'
-import {  Col, Row, Card } from 'antd'
+import { Col, Row, Card } from 'antd'
 import { StateType } from '@/pages/Scheduler/model'
 import SchedulerTabs from './SchedulerTabs'
 import SchedulerMenu from './SchedulerMenu'
-import SchedulerLeftTool from './SchedulerLeftTool'
-import DraggleLayout from "@/components/DraggleLayout";
+import SchedulerTree from './SchedulerTree'
+import DraggleLayout from '@/components/DraggleLayout'
 
 const Scheduler = (props: any) => {
-  const { rightClickMenu, dispatch } = props
-
+  const { rightClickMenu, dispatch, toolLeftWidth } = props
+  const { initialState }: any = useModel('@@initialState')
   const VIEW = {
-    leftToolWidth: 200,
-    marginTop: 84,
-    topHeight: 35.6,
-    bottomHeight: 127,
+    topHeight: 32,
     rightMargin: 32,
     leftMargin: 36,
     midMargin: 46,
-  };
+  }
 
   const [size, setSize] = useState({
     width: document.documentElement.clientWidth,
     height: document.documentElement.clientHeight,
-  });
+  })
   const onResize = useCallback(() => {
     setSize({
       width: document.documentElement.clientWidth,
       height: document.documentElement.clientHeight,
     })
-  }, []);
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener('resize', onResize)
+    onResize()
+    return () => {
+      window.removeEventListener('resize', onResize)
+    }
+  }, [onResize])
 
   const onClick = () => {
     if (rightClickMenu) {
@@ -64,38 +69,44 @@ const Scheduler = (props: any) => {
   return (
     <div onClick={onClick} style={{ margin: '-24px', overflow: 'hidden' }}>
       <SchedulerMenu />
-      <div className={styles.card}>
+      <Card bordered={false} className={styles.card} size="small" id="studio_card">
         <Row>
           <DraggleLayout
-              containerWidth={size.width - VIEW.leftToolWidth}
-              containerHeight={size.height - 85}
-              min={VIEW.leftMargin}
-              max={size.width - VIEW.rightMargin - VIEW.midMargin}
-              initLeftWidth={250}
-              isLeft={true}
-              handler={
-                <div
-                  style={{
-                    width: 4,
-                    height: '100%',
-                    background: 'rgb(240, 240, 240)',
-                  }}
-                />
-              }
-            >
-              <Col className={styles["vertical-tabs"]}>
-                <SchedulerLeftTool/>
-              </Col>
-              <Col style={{ width: `calc(100vw - ${VIEW.leftToolWidth}px)` }}>
+            containerWidth={size.width - (initialState.collapsed ? 48 : 208)}
+            containerHeight={size.height - 80}
+            min={VIEW.leftMargin}
+            max={size.width - VIEW.rightMargin - VIEW.midMargin}
+            initLeftWidth={toolLeftWidth}
+            isLeft={true}
+            handler={
+              <div
+                style={{
+                  width: 4,
+                  height: '100%',
+                  background: 'rgb(240, 240, 240)',
+                }}
+              />
+            }
+            model="Scheduler"
+          >
+            <Col style={{ width: toolLeftWidth, height: '100%' }}>
+              <SchedulerTree width={toolLeftWidth} />
+            </Col>
+
+            <Row style={{ height: size.height - 48 - VIEW.topHeight }}>
+              <Col style={{ width: '100%' }}>
                 <SchedulerTabs />
               </Col>
-            </DraggleLayout>
+            </Row>
+          </DraggleLayout>
         </Row>
-      </div>
+      </Card>
     </div>
   )
 }
 
 export default connect(({ Scheduler }: { Scheduler: StateType }) => ({
   rightClickMenu: Scheduler.rightClickMenu,
+  toolLeftWidth: Scheduler.toolLeftWidth,
+  pageLoading: Scheduler.pageLoading,
 }))(Scheduler)

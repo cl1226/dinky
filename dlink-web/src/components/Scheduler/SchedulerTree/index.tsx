@@ -506,7 +506,7 @@ const SchedulerTree: React.FC<SchedulerTreeProps> = (props) => {
         onChange={onChange}
         allowClear={true}
       />
-      <Scrollbars style={{ height: 'calc(100vh - 150px)' }} ref={sref}>
+      <Scrollbars style={{ height: 'calc(100vh - 72px)' }} ref={sref}>
         {treeData?.length && (
           <DirectoryTree
             multiple

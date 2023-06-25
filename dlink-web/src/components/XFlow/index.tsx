@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 /** app 核心组件 */
 import { XFlow, XFlowCanvas, KeyBindings, createGraphConfig } from '@antv/xflow'
 import type { IApplication, IAppLoad } from '@antv/xflow'
-import {CaretDownOutlined, CaretUpOutlined} from '@ant-design/icons';
+import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons'
 /** 交互组件 */
 import {
   /** 触发Command的交互组件 */
@@ -14,7 +14,7 @@ import {
   /** Graph的扩展交互组件 */
   CanvasSnapline,
   CanvasNodePortTooltip,
-  DagGraphExtension
+  DagGraphExtension,
 } from '@antv/xflow'
 
 import { CustomJsonForm } from './json-form'
@@ -36,15 +36,15 @@ import * as dndPanelConfig from './config-dnd-panel'
 /** 配置JsonConfigForm */
 import { formSchemaService, formValueUpdateService, controlMapService } from './config-form'
 import { IMeta } from './service'
-import './index.less'
 import '@antv/xflow/dist/index.css'
+import styles from './index.less'
 export interface IProps {
   activeKey: string
   flowId: string
 }
 
-export const useGraphConfig = createGraphConfig<IProps>(graphConfig => {
-  graphConfig.setEdgeRender("Edge", props => {
+export const useGraphConfig = createGraphConfig<IProps>((graphConfig) => {
+  graphConfig.setEdgeRender('Edge', (props) => {
     return <div className="react-edge"> {props.data.label} </div>
   })
 })
@@ -52,7 +52,7 @@ export const useGraphConfig = createGraphConfig<IProps>(graphConfig => {
 export const XFlowEditor: React.FC<IProps> = (props) => {
   const { activeKey, flowId } = props
 
-  const [showNodePanel, setshowNodePanel] = useState(false)
+  const [showNodePanel, setShowNodePanel] = useState(true)
 
   const cache = React.useMemo<{ app: IApplication | null }>(
     () => ({
@@ -92,38 +92,51 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
 
   const graphConfig = useGraphConfig(props)
 
+  const getNodeCollapsePosition = () => {
+    if (showNodePanel) return { width: 160, top: 0, bottom: 0, left: 0 }
+
+    return { width: 160, top: 0, left: 0, height: 40 }
+  }
   return (
     <XFlow
-      // className="dag-user-custom-clz"
-      className={`dag-user-custom-clz dag-user-custom-clz-custom${showNodePanel && '-hidden'}`}
+      className={styles['xflow-wrap']}
       hookConfig={graphHooksConfig}
       modelServiceConfig={modelServiceConfig}
       commandConfig={cmdConfig}
       onLoad={onLoad}
       meta={meta}
-      style={{ height: 'calc(100vh - 82px - 32px)', width: '100%' }}
+      style={{ height: '100%', width: '100%' }}
     >
       <DagGraphExtension />
       <NodeCollapsePanel
-        className="xflow-node-panel"
         // searchService={dndPanelConfig.searchService}
-        header={<div className="dnd-panel-header"> 节点库{showNodePanel} 
-        {
-          showNodePanel ? (<CaretDownOutlined  onClick={() => setshowNodePanel(!showNodePanel)} style={{'margin-left': '30px'}}/>)
-          : (<CaretUpOutlined onClick={() => setshowNodePanel(!showNodePanel)} style={{'margin-left': '30px'}}/>)
+        header={
+          <div className="dnd-panel-header">
+            节点库
+            {!showNodePanel ? (
+              <CaretDownOutlined
+                onClick={() => setShowNodePanel(true)}
+                style={{ marginLeft: '30px' }}
+              />
+            ) : (
+              <CaretUpOutlined
+                onClick={() => setShowNodePanel(false)}
+                style={{ marginLeft: '30px' }}
+              />
+            )}
+          </div>
         }
-        </div>}
         nodeDataService={dndPanelConfig.nodeDataService}
         onNodeDrop={dndPanelConfig.onNodeDrop}
-        position={{ width: 230, top: 0, bottom: 0, left: 0 }}
+        position={getNodeCollapsePosition()}
         footerPosition={{ height: 0 }}
         bodyPosition={{ top: 40, bottom: 0, left: 0 }}
       />
       <CanvasToolbar
-        className="xflow-workspace-toolbar-top"
+        className={'xflow-workspace-toolbar-top'}
         layout="horizontal"
         config={toolbarConfig}
-        position={{ top: 0, left: 230, right: 320, bottom: 0 }}
+        position={{ top: 0, left: 160, right: 0, bottom: 0 }}
       />
       <XFlowCanvas position={{ top: 40, left: 230, right: 32, bottom: 0 }}>
         <CanvasScaleToolbar position={{ top: 12, right: 12 }} />
@@ -137,21 +150,37 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
         formValueUpdateService={formValueUpdateService}
         getCustomRenderComponent={CustomJsonForm.getCustomRenderComponent}
         bodyPosition={{ top: 0, bottom: 0, right: 0 }}
-        position={{ width: 34, top: 0, bottom: 0, right: 0 }}
+        position={{ width: 32, top: 0, bottom: 0, right: 0 }}
         footerPosition={{ height: 0 }}
       />
       <KeyBindings config={keybindingConfig} />
       <svg width="100%" height="100%">
         <defs>
-        <marker id="v-arrow-1" orient="auto" overflow="visible" markerUnits="userSpaceOnUse">
-          <polygon id="v-166" stroke="#33aa99" fill="#33aa99" transform="rotate(180)" d="M 10 -5 0 0 10 5 z" points="12,6 6,0 12,-6 -6,0 12,6" strokeWidth="0">
-
-          </polygon>
-        </marker>
-        <marker id="v-arrow-2" orient="auto" overflow="visible" markerUnits="userSpaceOnUse"><polygon id="v-200" stroke="#33aa99" fill="#33aa99" transform="rotate(180)" d="M 10 -5 0 0 10 5 z" points="24,12 12,0 24,-12 -12,0 24,12" strokeWidth="0"></polygon></marker>
+          <marker id="v-arrow-1" orient="auto" overflow="visible" markerUnits="userSpaceOnUse">
+            <polygon
+              id="v-166"
+              stroke="#33aa99"
+              fill="#33aa99"
+              transform="rotate(180)"
+              d="M 10 -5 0 0 10 5 z"
+              points="12,6 6,0 12,-6 -6,0 12,6"
+              strokeWidth="0"
+            ></polygon>
+          </marker>
+          <marker id="v-arrow-2" orient="auto" overflow="visible" markerUnits="userSpaceOnUse">
+            <polygon
+              id="v-200"
+              stroke="#33aa99"
+              fill="#33aa99"
+              transform="rotate(180)"
+              d="M 10 -5 0 0 10 5 z"
+              points="24,12 12,0 24,-12 -12,0 24,12"
+              strokeWidth="0"
+            ></polygon>
+          </marker>
         </defs>
-    </svg>
-      </XFlow>
+      </svg>
+    </XFlow>
   )
 }
 

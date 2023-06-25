@@ -181,7 +181,6 @@ export type MetaStoreColumnType = {
 
 export type StateType = {
   pageLoading?: boolean
-  isFullScreen?: boolean
   toolHeight?: number
   toolLeftWidth?: number
   operations?: string
@@ -211,7 +210,6 @@ export type ModelType = {
     saveTask: Effect
   }
   reducers: {
-    changeFullScreen: Reducer<StateType>
     changePageLoading: Reducer<StateType>
     saveToolHeight: Reducer<StateType>
     saveToolLeftWidth: Reducer<StateType>
@@ -246,7 +244,6 @@ const Model: ModelType = {
   namespace: 'Studio',
   state: {
     pageLoading: false,
-    isFullScreen: false,
     toolHeight: 32,
     toolLeftWidth: 250,
     cluster: [],
@@ -291,12 +288,6 @@ const Model: ModelType = {
         ...state,
         pageLoading: payload,
       } as StateType
-    },
-    changeFullScreen(state, { payload }) {
-      return {
-        ...state,
-        isFullScreen: payload,
-      }
     },
     saveToolHeight(state, { payload }) {
       return {

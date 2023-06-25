@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import {Tabs, Col, Modal, Table, Row, message} from "antd";
-import {ContainerOutlined, PlusOutlined} from "@ant-design/icons";
+import { Tabs, Col, Modal, Table, Row, message } from 'antd'
+import { ContainerOutlined, PlusOutlined } from '@ant-design/icons'
 import { NsJsonSchemaForm, MODELS } from '@antv/xflow'
 import moment from 'moment'
 import { Descriptions, Radio, DatePicker, Input, Form } from 'antd'
@@ -9,15 +9,22 @@ import { Cron } from '@/components/Cron'
 import { NS_CANVAS_FORM, NS_FLOW_TASK_FORM } from './config-model-service'
 import { IMeta, ESchedulerType, getJsonCron } from './service'
 import { Scrollbars } from 'react-custom-scrollbars'
-import type { ColumnsType } from 'antd/es/table';
-import styles from './index.less';
+import type { ColumnsType } from 'antd/es/table'
+import styles from './index.less'
 import { page, getTask } from '@/pages/DataStudio/service'
 import { debounce } from 'lodash'
 import { useXFlowApp, XFlowGraphCommands } from '@antv/xflow'
 
 const RangePicker: any = DatePicker.RangePicker
-const {TabPane} = Tabs;
+const { TabPane } = Tabs
 const { Search } = Input
+
+export interface IGetShellListParams {
+  name?: string
+  pageIndex: number
+  pageSize: number
+  dialect?: string
+}
 
 export namespace CustomJsonForm {
   export const getCustomRenderComponent: NsJsonSchemaForm.ICustomRender = (
@@ -31,8 +38,6 @@ export namespace CustomJsonForm {
     } else {
       return CustomJsonForm.NodeCustomRender
     }
-
-    return null
   }
 
   export const CanvasCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (props) => {
@@ -112,13 +117,25 @@ export namespace CustomJsonForm {
 
     const [showTabPane, setshowTabPane] = useState(false)
 
-
     return (
-      <Col id='StudioRightTool' className={styles["vertical-tabs"]}>
-        <Tabs className={`xflow-righttools-tabcontent-wrap xflow-righttools-tabcontent-wrap${showTabPane && '-show'}`} onTabClick={() => setshowTabPane(!showTabPane)} defaultActiveKey="1" size="small" tabPosition="right" >
-          <TabPane tab={<span><ContainerOutlined/> 作业信息</span>} key="XflowTaskInfo">
-            <Scrollbars style={{height: 500}}>
-              <div className="custom-form-component">
+      <div className={styles['vertical-tabs']}>
+        <Tabs
+          className={`tab-tool-wrap ${showTabPane ? 'visible' : ''}`}
+          onTabClick={() => setshowTabPane(!showTabPane)}
+          defaultActiveKey="1"
+          size="small"
+          tabPosition="right"
+        >
+          <TabPane
+            tab={
+              <span>
+                <ContainerOutlined /> 作业信息
+              </span>
+            }
+            key="XflowTaskInfo"
+          >
+            <Scrollbars style={{ height: 500 }}>
+              <div className={styles['custom-form-component']}>
                 <div className="info-title">作业信息</div>
                 <div className="info-wrap">
                   <Scrollbars style={{ height: '100%' }} ref={sref}>
@@ -139,7 +156,10 @@ export namespace CustomJsonForm {
                       >
                         <Descriptions title="调度配置" column={1} layout="vertical">
                           <Descriptions.Item label="调度方式">
-                            <Form.Item name="schedulerType" style={{ width: '100%', marginBottom: 0 }}>
+                            <Form.Item
+                              name="schedulerType"
+                              style={{ width: '100%', marginBottom: 0 }}
+                            >
                               <Radio.Group
                                 onChange={(e: RadioChangeEvent) => {
                                   setCycleVisible(e.target.value === ESchedulerType.CYCLE)
@@ -191,38 +211,29 @@ export namespace CustomJsonForm {
             </Scrollbars>
           </TabPane>
         </Tabs>
-      </Col>
-      
+      </div>
     )
-  }
-
-  export interface IGetShellListParams {
-    name?: string
-    pageIndex: number
-    pageSize: number,
-    dialect: string
   }
 
   export const NodeCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (props) => {
     const sref: any = React.createRef<Scrollbars>()
 
-
     const [showTabPane, setshowTabPane] = useState(false)
     const [showModal, setshowModal] = useState(false)
 
     interface DataType {
-      name: string;
-      type: string;
-      createTime: string;
-      updateTime: string;
-      path: string;
+      name: string
+      type: string
+      createTime: string
+      updateTime: string
+      path: string
     }
 
     const columns: ColumnsType<DataType> = [
       {
         title: '脚本名称',
         dataIndex: 'name',
-        key: 'name'
+        key: 'name',
       },
       {
         title: '脚本类型',
@@ -244,7 +255,7 @@ export namespace CustomJsonForm {
         dataIndex: 'path',
         key: 'path',
       },
-    ];
+    ]
 
     const [shellData, setShellData] = useState([])
     const [pageNum, setPageNum] = useState(1)
@@ -259,15 +270,14 @@ export namespace CustomJsonForm {
 
     const rowSelection = {
       onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-        setSelectedRowKeys(selectedRowKeys);
+        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
+        setSelectedRowKeys(selectedRowKeys)
         setSelectedRows(selectedRows)
         setSelectedRow(selectedRows[0])
-      }
-    };
+      },
+    }
 
     const getShellList = async (extra?: IGetShellListParams) => {
-  
       const params: IGetShellListParams = {
         pageIndex: pageNum,
         pageSize: pageSize,
@@ -275,9 +285,9 @@ export namespace CustomJsonForm {
         dialect: dialect,
         ...(extra || {}),
       }
-  
+
       setLoading(true)
-      const result =  await page(params)
+      const result = await page(params)
       setLoading(false)
       setShellData(result.datas.records)
       setPageTotal(result.datas.total)
@@ -286,9 +296,9 @@ export namespace CustomJsonForm {
     }
 
     const getTaskInfo = async (id: any) => {
-      const result =  await getTask(id)
+      const result = await getTask(id)
       setSelectedRow(result.datas)
-    } 
+    }
 
     useEffect(() => {
       getShellList()
@@ -303,7 +313,7 @@ export namespace CustomJsonForm {
 
     const chooseShell = () => {
       if (selectedRowKeys == null) {
-        message.error("请选择关联的脚本");
+        message.error('请选择关联的脚本')
       } else {
         setSelectedRow(selectedRows[0])
         setshowModal(false)
@@ -320,7 +330,7 @@ export namespace CustomJsonForm {
           saveGraphDataService: async (meta, graph) => {
             /** 当前选中节点数据 */
             const nodes = await MODELS.SELECTED_NODES.useValue(modelService)
-            console.log("nodes: " +  nodes[0].data.jobId)
+            console.log('nodes: ' + nodes[0].data.jobId)
             if (nodes !== null && nodes.length > 0) {
               if (selectedRow != null) {
                 nodes[0].data.jobId = selectedRow?.id
@@ -338,22 +348,43 @@ export namespace CustomJsonForm {
 
     return (
       <>
-        <Col id='StudioRightTool' className={styles["vertical-tabs"]}>
-          <Tabs className={`xflow-righttools-tabcontent-wrap xflow-righttools-tabcontent-wrap${showTabPane && '-show'}`} onTabClick={() => setshowTabPane(!showTabPane)} defaultActiveKey="1" size="small" tabPosition="right" >
-            <TabPane tab={<span><ContainerOutlined/> 节点信息</span>} key="XflowTaskInfo">
-              <Scrollbars style={{height: 500}}>
-                <div className="custom-form-component">
+        <Col id="StudioRightTool" className={styles['vertical-tabs']}>
+          <Tabs
+            className={`tab-tool-wrap ${showTabPane ? 'visible' : ''}`}
+            onTabClick={() => setshowTabPane(!showTabPane)}
+            defaultActiveKey="1"
+            size="small"
+            tabPosition="right"
+          >
+            <TabPane
+              tab={
+                <span>
+                  <ContainerOutlined /> 节点信息
+                </span>
+              }
+              key="XflowTaskInfo"
+            >
+              <Scrollbars style={{ height: 500 }}>
+                <div className={styles['custom-form-component']}>
                   <div className="info-title">节点信息</div>
                   <div className="info-wrap">
                     <Scrollbars style={{ height: '100%' }} ref={sref}>
                       <div className="info-content">
                         <Descriptions title="基本信息" column={1}>
-                          <Descriptions.Item label="节点ID">{props.targetData?.id}</Descriptions.Item>
-                          <Descriptions.Item label="节点名称">{props.targetData?.label}</Descriptions.Item>
+                          <Descriptions.Item label="节点ID">
+                            {props.targetData?.id}
+                          </Descriptions.Item>
+                          <Descriptions.Item label="节点名称">
+                            {props.targetData?.label}
+                          </Descriptions.Item>
                         </Descriptions>
                         <Descriptions title="关联脚本" column={1}>
                           <Descriptions.Item label="脚本">
-                            <Input placeholder='请选择关联脚本' value={selectedRow?.name} suffix={<PlusOutlined onClick={() => setshowModal(!showModal)} />}></Input>
+                            <Input
+                              placeholder="请选择关联脚本"
+                              value={selectedRow?.name}
+                              suffix={<PlusOutlined onClick={() => setshowModal(!showModal)} />}
+                            ></Input>
                           </Descriptions.Item>
                         </Descriptions>
                       </div>
@@ -372,7 +403,7 @@ export namespace CustomJsonForm {
           onCancel={() => setshowModal(false)}
           width={800}
         >
-          <Scrollbars style={{height: 450}}>
+          <Scrollbars style={{ height: 450 }}>
             <Row justify={'end'}>
               <Search
                 placeholder="请输入脚本名称"
@@ -383,15 +414,15 @@ export namespace CustomJsonForm {
                 style={{ width: 200 }}
               />
             </Row>
-            <Table 
+            <Table
               rowSelection={{
-                type: "radio",
+                type: 'radio',
                 ...rowSelection,
-              }} 
+              }}
               rowKey="id"
               loading={loading}
-              columns={columns} 
-              dataSource={shellData} 
+              columns={columns}
+              dataSource={shellData}
               scroll={{ y: 300 }}
               size="small"
               pagination={{
@@ -408,11 +439,11 @@ export namespace CustomJsonForm {
                 showTotal: (total) => `共 ${total} 条`,
                 showSizeChanger: true,
                 showQuickJumper: true,
-              }}/>
+              }}
+            />
           </Scrollbars>
         </Modal>
       </>
-      
     )
   }
 }

@@ -123,8 +123,9 @@ export type StateType = {
   current?: TabsItemType
   currentPath?: string[]
   tabs?: TabsType
-
+  toolLeftWidth?: number
   rightClickMenu?: boolean
+  pageLoading?: boolean
 }
 
 export type ModelType = {
@@ -132,8 +133,9 @@ export type ModelType = {
   state: StateType
   effects: {}
   reducers: {
+    changePageLoading: Reducer<StateType>
     saveCurrentPath: Reducer<StateType>
-
+    saveToolLeftWidth: Reducer<StateType>
     saveTabs: Reducer<StateType>
     closeTabs: Reducer<StateType>
     changeActiveKey: Reducer<StateType>
@@ -152,11 +154,19 @@ const Model: ModelType = {
       panes: [],
     },
     rightClickMenu: false,
+    pageLoading: false,
+    toolLeftWidth: 250,
   },
 
   effects: {},
 
   reducers: {
+    saveToolLeftWidth(state, { payload }) {
+      return {
+        ...state,
+        toolLeftWidth: payload,
+      } as StateType
+    },
     saveCurrentPath(state, { payload }) {
       return {
         ...state,

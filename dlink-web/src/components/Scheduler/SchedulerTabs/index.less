@@ -17,16 +17,24 @@
  *
  */
 
-
-
-.edit-tabs{
+.edit-tabs {
+  height: 100%;
   :global {
-    .ant-tabs-nav, .ant-tabs-bottom > .ant-tabs-nav, .ant-tabs-top > div > .ant-tabs-nav, .ant-tabs-bottom > div > .ant-tabs-nav {
+    .ant-tabs-nav,
+    .ant-tabs-bottom > .ant-tabs-nav,
+    .ant-tabs-top > div > .ant-tabs-nav,
+    .ant-tabs-bottom > div > .ant-tabs-nav {
       margin: 0;
+      .ant-tabs-nav-more {
+        padding: 5px 16px;
+      }
     }
 
     .ant-tabs-content {
       height: 100%;
+      .ant-tabs-tabpane {
+        height: 100%;
+      }
     }
   }
 }

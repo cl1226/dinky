@@ -34,6 +34,7 @@ function DraggleLayout({
   isLeft = true, // 拖拽器
   onWidthChange = (width) => width, // 左侧容器高度变化
   dispatch,
+  model = 'Studio',
 }) {
   const ref = useRef(null)
 
@@ -51,12 +52,12 @@ function DraggleLayout({
         if (isLeft) {
           dispatch &&
             dispatch({
-              type: 'Studio/saveToolLeftWidth',
+              type: `${model}/saveToolLeftWidth`,
               payload: _x,
             })
         }
       },
-    },
+    } as any,
     { overbound: false },
   )
   const _handler = handler ? (

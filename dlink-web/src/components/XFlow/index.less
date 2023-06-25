@@ -2,287 +2,265 @@
 @primaryColor: #3056e3;
 @light-border: 1px solid #d9d9d9;
 
-// .dag-solution {
-//   .__dumi-default-previewer-actions {
-//     border: 0;
-//   }
-// }
-
-.dag-user-custom-clz {
+.xflow-wrap {
   position: relative;
   height: 100%;
-  // border: @light-border;
-  .xflow-x6-canvas {
-    // background: @body-bg;
-  }
-  // .xflow-port {
-  //   opacity: 0;
-  // }
-  .x6-edge {
-    path:nth-child(2) {
-      stroke: rgb(51, 170, 153);
-      stroke-width: 2;
-      transition: stroke-width 0.2s;
-      marker-end: url(#v-arrow-1);
-    }
-    &:hover {
+  :global {
+    .x6-edge {
       path:nth-child(2) {
+        transition: stroke-width 0.2s;
         stroke: rgb(51, 170, 153);
-        stroke-width: 4;
-        marker-end: url(#v-arrow-2);
+        stroke-width: 2;
+        marker-end: url(#v-arrow-1);
       }
-    }
-    &.x6-edge-selected {
-      path:nth-child(2) {
-        stroke: rgb(51, 170, 153);
-        stroke-width: 4;
-        marker-end: url(#v-arrow-2);
-      }
-    }
-  }
-
-  .xflow-node-dnd-panel-node-wrapper {
-    .xflow-algo-node {
-      width: 180px;
-    }
-  }
-  .xflow-canvas-dnd-node-tree {
-    border-right: @light-border;
-  }
-
-  .xflow-workspace-toolbar-top {
-    background-image: ~'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)';
-    border-bottom: @light-border;
-  }
-
-  .xflow-workspace-toolbar-bottom {
-    text-align: center;
-    background: #fff;
-    border-top: @light-border;
-  }
-
-  .xflow-modal-container {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 1000;
-  }
-
-  .xflow-collapse-panel {
-    .xflow-collapse-panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-evenly;
-      background: #f7f8fa;
-      .ant-input-affix-wrapper {
-        padding: 2px 11px;
-      }
-    }
-    .xflow-collapse-panel-body {
-      background: #fff;
-      z-index: 20;
-      transition: all 0.5s ease;
-      .xflow-collapse-header {
-        padding: 12px 8px;
-      }
-      .xflow-collapse-list {
-        &::-webkit-scrollbar {
-          width: 4px;
+      &:hover {
+        path:nth-child(2) {
+          stroke: rgb(51, 170, 153);
+          stroke-width: 4;
+          marker-end: url(#v-arrow-2);
         }
-        &::-webkit-scrollbar-thumb {
-          background: rgba(238, 238, 238, 0.5);
-          border-radius: 10px;
-          -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-          opacity: 0.2;
-        }
-        &::-webkit-scrollbar-track {
-          background: transparent;
-          border-radius: 0;
+      }
+      &.x6-edge-selected {
+        path:nth-child(2) {
+          stroke: rgb(51, 170, 153);
+          stroke-width: 4;
+          marker-end: url(#v-arrow-2);
         }
       }
     }
-    .xflow-node-dnd-panel-footer {
-      display: block;
+    .xflow-collapse-panel {
+      .xflow-collapse-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        background: #f7f8fa;
+        .ant-input-affix-wrapper {
+          padding: 2px 11px;
+        }
+      }
+      .xflow-collapse-panel-body {
+        z-index: 20;
+        padding-top: 10px;
+        background: #fff;
+        transition: all 0.5s ease;
+        .xflow-collapse-header {
+          padding: 0 8px;
+        }
+        .xflow-collapse-list {
+          &::-webkit-scrollbar {
+            width: 4px;
+          }
+          &::-webkit-scrollbar-thumb {
+            background: rgba(238, 238, 238, 0.5);
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+            opacity: 0.2;
+          }
+          &::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 0;
+          }
+          .ant-empty-image svg {
+            width: 100%;
+          }
+          .xflow-collapse-content {
+            display: inline-flex;
+            flex-wrap: wrap;
+            width: 100%;
+          }
+          .xflow-collapse-content-item:hover {
+            background: #f7f7f7;
+          }
+          .xflow-collapse-content-item {
+            width: 50%;
+            padding: 4px !important;
+            text-align: center;
+          }
+        }
+      }
+      .xflow-node-dnd-panel-footer {
+        display: block;
+      }
     }
-  }
 
-  .xflow-json-form .tabs .ant-tabs-nav {
-    box-shadow: unset;
-  }
-  .xflow-json-schema-form {
-    .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
-      color: #525252;
-      font-weight: 300 !important;
+    .xflow-workspace-toolbar-top {
+      background-image: ~'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)';
+      border-bottom: @light-border;
     }
-    .xflow-json-schema-form-footer {
-      display: none;
+    .xflow-modal-container {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1000;
     }
-    .xflow-json-form .tabs.xTab .ant-tabs-nav .ant-tabs-nav-list,
-    .xflow-json-form .tabs.xTab .ant-tabs-nav .ant-tabs-nav-list .ant-tabs-tab {
-      background: #f7f8fa;
-    }
-    .xflow-json-schema-form-body {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: #f7f8fa;
-      box-shadow: 0 1px 1px 0 rgb(206 201 201 / 50%);
-      .ant-tabs-content-holder {
+    .xflow-json-schema-form {
+      .xflow-json-schema-form-footer {
+        display: none;
+      }
+      .xflow-json-form .tabs.xTab .ant-tabs-nav .ant-tabs-nav-list,
+      .xflow-json-form .tabs.xTab .ant-tabs-nav .ant-tabs-nav-list .ant-tabs-tab {
+        background: #f7f8fa;
+      }
+      .xflow-json-schema-form-body {
+        position: relative;
+        width: 100%;
         height: 100%;
+        background: #f7f8fa;
+        box-shadow: 0 1px 1px 0 rgb(206 201 201 / 50%);
+        .ant-tabs-content-holder {
+          height: 100%;
+        }
       }
     }
-  }
-}
 
-.xflow-righttools-tabcontent-wrap {
-  position: relative;
-  top: 40px;
-  .ant-tabs-content-holder{
-      position: absolute;
-      transform: translateX(0px);
-      border: 1px solid #CCC;
-      transition: all 0.5s;
-      background-color: white;
-      background-clip: padding-box;
-      border-radius: 8px;
-      z-index: -1;
-      box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
-      width: 30vw;
+    .tab-tool-wrap {
+      position: relative;
+      .ant-tabs-content-holder {
+        position: absolute;
+        z-index: 100;
+        width: 0;
+        overflow: hidden;
+        background-color: white;
+        background-clip: padding-box;
+        border: none;
+        border-radius: 8px;
 
-  }
-  .ant-tabs-nav {
-      background-color: white;
-      z-index: 2;
-  }
-}
-.xflow-righttools-tabcontent-wrap-show{
-  div.ant-tabs-content-holder{
-      transform: translateX(-100%);
-      z-index: 1;
+        transform: translateX(0px);
+        .ant-tabs-content {
+          height: 100%;
+          .ant-tabs-tabpane {
+            height: 100%;
+          }
+        }
+      }
+      .ant-tabs-nav {
+        z-index: 2;
+        background-color: white;
+      }
+
+      &.visible {
+        div.ant-tabs-content-holder {
+          width: 30vw;
+          min-width: 360px;
+          max-width: 600px;
+          border: 1px solid #ccc;
+          box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+            0 9px 28px 8px rgba(0, 0, 0, 0.05);
+          transform: translateX(-100%);
+          transition: all 0.5s;
+        }
+      }
+    }
   }
 }
 
 .custom-form-component {
   height: 100%;
-  .info-title {
-    height: 40px;
-    color: #595959;
-    line-height: 40px;
-    text-align: center;
-    background-image: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-    border-bottom: 1px solid #d9d9d9;
-  }
-  .info-wrap {
-    height: calc(100% - 40px);
-    overflow-y: auto;
-    .info-content {
-      padding: 0 10px;
-      .ant-form-item {
-        margin-bottom: 18px;
-      }
-      .ant-descriptions-header {
-        margin-top: 10px;
-        margin-bottom: 10px;
-      }
-      .ant-descriptions-row > th,
-      .ant-descriptions-row > td {
-        padding-bottom: 0;
+  :global {
+    .info-title {
+      height: 40px;
+      color: #595959;
+      line-height: 40px;
+      text-align: center;
+      background-image: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+      border-bottom: 1px solid #d9d9d9;
+    }
+    .info-wrap {
+      height: calc(100% - 40px);
+      overflow-y: auto;
+      .info-content {
+        padding: 0 10px;
+        .ant-form-item {
+          margin-bottom: 18px;
+        }
+        .ant-descriptions-header {
+          margin-top: 10px;
+          margin-bottom: 10px;
+        }
+        .ant-descriptions-row > th,
+        .ant-descriptions-row > td {
+          padding-bottom: 0;
+        }
       }
     }
   }
 }
-.xflow-collapse-content {
-  width: 100%;
-  display: inline-flex;
-  flex-wrap: wrap;
-}
-.xflow-collapse-content-item:hover {
-  background: #f7f7f7;
-}
-.xflow-collapse-content-item {
-  text-align: center;
-  width: 50%;
-  padding: 4px !important;
-}
+
 .react-custom-node {
+  position: relative;
   height: 64px;
   padding: 6px 5px 0;
-  cursor: pointer;
-  position: relative;
   font-size: 12px;
   word-break: break-all;
+  cursor: pointer;
 }
-.xflow-collapse-panel {
-  width: 160px !important;
-  border-right: none;
-}
-.xflow-workspace-toolbar-top {
-  inset: 0 32px 0 160px !important;
-}
+
 .xflow-canvas-root {
   z-index: 1;
   inset: 40px 32px 0 0 !important;
 }
-.dag-user-custom-clz-custom .xflow-collapse-panel-body {
-  z-index: 20;
-  opacity: 1;
-}
-.dag-user-custom-clz-custom-hidden .xflow-collapse-panel-body {
-  height: 0;
-  opacity: 0;
-}
 
 /* --- tabs 垂直样式 --- start */
-.vertical-tabs{
+.vertical-tabs {
+  width: 100%;
+  height: 100%;
+  padding-top: 40px;
   :global {
-    .ant-tabs-left>.ant-tabs-nav, .ant-tabs-right>.ant-tabs-nav, .ant-tabs-left>div>.ant-tabs-nav, .ant-tabs-right>div>.ant-tabs-nav {
+    .ant-tabs-left > .ant-tabs-nav,
+    .ant-tabs-right > .ant-tabs-nav,
+    .ant-tabs-left > div > .ant-tabs-nav,
+    .ant-tabs-right > div > .ant-tabs-nav {
       min-width: 20px;
     }
 
-    .ant-tabs-left>.ant-tabs-nav .ant-tabs-tab, .ant-tabs-right>.ant-tabs-nav .ant-tabs-tab, .ant-tabs-left>div>.ant-tabs-nav .ant-tabs-tab, .ant-tabs-right>div>.ant-tabs-nav .ant-tabs-tab {
+    .ant-tabs-left > .ant-tabs-nav .ant-tabs-tab,
+    .ant-tabs-right > .ant-tabs-nav .ant-tabs-tab,
+    .ant-tabs-left > div > .ant-tabs-nav .ant-tabs-tab,
+    .ant-tabs-right > div > .ant-tabs-nav .ant-tabs-tab {
       padding: 5px 5px;
     }
 
     .ant-tabs-tab-btn {
+      color: #525252;
+      font-weight: 300 !important;
       writing-mode: vertical-lr;
     }
 
     .ant-tabs-tab .anticon {
       margin-right: 0;
+      vertical-align: unset;
     }
 
     .anticon {
       vertical-align: 0;
     }
 
-    .ant-tabs-left > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane, .ant-tabs-left > div > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane {
-      padding-left: 10px;
+    .ant-tabs-right > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane,
+    .ant-tabs-right > div > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane {
+      padding-right: 0;
     }
-
-    .ant-tabs-right > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane, .ant-tabs-right > div > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane {
-      padding-right: 10px;
-    }
-    .ant-tabs > .ant-tabs-nav .ant-tabs-nav-more, .ant-tabs > div > .ant-tabs-nav .ant-tabs-nav-more {
+    .ant-tabs > .ant-tabs-nav .ant-tabs-nav-more,
+    .ant-tabs > div > .ant-tabs-nav .ant-tabs-nav-more {
       padding: 8px;
     }
 
     /* --- 树文字显示  --- start */
-    .ant-tree-node-content-wrapper{
-      white-space: nowrap;
+    .ant-tree-node-content-wrapper {
       //max-width: 100%;
       height: 15px;
       overflow: hidden;
+      white-space: nowrap;
       text-overflow-ellipsis: true;
     }
-    .ant-tree.ant-tree-directory .ant-tree-treenode-selected::before, .ant-tree.ant-tree-directory .ant-tree-treenode-selected:hover::before {
-      background: rgba(21, 115, 204, 0.58);
+    .ant-tree.ant-tree-directory .ant-tree-treenode-selected::before,
+    .ant-tree.ant-tree-directory .ant-tree-treenode-selected:hover::before {
       //background: linear-gradient(112.72013189013455deg, rgba(240, 94, 7,1) 4.927083333333334%,rgba(30, 189, 177,1) 97.84374999999999%);
       top: -3px;
+      background: rgba(21, 115, 204, 0.58);
       //background: linear-gradient(151.47483992787556deg, rgba(97, 116, 180,1) 28.044290288153682%,rgba(229, 151, 64,1) 78.3110992529349%);
     }
   }
 }
 /* --- tabs 垂直样式 --- end */
-
