@@ -104,8 +104,14 @@ public class ApiServlet extends HttpServlet {
             Map<String, Object> sqlParam = getParams(request, config);
 
             connection = PoolUtils.getPooledConnection(dataBase);
-            SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(config.getSegment(), sqlParam);
-            Object data = JdbcUtil.executeSql(connection, sqlMeta.getSql(), sqlMeta.getJdbcParamValues());
+            String unParsedSql = config.getSegment();
+            String fixUnParsedSql = "";
+            if (!unParsedSql.contains("limit")) {
+                fixUnParsedSql = unParsedSql + " limit ${limit}, ${offset}";
+            }
+            SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(fixUnParsedSql, sqlParam);
+            String sql = sqlMeta.getSql();
+            Object data = JdbcUtil.executeSql(connection, sql, sqlMeta.getJdbcParamValues());
 //            JSONObject jsonObject = new JSONObject();
 //            jsonObject.put("timeConsuming", System.currentTimeMillis() - now);
 //            jsonObject.put("requestPath", request.getRequestURI());
@@ -203,12 +209,17 @@ public class ApiServlet extends HttpServlet {
 
     public Map<String, Object> getSqlParam(HttpServletRequest request, ApiConfig config) {
         Map<String, Object> map = new HashMap<>();
-
+        boolean limitFlag = false;
+        boolean offsetFlag = false;
         JSONArray requestParams = JSON.parseArray(config.getParams());
         for (int i = 0; i < requestParams.size(); i++) {
             JSONObject jo = requestParams.getJSONObject(i);
             String name = jo.getString("name");
             String type = jo.getString("type");
+
+            if ("limit".equals(name)) {
+                limitFlag = true;
+            }
 
             //数组类型参数
             if (type.startsWith("Array")) {
@@ -259,6 +270,13 @@ public class ApiServlet extends HttpServlet {
                     map.put(name, value);
                 }
             }
+        }
+
+        if (!limitFlag) {
+            map.put("limit", request.getParameter("limit") != null ? request.getParameter("limit") : 0);
+        }
+        if (!offsetFlag) {
+            map.put("offset", request.getParameter("offset") != null ? request.getParameter("offset") : 10);
         }
         return map;
     }

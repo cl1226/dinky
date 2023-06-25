@@ -170,14 +170,14 @@ public class MetadataServiceImpl implements MetadataService {
                 tableMap.put(table.getId(), table);
             }
             List<MetadataTableLineage> tableLineages = new ArrayList<>();
-            String srcTableId = "";
-            String targetTableId = "";
+            List<String> srcTableIds = new ArrayList<>();
+            List<String> targetTableIds = new ArrayList<>();
             for (LineageRelation relation : relations) {
-                if (relation.getSrcTableId().equals(srcTableId) && relation.getTgtTableId().equals(targetTableId)) {
+                if (srcTableIds.contains(relation.getSrcTableId()) && targetTableIds.contains(relation.getTgtTableId())) {
                     continue;
                 }
-                srcTableId = relation.getSrcTableId();
-                targetTableId = relation.getTgtTableId();
+                srcTableIds.add(relation.getSrcTableId());
+                targetTableIds.add(relation.getTgtTableId());
                 LineageTable srcTable = tableMap.get(relation.getSrcTableId());
                 LineageTable tgtTable = tableMap.get(relation.getTgtTableId());
                 MetadataTableLineage metadataTableLineage = buildMetadataTableLineage(dataBase, srcTable, tgtTable);

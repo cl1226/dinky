@@ -110,6 +110,16 @@ public class MetadataTaskController {
         return result;
     }
 
+    @GetMapping("/statistics/metadata")
+    public Result statisticsMetadata() {
+        return metadataTaskService.statisticsMetadata();
+    }
+
+    @GetMapping("/statistics/taskInstance")
+    public Result statisticsTaskInstance() {
+        return metadataTaskService.statisticsTaskInstance();
+    }
+
     /**
      * page
      */

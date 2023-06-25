@@ -14,8 +14,8 @@ public class ShellTest {
     @Test
     public void shell() throws Exception {
         ShellUtil instance = ShellUtil.getInstance();
-        instance.init("10.46.30.51", 22, "svolt", "Svolt.cn");
-        String res = instance.execCmd("hadoop fs -du -v /user/hive/warehouse |awk '{ SUM += $1 } END { print SUM/(1024*1024*1024)}'");
+        instance.init("sv-mdp-dev-name02", 22, "root", "svolt@1234");
+        String res = instance.execCmd("kinit -kt /opt/keytab/svolt.keytab svolt@SVOLT.COM && hadoop fs -du -v /user/hive/warehouse |awk '{ SUM += $1 } END { print SUM/(1024*1024*1024)}'");
         System.out.println(res);
     }
 

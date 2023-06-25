@@ -136,13 +136,13 @@ public class AppConfigServiceImpl extends SuperServiceImpl<AppConfigMapper, AppC
         appToken.setAppId(appId);
         //最新token存入缓存
         cacheManager.getCache(AuthConstant.EHCACHE_TOKEN_APP).putIfAbsent(token, appToken);
-        //clean old token
-        String oldToken = cacheManager.getCache(AuthConstant.EHCACHE_APP_TOKEN).get(appId, String.class);
-        if (oldToken != null) {
-            cacheManager.getCache(AuthConstant.EHCACHE_TOKEN_APP).evict(oldToken);
-        }
-        //appid和最新token关系记录下来,便于下次可以找到旧token可以删除，否则缓存中token越来越多
-        cacheManager.getCache(AuthConstant.EHCACHE_APP_TOKEN).put(appId, token);
+//        //clean old token
+//        String oldToken = cacheManager.getCache(AuthConstant.EHCACHE_APP_TOKEN).get(appId, String.class);
+//        if (oldToken != null) {
+//            cacheManager.getCache(AuthConstant.EHCACHE_TOKEN_APP).evict(oldToken);
+//        }
+//        //appid和最新token关系记录下来,便于下次可以找到旧token可以删除，否则缓存中token越来越多
+//        cacheManager.getCache(AuthConstant.EHCACHE_APP_TOKEN).put(appId, token);
 
         return appToken;
     }

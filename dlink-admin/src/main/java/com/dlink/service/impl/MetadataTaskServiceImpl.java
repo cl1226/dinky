@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -159,6 +160,23 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Result statisticsMetadata() {
+        QueryWrapper<MetadataVolume> wrapper = Wrappers.<MetadataVolume>query().eq("type", "ALL");
+        wrapper.orderByDesc("db_num + table_num");
+        wrapper.last("limit 5");
+        List<MetadataVolume> list = metadataVolumeService.list(wrapper);
+        return Result.succeed(list, "获取成功");
+    }
+
+    @Override
+    public Result statisticsTaskInstance() {
+        QueryWrapper<MetadataTaskInstance> wrapper = Wrappers.<MetadataTaskInstance>query().groupBy("status");
+        wrapper.select("status", "count(1) num");
+        List<Map<String, Object>> list = metadataTaskInstanceService.getBaseMapper().selectMaps(wrapper);
+        return Result.succeed(list, "获取成功");
     }
 
     @Override
