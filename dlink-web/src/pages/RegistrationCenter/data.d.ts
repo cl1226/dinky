@@ -17,153 +17,162 @@
  *
  */
 
-
 export type AlertGroupTableListItem = {
-  id: number,
-  name: string,
-  alias: string,
-  alertInstanceIds: string,
-  note: string,
-  enabled: boolean,
-  createTime: Date,
-  updateTime: Date,
-};
-
+  id: number
+  name: string
+  alias: string
+  alertInstanceIds: string
+  note: string
+  enabled: boolean
+  createTime: Date
+  updateTime: Date
+}
 
 export type AlertInstanceTableListItem = {
-  id: number,
-  name: string,
-  type: string,
-  params: string,
-  enabled: boolean,
-  createTime: Date,
-  updateTime: Date,
-};
-
+  id: number
+  name: string
+  type: string
+  params: string
+  enabled: boolean
+  createTime: Date
+  updateTime: Date
+}
 
 export type ClusterTableListItem = {
-  id: number,
-  name: string,
-  alias: string,
-  type: string,
-  hosts: string,
-  jobManagerHost: string,
-  resourceManagerAddr: string,
-  applicationId: string,
-  version: string,
-  status: number,
-  note: string,
-  enabled: boolean,
-  createTime: Date,
-  updateTime: Date,
-};
-
+  id: number
+  name: string
+  alias: string
+  type: string
+  hosts: string
+  jobManagerHost: string
+  resourceManagerAddr: string
+  applicationId: string
+  version: string
+  status: number
+  note: string
+  enabled: boolean
+  createTime: Date
+  updateTime: Date
+}
 
 export type ClusterConfigurationTableListItem = {
-  id: number,
-  name: string,
-  alias: string,
-  type: string,
-  config: any,
-  configJson: string,
-  isAvailable: boolean,
-  note: string,
-  enabled: boolean,
-  createTime: Date,
-  updateTime: Date,
-};
+  id: number
+  name: string
+  alias: string
+  type: string
+  config: any
+  configJson: string
+  isAvailable: boolean
+  note: string
+  enabled: boolean
+  createTime: Date
+  updateTime: Date
+}
 
+export type HadoopTableListItem = {
+  id: number
+  name: string
+  alias: string
+  type: string
+  hosts: string
+  jobManagerHost: string
+  resourceManagerAddr: string
+  applicationId: string
+  version: string
+  status: number
+  note: string
+  enabled: boolean
+  createTime: Date
+  updateTime: Date
+}
 
 export type DataBaseItem = {
-  id: number,
-  name: string,
-  alias: string,
-  groupName: string,
-  type: string,
-  url: string,
-  username: string,
-  password: string,
-  note: string,
-  flinkConfig: string,
-  flinkTemplate: string,
-  dbVersion: string,
-  status: boolean,
-  healthTime: Date,
-  heartbeatTime: Date,
-  enabled: boolean,
-  createTime: Date,
-  updateTime: Date,
-};
+  id: number
+  name: string
+  alias: string
+  groupName: string
+  type: string
+  url: string
+  username: string
+  password: string
+  note: string
+  flinkConfig: string
+  flinkTemplate: string
+  dbVersion: string
+  status: boolean
+  healthTime: Date
+  heartbeatTime: Date
+  enabled: boolean
+  createTime: Date
+  updateTime: Date
+}
 
 export type Column = {
-  name: string,
-  type: string,
-  comment: string,
-  keyFlag: boolean,
-  autoIncrement: boolean,
-  defaultValue: string,
-  nullable: string,
-  javaType: string,
-  columnFamily: string,
-  position: number,
-  precision: number,
-  scale: number,
-  characterSet: string,
-  collation: string,
-};
+  name: string
+  type: string
+  comment: string
+  keyFlag: boolean
+  autoIncrement: boolean
+  defaultValue: string
+  nullable: string
+  javaType: string
+  columnFamily: string
+  position: number
+  precision: number
+  scale: number
+  characterSet: string
+  collation: string
+}
 
 export type Table = {
-  name: string,
-  schema: string,
-  catalog: string,
-  comment: string,
-  type: string,
-  engine: string,
-  options: string,
-  rows: number,
-  createTime: string,
-  updateTime: string,
-};
-
+  name: string
+  schema: string
+  catalog: string
+  comment: string
+  type: string
+  engine: string
+  options: string
+  rows: number
+  createTime: string
+  updateTime: string
+}
 
 export type DocumentTableListItem = {
-  id: number,
-  name: string,
-  category: string,
-  type: string,
-  subtype: string,
-  description: string,
-  fillValue: string,
-  version: string,
-  likeNum: number,
-  enabled: boolean,
-  createTime: Date,
-  updateTime: Date,
-};
-
+  id: number
+  name: string
+  category: string
+  type: string
+  subtype: string
+  description: string
+  fillValue: string
+  version: string
+  likeNum: number
+  enabled: boolean
+  createTime: Date
+  updateTime: Date
+}
 
 export type FragmentVariableTableListItem = {
-  id: number,
-  name: string,
-  alias: string,
-  fragmentValue: string,
-  note: string,
-  enabled: boolean,
-  createTime: Date,
-  updateTime: Date,
-};
-
+  id: number
+  name: string
+  alias: string
+  fragmentValue: string
+  note: string
+  enabled: boolean
+  createTime: Date
+  updateTime: Date
+}
 
 export type JarTableListItem = {
-  id: number,
-  name: string,
-  alias: string,
-  type: string,
-  path: string,
-  mainClass: string,
-  paras: string,
-  note: string,
-  enabled: boolean,
-  createTime: Date,
-  updateTime: Date,
-};
+  id: number
+  name: string
+  alias: string
+  type: string
+  path: string
+  mainClass: string
+  paras: string
+  note: string
+  enabled: boolean
+  createTime: Date
+  updateTime: Date
+}

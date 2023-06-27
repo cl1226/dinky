@@ -332,6 +332,21 @@ export default [
             name: 'clusterConfiguration',
             component: './RegistrationCenter/ClusterManage/ClusterConfiguration',
           },
+          {
+            path: '/registration/cluster/hadoop',
+            name: 'hadoop',
+            component: './RegistrationCenter/ClusterManage/Hadoop',
+          },
+          {
+            path: '/registration/cluster/shell',
+            name: 'shell',
+            component: './RegistrationCenter/ClusterManage/Shell',
+          },
+          {
+            path: '/registration/cluster/yarn',
+            name: 'yarn',
+            component: './RegistrationCenter/ClusterManage/Yarn',
+          },
         ],
       },
       {
