@@ -312,16 +312,45 @@ export default [
     path: '/registration',
     name: 'registration',
     icon: 'appstore',
+    footerRender: false,
     routes: [
       {
         path: '/registration',
-        redirect: '/registration/cluster/clusterInstance',
+        redirect: '/registration/cluster/hadoop',
       },
       {
         path: '/registration/cluster',
         name: 'cluster',
         icon: 'cluster',
         routes: [
+          {
+            path: '/registration/cluster/hadoop',
+            name: 'hadoop',
+            component: './RegistrationCenter/ClusterManage/Hadoop',
+          },
+          {
+            path: '/registration/cluster/hadoop/create',
+            name: 'hadoopCreate',
+            component: './RegistrationCenter/ClusterManage/Hadoop/Create',
+            hideInMenu: true,
+          },
+          {
+            path: '/registration/cluster/hadoop/edit/:id',
+            name: 'hadoopEdit',
+            component: './RegistrationCenter/ClusterManage/Hadoop/Edit',
+            hideInMenu: true,
+          },
+          {
+            path: '/registration/cluster/hadoop/view/:id',
+            name: 'hadoopView',
+            component: './RegistrationCenter/ClusterManage/Hadoop/View',
+            hideInMenu: true,
+          },
+          {
+            path: '/registration/cluster/shell',
+            name: 'shell',
+            component: './RegistrationCenter/ClusterManage/Shell',
+          },
           {
             path: '/registration/cluster/clusterInstance',
             name: 'clusterInstance',
@@ -332,16 +361,7 @@ export default [
             name: 'clusterConfiguration',
             component: './RegistrationCenter/ClusterManage/ClusterConfiguration',
           },
-          {
-            path: '/registration/cluster/hadoop',
-            name: 'hadoop',
-            component: './RegistrationCenter/ClusterManage/Hadoop',
-          },
-          {
-            path: '/registration/cluster/shell',
-            name: 'shell',
-            component: './RegistrationCenter/ClusterManage/Shell',
-          },
+
           {
             path: '/registration/cluster/yarn',
             name: 'yarn',

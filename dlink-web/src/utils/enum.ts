@@ -1,3 +1,8 @@
+// 是否
+export enum ETrueFalse {
+  true = '是',
+  false = '否',
+}
 // 请求方式
 export enum ERequestMethod {
   GET = 'GET',
@@ -35,4 +40,10 @@ export enum ETokenExpire {
   '30day' = '30天',
   'once' = '单次有效',
   'forever' = '永久',
+}
+
+// Token过期时间
+export enum EHadoopType {
+  'CDH' = 'CDH(CM)',
+  'HDP' = 'HDP(Ambari)',
 }

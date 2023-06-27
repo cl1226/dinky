@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="164" height="164" viewBox="0 0 164 164">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="矩形_2023" data-name="矩形 2023" width="164" height="164"/>
+    </clipPath>
+    <linearGradient id="linear-gradient" x1="0.5" x2="0.5" y2="0.894" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#2f88ff" stop-opacity="0.212"/>
+      <stop offset="1" stop-color="#2f88ff" stop-opacity="0.02"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#2f88ff" stop-opacity="0.302"/>
+      <stop offset="1" stop-color="#2f88ff" stop-opacity="0.051"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-3" x1="0.52" y1="1.288" x2="0.586" y2="-0.067" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#1c8b47"/>
+      <stop offset="1" stop-color="#31e275"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-5" x1="0.5" x2="0.5" y2="0.894" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#2f88ff" stop-opacity="0.149"/>
+      <stop offset="1" stop-color="#2f88ff" stop-opacity="0.016"/>
+    </linearGradient>
+  </defs>
+  <g id="测试环境" clip-path="url(#clip-path)">
+    <rect id="矩形_2022" data-name="矩形 2022" width="164" height="164" fill="#fff"/>
+    <g id="组_3276" data-name="组 3276" transform="translate(-223 -207)">
+      <path id="多边形备份-2" d="M45.574,0l3.574,2.042V6.127L45.574,8.17,42,6.127V2.042Z" transform="translate(217.449 295.879) rotate(45)" fill="#2f88ff" fill-rule="evenodd" opacity="0.441"/>
+      <path id="形状结合" d="M31.83,72.83V70.277a1.277,1.277,0,0,1,2.553,0V72.83h2.553a1.277,1.277,0,1,1,0,2.553H34.383v2.553a1.277,1.277,0,0,1-2.553,0V75.383H29.277a1.277,1.277,0,1,1,0-2.553Z" transform="translate(292.619 155.835)" fill-rule="evenodd" fill="url(#linear-gradient)"/>
+      <path id="多边形备份-3" d="M56.2,2.736,81.765,17.5A20.424,20.424,0,0,1,91.977,35.184V64.7A20.425,20.425,0,0,1,81.762,82.393L56.2,97.15a20.424,20.424,0,0,1-20.424,0L10.212,82.391A20.424,20.424,0,0,1,0,64.7V35.184A20.423,20.423,0,0,1,10.209,17.5L35.776,2.736a20.424,20.424,0,0,1,20.424,0Z" transform="translate(237.786 272.615) rotate(-30)" fill-rule="evenodd" fill="url(#linear-gradient-2)"/>
+      <path id="多边形备份" d="M13.127,55l6.127,3.574v7.148L13.127,69.3,7,65.723V58.574ZM8.769,59.606v5.085l4.358,2.542,4.358-2.542V59.606l-4.358-2.542Z" transform="translate(322.749 159.951) rotate(35.025)" fill-rule="evenodd" opacity="0.6" fill="url(#linear-gradient-3)"/>
+      <path id="多边形备份-2-2" data-name="多边形备份" d="M11,55l4,2.333V62l-4,2.333L7,62V57.333ZM8.155,58.007v3.319L11,62.985l2.845-1.66V58.007L11,56.347Z" transform="translate(306.068 296.205) rotate(35.025)" fill-rule="evenodd" opacity="0.6" fill="url(#linear-gradient-3)"/>
+      <rect id="矩形备份-4" width="8.17" height="32.679" rx="4" transform="translate(252.445 236.479) rotate(30)" fill="url(#linear-gradient-5)"/>
+      <rect id="矩形备份-5" width="8.17" height="32.679" rx="4" transform="translate(348.439 336.558) rotate(30)" fill="url(#linear-gradient-5)"/>
+      <rect id="矩形备份-6" width="8.17" height="32.679" rx="4" transform="translate(379.948 231.352) rotate(30)" fill="url(#linear-gradient-5)"/>
+      <g id="组_3275" data-name="组 3275" transform="translate(0.228 -0.545)">
+        <rect id="矩形_2020" data-name="矩形 2020" width="72" height="55" transform="translate(269 248)" fill="#fff"/>
+        <g id="_ruanjianceshi" transform="translate(207.883 166.943)">
+          <path id="路径_2886" data-name="路径 2886" d="M286.863,329.865H243.811a2.365,2.365,0,1,0,0,4.73h43.051a2.365,2.365,0,0,0,0-4.73Zm0-15.933H243.811a2.365,2.365,0,1,0,0,4.73h43.051a2.365,2.365,0,0,0,0-4.73Z" transform="translate(-168.26 -214.55)" fill="#508bff"/>
+          <path id="路径_2887" data-name="路径 2887" d="M356.589,268.8a2.361,2.361,0,0,0-2.361,2.361v7.225a2.365,2.365,0,0,0,4.73,0v-7.217a2.361,2.361,0,0,0-2.369-2.369Zm23.887,15.933a2.361,2.361,0,0,0-2.361,2.361v7.217a2.365,2.365,0,0,0,4.73,0V287.1a2.361,2.361,0,0,0-2.369-2.369Z" transform="translate(-271.083 -173.403)" fill="#508bff"/>
+          <path id="路径_2888" data-name="路径 2888" d="M125.443,78.6H68.711A11.822,11.822,0,0,0,56.889,90.423V128.25a11.822,11.822,0,0,0,11.822,11.822h56.732a11.822,11.822,0,0,0,11.822-11.822V90.423A11.822,11.822,0,0,0,125.442,78.6Zm7.092,49.641a7.092,7.092,0,0,1-7.092,7.092H68.711a7.092,7.092,0,0,1-7.092-7.092V90.423a7.092,7.092,0,0,1,7.092-7.092h56.732a7.092,7.092,0,0,1,7.092,7.092Zm-67.918,26.9a2.512,2.512,0,1,1,0-5.024h64.92a2.512,2.512,0,1,1,0,5.024Z" fill="#508bff"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

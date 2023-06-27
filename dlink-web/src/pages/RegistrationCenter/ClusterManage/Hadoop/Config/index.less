@@ -1,0 +1,23 @@
+.config-wrap {
+  height: calc(100vh - 48px - 50px - 48px);
+  padding: 0 10px;
+  background-color: #fff;
+}
+.tab-wrap {
+  height: calc(100vh - 48px - 50px - 48px - 46px);
+  margin: 0 -10px;
+}
+.collapse-wrap {
+  background-color: transparent;
+  :global {
+    .ant-collapse-header {
+      font-size: 18px;
+      .ant-collapse-arrow {
+        font-size: 14px !important;
+      }
+    }
+    .ant-collapse-item {
+      border: 0;
+    }
+  }
+}
