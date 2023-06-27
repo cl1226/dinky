@@ -38,17 +38,21 @@ interface ListDataType {
   scheduleType: ESchedulerType
   taskId: number
   datasourceName: string
-  status: 'Success' | 'Failed'
+  status: 'Success' | 'Failed' | 'Running'
   updateTime: string
 }
 
 const RunningStatusConfig = {
+  Running: {
+    type: 'processing',
+    msg: '运行中',
+  },
   Success: {
     type: 'success',
     msg: '成功',
   },
   1: {
-    type: 'processing',
+    type: 'Default',
     msg: '未运行',
   },
   Failed: {
@@ -188,13 +192,13 @@ export default (props: IApiListProps) => {
       title: '操作',
       width: 80,
       key: 'action',
-      fixed:'right',
+      fixed: 'right',
       render: (cellValue, record) => (
         <Space size={0} split={<Divider type="vertical" style={{ margin: 2 }} />}>
           <Button
             size="small"
             type="link"
-            disabled={starting}
+            disabled={starting || record.status == 'Running'}
             onClick={() => {
               handleReRun(record)
             }}

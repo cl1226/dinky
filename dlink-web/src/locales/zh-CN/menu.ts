@@ -81,11 +81,14 @@ export default {
   'menu.registration.cluster.shell': 'SHELL 管理',
   'menu.registration.cluster.yarn': 'Yarn 队列管理',
   'menu.registration.jar': 'Jar 管理',
+
+  'menu.registration.resourcemanage': '资源管理',
+  'menu.registration.resourcemanage.jar': 'Jar 管理',
+  'menu.registration.resourcemanage.document': '文档管理',
   'menu.registration.database': '数据源管理',
   'menu.registration.alert': '报警管理',
   'menu.registration.alert.alertInstance': '报警实例管理',
   'menu.registration.alert.alertGroup': '报警组管理',
-  'menu.registration.document': '文档管理',
   'menu.registration.fragment': '全局变量管理',
 
   'menu.authenticationCenter': '认证中心',

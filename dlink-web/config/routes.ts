@@ -350,10 +350,23 @@ export default [
         ],
       },
       {
-        path: '/registration/jar',
-        name: 'jar',
-        icon: 'code-sandbox',
-        component: './RegistrationCenter/Jar',
+        path: '/registration/resourcemanage',
+        name: 'resourcemanage',
+        icon: 'bank',
+        routes: [
+          {
+            path: '/registration/resourcemanage/jar',
+            name: 'jar',
+            icon: 'code-sandbox',
+            component: './RegistrationCenter/ResourceManage/Jar',
+          },
+          {
+            path: '/registration/resourcemanage/document',
+            name: 'document',
+            icon: 'container',
+            component: './RegistrationCenter/ResourceManage/Document',
+          },
+        ],
       },
       {
         path: '/registration/database',
@@ -377,12 +390,6 @@ export default [
             component: './RegistrationCenter/AlertManage/AlertGroup',
           },
         ],
-      },
-      {
-        path: '/registration/document',
-        name: 'document',
-        icon: 'container',
-        component: './RegistrationCenter/Document',
       },
       {
         path: '/registration/fragment',
