@@ -373,6 +373,7 @@ export default [
         path: '/registration/resourcemanage',
         name: 'resourcemanage',
         icon: 'bank',
+        footerRender: false,
         routes: [
           {
             path: '/registration/resourcemanage/jar',

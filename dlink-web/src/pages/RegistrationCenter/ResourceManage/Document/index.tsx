@@ -17,11 +17,29 @@
  *
  */
 
-
+import CatalogueTree from '@/components/CatalogueTree'
+import PageWrap from '@/components/Common/PageWrap'
+import type { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
+import { useState } from 'react'
+import DocumentList from './DocumentList'
+const sessionStorageKey = 'registration.resourcemanage.document.list'
 const DocumentPage = () => {
-  return <div>
-    DocumentPage
-  </div>
+  const [catalogue, setcatalogue] = useState<TreeDataNode>()
+  const getCurrentCatalogue = (node: TreeDataNode) => {
+    setcatalogue(node)
+  }
+
+  return (
+    <PageWrap>
+      <CatalogueTree
+        ajaxUrl="/api/file/catalogue"
+        getCurrentCatalogue={getCurrentCatalogue}
+        sessionStorageKey={sessionStorageKey}
+        defaultSelectRoot
+      />
+      <DocumentList catalogue={catalogue} sessionStorageKey={sessionStorageKey} />
+    </PageWrap>
+  )
 }
 
-export default DocumentPage;
+export default DocumentPage
