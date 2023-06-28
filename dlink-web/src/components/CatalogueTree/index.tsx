@@ -11,10 +11,7 @@ import { request2, CODE } from '@/components/Common/crud'
 import { l } from '@/utils/intl'
 
 import UpdateCatalogueForm from './UpdateCatalogueForm'
-import {
-  handleAddOrUpdateCatalogue,
-  removeCatalogueById,
-} from './service'
+import { handleAddOrUpdateCatalogue, removeCatalogueById } from './service'
 import { useOutsideClick } from '@/hooks'
 import type { ItemType } from 'antd/es/menu/hooks/useItems'
 const { Search } = Input
@@ -74,7 +71,14 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
 
     //默认展开所有
     setExpandedKeys(expandList)
-    if (defaultSelectRoot && (selectedKeys.length === 0 || !data.some(i => i.id == selectedKeys[0])    )) {
+    const sessionQuery = JSON.parse(sessionStorage.getItem(sessionStorageKey) || '{}')
+    if (selectedKeys.length > 0 && !data.some((i) => i.id == selectedKeys[0])) {
+      setSelectedKeys([expandList[0]])
+      getCurrentCatalogue(tempTreeData[0])
+    } else if (sessionQuery && sessionQuery.catalogueId) {
+      setSelectedKeys([sessionQuery.catalogueId])
+      getCurrentCatalogue({ id: sessionQuery.catalogueId } as any)
+    } else if (defaultSelectRoot) {
       setSelectedKeys([expandList[0]])
       getCurrentCatalogue(tempTreeData[0])
     }
@@ -262,11 +266,6 @@ const CatalogueTree: React.FC<ICatalogueTreeProps> = (props: ICatalogueTreeProps
   }
 
   useEffect(() => {
-    const sessionQuery = JSON.parse(sessionStorage.getItem(sessionStorageKey) || '{}')
-    if (sessionQuery && sessionQuery.catalogueId) {
-      setSelectedKeys([sessionQuery.catalogueId])
-      getCurrentCatalogue({ id: sessionQuery.catalogueId } as any)
-    }
     getTreeData()
   }, [])
 

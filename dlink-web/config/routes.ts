@@ -387,6 +387,18 @@ export default [
             icon: 'container',
             component: './RegistrationCenter/ResourceManage/Document',
           },
+          {
+            path: '/registration/resourcemanage/document/edit/:id',
+            name: 'documentEdit',
+            hideInMenu: true,
+            component: './RegistrationCenter/ResourceManage/Document/Edit',
+          },
+          {
+            path: '/registration/resourcemanage/document/detail/:id',
+            name: 'documentDetail',
+            hideInMenu: true,
+            component: './RegistrationCenter/ResourceManage/Document/Detail',
+          },
         ],
       },
       {

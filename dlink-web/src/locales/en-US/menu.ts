@@ -87,6 +87,8 @@ export default {
   'menu.registration.resourcemanage': 'Resource Manage',
   'menu.registration.resourcemanage.jar': 'Jar Management',
   'menu.registration.resourcemanage.document': 'Document Management',
+  'menu.registration.resourcemanage.documentEdit': 'Edit',
+  'menu.registration.resourcemanage.documentDetail': 'Detail',
   'menu.registration.database': 'Data Source Management',
   'menu.registration.alert': 'Alarm Management',
   'menu.registration.alert.alertInstance': 'Alarm Instance Management',
