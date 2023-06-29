@@ -312,16 +312,45 @@ export default [
     path: '/registration',
     name: 'registration',
     icon: 'appstore',
+    footerRender: false,
     routes: [
       {
         path: '/registration',
-        redirect: '/registration/cluster/clusterInstance',
+        redirect: '/registration/cluster/hadoop',
       },
       {
         path: '/registration/cluster',
         name: 'cluster',
         icon: 'cluster',
         routes: [
+          {
+            path: '/registration/cluster/hadoop',
+            name: 'hadoop',
+            component: './RegistrationCenter/ClusterManage/Hadoop',
+          },
+          {
+            path: '/registration/cluster/hadoop/create',
+            name: 'hadoopCreate',
+            component: './RegistrationCenter/ClusterManage/Hadoop/Create',
+            hideInMenu: true,
+          },
+          {
+            path: '/registration/cluster/hadoop/edit/:id',
+            name: 'hadoopEdit',
+            component: './RegistrationCenter/ClusterManage/Hadoop/Edit',
+            hideInMenu: true,
+          },
+          {
+            path: '/registration/cluster/hadoop/view/:id',
+            name: 'hadoopView',
+            component: './RegistrationCenter/ClusterManage/Hadoop/View',
+            hideInMenu: true,
+          },
+          {
+            path: '/registration/cluster/shell',
+            name: 'shell',
+            component: './RegistrationCenter/ClusterManage/Shell',
+          },
           {
             path: '/registration/cluster/clusterInstance',
             name: 'clusterInstance',
@@ -332,13 +361,45 @@ export default [
             name: 'clusterConfiguration',
             component: './RegistrationCenter/ClusterManage/ClusterConfiguration',
           },
+
+          {
+            path: '/registration/cluster/yarn',
+            name: 'yarn',
+            component: './RegistrationCenter/ClusterManage/Yarn',
+          },
         ],
       },
       {
-        path: '/registration/jar',
-        name: 'jar',
-        icon: 'code-sandbox',
-        component: './RegistrationCenter/Jar',
+        path: '/registration/resourcemanage',
+        name: 'resourcemanage',
+        icon: 'bank',
+        footerRender: false,
+        routes: [
+          {
+            path: '/registration/resourcemanage/jar',
+            name: 'jar',
+            icon: 'code-sandbox',
+            component: './RegistrationCenter/ResourceManage/Jar',
+          },
+          {
+            path: '/registration/resourcemanage/document',
+            name: 'document',
+            icon: 'container',
+            component: './RegistrationCenter/ResourceManage/Document',
+          },
+          {
+            path: '/registration/resourcemanage/document/edit/:id',
+            name: 'documentEdit',
+            hideInMenu: true,
+            component: './RegistrationCenter/ResourceManage/Document/Edit',
+          },
+          {
+            path: '/registration/resourcemanage/document/detail/:id',
+            name: 'documentDetail',
+            hideInMenu: true,
+            component: './RegistrationCenter/ResourceManage/Document/Detail',
+          },
+        ],
       },
       {
         path: '/registration/database',
@@ -362,12 +423,6 @@ export default [
             component: './RegistrationCenter/AlertManage/AlertGroup',
           },
         ],
-      },
-      {
-        path: '/registration/document',
-        name: 'document',
-        icon: 'container',
-        component: './RegistrationCenter/Document',
       },
       {
         path: '/registration/fragment',
