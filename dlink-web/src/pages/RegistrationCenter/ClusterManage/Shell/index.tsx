@@ -18,28 +18,24 @@
  */
 
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Drawer, Input, message, Modal } from 'antd'
+import { Button, Input, message, Modal } from 'antd'
 import React, { useRef, useState } from 'react'
 import { PageContainer } from '@ant-design/pro-layout'
 import type { ActionType, ProColumns } from '@ant-design/pro-table'
 import ProTable from '@ant-design/pro-table'
-import ProDescriptions from '@ant-design/pro-descriptions'
 import type { ShellTableListItem } from '@/pages/RegistrationCenter/data'
 
 import { handleAddOrUpdate, handleRemove, queryData } from '@/components/Common/crud'
 import ShellForm from '@/pages/RegistrationCenter/ClusterManage/Shell/components/ShellForm'
-import { l } from '@/utils/intl'
 
-const TextArea = Input.TextArea
 const url = '/api/cluster'
 
-const ClusterTableList: React.FC<{}> = (props: any) => {
+const ShellTableList: React.FC<{}> = (props: any) => {
   const { dispatch } = props
   const [modalVisible, handleModalVisible] = useState<boolean>(false)
   const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false)
   const [formValues, setFormValues] = useState({})
   const actionRef = useRef<ActionType>()
-  const [row, setRow] = useState<ShellTableListItem>()
 
   const onDelete = (currentItem: ShellTableListItem) => {
     Modal.confirm({
@@ -53,83 +49,50 @@ const ClusterTableList: React.FC<{}> = (props: any) => {
 
   const columns: ProColumns<ShellTableListItem>[] = [
     {
-      title: l('pages.rc.cluster.instanceName'),
+      title: '名称',
       dataIndex: 'name',
-      render: (dom, entity) => {
-        return <a onClick={() => setRow(entity)}>{dom}</a>
-      },
+      width: 240,
     },
     {
-      title: l('pages.rc.cluster.instanceId'),
-      dataIndex: 'id',
-      hideInTable: true,
-      hideInForm: true,
+      title: 'hostName',
+      dataIndex: 'hostName',
+      width: 150,
+    },
+    {
+      title: 'ip',
+      dataIndex: 'ip',
       hideInSearch: true,
+      width: 150,
     },
     {
-      title: l('pages.rc.cluster.alias'),
-      sorter: true,
-      dataIndex: 'alias',
-      hideInTable: false,
+      title: '端口',
+      dataIndex: 'port',
+      hideInSearch: true,
+      width: 100,
     },
     {
-      title: l('pages.rc.cluster.jobManagerHaAddress'),
-      sorter: true,
-      dataIndex: 'hosts',
+      title: '用户名',
+      dataIndex: 'username',
+      hideInSearch: true,
+      width: 150,
+    },
+    {
+      title: '密码',
+      dataIndex: 'password',
+      hideInSearch: true,
+      width: 150,
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
       valueType: 'textarea',
-      hideInForm: false,
       hideInSearch: true,
-      hideInTable: true,
     },
     {
-      title: l('pages.rc.cluster.resourceManagerAddr'),
-      sorter: true,
-      valueType: 'textarea',
-      dataIndex: 'resourceManagerAddr',
-      hideInForm: true,
-      hideInSearch: true,
-      hideInTable: false,
-    },
-    {
-      title: l('pages.rc.cluster.applicationId'),
-      sorter: true,
-      valueType: 'textarea',
-      dataIndex: 'applicationId',
-      hideInForm: true,
-      hideInSearch: true,
-      hideInTable: false,
-    },
-    {
-      title: l('global.table.note'),
-      sorter: true,
-      valueType: 'textarea',
-      dataIndex: 'note',
-      hideInForm: false,
-      hideInSearch: true,
-      hideInTable: true,
-    },
-    {
-      title: l('global.table.createTime'),
-      dataIndex: 'createTime',
-      sorter: true,
-      valueType: 'dateTime',
-      hideInForm: true,
-      hideInTable: true,
-      renderFormItem: (item, { defaultRender, ...rest }, form) => {
-        const status = form.getFieldValue('status')
-        if (`${status}` === '0') {
-          return false
-        }
-        if (`${status}` === '3') {
-          return <Input {...rest} placeholder="请输入异常原因！" />
-        }
-        return defaultRender(item)
-      },
-    },
-    {
-      title: l('global.table.operate'),
+      title: '操作',
       dataIndex: 'option',
       valueType: 'option',
+      width: 200,
       render: (_, record) => [
         <a
           onClick={() => {
@@ -137,7 +100,7 @@ const ClusterTableList: React.FC<{}> = (props: any) => {
             setFormValues(record)
           }}
         >
-          {l('button.config')}
+          编辑
         </a>,
 
         <a
@@ -145,7 +108,7 @@ const ClusterTableList: React.FC<{}> = (props: any) => {
             onDelete(record)
           }}
         >
-          {l('button.delete')}
+          删除
         </a>,
       ],
     },
@@ -163,7 +126,7 @@ const ClusterTableList: React.FC<{}> = (props: any) => {
         }}
         toolBarRender={() => [
           <Button type="primary" onClick={() => handleModalVisible(true)}>
-            <PlusOutlined /> {l('button.create')}
+            <PlusOutlined /> 新建
           </Button>,
         ]}
         request={(params, sorter, filter) => queryData(url, { ...params, sorter, filter })}
@@ -208,31 +171,8 @@ const ClusterTableList: React.FC<{}> = (props: any) => {
           values={formValues}
         />
       ) : undefined}
-
-      <Drawer
-        width={600}
-        visible={!!row}
-        onClose={() => {
-          setRow(undefined)
-        }}
-        closable={false}
-      >
-        {row?.name && (
-          <ProDescriptions<ShellTableListItem>
-            column={2}
-            title={row?.name}
-            request={async () => ({
-              data: row || {},
-            })}
-            params={{
-              id: row?.name,
-            }}
-            columns={columns}
-          />
-        )}
-      </Drawer>
     </PageContainer>
   )
 }
 
-export default ClusterTableList
+export default ShellTableList

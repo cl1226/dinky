@@ -43,13 +43,12 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
   const [formVals, setFormVals] = useState<Partial<ShellTableListItem>>({
     id: props.values.id,
     name: props.values.name,
-    alias: props.values.alias,
-    resourceManagerAddr: props.values.resourceManagerAddr,
-    applicationId: props.values.applicationId,
-    type: props.values.type,
-    hosts: props.values.hosts,
-    note: props.values.note,
-    enabled: props.values.enabled,
+    hostName: props.values.hostName,
+    ip: props.values.ip,
+    port: props.values.port,
+    username: props.values.username,
+    password: props.values.password,
+    description: props.values.description,
   })
 
   const { onSubmit: handleSubmit, onCancel: handleModalVisible, modalVisible } = props
@@ -74,103 +73,34 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
   const renderContent = (formValsPara: Partial<ShellTableListItem>) => {
     return (
       <>
-        <Form.Item
-          name="name"
-          label={l('pages.rc.cluster.instanceName')}
-          rules={[{ required: true, message: l('pages.rc.cluster.namePlaceholder') }]}
-        >
-          <Input placeholder={l('pages.rc.cluster.namePlaceholder')} />
+        <Form.Item name="name" label="名称" rules={[{ required: true, message: '请输入名称' }]}>
+          <Input placeholder="请输入名称" />
         </Form.Item>
 
-        <Form.Item name="alias" label={l('pages.rc.cluster.alias')}>
-          <Input placeholder={l('pages.rc.cluster.aliasPlaceholder')} />
+        <Form.Item name="hostName" label="hostName">
+          <Input placeholder="请输入hostName" />
         </Form.Item>
+
+        <Form.Item name="ip" label="ip" rules={[{ required: true, message: '请输入ip' }]}>
+          <Input placeholder="请输入ip" />
+        </Form.Item>
+
+        <Form.Item name="端口" label="port" rules={[{ required: true, message: '请输入端口' }]}>
+          <Input placeholder="请输入端口" />
+        </Form.Item>
+
         <Form.Item
-          name="type"
-          label={l('pages.rc.cluster.type')}
-          rules={[{ required: true, message: l('pages.rc.cluster.typePlaceholder') }]}
+          name="用户名"
+          label="username"
+          rules={[{ required: true, message: '请输入用户名' }]}
         >
-          <Select>
-            <Option value={RUN_MODE.STANDALONE}>Standalone</Option>
-            <Option value={RUN_MODE.YARN_SESSION}>Yarn Session</Option>
-            <Option value={RUN_MODE.YARN_PER_JOB}>Yarn Per-Job</Option>
-            <Option value={RUN_MODE.YARN_APPLICATION}>Yarn Application</Option>
-            <Option value={RUN_MODE.KUBERNETES_SESSION}>Kubernetes Session</Option>
-            <Option value={RUN_MODE.KUBERNETES_APPLICATION}>Kubernetes Application</Option>
-          </Select>
+          <Input placeholder="请输入用户名" />
         </Form.Item>
-        <Form.Item
-          noStyle
-          shouldUpdate={(prevValues, currentValues) => prevValues.type !== currentValues.type}
-        >
-          {({ getFieldValue }) =>
-            getFieldValue('type') === 'yarn-session' ? (
-              <>
-                <Form.Item
-                  name="resourceManagerAddr"
-                  label={l('pages.rc.cluster.resourceManagerAddr')}
-                >
-                  <Input placeholder={l('pages.rc.cluster.resourceManagerAddr')} />
-                </Form.Item>
-                <Form.Item name="applicationId" label={l('pages.rc.cluster.applicationId')}>
-                  <Input placeholder={l('pages.rc.cluster.applicationId')} />
-                </Form.Item>
-              </>
-            ) : null
-          }
+        <Form.Item name="密码" label="password" rules={[{ required: true, message: '请输入密码' }]}>
+          <Input.Password placeholder="请输入密码" />
         </Form.Item>
-        <Form.Item
-          name="hosts"
-          label={l('pages.rc.cluster.jobManagerHaAddress')}
-          validateTrigger={['onChange']}
-          rules={[
-            {
-              required: true,
-              validator(_, hostsValue) {
-                let hostArray = []
-                if (hostsValue.trim().length === 0) {
-                  return Promise.reject(
-                    new Error(l('pages.rc.cluster.jobManagerHaAddressPlaceholder')),
-                  )
-                } else {
-                  hostArray = hostsValue.split(',')
-                  for (let i = 0; i < hostArray.length; i++) {
-                    if (hostArray[i].includes('/')) {
-                      return Promise.reject(
-                        new Error(l('pages.rc.cluster.jobManagerHaAddress.validate.slash')),
-                      )
-                    }
-                    if (parseInt(hostArray[i].split(':')[1]) >= 65535) {
-                      return Promise.reject(
-                        new Error(l('pages.rc.cluster.jobManagerHaAddress.validate.port')),
-                      )
-                    }
-                  }
-                  return Promise.resolve()
-                }
-              },
-            },
-          ]}
-        >
-          <Input.TextArea
-            placeholder={l('pages.rc.cluster.jobManagerHaAddressPlaceholderText')}
-            allowClear
-            autoSize={{ minRows: 3, maxRows: 10 }}
-          />
-        </Form.Item>
-        <Form.Item name="note" label={l('global.table.note')}>
-          <Input.TextArea
-            placeholder={l('global.table.notePlaceholder')}
-            allowClear
-            autoSize={{ minRows: 3, maxRows: 10 }}
-          />
-        </Form.Item>
-        <Form.Item name="enabled" label={l('global.table.isEnable')}>
-          <Switch
-            checkedChildren={l('button.enable')}
-            unCheckedChildren={l('button.disable')}
-            defaultChecked={formValsPara.enabled}
-          />
+        <Form.Item name="描述" label="description">
+          <Input.TextArea allowClear autoSize={{ minRows: 3, maxRows: 10 }} />
         </Form.Item>
       </>
     )
@@ -179,9 +109,11 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
   const renderFooter = () => {
     return (
       <>
-        <Button onClick={() => onModalCancel()}>{l('button.cancel')}</Button>
+        <Button onClick={() => onModalCancel()}>取消</Button>
+        <Button onClick={() => onModalCancel()}>测试</Button>
+
         <Button type="primary" onClick={() => submitForm()}>
-          {l('button.finish')}
+          保存
         </Button>
       </>
     )

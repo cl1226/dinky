@@ -11,10 +11,17 @@ import {
   Row,
   Typography,
   message,
+  Space,
 } from 'antd'
 import { EHadoopType, ETrueFalse } from '@/utils/enum'
 import { transferEnumToOptions } from '@/utils/utils'
-import { UploadOutlined } from '@ant-design/icons'
+import {
+  EyeInvisibleOutlined,
+  EyeTwoTone,
+  MinusCircleOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from '@ant-design/icons'
 import { history, useParams } from 'umi'
 import { getHadoopConfig, createHadoop } from '@/pages/RegistrationCenter/ClusterManage/service'
 import {
@@ -22,6 +29,7 @@ import {
   IHadoop,
   ITabComProps,
 } from '@/pages/RegistrationCenter/ClusterManage/Hadoop/data.d'
+import { CODE } from '@/components/Common/crud'
 const { Link } = Typography
 
 const Address = ({ value }: any) => {
@@ -47,6 +55,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   const [collapseKey, setCollapseKey] = useState<any>(['hadoop'])
   const [configLoaded, setConfigLoaded] = useState(false)
   const [cacheConfig, setCacheConfig] = useState<any>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const onLoadConfig = async () => {
     const formRes = await basicForm.validateFields()
     setIsLoading(true)
@@ -74,13 +83,22 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
     const kerberosFormRes = await kerberosForm.validateFields()
     const configFormRes = await configForm.validateFields()
 
+    const keytabArr = kerberosFormRes.keytabJson.map((item) => {
+      return {
+        principle: item.principle,
+        keytab: item.keytab[0]?.response?.datas,
+      }
+    })
+
+    setIsSubmitting(true)
     const result = await createHadoop({
       ...basicFormRes,
       ...configFormRes,
       ...kerberosFormRes,
+      keytabJson: JSON.stringify(keytabArr),
       yarnQueueModels: cacheConfig.yarnQueue || [],
     })
-
+    setIsSubmitting(false)
     if (result) {
       message.success('操作成功')
       history.push('/registration/cluster/hadoop')
@@ -123,7 +141,6 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
 
   useEffect(() => {
     if ((mode === 'edit' || mode === 'view') && detailInfo && detailInfo.hadoop) {
-      console.log(ETrueFalse, transferEnumToOptions(ETrueFalse))
       setCollapseKey([...collapseKey, 'config', 'kerberos'])
       setConfigLoaded(true)
       setBasicFormValue(detailInfo.hadoop)
@@ -137,6 +154,33 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
     if (mode === 'view') return false
     if (mode === 'edit' || mode === 'create') return configLoaded
     return false
+  }
+  const getUploadProps = () => {
+    const uuid = configForm.getFieldValue('uuid')
+    return {
+      name: 'files',
+      action: '/api/hadoop/cluster/upload',
+      headers: {
+        authorization: 'authorization-text',
+      },
+      data: {
+        uuid,
+      },
+      maxCount: 1,
+      showUploadList: false,
+      onChange(info) {
+        if (info.file.status === 'done') {
+          console.log('kerberosForm', kerberosForm.getFieldsValue())
+          if (info.file.response.code == CODE.SUCCESS) {
+            message.success(info.file.response.msg)
+          } else {
+            message.warn(info.file.response.msg)
+          }
+        } else if (info.file.status === 'error') {
+          message.error('上传失败')
+        }
+      },
+    }
   }
   return (
     <>
@@ -192,10 +236,11 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
               name="password"
               rules={[{ required: true, message: '请输入密码！' }]}
             >
-              <Input
+              <Input.Password
                 disabled={configLoaded || mode === 'edit'}
                 placeholder="请输入密码"
                 style={{ width: 500 }}
+                iconRender={(visible) => null}
               />
             </Form.Item>
             {mode === 'create' ? (
@@ -298,22 +343,103 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
                           <Input readOnly style={{ width: 500 }} />
                         </Form.Item>
 
-                        {/* <Form.Item
-                          label="krbConf文件"
-                          name="krbConfFile"
-                          valuePropName="fileList"
-                          getValueFromEvent={(e: any) => {
-                            console.log('Upload event:', e)
-                            if (Array.isArray(e)) {
-                              return e
-                            }
-                            return e?.fileList
-                          }}
-                        >
-                          <Upload>
-                            <Button icon={<UploadOutlined />}>点击上传</Button>
-                          </Upload>
-                        </Form.Item> */}
+                        <Form.List name="keytabJson">
+                          {(fields, { add, remove }) => (
+                            <>
+                              <Form.Item label="Principal/Keytab" style={{ marginBottom: 0 }}>
+                                {fields.map(({ key, name, ...restField }, fieldIndex) => (
+                                  <>
+                                    <Space
+                                      key={key}
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        marginBottom: 8,
+                                      }}
+                                      align="baseline"
+                                    >
+                                      <Form.Item
+                                        {...restField}
+                                        name={[name, 'principle']}
+                                        rules={[{ required: true, message: '请输入Principal' }]}
+                                      >
+                                        <Input
+                                          disabled={mode === 'view'}
+                                          style={{ width: 300 }}
+                                          placeholder="Principal"
+                                        />
+                                      </Form.Item>
+                                      <Form.Item
+                                        {...restField}
+                                        name={[name, 'keytab']}
+                                        rules={[{ required: true, message: '请上传Keytab文件' }]}
+                                        valuePropName="fileList"
+                                        getValueFromEvent={(e: any) => {
+                                          console.log('e', e)
+                                          if (Array.isArray(e)) {
+                                            return e
+                                          }
+                                          return e?.fileList
+                                        }}
+                                      >
+                                        <Upload disabled={mode === 'view'} {...getUploadProps()}>
+                                          <Input.Group compact>
+                                            <Button
+                                              disabled={mode === 'view'}
+                                              style={{ width: 80 }}
+                                              icon={<UploadOutlined />}
+                                            >
+                                              上传
+                                            </Button>
+
+                                            <Form.Item
+                                              noStyle
+                                              shouldUpdate={(prevValues, currentValues) =>
+                                                prevValues.keytabJson[fieldIndex] !==
+                                                currentValues.keytabJson[fieldIndex]
+                                              }
+                                            >
+                                              {({ getFieldValue }) => (
+                                                <Input
+                                                  style={{ width: 300 }}
+                                                  placeholder="keytab"
+                                                  readOnly
+                                                  value={
+                                                    getFieldValue('keytabJson')[fieldIndex]?.[
+                                                      'keytab'
+                                                    ]?.[0]?.response?.datas || ''
+                                                  }
+                                                />
+                                              )}
+                                            </Form.Item>
+                                          </Input.Group>
+                                        </Upload>
+                                      </Form.Item>
+
+                                      {mode !== 'view' ? (
+                                        <MinusCircleOutlined
+                                          style={{ marginTop: 8 }}
+                                          onClick={() => remove(name)}
+                                        />
+                                      ) : null}
+                                    </Space>
+                                  </>
+                                ))}
+                                {mode !== 'view' ? (
+                                  <Button
+                                    type="dashed"
+                                    style={{ width: 300 }}
+                                    onClick={() => add()}
+                                    block
+                                    icon={<PlusOutlined />}
+                                  >
+                                    添加 Principal/Keytab
+                                  </Button>
+                                ) : null}
+                              </Form.Item>
+                            </>
+                          )}
+                        </Form.List>
                       </>
                     ) : null
                   }
@@ -326,7 +452,12 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
 
       {submitVisible() ? (
         <Row>
-          <Button style={{ marginLeft: 30 }} type={'primary'} onClick={onSubmit}>
+          <Button
+            loading={isSubmitting}
+            style={{ marginLeft: 30 }}
+            type={'primary'}
+            onClick={onSubmit}
+          >
             提交
           </Button>
         </Row>

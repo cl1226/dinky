@@ -75,7 +75,8 @@ export type ShellTableListItem = {
   hostName?: string
   ip: string
   port: string
-  userName: string
+  hostName: string
+  username: string
   password: string
   description?: string
   createTime: Date
