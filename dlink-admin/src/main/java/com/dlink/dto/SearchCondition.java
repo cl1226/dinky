@@ -43,4 +43,6 @@ public class SearchCondition {
 
     private String itemType;
 
+    private String type;
+
 }

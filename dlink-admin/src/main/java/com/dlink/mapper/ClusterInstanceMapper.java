@@ -1,7 +1,7 @@
 package com.dlink.mapper;
 
 import com.dlink.db.mapper.SuperMapper;
-import com.dlink.model.ClusterInstance;
+import com.dlink.model.EnvironmentInstance;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -11,5 +11,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 2023/6/15 15:24
  **/
 @Mapper
-public interface ClusterInstanceMapper extends SuperMapper<ClusterInstance> {
+public interface ClusterInstanceMapper extends SuperMapper<EnvironmentInstance> {
 }

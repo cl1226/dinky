@@ -232,6 +232,21 @@
             <artifactId>jsch</artifactId>
             <version>0.1.55</version>
         </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.8.1</version> <!-- minio 依赖于 okhttp 且版本较高。注意，spring-boot-dependencies 中的不够高 -->
+        </dependency>
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudera.api</groupId>
+            <artifactId>cloudera-manager-api</artifactId>
+            <version>6.3.1</version>
+        </dependency>
     </dependencies>
 
     <build>
