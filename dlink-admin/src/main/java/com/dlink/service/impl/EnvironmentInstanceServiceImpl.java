@@ -2,8 +2,8 @@ package com.dlink.service.impl;
 
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.mapper.ClusterInstanceMapper;
-import com.dlink.model.ClusterInstance;
-import com.dlink.service.ClusterInstanceService;
+import com.dlink.model.EnvironmentInstance;
+import com.dlink.service.EnvironmentInstanceService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,5 +13,5 @@ import org.springframework.stereotype.Service;
  * @since 2023/6/15 15:25
  **/
 @Service
-public class ClusterInstanceServiceImpl extends SuperServiceImpl<ClusterInstanceMapper, ClusterInstance> implements ClusterInstanceService {
+public class EnvironmentInstanceServiceImpl extends SuperServiceImpl<ClusterInstanceMapper, EnvironmentInstance> implements EnvironmentInstanceService {
 }

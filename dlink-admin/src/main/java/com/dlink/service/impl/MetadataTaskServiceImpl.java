@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -18,7 +17,6 @@ import com.dlink.model.*;
 import com.dlink.service.*;
 import com.dlink.utils.QuartzUtil;
 import com.dlink.utils.ShellUtil;
-import com.jcraft.jsch.JSchException;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +51,7 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
     @Autowired
     private Scheduler scheduler;
     @Autowired
-    private ClusterInstanceService clusterInstanceService;
+    private EnvironmentInstanceService environmentInstanceService;
     @Autowired
     private MetadataVolumeService metadataVolumeService;
 
@@ -344,13 +342,13 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
             String url = dataBase.getDriverConfig().getUrl();
             String[] split = url.split("/|:");
             String ip = split[4];
-            QueryWrapper<ClusterInstance> queryWrapper = Wrappers.<ClusterInstance>query().eq("ip", ip);
+            QueryWrapper<EnvironmentInstance> queryWrapper = Wrappers.<EnvironmentInstance>query().eq("ip", ip);
             queryWrapper.or().eq("host_name", ip);
-            ClusterInstance clusterInstance = clusterInstanceService.getOne(queryWrapper);
+            EnvironmentInstance environmentInstance = environmentInstanceService.getOne(queryWrapper);
             String res = "0";
-            if (clusterInstance != null) {
+            if (environmentInstance != null) {
                 ShellUtil instance = ShellUtil.getInstance();
-                instance.init(clusterInstance.getIp(), clusterInstance.getPort(), clusterInstance.getUsername(), clusterInstance.getPassword());
+                instance.init(environmentInstance.getIp(), environmentInstance.getPort(), environmentInstance.getUsername(), environmentInstance.getPassword());
                 res = instance.execCmd("hadoop fs -du -v /user/hive/warehouse |awk '{ SUM += $1 } END { print SUM}'");
             }
             totalHiveVol = BigDecimal.valueOf(Double.valueOf(res));
@@ -419,13 +417,13 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
                 String url = dataBase.getDriverConfig().getUrl();
                 String[] split = url.split("/|:");
                 String ip = split[4];
-                QueryWrapper<ClusterInstance> q = Wrappers.<ClusterInstance>query().eq("ip", ip);
+                QueryWrapper<EnvironmentInstance> q = Wrappers.<EnvironmentInstance>query().eq("ip", ip);
                 q.or().eq("host_name", ip);
-                ClusterInstance clusterInstance = clusterInstanceService.getOne(q);
+                EnvironmentInstance environmentInstance = environmentInstanceService.getOne(q);
                 String r = "0";
-                if (clusterInstance != null) {
+                if (environmentInstance != null) {
                     ShellUtil instance = ShellUtil.getInstance();
-                    instance.init(clusterInstance.getIp(), clusterInstance.getPort(), clusterInstance.getUsername(), clusterInstance.getPassword());
+                    instance.init(environmentInstance.getIp(), environmentInstance.getPort(), environmentInstance.getUsername(), environmentInstance.getPassword());
                     String str = "hadoop fs -du -v /user/hive/warehouse/" + dbName + " |awk '{ SUM += $1 } END { print SUM}'";
                     r = instance.execCmd(str);
                     otherHiveVol = otherHiveVol.add(BigDecimal.valueOf(Double.valueOf(r)));

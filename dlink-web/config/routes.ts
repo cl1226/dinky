@@ -373,6 +373,7 @@ export default [
         path: '/registration/resourcemanage',
         name: 'resourcemanage',
         icon: 'bank',
+        footerRender: false,
         routes: [
           {
             path: '/registration/resourcemanage/jar',
@@ -385,6 +386,18 @@ export default [
             name: 'document',
             icon: 'container',
             component: './RegistrationCenter/ResourceManage/Document',
+          },
+          {
+            path: '/registration/resourcemanage/document/edit/:id',
+            name: 'documentEdit',
+            hideInMenu: true,
+            component: './RegistrationCenter/ResourceManage/Document/Edit',
+          },
+          {
+            path: '/registration/resourcemanage/document/detail/:id',
+            name: 'documentDetail',
+            hideInMenu: true,
+            component: './RegistrationCenter/ResourceManage/Document/Detail',
           },
         ],
       },

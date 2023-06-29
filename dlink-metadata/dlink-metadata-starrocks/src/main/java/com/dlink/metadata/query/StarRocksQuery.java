@@ -50,7 +50,7 @@ public class StarRocksQuery extends AbstractDBQuery {
 
     @Override
     public String schemaName() {
-        return "SCHEMA";
+        return "SCHEMA_NAME";
     }
 
     @Override

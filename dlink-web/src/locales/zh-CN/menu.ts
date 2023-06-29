@@ -88,6 +88,8 @@ export default {
   'menu.registration.resourcemanage': '资源管理',
   'menu.registration.resourcemanage.jar': 'Jar 管理',
   'menu.registration.resourcemanage.document': '文档管理',
+  'menu.registration.resourcemanage.documentEdit': '编辑',
+  'menu.registration.resourcemanage.documentDetail': '详情',
   'menu.registration.database': '数据源管理',
   'menu.registration.alert': '报警管理',
   'menu.registration.alert.alertInstance': '报警实例管理',

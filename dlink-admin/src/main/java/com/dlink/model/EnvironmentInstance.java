@@ -13,8 +13,8 @@ import lombok.EqualsAndHashCode;
  **/
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("dlink_cluster_instance")
-public class ClusterInstance extends SuperEntity {
+@TableName("dlink_environment_instance")
+public class EnvironmentInstance extends SuperEntity {
 
     private String ip;
 
