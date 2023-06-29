@@ -69,19 +69,15 @@ export type ClusterConfigurationTableListItem = {
   updateTime: Date
 }
 
-export type HadoopTableListItem = {
+export type ShellTableListItem = {
   id: number
   name: string
-  alias: string
-  type: string
-  hosts: string
-  jobManagerHost: string
-  resourceManagerAddr: string
-  applicationId: string
-  version: string
-  status: number
-  note: string
-  enabled: boolean
+  hostName?: string
+  ip: string
+  port: string
+  userName: string
+  password: string
+  description?: string
   createTime: Date
   updateTime: Date
 }

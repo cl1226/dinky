@@ -41,10 +41,15 @@ export const isAntDesignProOrDev = (): boolean => {
 
 // 将枚举转换为option数组
 export const transferEnumToOptions = (e, option?: any): any => {
-  const { labelKey = 'label', valueKey = 'value' } = option || {}
+  const { labelKey = 'label', valueKey = 'value', reversal = false } = option || {}
+  const transfer = (str) => {
+    if (str === 'true') return true
+    if (str === 'false') return false
+    return str
+  }
   return Object.keys(e).map((key) => ({
-    [labelKey]: e[key],
-    [valueKey]: key,
+    [labelKey]: transfer(reversal ? key : e[key]),
+    [valueKey]: transfer(reversal ? e[key] : key),
   }))
 }
 

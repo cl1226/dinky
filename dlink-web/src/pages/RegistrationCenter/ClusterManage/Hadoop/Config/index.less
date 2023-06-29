@@ -7,9 +7,14 @@
   height: calc(100vh - 48px - 50px - 48px - 46px);
   margin: 0 -10px;
 }
+
 .collapse-wrap {
-  background-color: transparent;
+  background-color: transparent !important;
+
   :global {
+    .ant-divider-horizontal {
+      margin-top: 0;
+    }
     .ant-collapse-header {
       font-size: 18px;
       .ant-collapse-arrow {
@@ -17,7 +22,10 @@
       }
     }
     .ant-collapse-item {
-      border: 0;
+      border-bottom: 0 !important;
     }
   }
+}
+
+.yarn-wrap {
 }

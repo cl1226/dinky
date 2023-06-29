@@ -165,7 +165,6 @@ const StudioTree: React.FC<StudioTreeProps> = (props) => {
           Number(history.location.query?.taskId),
           loop(tempTreeData),
         )
-        console.log('isInit', findNode.key)
         setExpandedKeys([findNode.key])
         setSelectedKeys([findNode.key])
         toOpen(findNode)
