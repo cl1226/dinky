@@ -10,6 +10,7 @@ import {
   PlayCircleOutlined,
   MessageOutlined,
   DownloadOutlined,
+  HighlightOutlined,
 } from '@ant-design/icons'
 import {
   Button,
@@ -31,7 +32,7 @@ import type { ColumnsType } from 'antd/es/table'
 
 import { history } from 'umi'
 import type { IGetApiConfigListParams } from '../service'
-import { getApiConfigList, deleteApiConfig, updateApiConfigStatus, ExecuteTask } from '../service'
+import { getApiConfigList, deleteApiConfig } from '../service'
 import type { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { debounce } from 'lodash'
@@ -108,16 +109,6 @@ export default (props: IListProps) => {
     }
   }
 
-  // TODO
-  const onUpdateApiStatus = async (id: number, mode: 'offline' | 'online') => {
-    if (loading) return
-    setLoading(true)
-    const result = await updateApiConfigStatus(id, mode)
-    setLoading(false)
-    if (result) {
-      getApiList()
-    }
-  }
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys)
   }
@@ -214,7 +205,7 @@ export default (props: IListProps) => {
     },
     {
       title: '操作',
-      width: 160,
+      width: 100,
       key: 'action',
       fixed: 'right',
       render: (cellValue, record) => (
@@ -234,7 +225,7 @@ export default (props: IListProps) => {
               onClick={() => handleDialog(DialogType.rename, record)}
               size="small"
               type="text"
-              icon={<MessageOutlined />}
+              icon={<HighlightOutlined />}
             />
           </Tooltip>
           <Tooltip title={'下载'}>
@@ -294,7 +285,7 @@ export default (props: IListProps) => {
             </div>
             <div className="condition-col">
               <div className="condition-item">
-                <div className="condition-label">任务名称</div>
+                <div className="condition-label">文件名称</div>
                 <Search
                   placeholder="请输入名称"
                   onSearch={() => {

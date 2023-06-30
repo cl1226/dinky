@@ -22,7 +22,7 @@ import PageWrap from '@/components/Common/PageWrap'
 import type { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { useState } from 'react'
 import JarList from './JarList'
-const sessionStorageKey = 'registration.resourcemanage.document.list'
+const sessionStorageKey = 'registration.resourcemanage.jar.list'
 const JarPage = () => {
   const [catalogue, setcatalogue] = useState<TreeDataNode>()
   const getCurrentCatalogue = (node: TreeDataNode) => {

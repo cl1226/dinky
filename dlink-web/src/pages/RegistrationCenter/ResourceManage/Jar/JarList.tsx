@@ -8,6 +8,9 @@ import {
   BugOutlined,
   DeleteOutlined,
   PlayCircleOutlined,
+  MessageOutlined,
+  DownloadOutlined,
+  HighlightOutlined,
 } from '@ant-design/icons'
 import {
   Button,
@@ -28,24 +31,24 @@ import {
 import type { ColumnsType } from 'antd/es/table'
 
 import { history } from 'umi'
-import type { IGetApiConfigListParams } from '@/pages/DataAsset/MetaDataManage/TaskManage/service'
-import {
-  getApiConfigList,
-  deleteApiConfig,
-  updateApiConfigStatus,
-  ExecuteTask,
-} from '@/pages/DataAsset/MetaDataManage/TaskManage/service'
+import type { IGetApiConfigListParams } from '../service'
+import { getApiConfigList, deleteApiConfig } from '../service'
 import type { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { debounce } from 'lodash'
 import moment from 'moment'
-import { ESchedulerType, ESchedulerTypeMap } from '@/components/XFlow/service'
+import { downloadBlob } from '@/utils/download'
 import Dialog, { DialogType } from './Dialog'
 
-interface ITableTaskItem extends ITaskItem {
+export interface ITableDocumentItem {
   id: number
-  runStatus: string | null
-  scheduleStatus: string | null
+  catalogueId: number
+  description: string
+  filePath: string
+  createTime: string
+  name: string
+  type: 'File' | 'Jar'
+  updateTime: string
 }
 
 const { Search } = Input
@@ -54,26 +57,6 @@ export type IListProps = {
   catalogue: TreeDataNode | undefined
   sessionStorageKey: string
   tableProps?: {}
-}
-
-export enum EDebugStatus {
-  '失败',
-  '成功',
-}
-
-const RunningStatusConfig = {
-  Success: {
-    type: 'success',
-    msg: '成功',
-  },
-  1: {
-    type: 'processing',
-    msg: '未调度',
-  },
-  Failed: {
-    type: 'error',
-    msg: '失败',
-  },
 }
 
 export default (props: IListProps) => {
@@ -86,9 +69,10 @@ export default (props: IListProps) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [loading, setLoading] = useState(false)
   const [listData, setlistData] = useState([])
-  const [dialogtype, setdialogtype] = useState<DialogType>(DialogType.create)
+  const [dialogtype, setdialogtype] = useState<DialogType>(DialogType.upload)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const { catalogue, tableProps = {} } = props
+  const [editRecord, seteditRecord] = useState<ITableDocumentItem>()
+  const { catalogue, tableProps = {}, sessionStorageKey } = props
 
   const getApiList = async (extra?: IGetApiConfigListParams) => {
     if (!catalogue?.id && !extra?.catalogueId) return
@@ -98,6 +82,7 @@ export default (props: IListProps) => {
       pageSize: pageSize,
       name: searchKey,
       catalogueId: catalogue?.id,
+      type: 'Jar',
       ...(extra || {}),
     }
 
@@ -124,22 +109,22 @@ export default (props: IListProps) => {
     }
   }
 
-  const onUpdateApiStatus = async (id: number, mode: 'offline' | 'online') => {
-    if (loading) return
-    setLoading(true)
-    const result = await updateApiConfigStatus(id, mode)
-    setLoading(false)
-    if (result) {
-      getApiList()
-    }
-  }
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys)
   }
 
-  const handleDialog = (type: DialogType) => {
+  const handleDialog = (type: DialogType, record?: ITableDocumentItem) => {
+    if (record) {
+      seteditRecord(record)
+    }
     setIsModalOpen(true)
     setdialogtype(type)
+  }
+
+  const download = (record: ITableDocumentItem) => {
+    const tmpArr = record.filePath.split('/') || []
+    const fileName = tmpArr.length === 0 ? record.name : tmpArr[tmpArr.length - 1]
+    downloadBlob(`/api/file/manage/downloadFile?id=${record.id}`, fileName)
   }
 
   const pageJump = (type, record?) => {
@@ -147,7 +132,7 @@ export default (props: IListProps) => {
       return
     }
     sessionStorage.setItem(
-      'dataAsset.metaDataManage.taskManage.list',
+      sessionStorageKey,
       JSON.stringify({
         pageIndex: pageNum,
         pageSize: pageSize,
@@ -155,86 +140,45 @@ export default (props: IListProps) => {
         catalogueId: catalogue?.id,
       }),
     )
-    if (type == 'edit') {
-      history.push(`/dataAsset/metaDataManage/create?id=${record.id}`)
-    } else if (record) {
-      history.push(`/dataAsset/metaDataManage/${type}/${record.id}`)
-    } else {
-      history.push(`/dataAsset/metaDataManage/${type}`)
-    }
+    history.push(`/registration/resourcemanage/document/${type}/${record.id}`)
   }
 
   useEffect(() => {
     if (catalogue && catalogue.id) {
-      const sessionJson = sessionStorage.getItem('dataAsset.metaDataManage.taskManage.list')
+      const sessionJson = sessionStorage.getItem(sessionStorageKey)
       const sessionQuery = JSON.parse(sessionJson || '{}')
       getApiList(sessionQuery)
-      sessionStorage.removeItem('dataAsset.metaDataManage.taskManage.list')
+      sessionStorage.removeItem(sessionStorageKey)
     }
   }, [catalogue])
 
-  const columns: ColumnsType<ITableTaskItem> = [
+  const columns: ColumnsType<ITableDocumentItem> = [
     {
-      title: '任务名称',
+      title: '名称',
       dataIndex: 'name',
       key: 'name',
-      fixed: 'left',
       width: 150,
       ellipsis: {
         showTitle: false,
       },
-      render: (cellValue, record) => (
-        <Tooltip placement="topLeft" title={cellValue}>
-          <Button
-            type="link"
-            onClick={() => {
-              pageJump('detail', record)
-            }}
-          >
-            {cellValue}
-          </Button>
-        </Tooltip>
-      ),
+      // render: (cellValue, record) => (
+      //   <Tooltip placement="topLeft" title={cellValue}>
+      //     <Button
+      //       type="link"
+      //       onClick={() => {
+      //         pageJump('detail', record)
+      //       }}
+      //     >
+      //       {cellValue}
+      //     </Button>
+      //   </Tooltip>
+      // ),
     },
     {
-      title: '数据源',
-      dataIndex: 'datasourceName',
-      key: 'datasourceName',
-      width: 100,
-    },
-    {
-      title: '数据源类型',
-      dataIndex: 'datasourceType',
-      key: 'datasourceType',
-      width: 100,
-    },
-    {
-      title: '调度类型',
-      dataIndex: 'scheduleType',
-      key: 'scheduleType',
-      width: 100,
-      render(value, record, index) {
-        return ESchedulerTypeMap[value]
-      },
-    },
-    {
-      title: '调度状态',
-      dataIndex: 'scheduleStatus',
-      key: 'scheduleStatus',
-      width: 100,
-      render(value, record, index) {
-        const v = value ?? 1
-        if (record.scheduleType == ESchedulerType.SINGLE) {
-          return ''
-        }
-        return <Badge status={RunningStatusConfig[v].type} text={RunningStatusConfig[v].msg} />
-      },
-    },
-    {
-      title: '调度周期',
-      width: 100,
-      dataIndex: 'cronExpression',
-      key: 'cronExpression',
+      title: '文件路径',
+      dataIndex: 'filePath',
+      key: 'filePath',
+      width: 150,
     },
     {
       title: '描述',
@@ -251,70 +195,58 @@ export default (props: IListProps) => {
       ),
     },
     {
-      title: '下次运行时间',
-      dataIndex: 'nextRunTime',
-      width: 130,
-      key: 'nextRunTime',
-      render: (value) => value && moment(value).format('YYYY-MM-DD HH:mm:ss'),
+      title: '更新时间',
+      dataIndex: 'updateTime',
+      key: 'updateTime',
+      width: 100,
+      render(value, record, index) {
+        return value && moment(value).format('YYYY-MM-DD HH:mm:ss')
+      },
     },
     {
       title: '操作',
-      width: 160,
+      width: 100,
       key: 'action',
       fixed: 'right',
       render: (cellValue, record) => (
         <Space size="middle">
-          {record.status === 1 ? (
-            <Tooltip title={'下线'}>
-              <Popconfirm
-                title="请确认将执行下线操作！"
-                placement="bottom"
-                onConfirm={() => {
-                  onUpdateApiStatus(record.id, 'offline')
-                }}
-              >
-                <Button size="small" type="text" icon={<FallOutlined />} />
-              </Popconfirm>
-            </Tooltip>
-          ) : (
-            <Tooltip title={'上线'}>
-              <Popconfirm
-                title="请确认将执行上线操作"
-                placement="bottom"
-                onConfirm={() => {
-                  onUpdateApiStatus(record.id, 'online')
-                }}
-              >
-                <Button size="small" type="text" icon={<RiseOutlined />} />
-              </Popconfirm>
-            </Tooltip>
-          )}
-          <Tooltip title={'编辑'}>
+          {/* <Tooltip title={'编辑'}>
             <Button
               onClick={() => {
                 pageJump('edit', record)
               }}
               size="small"
-              disabled={record.status === 1}
               type="text"
               icon={<EditOutlined />}
+            />
+          </Tooltip> */}
+          <Tooltip title={'重命名'}>
+            <Button
+              onClick={() => handleDialog(DialogType.rename, record)}
+              size="small"
+              type="text"
+              icon={<HighlightOutlined />}
+            />
+          </Tooltip>
+          <Tooltip title={'下载'}>
+            <Button
+              onClick={() => {
+                download(record)
+              }}
+              size="small"
+              type="text"
+              icon={<DownloadOutlined />}
             />
           </Tooltip>
           <Tooltip title={'删除'}>
             <Popconfirm
               title="请确认将执行删除操作！"
               placement="bottom"
-              disabled={record.status === 1}
               onConfirm={() => {
                 onDelete([record.id])
               }}
             >
-              <Button
-                size="small"
-                type="text"
-                disabled={record.status === 1}
-                icon={<DeleteOutlined />}
-              />
+              <Button size="small" type="text" icon={<DeleteOutlined />} />
             </Popconfirm>
           </Tooltip>
         </Space>
@@ -328,8 +260,11 @@ export default (props: IListProps) => {
           <Row justify={'space-between'}>
             <div className="action-col">
               <Space>
-                <Button onClick={() => handleDialog(DialogType.create)}>创建文件</Button>
-                <Button onClick={() => handleDialog(DialogType.upload)} type="primary">
+                <Button
+                  disabled={loading}
+                  onClick={() => handleDialog(DialogType.upload)}
+                  type="primary"
+                >
                   上传文件
                 </Button>
 
@@ -347,7 +282,7 @@ export default (props: IListProps) => {
             </div>
             <div className="condition-col">
               <div className="condition-item">
-                <div className="condition-label">任务名称</div>
+                <div className="condition-label">文件名称</div>
                 <Search
                   placeholder="请输入名称"
                   onSearch={() => {
@@ -395,7 +330,14 @@ export default (props: IListProps) => {
             {...tableProps}
           />
 
-          <Dialog type={dialogtype} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+          <Dialog
+            type={dialogtype}
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+            catalogue={catalogue as TreeDataNode}
+            onCreateSuccess={getApiList}
+            editRecord={editRecord}
+          />
         </div>
       </Scrollbars>
     </div>
