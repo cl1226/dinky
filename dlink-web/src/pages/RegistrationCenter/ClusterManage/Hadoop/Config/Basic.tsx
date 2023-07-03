@@ -195,12 +195,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
         <Collapse.Panel header="Hadoop 平台" key="hadoop">
           <Form {...formLayout} form={basicForm} name="basic-form" initialValues={{ type: 'CDH' }}>
             <Form.Item label="Hadoop 平台类型" name="type">
-              <Radio.Group
-                disabled={configLoaded}
-                options={transferEnumToOptions(EHadoopType)}
-                optionType="button"
-                buttonStyle="solid"
-              />
+              <Radio.Group disabled={configLoaded} options={transferEnumToOptions(EHadoopType)} />
             </Form.Item>
             <Form.Item
               label="名称"

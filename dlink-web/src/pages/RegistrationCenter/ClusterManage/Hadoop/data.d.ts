@@ -25,6 +25,7 @@ export interface IHadoop {
   kdcHost: string
   realm: string
   uuid: string
+  yarnQueueModels?: IYarnQueueItem[]
 }
 
 export interface IYarnQueueItem {
