@@ -72,10 +72,11 @@ export type ClusterConfigurationTableListItem = {
 export type ShellTableListItem = {
   id: number
   name: string
-  hostName?: string
+  hostname?: string
+  clusterName?: string
+  clusterId?: number
   ip: string
   port: string
-  hostName: string
   username: string
   password: string
   description?: string

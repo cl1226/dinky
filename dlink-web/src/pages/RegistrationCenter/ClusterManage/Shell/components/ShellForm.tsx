@@ -17,12 +17,12 @@
  *
  */
 
-import React, { useState } from 'react'
-import { Button, Form, Input, Modal, Select, Switch } from 'antd'
+import React, { useState, useEffect } from 'react'
+import { Button, Form, Input, message, Modal, Select } from 'antd'
 
 import { ShellTableListItem } from '@/pages/RegistrationCenter/data'
 
-import { RUN_MODE } from '@/components/Studio/conf'
+import { getHadoopList, postShellTest } from '@/pages/RegistrationCenter/ClusterManage/service'
 import { l } from '@/utils/intl'
 
 export type ClusterFormProps = {
@@ -43,23 +43,22 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
   const [formVals, setFormVals] = useState<Partial<ShellTableListItem>>({
     id: props.values.id,
     name: props.values.name,
-    hostName: props.values.hostName,
+    clusterId: props.values.clusterId,
+    hostname: props.values.hostname,
     ip: props.values.ip,
     port: props.values.port,
     username: props.values.username,
     password: props.values.password,
     description: props.values.description,
   })
-
+  const [clusterOptions, setClusterOptions] = useState<any>([])
+  const [testLoading, setTestLoading] = useState(false)
   const { onSubmit: handleSubmit, onCancel: handleModalVisible, modalVisible } = props
 
   const submitForm = async () => {
     const fieldsValue = await form.validateFields()
 
     fieldsValue.id = formVals.id
-    if (!fieldsValue.alias || fieldsValue.alias.length == 0) {
-      fieldsValue.alias = fieldsValue.name
-    }
 
     setFormVals(fieldsValue)
     handleSubmit(fieldsValue)
@@ -69,7 +68,23 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
     handleModalVisible(false)
     form.resetFields()
   }
-
+  const onModalTest = async () => {
+    const fieldsValue = await form.validateFields()
+    setTestLoading(true)
+    const result = await postShellTest({
+      ip: fieldsValue.ip,
+      hostname: fieldsValue.hostname,
+      port: fieldsValue.port,
+      username: fieldsValue.username,
+      password: fieldsValue.password,
+    })
+    setTestLoading(false)
+    if (result) {
+      Modal.success({
+        content: '连接成功',
+      })
+    }
+  }
   const renderContent = (formValsPara: Partial<ShellTableListItem>) => {
     return (
       <>
@@ -77,29 +92,41 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
           <Input placeholder="请输入名称" />
         </Form.Item>
 
-        <Form.Item name="hostName" label="hostName">
-          <Input placeholder="请输入hostName" />
+        <Form.Item
+          name="clusterId"
+          label="所属集群"
+          rules={[{ required: true, message: '请选择集群' }]}
+        >
+          <Select placeholder="请选择集群">
+            {clusterOptions.map((item) => (
+              <Option value={item.value}>{item.label}</Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Form.Item name="hostname" label="hostname">
+          <Input placeholder="请输入hostname" />
         </Form.Item>
 
         <Form.Item name="ip" label="ip" rules={[{ required: true, message: '请输入ip' }]}>
           <Input placeholder="请输入ip" />
         </Form.Item>
 
-        <Form.Item name="端口" label="port" rules={[{ required: true, message: '请输入端口' }]}>
+        <Form.Item name="port" label="端口" rules={[{ required: true, message: '请输入端口' }]}>
           <Input placeholder="请输入端口" />
         </Form.Item>
 
         <Form.Item
-          name="用户名"
-          label="username"
+          name="username"
+          label="用户名"
           rules={[{ required: true, message: '请输入用户名' }]}
         >
           <Input placeholder="请输入用户名" />
         </Form.Item>
-        <Form.Item name="密码" label="password" rules={[{ required: true, message: '请输入密码' }]}>
+        <Form.Item name="password" label="密码" rules={[{ required: true, message: '请输入密码' }]}>
           <Input.Password placeholder="请输入密码" />
         </Form.Item>
-        <Form.Item name="描述" label="description">
+        <Form.Item name="description" label="描述">
           <Input.TextArea allowClear autoSize={{ minRows: 3, maxRows: 10 }} />
         </Form.Item>
       </>
@@ -110,7 +137,9 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
     return (
       <>
         <Button onClick={() => onModalCancel()}>取消</Button>
-        <Button onClick={() => onModalCancel()}>测试</Button>
+        <Button loading={testLoading} onClick={() => onModalTest()}>
+          测试
+        </Button>
 
         <Button type="primary" onClick={() => submitForm()}>
           保存
@@ -118,6 +147,16 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
       </>
     )
   }
+
+  const initClusterOptions = async () => {
+    const result = await getHadoopList()
+
+    setClusterOptions(result.map((item) => ({ label: item.name, value: item.id })))
+  }
+
+  useEffect(() => {
+    initClusterOptions()
+  }, [])
 
   return (
     <Modal

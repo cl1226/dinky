@@ -19,16 +19,19 @@
 
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Input, message, Modal } from 'antd'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { PageContainer } from '@ant-design/pro-layout'
 import type { ActionType, ProColumns } from '@ant-design/pro-table'
 import ProTable from '@ant-design/pro-table'
 import type { ShellTableListItem } from '@/pages/RegistrationCenter/data'
 
-import { handleAddOrUpdate, handleRemove, queryData } from '@/components/Common/crud'
 import ShellForm from '@/pages/RegistrationCenter/ClusterManage/Shell/components/ShellForm'
-
-const url = '/api/cluster'
+import {
+  getHadoopList,
+  getShellList,
+  addorUpdateShell,
+  deleteShell,
+} from '@/pages/RegistrationCenter/ClusterManage/service'
 
 const ShellTableList: React.FC<{}> = (props: any) => {
   const { dispatch } = props
@@ -36,13 +39,24 @@ const ShellTableList: React.FC<{}> = (props: any) => {
   const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false)
   const [formValues, setFormValues] = useState({})
   const actionRef = useRef<ActionType>()
-
+  const [clusterMaps, setClusterMaps] = useState<any>({})
+  const initClusterMaps = async () => {
+    const result = await getHadoopList()
+    const tempMaps = {}
+    result.forEach((item) => {
+      tempMaps[item.id] = {
+        text: item.name,
+        status: item.id,
+      }
+    })
+    setClusterMaps(tempMaps)
+  }
   const onDelete = (currentItem: ShellTableListItem) => {
     Modal.confirm({
       content: '确定删除该环境配置吗？',
       onOk: async () => {
-        await handleRemove(url, [currentItem])
-        actionRef.current?.reloadAndRest?.()
+        const result = await deleteShell(currentItem.id)
+        result && actionRef.current?.reloadAndRest?.()
       },
     })
   }
@@ -54,15 +68,28 @@ const ShellTableList: React.FC<{}> = (props: any) => {
       width: 240,
     },
     {
-      title: 'hostName',
-      dataIndex: 'hostName',
+      title: '所属集群',
+      dataIndex: 'clusterName',
+      width: 240,
+      valueType: 'select',
+      valueEnum: clusterMaps,
+    },
+    {
+      title: '所属集群ID',
+      dataIndex: 'clusterId',
+      hideInSearch: true,
       width: 150,
+    },
+    {
+      title: 'hostname',
+      dataIndex: 'hostname',
+      width: 200,
     },
     {
       title: 'ip',
       dataIndex: 'ip',
       hideInSearch: true,
-      width: 150,
+      width: 200,
     },
     {
       title: '端口',
@@ -74,12 +101,14 @@ const ShellTableList: React.FC<{}> = (props: any) => {
       title: '用户名',
       dataIndex: 'username',
       hideInSearch: true,
+
       width: 150,
     },
     {
       title: '密码',
       dataIndex: 'password',
       hideInSearch: true,
+      hideInTable: true,
       width: 150,
     },
     {
@@ -87,12 +116,14 @@ const ShellTableList: React.FC<{}> = (props: any) => {
       dataIndex: 'description',
       valueType: 'textarea',
       hideInSearch: true,
+      width: 300,
     },
     {
       title: '操作',
       dataIndex: 'option',
       valueType: 'option',
-      width: 200,
+      fixed: 'right',
+      width: 150,
       render: (_, record) => [
         <a
           onClick={() => {
@@ -114,6 +145,9 @@ const ShellTableList: React.FC<{}> = (props: any) => {
     },
   ]
 
+  useEffect(() => {
+    initClusterMaps()
+  }, [])
   return (
     <PageContainer title={false}>
       <ProTable<ShellTableListItem>
@@ -121,6 +155,7 @@ const ShellTableList: React.FC<{}> = (props: any) => {
         headerTitle={'环境管理'}
         actionRef={actionRef}
         rowKey="id"
+        scroll={{ x: 1200 }}
         search={{
           labelWidth: 120,
         }}
@@ -129,7 +164,15 @@ const ShellTableList: React.FC<{}> = (props: any) => {
             <PlusOutlined /> 新建
           </Button>,
         ]}
-        request={(params, sorter, filter) => queryData(url, { ...params, sorter, filter })}
+        request={(params, sorter, filter) => {
+          const { current, clusterName, ...resetParams } = params
+
+          return getShellList({
+            pageIndex: current,
+            clusterName: clusterName ? clusterMaps[clusterName]?.text : '',
+            ...resetParams,
+          })
+        }}
         columns={columns}
         pagination={{
           defaultPageSize: 10,
@@ -138,7 +181,7 @@ const ShellTableList: React.FC<{}> = (props: any) => {
       />
       <ShellForm
         onSubmit={async (value) => {
-          const success = await handleAddOrUpdate(url, value)
+          const success = await addorUpdateShell(value)
           if (success) {
             handleModalVisible(false)
             setFormValues({})
@@ -154,7 +197,7 @@ const ShellTableList: React.FC<{}> = (props: any) => {
       {formValues && Object.keys(formValues).length ? (
         <ShellForm
           onSubmit={async (value) => {
-            const success = await handleAddOrUpdate(url, value)
+            const success = await addorUpdateShell(value)
             if (success) {
               handleUpdateModalVisible(false)
               setFormValues({})
