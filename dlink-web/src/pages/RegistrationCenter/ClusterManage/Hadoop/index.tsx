@@ -19,7 +19,7 @@ const HadoopPage: React.FC<{}> = (props: any) => {
     <PageContainer title={false}>
       <div className={styles['hadoop-list']}>
         {hadoopList.map((item) => (
-          <Card className={styles['hadoop-card']} hoverable bordered={false}>
+          <Card className={'hadoop-card'} hoverable bordered={false}>
             <div className="title-row">{item.name}</div>
             <div className="img-row">
               <img src="/registration/cluster/hadoop-card.svg" alt="" />
@@ -38,7 +38,7 @@ const HadoopPage: React.FC<{}> = (props: any) => {
           </Card>
         ))}
         <Card
-          className={styles['hadoop-card']}
+          className={'hadoop-card'}
           hoverable
           bordered={false}
           onClick={() => history.push('/registration/cluster/hadoop/create')}
