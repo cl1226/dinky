@@ -17,43 +17,38 @@
  *
  */
 
-
-import {Reducer} from "umi";
-import {DocumentTableListItem} from "@/pages/RegistrationCenter/data";
+import { Reducer } from 'umi'
+import { DocumentTableListItem } from '@/pages/RegistrationCenter/data'
 
 export type DocumentStateType = {
-  fillDocuments:DocumentTableListItem[],
-};
+  fillDocuments: DocumentTableListItem[]
+}
 
 export type ModelType = {
-  namespace: string;
-  state: DocumentStateType;
-  effects: {
-  };
+  namespace: string
+  state: DocumentStateType
+  effects: {}
   reducers: {
-    saveAllFillDocuments: Reducer<DocumentStateType>;
-  };
-};
+    saveAllFillDocuments: Reducer<DocumentStateType>
+  }
+}
 
 const DocumentModel: ModelType = {
   namespace: 'Document',
   state: {
-    fillDocuments:[],
+    fillDocuments: [],
   },
 
-  effects: {
-
-  },
+  effects: {},
 
   reducers: {
-    saveAllFillDocuments(state, {payload}) {
+    saveAllFillDocuments(state, { payload }) {
       return {
         ...state,
         fillDocuments: payload,
-      };
+      }
     },
-
   },
-};
+}
 
-export default DocumentModel;
+export default DocumentModel
