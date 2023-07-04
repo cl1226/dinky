@@ -83,7 +83,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
     const kerberosFormRes = await kerberosForm.validateFields()
     const configFormRes = await configForm.validateFields()
 
-    const keytabArr = kerberosFormRes.keytabJson.map((item) => {
+    const keytabArr = (kerberosFormRes?.keytabJson || []).map((item) => {
       return {
         principle: item.principle,
         keytab: item.keytab[0]?.response?.datas,
@@ -136,6 +136,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       kerberos: info.kerberos,
       kdcHost: info.kdcHost,
       realm: info.realm,
+      keytabJson: JSON.parse(info?.keytabJson || '[]'),
     })
   }
 

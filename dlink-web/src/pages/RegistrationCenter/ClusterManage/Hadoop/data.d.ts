@@ -26,6 +26,7 @@ export interface IHadoop {
   realm: string
   uuid: string
   yarnQueueModels?: IYarnQueueItem[]
+  keytabJson?: string
 }
 
 export interface IYarnQueueItem {
