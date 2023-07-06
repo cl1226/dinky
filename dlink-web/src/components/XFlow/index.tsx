@@ -132,7 +132,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
         config={toolbarConfig}
         position={{ top: 0, left: 160, right: 0, bottom: 0 }}
       />
-      <XFlowCanvas config={graphConfig} position={{ top: 40, left: 160, right: 32, bottom: 0 }}>
+      <XFlowCanvas config={graphConfig} position={{ top: 40, left: 0, right: 32, bottom: 0 }}>
         <CanvasScaleToolbar position={{ top: 12, right: 12 }} />
         <CanvasContextMenu config={menuConfig} />
         <CanvasSnapline color="#faad14" />

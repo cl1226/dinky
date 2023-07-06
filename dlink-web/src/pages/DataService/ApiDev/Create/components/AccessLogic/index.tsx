@@ -148,6 +148,7 @@ export default (props: IStepComProps) => {
   const [testParams, setTestParams] = useState<readonly ITestParams[]>([])
   const [executeKey, setExecuteKey] = useState('1')
   const [executeResult, setExecuteResult] = useState([])
+  const [executeSqlStr, setExecuteSqlStr] = useState('')
 
   const [tableForm] = Form.useForm()
 
@@ -165,10 +166,14 @@ export default (props: IStepComProps) => {
       sql: form.getFieldValue('segment'),
       params: JSON.stringify(reqP),
     }
+    setExecuteSqlStr('')
+    setExecuteResult([])
     requestExecuteSql(tempParam).then((res) => {
       if (res.code === CODE.SUCCESS) {
         setExecuteKey('2')
-        setExecuteResult(res.datas || [])
+        const { result, executeSQL } = res.datas || {}
+        setExecuteResult(result)
+        setExecuteSqlStr(executeSQL)
       } else {
         message.error(res.msg)
       }
@@ -418,7 +423,7 @@ export default (props: IStepComProps) => {
                 setExecuteKey(key)
               }}
             >
-              <Tabs.TabPane tab="预览SQL" key="1">
+              <Tabs.TabPane tab="初始SQL" key="1">
                 <AceEditor
                   width="100%"
                   height="400px"
@@ -431,6 +436,21 @@ export default (props: IStepComProps) => {
               </Tabs.TabPane>
               <Tabs.TabPane tab="执行结果" key="2">
                 <CustomTable dataSource={executeResult}></CustomTable>
+              </Tabs.TabPane>
+              <Tabs.TabPane tab="执行SQL" key="3">
+                {executeSqlStr ? (
+                  <AceEditor
+                    width="100%"
+                    height="400px"
+                    mode="mysql"
+                    theme="github"
+                    readOnly
+                    showPrintMargin={false}
+                    value={executeSqlStr}
+                  />
+                ) : (
+                  <Empty />
+                )}
               </Tabs.TabPane>
             </Tabs>
           </div>
