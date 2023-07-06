@@ -2,7 +2,6 @@ import type { NsGraph, NsNodeCmd } from '@antv/xflow'
 import { controlMapService, ControlShapeEnum } from './form-controls'
 import { MODELS, XFlowNodeCommands, NsJsonSchemaForm } from '@antv/xflow'
 import { set } from 'lodash'
-import { CustomJsonForm } from './json-form'
 
 export function delay(ms: number) {
   return new Promise((resolve) => setTimeout(() => resolve(true), ms))
@@ -12,41 +11,9 @@ export const formSchemaService: NsJsonSchemaForm.IFormSchemaService = async (arg
   const { targetData, modelService, targetType } = args
   /** 可以使用获取 graphMeta */
   const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
-  console.log('args', args)
-  if (targetType === 'canvas') {
-    return {
-      tabs: [],
-    }
-  } else {
-    const nodeSchema: NsJsonSchemaForm.ISchema = {
-      tabs: [
-        {
-          name: '节点信息',
-          groups: [
-            {
-              name: 'node1',
-              controls: [
-                {
-                  name: 'label',
-                  label: '节点名称',
-                  shape: NsJsonSchemaForm.ControlShape.INPUT,
-                  value: targetData!.label,
-                  required: true,
-                },
-                {
-                  name: 'jobId',
-                  label: '节点作业',
-                  shape: ControlShapeEnum.SelectorShape,
-                  value: targetData!.jobId,
-                  required: true,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    }
-    return nodeSchema
+
+  return {
+    tabs: [],
   }
 }
 

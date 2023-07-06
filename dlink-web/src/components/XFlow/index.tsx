@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 /** app 核心组件 */
-import { XFlow, XFlowCanvas, KeyBindings, createGraphConfig } from '@antv/xflow'
+import { XFlow, XFlowCanvas, KeyBindings } from '@antv/xflow'
 import type { IApplication, IAppLoad } from '@antv/xflow'
 import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons'
 /** 交互组件 */
@@ -20,7 +20,7 @@ import {
 import { CustomJsonForm } from './json-form'
 /** app 组件配置  */
 /** 配置画布 */
-import { useGraphHookConfig } from './config-graph'
+import { useGraphHookConfig, useGraphConfig } from './config-graph'
 /** 配置Command */
 import { useCmdConfig, initGraphCmds } from './config-cmd'
 /** 配置Model */
@@ -43,12 +43,6 @@ export interface IProps {
   flowId: string
 }
 
-export const useGraphConfig = createGraphConfig<IProps>((graphConfig) => {
-  graphConfig.setEdgeRender('Edge', (props) => {
-    return <div className="react-edge"> {props.data.label} </div>
-  })
-})
-
 export const XFlowEditor: React.FC<IProps> = (props) => {
   const { activeKey, flowId } = props
 
@@ -63,6 +57,8 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
   const [inited, setInited] = useState(false)
   const [meta, setMeta] = useState<IMeta>({ flowId: flowId })
   const graphHooksConfig = useGraphHookConfig(props)
+  const graphConfig = useGraphConfig(props)
+
   const toolbarConfig = useToolbarConfig()
   const menuConfig = useMenuConfig()
   const cmdConfig = useCmdConfig()
@@ -89,8 +85,6 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
       initGraphCmds(cache.app, handleMeta)
     }
   }, [cache.app, flowId])
-
-  const graphConfig = useGraphConfig(props)
 
   const getNodeCollapsePosition = () => {
     if (showNodePanel) return { width: 160, top: 0, bottom: 0, left: 0 }
@@ -138,7 +132,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
         config={toolbarConfig}
         position={{ top: 0, left: 160, right: 0, bottom: 0 }}
       />
-      <XFlowCanvas position={{ top: 40, left: 230, right: 32, bottom: 0 }}>
+      <XFlowCanvas config={graphConfig} position={{ top: 40, left: 160, right: 32, bottom: 0 }}>
         <CanvasScaleToolbar position={{ top: 12, right: 12 }} />
         <CanvasContextMenu config={menuConfig} />
         <CanvasSnapline color="#faad14" />

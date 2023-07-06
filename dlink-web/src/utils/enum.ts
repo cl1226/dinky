@@ -20,6 +20,12 @@ export enum EContentType {
   'application/x-www-form-urlencoded' = 'application/x-www-form-urlencoded',
 }
 
+// 缓存
+export enum ECachePlugin {
+  'None' = '不设置',
+  'Memory' = '内存',
+}
+
 // 取数方式
 export enum EAccessType {
   'sql' = '脚本方式',

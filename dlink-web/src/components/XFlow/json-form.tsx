@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Tabs, Col, Modal, Table, Row, message } from 'antd'
-import { ContainerOutlined, PlusOutlined } from '@ant-design/icons'
+import { CloseCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { NsJsonSchemaForm, MODELS } from '@antv/xflow'
 import moment from 'moment'
 import { Descriptions, Radio, DatePicker, Input, Form } from 'antd'
 import type { RadioChangeEvent } from 'antd'
 import { Cron } from '@/components/Cron'
-import { NS_CANVAS_FORM, NS_FLOW_TASK_FORM } from './config-model-service'
+import { NS_CANVAS_FORM } from './config-model-service'
 import { IMeta, ESchedulerType, getJsonCron } from './service'
 import { Scrollbars } from 'react-custom-scrollbars'
 import type { ColumnsType } from 'antd/es/table'
@@ -14,9 +14,10 @@ import styles from './index.less'
 import { page, getTask } from '@/pages/DataStudio/service'
 import { debounce } from 'lodash'
 import { useXFlowApp, XFlowGraphCommands } from '@antv/xflow'
-
+import type { NsNodeCmd } from '@antv/xflow'
+import { XFlowNodeCommands } from '@antv/xflow'
+// import { useTabState } from './config-model-service'
 const RangePicker: any = DatePicker.RangePicker
-const { TabPane } = Tabs
 const { Search } = Input
 
 export interface IGetShellListParams {
@@ -26,6 +27,79 @@ export interface IGetShellListParams {
   dialect?: string
 }
 
+export const VerticalTabs: React.FC<NsJsonSchemaForm.ICustomProps> = (props) => {
+  const { targetType, commandService, modelService } = props
+  const [showTabPane, setShowTabPane] = useState(false)
+  const sref: any = React.createRef<Scrollbars>()
+  const refreshVisible = async (visible) => {
+    if (visible) {
+      // const [tabState, setTabState] = await useTabState(modelService)
+      // setTabState({
+      //   visible: true,
+      // })
+      setShowTabPane(true)
+    } else {
+      setShowTabPane(false)
+      commandService.executeCommand<NsNodeCmd.SelectNode.IArgs>(XFlowNodeCommands.SELECT_NODE.id, {
+        nodeIds: [],
+        resetSelection: true,
+      })
+    }
+  }
+  const getTabs = () => {
+    const tabs: any = []
+    if (targetType === 'canvas') {
+      tabs.push({
+        label: '作业信息',
+        key: 'taskInfo',
+        children: <CustomJsonForm.CanvasCustomRender {...props} />,
+      })
+    } else {
+      tabs.push({
+        label: '节点信息',
+        key: 'nodeInfo',
+        children: <CustomJsonForm.NodeCustomRender {...props} />,
+      })
+    }
+    return tabs.map((item) => ({
+      ...item,
+      children: (
+        <div className={styles['json-form']}>
+          <div className="info-title">
+            {item.label}
+            <div className="close-box" onClick={() => refreshVisible(false)}>
+              <CloseCircleOutlined />
+            </div>
+          </div>
+          <div className="info-wrap">
+            <Scrollbars style={{ height: '100%' }} ref={sref}>
+              <div className="info-content">{item.children}</div>
+            </Scrollbars>
+          </div>
+        </div>
+      ),
+    }))
+  }
+  useEffect(() => {
+    if (!showTabPane && targetType === 'node') {
+      refreshVisible(true)
+    }
+  }, [targetType])
+  return (
+    <div className={styles['vertical-tabs']}>
+      <Tabs
+        className={[styles['tab-tool-wrap'], showTabPane ? styles['tab-tool-show'] : ''].join(' ')}
+        onTabClick={() => refreshVisible(!showTabPane)}
+        onChange={() => {
+          refreshVisible(true)
+        }}
+        size="small"
+        tabPosition="right"
+        items={getTabs()}
+      ></Tabs>
+    </div>
+  )
+}
 export namespace CustomJsonForm {
   export const getCustomRenderComponent: NsJsonSchemaForm.ICustomRender = (
     targetType,
@@ -33,11 +107,7 @@ export namespace CustomJsonForm {
     modelService,
     commandService,
   ) => {
-    if (targetType === 'canvas') {
-      return CustomJsonForm.CanvasCustomRender
-    } else {
-      return CustomJsonForm.NodeCustomRender
-    }
+    return VerticalTabs
   }
 
   export const CanvasCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (props) => {
@@ -45,7 +115,6 @@ export namespace CustomJsonForm {
     const [canvasForm] = Form.useForm()
     const [baseInfo, setBaseInfo] = useState<IMeta>({ flowId: '' })
     const [cycleVisible, setCycleVisible] = useState<boolean>(false)
-    const sref: any = React.createRef<Scrollbars>()
 
     const registerModel = async () => {
       if (!modelService.findDeferredModel(NS_CANVAS_FORM.id)) {
@@ -115,112 +184,75 @@ export namespace CustomJsonForm {
       registerModel()
     }, [])
 
-    const [showTabPane, setshowTabPane] = useState(false)
-
     return (
-      <div className={styles['vertical-tabs']}>
-        <Tabs
-          className={`tab-tool-wrap ${showTabPane ? 'visible' : ''}`}
-          onTabClick={() => setshowTabPane(!showTabPane)}
-          defaultActiveKey="1"
-          size="small"
-          tabPosition="right"
+      <>
+        <Descriptions title="基本信息" column={1}>
+          <Descriptions.Item label="作业ID">{baseInfo.flowId}</Descriptions.Item>
+          <Descriptions.Item label="作业名称">{baseInfo.flowName}</Descriptions.Item>
+          <Descriptions.Item label="作业状态">{baseInfo.status}</Descriptions.Item>
+        </Descriptions>
+        <Form
+          name="canvasForm"
+          form={canvasForm}
+          initialValues={{
+            timezoneId: 'Asia/Shanghai',
+            timerange: [moment(), moment().add(100, 'y')],
+            schedulerType: ESchedulerType.SINGLE,
+          }}
         >
-          <TabPane
-            tab={
-              <span>
-                <ContainerOutlined /> 作业信息
-              </span>
-            }
-            key="XflowTaskInfo"
-          >
-            <Scrollbars style={{ height: 500 }}>
-              <div className={styles['custom-form-component']}>
-                <div className="info-title">作业信息</div>
-                <div className="info-wrap">
-                  <Scrollbars style={{ height: '100%' }} ref={sref}>
-                    <div className="info-content">
-                      <Descriptions title="基本信息" column={1}>
-                        <Descriptions.Item label="作业ID">{baseInfo.flowId}</Descriptions.Item>
-                        <Descriptions.Item label="作业名称">{baseInfo.flowName}</Descriptions.Item>
-                        <Descriptions.Item label="作业状态">{baseInfo.status}</Descriptions.Item>
-                      </Descriptions>
-                      <Form
-                        name="canvasForm"
-                        form={canvasForm}
-                        initialValues={{
-                          timezoneId: 'Asia/Shanghai',
-                          timerange: [moment(), moment().add(100, 'y')],
-                          schedulerType: ESchedulerType.SINGLE,
-                        }}
-                      >
-                        <Descriptions title="调度配置" column={1} layout="vertical">
-                          <Descriptions.Item label="调度方式">
-                            <Form.Item
-                              name="schedulerType"
-                              style={{ width: '100%', marginBottom: 0 }}
-                            >
-                              <Radio.Group
-                                onChange={(e: RadioChangeEvent) => {
-                                  setCycleVisible(e.target.value === ESchedulerType.CYCLE)
-                                }}
-                              >
-                                <Radio value={ESchedulerType.SINGLE}>单次调度</Radio>
-                                <Radio value={ESchedulerType.CYCLE}>周期调度</Radio>
-                              </Radio.Group>
-                            </Form.Item>
-                          </Descriptions.Item>
+          <Descriptions title="调度配置" column={1} layout="vertical">
+            <Descriptions.Item label="调度方式">
+              <Form.Item name="schedulerType" style={{ width: '100%', marginBottom: 0 }}>
+                <Radio.Group
+                  onChange={(e: RadioChangeEvent) => {
+                    setCycleVisible(e.target.value === ESchedulerType.CYCLE)
+                  }}
+                >
+                  <Radio value={ESchedulerType.SINGLE}>单次调度</Radio>
+                  <Radio value={ESchedulerType.CYCLE}>周期调度</Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Descriptions.Item>
 
-                          {cycleVisible ? (
-                            <>
-                              <Descriptions.Item key="timerange" label="起止时间">
-                                <Form.Item
-                                  name="timerange"
-                                  rules={[{ required: true, message: '请选择起止时间！' }]}
-                                  style={{ width: '100%' }}
-                                >
-                                  <RangePicker showTime />
-                                </Form.Item>
-                              </Descriptions.Item>
-                              <Descriptions.Item key="crontab" label="定时">
-                                <Form.Item
-                                  name="crontab"
-                                  rules={[{ required: true, message: '请选择定时！' }]}
-                                  style={{ width: '100%' }}
-                                >
-                                  <Cron />
-                                </Form.Item>
-                              </Descriptions.Item>
-                              <Descriptions.Item key="timezoneId" label="时区">
-                                <Form.Item
-                                  name="timezoneId"
-                                  rules={[{ required: true, message: '请选择时区！' }]}
-                                  style={{ width: '100%' }}
-                                >
-                                  <Input readOnly />
-                                </Form.Item>
-                              </Descriptions.Item>
-                            </>
-                          ) : null}
-                        </Descriptions>
-                      </Form>
-                    </div>
-                  </Scrollbars>
-                </div>
-              </div>
-            </Scrollbars>
-          </TabPane>
-        </Tabs>
-      </div>
+            {cycleVisible ? (
+              <>
+                <Descriptions.Item key="timerange" label="起止时间">
+                  <Form.Item
+                    name="timerange"
+                    rules={[{ required: true, message: '请选择起止时间！' }]}
+                    style={{ width: '100%' }}
+                  >
+                    <RangePicker showTime />
+                  </Form.Item>
+                </Descriptions.Item>
+                <Descriptions.Item key="crontab" label="定时">
+                  <Form.Item
+                    name="crontab"
+                    rules={[{ required: true, message: '请选择定时！' }]}
+                    style={{ width: '100%' }}
+                  >
+                    <Cron />
+                  </Form.Item>
+                </Descriptions.Item>
+                <Descriptions.Item key="timezoneId" label="时区">
+                  <Form.Item
+                    name="timezoneId"
+                    rules={[{ required: true, message: '请选择时区！' }]}
+                    style={{ width: '100%' }}
+                  >
+                    <Input readOnly />
+                  </Form.Item>
+                </Descriptions.Item>
+              </>
+            ) : null}
+          </Descriptions>
+        </Form>
+      </>
     )
   }
 
   export const NodeCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (props) => {
-    const sref: any = React.createRef<Scrollbars>()
-
-    const [showTabPane, setshowTabPane] = useState(false)
     const [showModal, setshowModal] = useState(false)
-
     interface DataType {
       name: string
       type: string
@@ -302,10 +334,13 @@ export namespace CustomJsonForm {
 
     useEffect(() => {
       getShellList()
+    }, [])
+    useEffect(() => {
       if (!!props && !!props.targetData && props.targetData.jobId) {
+        console.log('props.targetData', props.targetData)
         getTaskInfo(props.targetData.jobId)
       }
-    }, [])
+    }, [props?.targetData?.jobId])
 
     const onNameChange = (e) => {
       setSearchKey(e.target.value)
@@ -342,59 +377,22 @@ export namespace CustomJsonForm {
       )
     }
 
-    // useEffect(() => {
-    //   bindShell()
-    // }, [])
-
     return (
       <>
-        <Col id="StudioRightTool" className={styles['vertical-tabs']}>
-          <Tabs
-            className={`tab-tool-wrap ${showTabPane ? 'visible' : ''}`}
-            onTabClick={() => setshowTabPane(!showTabPane)}
-            defaultActiveKey="1"
-            size="small"
-            tabPosition="right"
-          >
-            <TabPane
-              tab={
-                <span>
-                  <ContainerOutlined /> 节点信息
-                </span>
-              }
-              key="XflowTaskInfo"
-            >
-              <Scrollbars style={{ height: 500 }}>
-                <div className={styles['custom-form-component']}>
-                  <div className="info-title">节点信息</div>
-                  <div className="info-wrap">
-                    <Scrollbars style={{ height: '100%' }} ref={sref}>
-                      <div className="info-content">
-                        <Descriptions title="基本信息" column={1}>
-                          <Descriptions.Item label="节点ID">
-                            {props.targetData?.id}
-                          </Descriptions.Item>
-                          <Descriptions.Item label="节点名称">
-                            {props.targetData?.label}
-                          </Descriptions.Item>
-                        </Descriptions>
-                        <Descriptions title="关联脚本" column={1}>
-                          <Descriptions.Item label="脚本">
-                            <Input
-                              placeholder="请选择关联脚本"
-                              value={selectedRow?.name}
-                              suffix={<PlusOutlined onClick={() => setshowModal(!showModal)} />}
-                            ></Input>
-                          </Descriptions.Item>
-                        </Descriptions>
-                      </div>
-                    </Scrollbars>
-                  </div>
-                </div>
-              </Scrollbars>
-            </TabPane>
-          </Tabs>
-        </Col>
+        <Descriptions title="基本信息" column={1}>
+          <Descriptions.Item label="节点ID">{props.targetData?.id}</Descriptions.Item>
+          <Descriptions.Item label="节点名称">{props.targetData?.label}</Descriptions.Item>
+        </Descriptions>
+        <Descriptions title="关联脚本" column={1}>
+          <Descriptions.Item label="脚本">
+            <Input
+              placeholder="请选择关联脚本"
+              value={selectedRow?.name}
+              suffix={<PlusOutlined onClick={() => setshowModal(!showModal)} />}
+            ></Input>
+          </Descriptions.Item>
+        </Descriptions>
+
         <Modal
           title="关联脚本"
           centered

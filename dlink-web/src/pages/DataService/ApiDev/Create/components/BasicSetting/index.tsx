@@ -4,7 +4,7 @@ import { Form, Input, Select, Radio } from 'antd'
 import CatalogueSelect from '@/pages/DataService/ApiDev/Create/components/CatalogueSelect'
 import Parameters from '@/pages/DataService/ApiDev/Create/components/Parameters'
 
-import { EContentType, EAuthType } from '@/utils/enum'
+import { EContentType, EAuthType, ECachePlugin } from '@/utils/enum'
 import { transferEnumToOptions } from '@/utils/utils'
 import { IStepComProps } from '@/pages/DataService/ApiDev/Create/type'
 import { CODE } from '@/components/Common/crud'
@@ -19,6 +19,7 @@ export default ({ form, formLayout, forms, mode, detailInfo }: IStepComProps) =>
       name="basic-setting-form"
       initialValues={{
         authType: 'none',
+        cachePlugin: 'None',
       }}
     >
       <Form.Item
@@ -84,6 +85,14 @@ export default ({ form, formLayout, forms, mode, detailInfo }: IStepComProps) =>
           optionType="button"
           buttonStyle="solid"
         />
+      </Form.Item>
+
+      <Form.Item label="缓存" name="cachePlugin">
+        <Select
+          placeholder="请选择"
+          style={{ width: 300 }}
+          options={transferEnumToOptions(ECachePlugin)}
+        ></Select>
       </Form.Item>
 
       <Form.Item label="描述" name="description">

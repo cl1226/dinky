@@ -114,77 +114,6 @@
         }
       }
     }
-
-    .tab-tool-wrap {
-      position: relative;
-      .ant-tabs-content-holder {
-        position: absolute;
-        z-index: 100;
-        width: 0;
-        overflow: hidden;
-        background-color: white;
-        background-clip: padding-box;
-        border: none;
-        border-radius: 8px;
-
-        transform: translateX(0px);
-        .ant-tabs-content {
-          height: 100%;
-          .ant-tabs-tabpane {
-            height: 100%;
-          }
-        }
-      }
-      .ant-tabs-nav {
-        z-index: 2;
-        background-color: white;
-      }
-
-      &.visible {
-        div.ant-tabs-content-holder {
-          width: 30vw;
-          min-width: 360px;
-          max-width: 600px;
-          border: 1px solid #ccc;
-          box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
-            0 9px 28px 8px rgba(0, 0, 0, 0.05);
-          transform: translateX(-100%);
-          transition: all 0.5s;
-        }
-      }
-    }
-  }
-}
-
-.custom-form-component {
-  height: 100%;
-  :global {
-    .info-title {
-      height: 40px;
-      color: #595959;
-      line-height: 40px;
-      text-align: center;
-      background-image: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-      border-bottom: 1px solid #d9d9d9;
-    }
-    .info-wrap {
-      height: calc(100% - 40px);
-      overflow-y: auto;
-      .info-content {
-        padding: 0 10px;
-        .ant-form-item {
-          margin-bottom: 18px;
-        }
-        .ant-descriptions-header {
-          margin-top: 10px;
-          margin-bottom: 10px;
-        }
-        .ant-descriptions-row > th,
-        .ant-descriptions-row > td {
-          padding-bottom: 0;
-        }
-      }
-    }
   }
 }
 
@@ -264,3 +193,87 @@
   }
 }
 /* --- tabs 垂直样式 --- end */
+
+.tab-tool-wrap {
+  position: relative;
+  height: 100%;
+  :global {
+    .ant-tabs-content-holder {
+      position: absolute;
+      z-index: 100;
+      width: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: white;
+      background-clip: padding-box;
+      border: none;
+      border-radius: 8px;
+      transform: translateX(-100%);
+      .ant-tabs-content {
+        height: 100%;
+        .ant-tabs-tabpane {
+          height: 100%;
+        }
+      }
+    }
+    .ant-tabs-nav {
+      z-index: 2;
+      background-color: white;
+    }
+  }
+}
+.tab-tool-show {
+  :global {
+    .ant-tabs-content-holder {
+      width: 30vw;
+      min-width: 360px;
+      max-width: 600px;
+      border: 1px solid #ccc;
+      box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+        0 9px 28px 8px rgba(0, 0, 0, 0.05);
+
+      transition: all 0.5s;
+    }
+  }
+}
+
+.json-form {
+  height: 100%;
+  :global {
+    .info-title {
+      position: relative;
+      height: 40px;
+      color: #595959;
+      line-height: 40px;
+      text-align: center;
+      background-image: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+      border-bottom: 1px solid #d9d9d9;
+      .close-box {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 18px;
+      }
+    }
+    .info-wrap {
+      height: calc(100% - 40px);
+      overflow-y: auto;
+      .info-content {
+        padding: 0 10px;
+        .ant-form-item {
+          margin-bottom: 18px;
+        }
+        .ant-descriptions-header {
+          margin-top: 10px;
+          margin-bottom: 10px;
+        }
+        .ant-descriptions-row > th,
+        .ant-descriptions-row > td {
+          padding-bottom: 0;
+        }
+      }
+    }
+  }
+}
