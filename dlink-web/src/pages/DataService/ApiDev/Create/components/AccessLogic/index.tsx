@@ -109,7 +109,7 @@ export const ParamtersTable = ({ params, onAdd }) => {
   )
 }
 
-export const CustomTable = ({ dataSource }) => {
+export const CustomTable = ({ dataSource, error }) => {
   const getColumns = (rowItem) =>
     Object.keys(rowItem || []).map((key) => ({
       title: key,
@@ -124,6 +124,10 @@ export const CustomTable = ({ dataSource }) => {
         </Tooltip>
       ),
     }))
+
+  if (error) {
+    return <span style={{ color: 'red' }}>{error}</span>
+  }
   return dataSource && dataSource.length ? (
     <Table
       columns={getColumns(dataSource?.[0])}
@@ -148,6 +152,7 @@ export default (props: IStepComProps) => {
   const [testParams, setTestParams] = useState<readonly ITestParams[]>([])
   const [executeKey, setExecuteKey] = useState('1')
   const [executeResult, setExecuteResult] = useState([])
+  const [executeError, setExecuteError] = useState('')
   const [executeSqlStr, setExecuteSqlStr] = useState('')
 
   const [tableForm] = Form.useForm()
@@ -171,8 +176,9 @@ export default (props: IStepComProps) => {
     requestExecuteSql(tempParam).then((res) => {
       if (res.code === CODE.SUCCESS) {
         setExecuteKey('2')
-        const { result, executeSQL } = res.datas || {}
-        setExecuteResult(result)
+        const { result, executeSQL, errorMsg } = res.datas || {}
+        setExecuteResult(result || [])
+        setExecuteError(errorMsg || '')
         setExecuteSqlStr(executeSQL)
       } else {
         message.error(res.msg)
@@ -435,7 +441,7 @@ export default (props: IStepComProps) => {
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab="执行结果" key="2">
-                <CustomTable dataSource={executeResult}></CustomTable>
+                <CustomTable dataSource={executeResult} error={executeError}></CustomTable>
               </Tabs.TabPane>
               <Tabs.TabPane tab="执行SQL" key="3">
                 {executeSqlStr ? (
