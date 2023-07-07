@@ -9,7 +9,7 @@ export const formLayout = {
 // 根据接口详情赋值当前步骤的form数据
 export const transferFormFieldsValue = (step: number, detail: any) => {
   if (step === 0) {
-    const { authType, absolutePath, catalogueId, path, name, contentType, params, description } =
+    const { authType, absolutePath, catalogueId, path, name, contentType, params, description,cachePlugin } =
       detail
 
     return {
@@ -23,6 +23,7 @@ export const transferFormFieldsValue = (step: number, detail: any) => {
       params,
       description,
       authType,
+      cachePlugin
     }
   } else if (step === 1) {
     const { accessType, datasourceType, datasourceId, datasourceDb, segment } = detail
