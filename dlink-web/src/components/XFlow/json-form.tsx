@@ -11,7 +11,20 @@ import {
 } from '@antv/xflow'
 import type { NsNodeCmd, IGraphCommandService, IModelService } from '@antv/xflow'
 import { Scrollbars } from 'react-custom-scrollbars'
-import { Descriptions, Radio, DatePicker, Input, Form, Button, Tabs, message, Modal } from 'antd'
+import {
+  Descriptions,
+  Radio,
+  Select,
+  DatePicker,
+  Input,
+  Form,
+  Button,
+  Tabs,
+  message,
+  Modal,
+  InputNumber,
+  Switch,
+} from 'antd'
 import { CloseCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import type { FormInstance } from 'antd'
 import moment from 'moment'
@@ -20,6 +33,8 @@ import { Cron } from '@/components/Cron'
 import { JobSelect } from '@/components/XFlow/components/JobSelect'
 import { NS_CANVAS_FORM } from './config-model-service'
 import { IMeta, ESchedulerType, getJsonCron, DIALECT } from './service'
+import { EDeployMode, EPriority, ESparkVersion, EProgramType } from './type.d'
+import { transferEnumToOptions } from '@/utils/utils'
 
 const RangePicker: any = DatePicker.RangePicker
 
@@ -27,8 +42,16 @@ interface ICustomFormProps extends NsJsonSchemaForm.ICustomProps {
   form: FormInstance
 }
 
+const formLayout: any = {
+  labelCol: { flex: '110px' },
+  labelAlign: 'left',
+  labelWrap: true,
+  wrapperCol: { flex: 1 },
+  colon: true,
+}
+
 const getNodeParams = (nodeType, formResult) => {
-  if (nodeType === DIALECT.KAFKA) {
+  if (nodeType === DIALECT.SPARK) {
     return {}
   }
   const { jobObj } = formResult
@@ -37,7 +60,23 @@ const getNodeParams = (nodeType, formResult) => {
     jobName: jobObj?.name || '',
   }
 }
-
+const getNodeDefaultFormValue = (nodeType) => {
+  if (nodeType === DIALECT.SPARK) {
+    return {
+      deployMode: EDeployMode.local,
+      driverCores: 1,
+      driverMemory: '512M',
+      executorInstances: 2,
+      executorMemory: '2G',
+      executorCores: 2,
+      version: ESparkVersion.SPARK2,
+      programType: EProgramType.SCALA,
+      priority: EPriority.MEDIUM,
+      maxAppAttempts: 0,
+    }
+  }
+  return {}
+}
 const compareFormJson = (newObj, oldJson) => {
   const oldObj = JSON.parse(oldJson || '{}')
 
@@ -253,7 +292,7 @@ export const CanvasCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (prop
           <Descriptions.Item label="调度方式">
             <Form.Item name="schedulerType" style={{ width: '100%', marginBottom: 0 }}>
               <Radio.Group
-                onChange={(e: RadioChangeEvent) => {
+                onChange={(e) => {
                   setCycleVisible(e.target.value === ESchedulerType.CYCLE)
                 }}
               >
@@ -340,6 +379,11 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
         return NodeCustomForm.Default()
     }
   }
+
+  const transferJson = (infoJson) => {
+    const infoObj = JSON.parse(infoJson || '{}')
+    return infoObj
+  }
   return (
     <>
       <Form
@@ -349,7 +393,11 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
           nodeName: props.targetData?.label,
           nodeId: props.targetData?.id,
           nodeType: props.targetData?.nodeType,
+          ...(props.targetData?.nodeInfo
+            ? transferJson(props.targetData?.nodeInfo)
+            : getNodeDefaultFormValue(props.targetData?.nodeType)),
         }}
+        {...formLayout}
       >
         <Descriptions title="基本信息" column={1}></Descriptions>
 
@@ -382,7 +430,97 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
 }
 
 export namespace NodeCustomForm {
-  export const Spark = () => {}
+  export const Spark = () => {
+    return (
+      <>
+        <Form.Item label="描述" name="description">
+          <Input.TextArea
+            placeholder="请输入"
+            style={{ width: '100%', resize: 'none' }}
+            rows={3}
+          ></Input.TextArea>
+        </Form.Item>
+        <Form.Item
+          label="任务优先级"
+          name="priority"
+          rules={[{ required: true, message: '请选择任务优先级' }]}
+        >
+          <Select style={{ width: '100%' }} options={transferEnumToOptions(EPriority)} />
+        </Form.Item>
+
+        <Form.Item label="失败重试次数" name="maxAppAttempts">
+          <InputNumber style={{ width: '100%' }} min={0} precision={0} addonAfter={'次'} />
+        </Form.Item>
+
+        <Form.Item label="程序类型" name="programType">
+          <Select style={{ width: '100%' }} options={transferEnumToOptions(EProgramType)} />
+        </Form.Item>
+        <Form.Item label="Spark版本" name="version">
+          <Select style={{ width: '100%' }} options={transferEnumToOptions(ESparkVersion)} />
+        </Form.Item>
+        <Form.Item
+          label="主函数Class"
+          name="mainClass"
+          rules={[{ required: true, message: '请输入主函数的Class' }]}
+        >
+          <Input style={{ width: '100%' }} placeholder="请输入主函数的Class"></Input>
+        </Form.Item>
+        <Form.Item
+          label="主程序包"
+          name="mainJarPath"
+          rules={[{ required: true, message: '请选择主程序包' }]}
+        >
+          <Select
+            style={{ width: '100%' }}
+            placeholder="请选择主程序包"
+            options={[
+              {
+                value: 'lucy',
+                label: 'Lucy',
+              },
+            ]}
+          />
+        </Form.Item>
+        <Form.Item label="部署方式" name="deployMode">
+          <Radio.Group options={transferEnumToOptions(EDeployMode)} />
+        </Form.Item>
+        <Form.Item label="任务名称" name="taskName">
+          <Input style={{ width: '100%' }} placeholder="请输入任务名称（选填）"></Input>
+        </Form.Item>
+
+        <Form.Item label="Driver核心数" name="driverCores">
+          <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'次'} />
+        </Form.Item>
+        <Form.Item label="Driver内存数" name="driverMemory">
+          <Input style={{ width: '100%' }} placeholder="请输入Driver内存数"></Input>
+        </Form.Item>
+        <Form.Item label="Executor数量" name="executorInstances">
+          <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'次'} />
+        </Form.Item>
+        <Form.Item label="Executor内存数" name="executorMemory">
+          <Input style={{ width: '100%' }} placeholder="请输入Driver内存数"></Input>
+        </Form.Item>
+        <Form.Item label="Executor核心数" name="executorCores">
+          <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'次'} />
+        </Form.Item>
+
+        <Form.Item label="主程序参数" name="mainClassParameters">
+          <Input.TextArea
+            placeholder="请输入"
+            style={{ resize: 'none', width: '100%' }}
+            rows={3}
+          ></Input.TextArea>
+        </Form.Item>
+        <Form.Item label="选项参数" name="optionParameters">
+          <Input.TextArea
+            placeholder="请输入"
+            style={{ resize: 'none', width: '100%' }}
+            rows={3}
+          ></Input.TextArea>
+        </Form.Item>
+      </>
+    )
+  }
   export const Default = () => {
     return (
       <>

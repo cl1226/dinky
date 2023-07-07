@@ -19,7 +19,7 @@ export interface TaskTableItem {
 }
 // valueKey: id Object
 export const JobSelect: React.FC<any> = (props) => {
-  const { value, valueKey = 'id', onChange, placeholder = '请选择关联脚本' } = props
+  const { value, valueKey = 'id', onChange, placeholder = '请选择关联脚本', ...resetProps } = props
 
   const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
@@ -110,6 +110,7 @@ export const JobSelect: React.FC<any> = (props) => {
             pageSize: 10,
           })
         }}
+        {...resetProps}
       ></Input>
 
       <Modal
