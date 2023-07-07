@@ -6,22 +6,13 @@ import type { NsNodeCmd } from '@antv/xflow'
 import type { NsNodeCollapsePanel } from '@antv/xflow'
 import { Avatar, Card } from 'antd'
 import { getFlowTaskEnum } from './service'
-import { getIcon } from '@/components/Studio/icon'
+import { getIcon } from './icon'
 
 export const onNodeDrop: NsNodeCollapsePanel.IOnNodeDrop = async (node, commands, modelService) => {
   const args: NsNodeCmd.AddNode.IArgs = {
     nodeConfig: { ...node, id: uuidv4() },
   }
   commands.executeCommand(XFlowNodeCommands.ADD_NODE.id, args)
-}
-
-const NodeDescription = (props) => {
-  const { name } = props
-  return (
-    <Card size="small" title={false} style={{ width: '150px' }} bordered={false}>
-      此节点用于执行一个指定的{name}作业节点。
-    </Card>
-  )
 }
 
 export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta, modelService) => {
@@ -35,15 +26,16 @@ export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta
       type: jtem.type,
       parentId: '1',
       // renderKey: DND_RENDER_ID,
-      renderComponent: props => (
+      renderComponent: (props) => (
         <div className="react-dnd-node react-custom-node">
-          <Avatar src={getIcon(jtem.type)}></Avatar> 
-          <p>{props.data.label}</p> 
+          <Avatar src={getIcon(jtem.type)}></Avatar>
+          <p>{props.data.label}</p>
         </div>
       ),
       jobId: '0',
-      // popoverContent: <NodeDescription name={jtem} />,
-      params: { type: jtem.type }
+      nodeType: jtem.type,
+      nodeInfo: '',
+      params: { type: jtem.type },
     })),
   }))
 }

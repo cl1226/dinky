@@ -36,7 +36,7 @@ import { l } from '@/utils/intl'
 const { TabPane } = Tabs
 
 const EditorTabs = (props: any) => {
-  const { tabs, current } = props
+  const { tabs, current, width } = props
 
   const onChange = (activeKey: any) => {
     props.changeActiveKey(activeKey)
@@ -105,7 +105,7 @@ const EditorTabs = (props: any) => {
   const getTabPane = (pane, i) => {
     return (
       <TabPane tab={Tab(pane)} key={pane.key} closable={pane.closable}>
-        <SchedulerEdit tabkey={pane.key} activeKey={current.key} />
+        <SchedulerEdit width={width} tabkey={pane.key} activeKey={current.key} />
       </TabPane>
     )
   }

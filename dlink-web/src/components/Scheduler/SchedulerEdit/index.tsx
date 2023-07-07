@@ -20,9 +20,9 @@
 import { XFlowEditor } from '@/components/XFlow'
 
 const WorkflowEditor = (props: any) => {
-  const { tabkey, activeKey } = props
+  const { tabkey, activeKey, width } = props
 
-  return <XFlowEditor activeKey={activeKey} flowId={tabkey}></XFlowEditor>
+  return <XFlowEditor width={width} activeKey={activeKey} flowId={tabkey}></XFlowEditor>
 }
 
 export default WorkflowEditor

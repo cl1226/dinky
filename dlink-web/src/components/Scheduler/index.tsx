@@ -95,7 +95,9 @@ const Scheduler = (props: any) => {
 
             <Row style={{ height: size.height - 48 - VIEW.topHeight }}>
               <Col style={{ width: '100%' }}>
-                <SchedulerTabs />
+                <SchedulerTabs
+                  width={size.width - (initialState.collapsed ? 48 : 208) - toolLeftWidth}
+                />
               </Col>
             </Row>
           </DraggleLayout>

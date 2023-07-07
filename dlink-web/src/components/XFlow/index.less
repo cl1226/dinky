@@ -133,7 +133,9 @@
 
 /* --- tabs 垂直样式 --- start */
 .vertical-tabs {
-  width: 100%;
+  position: absolute;
+  right: 0;
+  width: 32px;
   height: 100%;
   padding-top: 40px;
   :global {
@@ -252,9 +254,9 @@
         position: absolute;
         top: 50%;
         right: 10px;
+        font-size: 18px;
         transform: translateY(-50%);
         cursor: pointer;
-        font-size: 18px;
       }
     }
     .info-wrap {
@@ -276,4 +278,13 @@
       }
     }
   }
+}
+
+.mask-wrap {
+  position: absolute;
+  top: 40px;
+  right: 32px;
+  bottom: 0;
+  z-index: 99;
+  background-color: rgba(0, 0, 0, 0.45);
 }

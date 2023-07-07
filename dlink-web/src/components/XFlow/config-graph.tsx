@@ -5,7 +5,7 @@ import { createHookConfig, DisposableCollection } from '@antv/xflow'
 import { DND_RENDER_ID, GROUP_NODE_RENDER_ID } from './constant'
 import { AlgoNode } from './react-node/algo-node'
 import { GroupNode } from './react-node/group'
-// import { useTabState } from './config-model-service'
+
 export const useGraphHookConfig = createHookConfig<IProps>((config, proxy) => {
   // 获取 Props
   const props = proxy.getValue()
@@ -57,19 +57,4 @@ export const useGraphConfig = createGraphConfig<IProps>((graphConfig) => {
   // graphConfig.setEdgeRender('Edge', (props) => {
   //   return <div className="react-edge"> {props.data.label} </div>
   // })
-
-  const event: IEvent<'blank:click'> = {
-    eventName: 'blank:click',
-    callback: async (eventArgs, command, modelService) => {
-      console.log('blank:click', eventArgs)
-      // const [tabState, setTabState] = await useTabState(modelService)
-      // if (tabState) {
-      //   setTabState({
-      //     visible: false,
-      //   })
-      // }
-    },
-  }
-  /**  这里绑定事件  */
-  graphConfig.setEvents([event])
 })

@@ -22,6 +22,19 @@ export interface IMeta {
   cron?: string
 }
 
+// 节点类型
+export const DIALECT = {
+  KAFKA: 'Kafka',
+  FTP: 'Ftp',
+  FILE: 'File',
+  FLINKSQL: 'FlinkSQL',
+  HIVE: 'Hive',
+  SPARK: 'Spark',
+  FLINK: 'Flink',
+  SQL: 'SQL',
+  QUALITY: 'Quality',
+}
+
 /** 状态 类型 */
 enum GraphStatusEnum {
   CREATE = 'CREATE',

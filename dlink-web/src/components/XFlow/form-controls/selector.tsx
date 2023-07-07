@@ -71,8 +71,8 @@ const Select: React.FC<ISelectorProps> = (props) => {
   const getTreeData = async () => {
     const nodes = await MODELS.SELECTED_NODES.useValue(modelService)
     setValue(nodes[0].data.jobId)
-    const { params } = nodes[0].data
-    const result = await getFlowCatalogueTreeByType(params?.type)
+    const { nodeType } = nodes[0].data
+    const result = await getFlowCatalogueTreeByType(nodeType)
     setTreeData(convertToTreeData(result, 0))
   }
 

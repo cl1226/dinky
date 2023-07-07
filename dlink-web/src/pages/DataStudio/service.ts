@@ -17,10 +17,14 @@
  *
  */
 
-
-import {CAParam, StudioMetaStoreParam, StudioParam, IGetShellListParams} from "@/components/Studio/StudioEdit/data";
-import {request2} from "@/components/Common/crud";
-import {request} from "umi";
+import {
+  CAParam,
+  StudioMetaStoreParam,
+  StudioParam,
+  IGetShellListParams,
+} from '@/components/Studio/StudioEdit/data'
+import { request2 } from '@/components/Common/crud'
+import { request } from 'umi'
 
 export async function executeSql(params: StudioParam) {
   return request<API.Result>('/api/studio/executeSql', {
@@ -28,7 +32,7 @@ export async function executeSql(params: StudioParam) {
     data: {
       ...params,
     },
-  });
+  })
 }
 
 export async function executeDDL(params: StudioParam) {
@@ -37,7 +41,7 @@ export async function executeDDL(params: StudioParam) {
     data: {
       ...params,
     },
-  });
+  })
 }
 
 export async function explainSql(params: StudioParam) {
@@ -46,7 +50,7 @@ export async function explainSql(params: StudioParam) {
     data: {
       ...params,
     },
-  });
+  })
 }
 
 export async function getStreamGraph(params: StudioParam) {
@@ -55,7 +59,7 @@ export async function getStreamGraph(params: StudioParam) {
     data: {
       ...params,
     },
-  });
+  })
 }
 
 export async function getJobPlan(params: StudioParam) {
@@ -64,7 +68,7 @@ export async function getJobPlan(params: StudioParam) {
     data: {
       ...params,
     },
-  });
+  })
 }
 
 export async function getJobData(jobId: string) {
@@ -73,7 +77,7 @@ export async function getJobData(jobId: string) {
     params: {
       jobId,
     },
-  });
+  })
 }
 
 export async function getCatalogueTreeData(params?: StudioParam) {
@@ -82,7 +86,7 @@ export async function getCatalogueTreeData(params?: StudioParam) {
     data: {
       ...params,
     },
-  });
+  })
 }
 
 export async function getLineage(params: CAParam) {
@@ -91,7 +95,7 @@ export async function getLineage(params: CAParam) {
     data: {
       ...params,
     },
-  });
+  })
 }
 
 export async function getMSCatalogs(params: StudioMetaStoreParam) {
@@ -100,7 +104,7 @@ export async function getMSCatalogs(params: StudioMetaStoreParam) {
     data: {
       ...params,
     },
-  });
+  })
 }
 
 export async function getMSSchemaInfo(params: StudioMetaStoreParam) {
@@ -109,7 +113,7 @@ export async function getMSSchemaInfo(params: StudioMetaStoreParam) {
     data: {
       ...params,
     },
-  });
+  })
 }
 
 //海豚 获取任务定义
@@ -119,7 +123,7 @@ export async function getTaskDefinition(dinkyTaskId: string) {
     params: {
       dinkyTaskId,
     },
-  });
+  })
 }
 
 //海豚 获取任务定义集合
@@ -129,46 +133,56 @@ export async function getTaskMainInfos(dinkyTaskId: string) {
     params: {
       dinkyTaskId,
     },
-  });
+  })
 }
 
 //海豚 创建任务定义
-export async function createTaskDefinition(dinkyTaskId: string, upstreamCodes: string, params: object) {
+export async function createTaskDefinition(
+  dinkyTaskId: string,
+  upstreamCodes: string,
+  params: object,
+) {
   return request<API.Result>('/api/scheduler/task', {
     method: 'POST',
     params: {
       dinkyTaskId,
-      upstreamCodes
+      upstreamCodes,
     },
     data: {
       ...params,
     },
-  });
+  })
 }
 
 //海豚 更新任务定义
-export async function updateTaskDefinition(processCode: string, projectCode: string, taskCode: string, upstreamCodes: string, params: object) {
+export async function updateTaskDefinition(
+  processCode: string,
+  projectCode: string,
+  taskCode: string,
+  upstreamCodes: string,
+  params: object,
+) {
   return request<API.Result>('/api/scheduler/task', {
     method: 'PUT',
     params: {
       processCode,
       projectCode,
       taskCode,
-      upstreamCodes
+      upstreamCodes,
     },
     data: {
       ...params,
     },
-  });
+  })
 }
 
-export async function page(params: IGetShellListParams) {
+export async function getJobList(params: IGetShellListParams) {
   return request<API.Result>('/api/task/page', {
     method: 'POST',
     data: {
       ...params,
     },
-  });
+  })
 }
 
 export async function getTask(id: any) {
@@ -177,5 +191,5 @@ export async function getTask(id: any) {
     params: {
       id,
     },
-  });
+  })
 }

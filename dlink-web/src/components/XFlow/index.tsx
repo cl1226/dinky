@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 /** app 核心组件 */
 import { XFlow, XFlowCanvas, KeyBindings } from '@antv/xflow'
 import type { IApplication, IAppLoad } from '@antv/xflow'
@@ -17,7 +17,7 @@ import {
   DagGraphExtension,
 } from '@antv/xflow'
 
-import { CustomJsonForm } from './json-form'
+import { getVerticalTabs } from './json-form'
 /** app 组件配置  */
 /** 配置画布 */
 import { useGraphHookConfig, useGraphConfig } from './config-graph'
@@ -38,14 +38,16 @@ import { formSchemaService, formValueUpdateService, controlMapService } from './
 import { IMeta } from './service'
 import '@antv/xflow/dist/index.css'
 import styles from './index.less'
+
 export interface IProps {
   activeKey: string
   flowId: string
+  width: number
 }
 
 export const XFlowEditor: React.FC<IProps> = (props) => {
-  const { activeKey, flowId } = props
-
+  const { activeKey, flowId, width } = props
+  console.log('width', width)
   const [showNodePanel, setShowNodePanel] = useState(true)
 
   const cache = React.useMemo<{ app: IApplication | null }>(
@@ -54,6 +56,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
     }),
     [],
   )
+
   const [inited, setInited] = useState(false)
   const [meta, setMeta] = useState<IMeta>({ flowId: flowId })
   const graphHooksConfig = useGraphHookConfig(props)
@@ -91,6 +94,7 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
 
     return { width: 160, top: 0, left: 0, height: 40 }
   }
+
   return (
     <XFlow
       className={styles['xflow-wrap']}
@@ -142,12 +146,13 @@ export const XFlowEditor: React.FC<IProps> = (props) => {
         controlMapService={controlMapService}
         formSchemaService={formSchemaService}
         formValueUpdateService={formValueUpdateService}
-        getCustomRenderComponent={CustomJsonForm.getCustomRenderComponent}
+        getCustomRenderComponent={() => getVerticalTabs({ width })}
         bodyPosition={{ top: 0, bottom: 0, right: 0 }}
         position={{ width: 32, top: 0, bottom: 0, right: 0 }}
         footerPosition={{ height: 0 }}
       />
       <KeyBindings config={keybindingConfig} />
+
       <svg width="100%" height="100%">
         <defs>
           <marker id="v-arrow-1" orient="auto" overflow="visible" markerUnits="userSpaceOnUse">
