@@ -31,6 +31,8 @@ import moment from 'moment'
 
 import { Cron } from '@/components/Cron'
 import { JobSelect } from '@/components/XFlow/components/JobSelect'
+import { JarSelect } from '@/components/XFlow/components/JarSelect'
+import { SourceSelect } from '@/components/XFlow/components/SourceSelect'
 import { NS_CANVAS_FORM } from './config-model-service'
 import { IMeta, ESchedulerType, getJsonCron, DIALECT } from './service'
 import { EDeployMode, EPriority, ESparkVersion, EProgramType } from './type.d'
@@ -40,19 +42,20 @@ const RangePicker: any = DatePicker.RangePicker
 
 interface ICustomFormProps extends NsJsonSchemaForm.ICustomProps {
   form: FormInstance
+  onValuesChange: (changedValues, allValues) => void
+  onClose: (confirm?: boolean) => void
 }
 
 const formLayout: any = {
   labelCol: { flex: '110px' },
   labelAlign: 'left',
   labelWrap: true,
-  wrapperCol: { flex: 1 },
   colon: true,
 }
 
 const getNodeParams = (nodeType, formResult) => {
   if (nodeType === DIALECT.SPARK) {
-    return {}
+    return formResult
   }
   const { jobObj } = formResult
   return {
@@ -73,18 +76,12 @@ const getNodeDefaultFormValue = (nodeType) => {
       programType: EProgramType.SCALA,
       priority: EPriority.MEDIUM,
       maxAppAttempts: 0,
+      mainJarPath: '/file/test/SquirrelSetup.log',
     }
   }
   return {}
 }
-const compareFormJson = (newObj, oldJson) => {
-  const oldObj = JSON.parse(oldJson || '{}')
 
-  return Object.keys(newObj).some((key) => {
-    if (!newObj[key] && !oldObj[key]) return false
-    return newObj[key] !== oldObj[key]
-  })
-}
 const DescriptionsText = (props) => {
   return <span>{props.value}</span>
 }
@@ -94,8 +91,12 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
     const { width } = options
     const { targetType, commandService, modelService, targetData } = props
     const [showTabPane, setShowTabPane] = useState(false)
+    const [nodeChanged, setNodeChanged] = useState(false)
+    const [activeKey, setActiveKey] = useState(targetType === 'canvas' ? 'taskInfo' : 'nodeInfo')
     const sref: any = React.createRef<Scrollbars>()
     const [nodeForm] = Form.useForm()
+
+    const onNodeFormChange = () => setNodeChanged(true)
 
     const getTabs = () => {
       const tabs: any = []
@@ -106,11 +107,25 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
           children: <CanvasCustomRender {...props} />,
         })
       } else {
-        tabs.push({
-          label: '节点信息',
-          key: 'nodeInfo',
-          children: <NodeCustomRender form={nodeForm} {...props} />,
-        })
+        tabs.push(
+          {
+            label: '节点信息',
+            key: 'nodeInfo',
+            children: (
+              <NodeCustomRender
+                form={nodeForm}
+                onValuesChange={onNodeFormChange}
+                onClose={onClose}
+                {...props}
+              />
+            ),
+          },
+          {
+            label: '节点测试',
+            key: 'nodeTest',
+            children: <span>1111</span>,
+          },
+        )
       }
       return tabs.map((item) => ({
         ...item,
@@ -118,7 +133,7 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
           <div className={styles['json-form']}>
             <div className="info-title">
               {item.label}
-              <div className="close-box" onClick={onClose}>
+              <div className="close-box" onClick={() => onClose()}>
                 <CloseCircleOutlined />
               </div>
             </div>
@@ -135,18 +150,14 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
       if (!showTabPane && targetType === 'node') {
         Promise.resolve().then(() => {
           setShowTabPane(true)
+          setNodeChanged(false)
         })
       }
     }, [targetType])
 
-    const onClose = async () => {
-      if (targetType === 'node') {
-        const result = await nodeForm.getFieldsValue()
-
-        const { nodeType, ...resetRes } = result
-        const dataParams = getNodeParams(nodeType, resetRes)
-        console.log('dataParams', dataParams)
-        if (compareFormJson(dataParams, targetData?.nodeInfo)) {
+    const onClose = async (noConfirm = false) => {
+      if (targetType === 'node' && !noConfirm) {
+        if (nodeChanged) {
           Modal.confirm({
             title: '提示',
             icon: <ExclamationCircleOutlined />,
@@ -181,16 +192,21 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
             className={[styles['tab-tool-wrap'], showTabPane ? styles['tab-tool-show'] : ''].join(
               ' ',
             )}
-            onTabClick={() => setShowTabPane(true)}
+            onTabClick={(key) => {
+              setActiveKey(key)
+              setNodeChanged(false)
+              setShowTabPane(true)
+            }}
             size="small"
             tabPosition="right"
+            activeKey={activeKey}
             items={getTabs()}
           ></Tabs>
         </div>
         {showTabPane ? (
           <div
             style={{ width: width - 32 }}
-            onClick={onClose}
+            onClick={() => onClose()}
             className={styles['mask-wrap']}
           ></div>
         ) : null}
@@ -341,7 +357,8 @@ export const CanvasCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (prop
 
 export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
   console.log('NodeCustomRender', props)
-  const { form } = props
+  const { form, onValuesChange, onClose } = props
+
   const {
     commandService,
     modelService,
@@ -362,8 +379,10 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
           const nodes = await MODELS.SELECTED_NODES.useValue(modelService)
           console.log('nodes: ', nodes[0], nodes[0].data)
           if (nodes !== null && nodes.length > 0) {
-            nodes[0].data.nodeInfo = JSON.stringify(dataParams)
+            nodes[0].data.nodeInfo = dataParams
           }
+          message.success('暂存成功')
+          onClose && onClose(true)
           return { err: null, data: graph, meta }
         },
       },
@@ -380,10 +399,6 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
     }
   }
 
-  const transferJson = (infoJson) => {
-    const infoObj = JSON.parse(infoJson || '{}')
-    return infoObj
-  }
   return (
     <>
       <Form
@@ -394,9 +409,10 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
           nodeId: props.targetData?.id,
           nodeType: props.targetData?.nodeType,
           ...(props.targetData?.nodeInfo
-            ? transferJson(props.targetData?.nodeInfo)
+            ? props.targetData?.nodeInfo || {}
             : getNodeDefaultFormValue(props.targetData?.nodeType)),
         }}
+        onValuesChange={onValuesChange}
         {...formLayout}
       >
         <Descriptions title="基本信息" column={1}></Descriptions>
@@ -470,16 +486,7 @@ export namespace NodeCustomForm {
           name="mainJarPath"
           rules={[{ required: true, message: '请选择主程序包' }]}
         >
-          <Select
-            style={{ width: '100%' }}
-            placeholder="请选择主程序包"
-            options={[
-              {
-                value: 'lucy',
-                label: 'Lucy',
-              },
-            ]}
-          />
+          <JarSelect style={{ width: '100%' }} placeholder="请选择主程序包" />
         </Form.Item>
         <Form.Item label="部署方式" name="deployMode">
           <Radio.Group options={transferEnumToOptions(EDeployMode)} />
@@ -517,6 +524,14 @@ export namespace NodeCustomForm {
             style={{ resize: 'none', width: '100%' }}
             rows={3}
           ></Input.TextArea>
+        </Form.Item>
+
+        <Form.Item
+          label="资源"
+          name="resourcePaths"
+          rules={[{ required: true, message: '请选择资源' }]}
+        >
+          <SourceSelect style={{ width: '100%' }} placeholder="请选择资源" />
         </Form.Item>
       </>
     )

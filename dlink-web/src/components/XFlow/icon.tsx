@@ -50,7 +50,7 @@ export const getIcon = (type: string) => {
 export const SparkSvg = () => (
   <svg
     t="1688634594973"
-    class="icon"
+    className="icon"
     viewBox="0 0 1024 1024"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -78,7 +78,7 @@ export const SparkSvg = () => (
 export const FlinkSvg = () => (
   <svg
     t="1688633577127"
-    class="icon"
+    className="icon"
     viewBox="0 0 1024 1024"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -97,7 +97,7 @@ export const FlinkSvg = () => (
 export const FtpSvg = () => (
   <svg
     t="1688633721011"
-    class="icon"
+    className="icon"
     viewBox="0 0 1024 1024"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -121,7 +121,7 @@ export const FtpSvg = () => (
 export const FileSvg = () => (
   <svg
     t="1688633801632"
-    class="icon"
+    className="icon"
     viewBox="0 0 1024 1024"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -144,7 +144,7 @@ export const FileSvg = () => (
 export const SQLSvg = () => (
   <svg
     t="1688633864938"
-    class="icon"
+    className="icon"
     viewBox="0 0 1024 1024"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -172,7 +172,7 @@ export const SQLSvg = () => (
 export const QualitySvg = () => (
   <svg
     t="1688633940221"
-    class="icon"
+    className="icon"
     viewBox="0 0 1024 1024"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -190,7 +190,7 @@ export const QualitySvg = () => (
 export const KafkaSvg = () => (
   <svg
     t="1688634026265"
-    class="icon"
+    className="icon"
     viewBox="0 0 1024 1024"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -209,7 +209,7 @@ export const KafkaSvg = () => (
 export const FlinkSQLSvg = () => (
   <svg
     t="1688633634293"
-    class="icon"
+    className="icon"
     viewBox="0 0 1024 1024"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"

@@ -47,7 +47,6 @@ export interface IProps {
 
 export const XFlowEditor: React.FC<IProps> = (props) => {
   const { activeKey, flowId, width } = props
-  console.log('width', width)
   const [showNodePanel, setShowNodePanel] = useState(true)
 
   const cache = React.useMemo<{ app: IApplication | null }>(

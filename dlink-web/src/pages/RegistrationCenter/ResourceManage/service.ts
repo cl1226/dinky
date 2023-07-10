@@ -138,3 +138,46 @@ export async function showDetail(id: number) {
   })
 }
 
+// 获取主程序包
+export const requestJarTree = async () => {
+  return request2('/api/jar/catalogue/getAllTreeAndData', {
+    method: 'GET',
+    params: {},
+  })
+}
+
+// 获取主程序包
+export const getJarTree = async () => {
+  try {
+    const { code, datas } = await requestJarTree()
+    if (code == CODE.SUCCESS) {
+      return datas
+    } else {
+      return null
+    }
+  } catch (error) {
+    return null
+  }
+}
+
+// 获取资源
+export const requestSourceTree = async () => {
+  return request2('/api/file/catalogue/getAllTreeAndData', {
+    method: 'GET',
+    params: {},
+  })
+}
+
+// 获取主程序包
+export const getSourceTree = async () => {
+  try {
+    const { code, datas } = await requestSourceTree()
+    if (code == CODE.SUCCESS) {
+      return datas
+    } else {
+      return null
+    }
+  } catch (error) {
+    return null
+  }
+}

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Row, Space, Input, Modal, message, Table } from 'antd'
-import { CloseCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { Row, Input, Modal, message, Table } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
 import { Scrollbars } from 'react-custom-scrollbars'
 import type { ColumnsType } from 'antd/es/table'
-import { getJobList, getTask } from '@/pages/DataStudio/service'
-import { debounce } from 'lodash'
+import { getJobList } from '@/pages/DataStudio/service'
 import { IGetShellListParams } from '@/components/Studio/StudioEdit/data'
 
 const { Search } = Input

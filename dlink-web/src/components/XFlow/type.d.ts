@@ -15,10 +15,10 @@ export enum EPriority {
 }
 // 程序类型
 export enum EProgramType {
-  JAVA = 'HIGHEST',
-  SCALA = 'HIGH',
-  PYTHON = 'MEDIUM',
-  SQL = 'LOW',
+  JAVA = 'JAVA',
+  SCALA = 'SCALA',
+  PYTHON = 'PYTHON',
+  SQL = 'SQL',
 }
 
 // SPARK 版本
