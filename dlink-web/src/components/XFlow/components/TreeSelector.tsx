@@ -1,11 +1,59 @@
 import React, { Key, useEffect, useMemo, useState } from 'react'
 import { Row, TreeSelect, Input, Modal, message, Table, Tree } from 'antd'
 import type { DataNode } from 'antd/es/tree'
-import { generateList, getParentKey } from '@/utils/utils'
+
 import { Scrollbars } from 'react-custom-scrollbars'
 
 const { Search } = Input
 const { DirectoryTree } = Tree
+
+// tree树 匹配方法
+export const getParentKey = (key: number | string, tree: any): any => {
+  let parentKey
+  for (const element of tree) {
+    const node = element
+    if (node.children) {
+      if (node.children.some((item: any) => item.key === key)) {
+        parentKey = node.key
+      } else if (getParentKey(key, node.children)) {
+        parentKey = getParentKey(key, node.children)
+      }
+    }
+  }
+  return parentKey
+}
+
+//将树形节点改为一维数组
+export const generateList = (data: any, list: any[]) => {
+  for (const element of data) {
+    const node = element
+    const { name, id, key } = node
+    list.push({ name, id, key: key, title: name })
+    if (node.children) {
+      generateList(node.children, list)
+    }
+  }
+  return list
+}
+
+const initLoop = (data) =>
+  data.map((item) => {
+    if (item.children) {
+      return {
+        name: item.name,
+        id: item.id,
+        key: `catalogue:${item.id}`,
+        isLeaf: false,
+        children: initLoop(item.children),
+      }
+    }
+    return {
+      name: item.name,
+      id: item.id,
+      key: item.filePath,
+      isLeaf: true,
+    }
+  })
 
 export const TreeSelector = (props) => {
   const { treeData, onChange, multiple = false, selectedKeys } = props
@@ -36,13 +84,12 @@ export const TreeSelector = (props) => {
       return
     }
     value = String(value).trim()
-    const expandList: any[] = generateList(treeData, [])
-    console.log('expandList', treeData)
+    const initLoopTree = initLoop(treeData)
+    const expandList: any[] = generateList(initLoopTree, [])
     let expandedKeys = expandList
       .map((item) => {
-        console.log('xxxx', item.name.indexOf(value) > -1, getParentKey(item.id, treeData))
         if (item.name.indexOf(value) > -1) {
-          return getParentKey(item.id, treeData)
+          return getParentKey(item.key, initLoopTree)
         }
         return null
       })

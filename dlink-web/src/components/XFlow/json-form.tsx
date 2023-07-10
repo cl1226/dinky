@@ -76,7 +76,6 @@ const getNodeDefaultFormValue = (nodeType) => {
       programType: EProgramType.SCALA,
       priority: EPriority.MEDIUM,
       maxAppAttempts: 0,
-      mainJarPath: '/file/test/SquirrelSetup.log',
     }
   }
   return {}
@@ -369,7 +368,6 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
     const { nodeId, nodeName, nodeType, ...resetRes } = result
 
     const dataParams = getNodeParams(nodeType, resetRes)
-    console.log(result, dataParams)
 
     commandService.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
       XFlowGraphCommands.SAVE_GRAPH_DATA.id,
