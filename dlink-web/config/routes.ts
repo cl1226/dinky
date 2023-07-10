@@ -361,12 +361,11 @@ export default [
             name: 'clusterConfiguration',
             component: './RegistrationCenter/ClusterManage/ClusterConfiguration',
           },
-
-          {
-            path: '/registration/cluster/yarn',
-            name: 'yarn',
-            component: './RegistrationCenter/ClusterManage/Yarn',
-          },
+          // {
+          //   path: '/registration/cluster/yarn',
+          //   name: 'yarn',
+          //   component: './RegistrationCenter/ClusterManage/Yarn',
+          // },
         ],
       },
       {

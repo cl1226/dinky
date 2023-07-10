@@ -91,11 +91,11 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
     const { targetType, commandService, modelService, targetData } = props
     const [showTabPane, setShowTabPane] = useState(false)
     const [nodeChanged, setNodeChanged] = useState(false)
+    const [canvasChanged, setCanvasChanged] = useState(false)
     const [activeKey, setActiveKey] = useState(targetType === 'canvas' ? 'taskInfo' : 'nodeInfo')
     const sref: any = React.createRef<Scrollbars>()
     const [nodeForm] = Form.useForm()
-
-    const onNodeFormChange = () => setNodeChanged(true)
+    const [canvasForm] = Form.useForm()
 
     const getTabs = () => {
       const tabs: any = []
@@ -103,7 +103,14 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
         tabs.push({
           label: '作业信息',
           key: 'taskInfo',
-          children: <CanvasCustomRender {...props} />,
+          children: (
+            <CanvasCustomRender
+              form={canvasForm}
+              onValuesChange={() => setCanvasChanged(true)}
+              onClose={onClose}
+              {...props}
+            />
+          ),
         })
       } else {
         tabs.push(
@@ -113,17 +120,17 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
             children: (
               <NodeCustomRender
                 form={nodeForm}
-                onValuesChange={onNodeFormChange}
+                onValuesChange={() => setNodeChanged(true)}
                 onClose={onClose}
                 {...props}
               />
             ),
           },
-          {
-            label: '节点测试',
-            key: 'nodeTest',
-            children: <span>1111</span>,
-          },
+          // {
+          //   label: '节点测试',
+          //   key: 'nodeTest',
+          //   children: <span>1111</span>,
+          // },
         )
       }
       return tabs.map((item) => ({
@@ -150,13 +157,14 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
         Promise.resolve().then(() => {
           setShowTabPane(true)
           setNodeChanged(false)
+          setCanvasChanged(false)
         })
       }
     }, [targetType])
 
     const onClose = async (noConfirm = false) => {
-      if (targetType === 'node' && !noConfirm) {
-        if (nodeChanged) {
+      if (!noConfirm) {
+        if (targetType === 'node' && nodeChanged) {
           Modal.confirm({
             title: '提示',
             icon: <ExclamationCircleOutlined />,
@@ -174,7 +182,19 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
           })
           return
         }
+        if (targetType === 'canvas' && canvasChanged) {
+          Modal.confirm({
+            title: '提示',
+            icon: <ExclamationCircleOutlined />,
+            content: '您的修改内容未暂存，是否关闭？',
+            onOk: async () => {
+              setShowTabPane(false)
+            },
+          })
+          return
+        }
       }
+
       await commandService.executeCommand<NsNodeCmd.SelectNode.IArgs>(
         XFlowNodeCommands.SELECT_NODE.id,
         {
@@ -194,6 +214,7 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
             onTabClick={(key) => {
               setActiveKey(key)
               setNodeChanged(false)
+              setCanvasChanged(false)
               setShowTabPane(true)
             }}
             size="small"
@@ -213,36 +234,16 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
     )
   }
 
-export const CanvasCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (props) => {
+export const CanvasCustomRender: React.FC<ICustomFormProps> = (props) => {
+  const { form, onValuesChange, onClose } = props
   const { modelService } = props
-  const [canvasForm] = Form.useForm()
   const [baseInfo, setBaseInfo] = useState<IMeta>({ flowId: '' })
   const [cycleVisible, setCycleVisible] = useState<boolean>(false)
-
-  const registerModel = async () => {
-    if (!modelService.findDeferredModel(NS_CANVAS_FORM.id)) {
-      modelService.registerModel({
-        id: NS_CANVAS_FORM.id,
-        getInitialValue: () => {
-          return {
-            canvasForm: canvasForm,
-          }
-        },
-      })
-      return
-    } else {
-      const ctx = await modelService.awaitModel<NS_CANVAS_FORM.ICanvasForm>(NS_CANVAS_FORM.id)
-
-      ctx.setValue({
-        canvasForm: canvasForm,
-      })
-    }
-  }
 
   const compareMeta = (meta: any) => {
     const { schedulerType, cron } = meta
     if (!schedulerType) return true
-    const fieldValues = canvasForm.getFieldsValue(true)
+    const fieldValues = form.getFieldsValue(true)
 
     if (schedulerType === ESchedulerType.SINGLE) {
       return schedulerType === fieldValues.schedulerType
@@ -251,6 +252,27 @@ export const CanvasCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (prop
     }
     return false
   }
+
+  const onSave = async () => {
+    const result = await form.validateFields()
+    const { schedulerType } = result
+    let cron: any = null
+    if (schedulerType === ESchedulerType.CYCLE) {
+      cron = getJsonCron(result)
+    }
+    const canvasFormParams = {
+      schedulerType,
+      cron,
+    }
+
+    const ctx = await modelService.awaitModel<NS_CANVAS_FORM.ICanvasForm>(NS_CANVAS_FORM.id)
+
+    ctx.setValue({
+      ...canvasFormParams,
+    })
+    onClose && onClose(true)
+  }
+
   React.useEffect(() => {
     ~(async () => {
       const model = await MODELS.GRAPH_META.getModel(modelService)
@@ -267,7 +289,7 @@ export const CanvasCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (prop
               timerange = [moment(startTime), moment(endTime)]
             }
 
-            canvasForm.setFieldsValue({
+            form.setFieldsValue({
               schedulerType,
               timerange,
               timezoneId,
@@ -277,14 +299,12 @@ export const CanvasCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (prop
             return
           }
         }
-        canvasForm.setFieldsValue({
+        form.setFieldsValue({
           schedulerType: ESchedulerType.SINGLE,
         })
         setCycleVisible(false)
       })
     })()
-
-    registerModel()
   }, [])
 
   return (
@@ -296,7 +316,8 @@ export const CanvasCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (prop
       </Descriptions>
       <Form
         name="canvasForm"
-        form={canvasForm}
+        form={form}
+        onValuesChange={onValuesChange}
         initialValues={{
           timezoneId: 'Asia/Shanghai',
           timerange: [moment(), moment().add(100, 'y')],
@@ -349,13 +370,17 @@ export const CanvasCustomRender: React.FC<NsJsonSchemaForm.ICustomProps> = (prop
             </>
           ) : null}
         </Descriptions>
+        <Form.Item>
+          <Button style={{ marginTop: 20 }} type="primary" onClick={onSave}>
+            暂存
+          </Button>
+        </Form.Item>
       </Form>
     </>
   )
 }
 
 export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
-  console.log('NodeCustomRender', props)
   const { form, onValuesChange, onClose } = props
 
   const {
@@ -375,7 +400,6 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
         saveGraphDataService: async (meta, graph) => {
           /** 当前选中节点数据 */
           const nodes = await MODELS.SELECTED_NODES.useValue(modelService)
-          console.log('nodes: ', nodes[0], nodes[0].data)
           if (nodes !== null && nodes.length > 0) {
             nodes[0].data.nodeInfo = dataParams
           }

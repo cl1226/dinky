@@ -11,7 +11,8 @@ export namespace NS_LOADING_STATE {
 export namespace NS_CANVAS_FORM {
   export const id = 'canvas_form'
   export interface ICanvasForm {
-    canvasForm: any
+    schedulerType: any
+    [key: string]: any
   }
 }
 
@@ -22,6 +23,16 @@ export const useModelServiceConfig = createModelServiceConfig((config) => {
       getInitialValue: () => {
         loading: true
       },
+    })
+  })
+
+  config.registerModel((registry) => {
+    return registry.registerModel({
+      id: NS_CANVAS_FORM.id,
+      getInitialValue: () => ({
+        schedulerType: '',
+        cron: null,
+      }),
     })
   })
 })

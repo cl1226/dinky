@@ -18,7 +18,7 @@ import { XFlowApi, StatusEnum, ESchedulerType, getJsonCron } from './service'
 import { CustomCommands } from './cmd-extensions/constants'
 import type { NsDeployDagCmd } from './cmd-extensions/cmd-deploy'
 import { message, Popconfirm } from 'antd'
-import { NS_CANVAS_FORM } from './config-model-service'
+import { NS_CANVAS_FORM, NS_CANVAS_STATE } from './config-model-service'
 export namespace NSToolbarConfig {
   /** 注册icon 类型 */
   IconStore.set('SaveOutlined', SaveOutlined)
@@ -104,40 +104,21 @@ export namespace NSToolbarConfig {
       onClick: async ({ commandService }) => {
         const ctx = await modelService.awaitModel<NS_CANVAS_FORM.ICanvasForm>(NS_CANVAS_FORM.id)
 
-        const { canvasForm } = await ctx.getValidValue()
+        const canvasForm = await ctx.getValidValue()
 
-        canvasForm
-          .validateFields()
-          .then(async (values) => {
-            console.log('values', values)
-            const { schedulerType } = values
-            let cron: any = null
-            if (schedulerType === ESchedulerType.CYCLE) {
-              cron = getJsonCron(values)
-            }
-            const canvasForm = {
-              schedulerType,
-              cron,
-            }
+        await commandService.executeCommand<NsDeployDagCmd.IArgs>(
+          CustomCommands.DEPLOY_SERVICE.id,
+          {
+            deployDagService: (meta, graphData) =>
+              XFlowApi.deployDagService(meta, graphData, canvasForm),
+          },
+        )
 
-            await commandService.executeCommand<NsDeployDagCmd.IArgs>(
-              CustomCommands.DEPLOY_SERVICE.id,
-              {
-                deployDagService: (meta, graphData) =>
-                  XFlowApi.deployDagService(meta, graphData, canvasForm),
-              },
-            )
-
-            setGraphMeta({
-              ...graphMeta.meta,
-              status: StatusEnum.DEPLOY,
-              ...canvasForm,
-            })
-          })
-          .catch(({ errorFields }) => {
-            const msg = errorFields?.[0]?.['errors']?.[0] || '操作失败'
-            message.warn(msg)
-          })
+        setGraphMeta({
+          ...graphMeta.meta,
+          status: StatusEnum.DEPLOY,
+          ...canvasForm,
+        })
       },
     })
 

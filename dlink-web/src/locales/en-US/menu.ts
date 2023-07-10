@@ -81,7 +81,7 @@ export default {
   'menu.registration.cluster.hadoopCreate': 'Hadoop Create',
   'menu.registration.cluster.hadoopEdit': 'Hadoop Setting',
   'menu.registration.cluster.hadoopView': 'Hadoop',
-  'menu.registration.cluster.shell': 'SHELL Management',
+  'menu.registration.cluster.shell': 'Hadoop Client Management',
   'menu.registration.cluster.yarn': 'Yarn Management',
   'menu.registration.jar': 'Jar Management',
   'menu.registration.resourcemanage': 'Resource Manage',

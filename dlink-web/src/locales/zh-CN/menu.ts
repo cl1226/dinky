@@ -81,7 +81,7 @@ export default {
   'menu.registration.cluster.hadoopCreate': 'Hadoop 集群创建',
   'menu.registration.cluster.hadoopEdit': 'Hadoop 集群配置',
   'menu.registration.cluster.hadoopView': 'Hadoop 集群',
-  'menu.registration.cluster.shell': '环境管理',
+  'menu.registration.cluster.shell': 'Hadoop客户端管理',
   'menu.registration.cluster.yarn': 'Yarn 队列管理',
   'menu.registration.jar': 'Jar 管理',
 
