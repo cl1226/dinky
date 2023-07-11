@@ -74,7 +74,7 @@ const getNodeDefaultFormValue = (nodeType) => {
       executorCores: 2,
       version: ESparkVersion.SPARK2,
       programType: EProgramType.SCALA,
-      priority: EPriority.MEDIUM,
+      // priority: EPriority.MEDIUM,
       maxAppAttempts: 0,
     }
   }
@@ -464,13 +464,13 @@ export namespace NodeCustomForm {
             rows={3}
           ></Input.TextArea>
         </Form.Item>
-        <Form.Item
+        {/* <Form.Item
           label="任务优先级"
           name="priority"
           rules={[{ required: true, message: '请选择任务优先级' }]}
         >
           <Select style={{ width: '100%' }} options={transferEnumToOptions(EPriority)} />
-        </Form.Item>
+        </Form.Item> */}
 
         <Form.Item label="失败重试次数" name="maxAppAttempts">
           <InputNumber style={{ width: '100%' }} min={0} precision={0} addonAfter={'次'} />
@@ -504,7 +504,7 @@ export namespace NodeCustomForm {
         </Form.Item>
 
         <Form.Item label="Driver核心数" name="driverCores">
-          <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'次'} />
+          <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'个'} />
         </Form.Item>
         <Form.Item label="Driver内存数" name="driverMemory">
           <Input style={{ width: '100%' }} placeholder="请输入Driver内存数"></Input>
@@ -516,7 +516,7 @@ export namespace NodeCustomForm {
           <Input style={{ width: '100%' }} placeholder="请输入Driver内存数"></Input>
         </Form.Item>
         <Form.Item label="Executor核心数" name="executorCores">
-          <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'次'} />
+          <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'个'} />
         </Form.Item>
 
         <Form.Item label="主程序参数" name="mainClassParameters">

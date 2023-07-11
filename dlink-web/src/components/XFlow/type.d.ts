@@ -1,6 +1,6 @@
 // 部署方式
 export enum EDeployMode {
-  cluster = 'client',
+  cluster = 'cluster',
   client = 'client',
   local = 'local',
 }
