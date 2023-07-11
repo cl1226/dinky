@@ -90,8 +90,7 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
     const { width } = options
     const { targetType, commandService, modelService, targetData } = props
     const [showTabPane, setShowTabPane] = useState(false)
-    const [nodeChanged, setNodeChanged] = useState(false)
-    const [canvasChanged, setCanvasChanged] = useState(false)
+    const [formChanged, setFormChanged] = useState(false)
     const [activeKey, setActiveKey] = useState(targetType === 'canvas' ? 'taskInfo' : 'nodeInfo')
     const sref: any = React.createRef<Scrollbars>()
     const [nodeForm] = Form.useForm()
@@ -106,7 +105,7 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
           children: (
             <CanvasCustomRender
               form={canvasForm}
-              onValuesChange={() => setCanvasChanged(true)}
+              onValuesChange={() => setFormChanged(true)}
               onClose={onClose}
               {...props}
             />
@@ -120,7 +119,7 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
             children: (
               <NodeCustomRender
                 form={nodeForm}
-                onValuesChange={() => setNodeChanged(true)}
+                onValuesChange={() => setFormChanged(true)}
                 onClose={onClose}
                 {...props}
               />
@@ -156,15 +155,14 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
       if (!showTabPane && targetType === 'node') {
         Promise.resolve().then(() => {
           setShowTabPane(true)
-          setNodeChanged(false)
-          setCanvasChanged(false)
+          setFormChanged(false)
         })
       }
     }, [targetType])
 
     const onClose = async (noConfirm = false) => {
-      if (!noConfirm) {
-        if (targetType === 'node' && nodeChanged) {
+      if (!noConfirm && formChanged) {
+        if (targetType === 'node' || targetType === 'canvas') {
           Modal.confirm({
             title: '提示',
             icon: <ExclamationCircleOutlined />,
@@ -177,17 +175,6 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
                   resetSelection: true,
                 },
               )
-              setShowTabPane(false)
-            },
-          })
-          return
-        }
-        if (targetType === 'canvas' && canvasChanged) {
-          Modal.confirm({
-            title: '提示',
-            icon: <ExclamationCircleOutlined />,
-            content: '您的修改内容未暂存，是否关闭？',
-            onOk: async () => {
               setShowTabPane(false)
             },
           })
@@ -213,8 +200,7 @@ export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProp
             )}
             onTabClick={(key) => {
               setActiveKey(key)
-              setNodeChanged(false)
-              setCanvasChanged(false)
+              setFormChanged(false)
               setShowTabPane(true)
             }}
             size="small"
