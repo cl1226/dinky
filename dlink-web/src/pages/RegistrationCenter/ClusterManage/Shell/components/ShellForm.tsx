@@ -19,9 +19,9 @@
 
 import React, { useState, useEffect } from 'react'
 import { Button, Form, Input, message, Modal, Select } from 'antd'
-
+import MonacoEditor from 'react-monaco-editor'
 import { ShellTableListItem } from '@/pages/RegistrationCenter/data'
-
+import styles from '../index.less'
 import { getHadoopList, postShellTest } from '@/pages/RegistrationCenter/ClusterManage/service'
 import { l } from '@/utils/intl'
 
@@ -77,6 +77,7 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
       port: fieldsValue.port,
       username: fieldsValue.username,
       password: fieldsValue.password,
+      env: fieldsValue.env,
     })
     setTestLoading(false)
     if (result) {
@@ -126,6 +127,24 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
         <Form.Item name="password" label="密码" rules={[{ required: true, message: '请输入密码' }]}>
           <Input.Password placeholder="请输入密码" />
         </Form.Item>
+
+        <Form.Item
+          name="env"
+          label="环境变量"
+          rules={[{ required: true, message: '请输入资源内容' }]}
+        >
+          <MonacoEditor
+            className={styles.editor}
+            height="200"
+            theme="vs"
+            language="java"
+            options={{
+              automaticLayout: true,
+              selectOnLineNumbers: true,
+            }}
+          />
+        </Form.Item>
+
         <Form.Item name="description" label="描述">
           <Input.TextArea allowClear autoSize={{ minRows: 3, maxRows: 10 }} />
         </Form.Item>
@@ -161,7 +180,7 @@ const ClusterForm: React.FC<ClusterFormProps> = (props) => {
   return (
     <Modal
       width={'40%'}
-      bodyStyle={{ padding: '32px 40px 48px' }}
+      bodyStyle={{ padding: '32px 20px' }}
       destroyOnClose
       title={formVals.id ? l('pages.rc.cluster.modify') : l('pages.rc.cluster.create')}
       visible={modalVisible}

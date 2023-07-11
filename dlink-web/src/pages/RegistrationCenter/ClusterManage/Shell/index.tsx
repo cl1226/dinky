@@ -18,7 +18,7 @@
  */
 
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Input, message, Modal } from 'antd'
+import { Button, Tooltip, message, Modal } from 'antd'
 import React, { useEffect, useRef, useState } from 'react'
 import { PageContainer } from '@ant-design/pro-layout'
 import type { ActionType, ProColumns } from '@ant-design/pro-table'
@@ -89,7 +89,7 @@ const ShellTableList: React.FC<{}> = (props: any) => {
       title: 'ip',
       dataIndex: 'ip',
       hideInSearch: true,
-      width: 200,
+      width: 150,
     },
     {
       title: '端口',
@@ -101,15 +101,14 @@ const ShellTableList: React.FC<{}> = (props: any) => {
       title: '用户名',
       dataIndex: 'username',
       hideInSearch: true,
-
       width: 150,
     },
     {
-      title: '密码',
-      dataIndex: 'password',
+      title: '环境变量',
+      dataIndex: 'env',
       hideInSearch: true,
-      hideInTable: true,
-      width: 150,
+      width: 200,
+      ellipsis: true,
     },
     {
       title: '描述',
