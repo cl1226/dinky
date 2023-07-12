@@ -5,6 +5,7 @@ import { Scrollbars } from 'react-custom-scrollbars'
 import { useParams } from 'umi'
 import Basic from './Basic'
 import Yarn from './Yarn'
+import Tenant from './Tenant'
 import { getHadoopDetail } from '@/pages/RegistrationCenter/ClusterManage/service'
 import { IHadoop, IYarnQueueItem } from '@/pages/RegistrationCenter/ClusterManage/Hadoop/data.d'
 
@@ -65,6 +66,19 @@ const HadoopConfig: React.FC<{ mode: 'create' | 'view' | 'edit' }> = (props: any
                   <Scrollbars style={{ height: '100%' }}>
                     <div style={{ padding: 10 }}>
                       <Yarn mode={mode} detailInfo={yarnQueue} />
+                    </div>
+                  </Scrollbars>
+                </div>
+              ),
+            },
+            {
+              label: `操作系统租户`,
+              key: 'tenant',
+              children: (
+                <div className={styles['tab-wrap']}>
+                  <Scrollbars style={{ height: '100%' }}>
+                    <div style={{ padding: 10 }}>
+                      <Tenant mode={mode} detailInfo={hadoopDetail?.id} />
                     </div>
                   </Scrollbars>
                 </div>

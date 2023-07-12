@@ -86,7 +86,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
     const keytabArr = (kerberosFormRes?.keytabJson || []).map((item) => {
       return {
         principle: item.principle,
-        keytab: item.keytab[0]?.response?.datas,
+        keytab: item.keytab,
       }
     })
 
@@ -137,6 +137,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       kdcHost: info.kdcHost,
       realm: info.realm,
       keytabJson: JSON.parse(info?.keytabJson || '[]'),
+      krb5: info.krb5,
     })
   }
 
@@ -156,7 +157,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
     if (mode === 'edit' || mode === 'create') return configLoaded
     return false
   }
-  const getUploadProps = () => {
+  const getUploadProps = (fieldIndex) => {
     const uuid = configForm.getFieldValue('uuid')
     return {
       name: 'files',
@@ -171,12 +172,43 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       showUploadList: false,
       onChange(info) {
         if (info.file.status === 'done') {
-          console.log('kerberosForm', kerberosForm.getFieldsValue())
+          let tempKeytab = ''
           if (info.file.response.code == CODE.SUCCESS) {
+            tempKeytab = info.file?.response?.datas || ''
             message.success(info.file.response.msg)
           } else {
             message.warn(info.file.response.msg)
           }
+          kerberosForm.setFieldValue(['keytabJson', fieldIndex, 'keytab'], tempKeytab)
+        } else if (info.file.status === 'error') {
+          message.error('上传失败')
+        }
+      },
+    }
+  }
+  const getKrb5UploadProps = () => {
+    const uuid = configForm.getFieldValue('uuid')
+    return {
+      name: 'files',
+      action: '/api/hadoop/cluster/upload',
+      headers: {
+        authorization: 'authorization-text',
+      },
+      data: {
+        uuid,
+      },
+      maxCount: 1,
+      showUploadList: false,
+      onChange(info) {
+        if (info.file.status === 'done') {
+          let tempUrl = ''
+          if (info.file.response.code == CODE.SUCCESS) {
+            tempUrl = info.file?.response?.datas || ''
+            message.success(info.file.response.msg)
+          } else {
+            message.warn(info.file.response.msg)
+          }
+          kerberosForm.setFieldValue('krb5', tempUrl)
         } else if (info.file.status === 'error') {
           message.error('上传失败')
         }
@@ -339,6 +371,39 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
                           <Input readOnly style={{ width: 500 }} />
                         </Form.Item>
 
+                        <Form.Item
+                          label="krb5"
+                          name={'krb5'}
+                          rules={[{ required: true, message: '请上传conf文件' }]}
+                        >
+                          <Input.Group compact>
+                            <Form.Item
+                              noStyle
+                              shouldUpdate={(prevValues, currentValues) =>
+                                prevValues.krb5 !== currentValues.krb5
+                              }
+                            >
+                              {({ getFieldValue }) => (
+                                <Input
+                                  style={{ width: 300 }}
+                                  placeholder="keytab"
+                                  readOnly
+                                  value={getFieldValue('krb5') || ''}
+                                />
+                              )}
+                            </Form.Item>
+                            <Upload disabled={mode === 'view'} {...getKrb5UploadProps()}>
+                              <Button
+                                disabled={mode === 'view'}
+                                style={{ width: 80 }}
+                                icon={<UploadOutlined />}
+                              >
+                                上传
+                              </Button>
+                            </Upload>
+                          </Input.Group>
+                        </Form.Item>
+
                         <Form.List name="keytabJson">
                           {(fields, { add, remove }) => (
                             <>
@@ -369,17 +434,32 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
                                         {...restField}
                                         name={[name, 'keytab']}
                                         rules={[{ required: true, message: '请上传Keytab文件' }]}
-                                        valuePropName="fileList"
-                                        getValueFromEvent={(e: any) => {
-                                          console.log('e', e)
-                                          if (Array.isArray(e)) {
-                                            return e
-                                          }
-                                          return e?.fileList
-                                        }}
                                       >
-                                        <Upload disabled={mode === 'view'} {...getUploadProps()}>
-                                          <Input.Group compact>
+                                        <Input.Group compact>
+                                          <Form.Item
+                                            noStyle
+                                            shouldUpdate={(prevValues, currentValues) =>
+                                              prevValues.keytabJson[fieldIndex] !==
+                                              currentValues.keytabJson[fieldIndex]
+                                            }
+                                          >
+                                            {({ getFieldValue }) => (
+                                              <Input
+                                                style={{ width: 300 }}
+                                                placeholder="keytab"
+                                                readOnly
+                                                value={
+                                                  getFieldValue('keytabJson')[fieldIndex]?.[
+                                                    'keytab'
+                                                  ] || ''
+                                                }
+                                              />
+                                            )}
+                                          </Form.Item>
+                                          <Upload
+                                            disabled={mode === 'view'}
+                                            {...getUploadProps(fieldIndex)}
+                                          >
                                             <Button
                                               disabled={mode === 'view'}
                                               style={{ width: 80 }}
@@ -387,29 +467,8 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
                                             >
                                               上传
                                             </Button>
-
-                                            <Form.Item
-                                              noStyle
-                                              shouldUpdate={(prevValues, currentValues) =>
-                                                prevValues.keytabJson[fieldIndex] !==
-                                                currentValues.keytabJson[fieldIndex]
-                                              }
-                                            >
-                                              {({ getFieldValue }) => (
-                                                <Input
-                                                  style={{ width: 300 }}
-                                                  placeholder="keytab"
-                                                  readOnly
-                                                  value={
-                                                    getFieldValue('keytabJson')[fieldIndex]?.[
-                                                      'keytab'
-                                                    ]?.[0]?.response?.datas || ''
-                                                  }
-                                                />
-                                              )}
-                                            </Form.Item>
-                                          </Input.Group>
-                                        </Upload>
+                                          </Upload>
+                                        </Input.Group>
                                       </Form.Item>
 
                                       {mode !== 'view' ? (

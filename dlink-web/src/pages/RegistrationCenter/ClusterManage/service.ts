@@ -108,6 +108,114 @@ export const createHadoop = async (params: any) => {
   }
 }
 
+// 获取租户
+export const requestTenantList = async (params) => {
+  return request2('/api/hadoop/tenant', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+  })
+}
+
+// 获取租户
+export const getTenantList = async (params) => {
+  try {
+    const { code, msg, datas } = await requestTenantList(params)
+    if (code == CODE.SUCCESS) {
+      return datas || []
+    } else {
+      message.warn(msg)
+      return []
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return []
+  }
+}
+
+// 删除租户
+export async function requestDeleteTenant(id: number) {
+  return request2(`/api/hadoop/tenant?id=${id}`, {
+    method: 'DELETE',
+  })
+}
+
+// 删除租户
+export const deleteTenant = async (id: number) => {
+  const hide = message.loading(l('app.request.delete'))
+  try {
+    const { code, msg } = await requestDeleteTenant(id)
+    hide()
+    if (code == CODE.SUCCESS) {
+      message.success(msg)
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    hide()
+    message.error(l('app.request.delete.error'))
+    return false
+  }
+}
+
+// 创建租户
+export const requestAddorUpdateTenant = (params) => {
+  return request2('/api/hadoop/tenant ', {
+    method: 'PUT',
+    data: {
+      ...params,
+    },
+  })
+}
+// 创建租户
+export const addorUpdateTenant = async (fields: any) => {
+  const tipsTitle = fields.id ? l('app.request.update') : l('app.request.add')
+  const hide = message.loading(l('app.request.running') + tipsTitle)
+  try {
+    const { code, msg } = await requestAddorUpdateTenant({ ...fields })
+    hide()
+    if (code == CODE.SUCCESS) {
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    hide()
+    message.error(l('app.request.error'))
+    return false
+  }
+}
+
+// 获取队列
+export const requestQueueOptions = async (params) => {
+  return request2('/api/hadoop/cluster/getQueuesByClusterId', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+  })
+}
+
+// 获取队列
+export const getQueueOptions = async (params) => {
+  try {
+    const { code, msg, datas } = await requestQueueOptions(params)
+    if (code == CODE.SUCCESS) {
+      return datas || []
+    } else {
+      message.warn(msg)
+      return []
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return []
+  }
+}
+
 // 获取环境列表
 export async function requestShellList(params) {
   return request2('/api/environment/instance/page', {
