@@ -28,6 +28,7 @@ export interface IHadoop {
   yarnQueueModels?: IYarnQueueItem[]
   keytabJson?: string
   krb5?: string
+  xmlUrls?: string
 }
 
 export interface IYarnQueueItem {

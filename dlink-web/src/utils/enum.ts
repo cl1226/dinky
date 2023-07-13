@@ -51,5 +51,6 @@ export enum ETokenExpire {
 // Token过期时间
 export enum EHadoopType {
   'CDH' = 'CDH(CM)',
-  'HDP' = 'HDP(Ambari)',
+  // 'HDP' = 'HDP(Ambari)',
+  'Apache' = 'Apache Hadoop',
 }

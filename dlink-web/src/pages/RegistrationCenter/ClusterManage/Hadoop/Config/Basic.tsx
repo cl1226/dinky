@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import styles from './index.less'
 import {
   Form,
@@ -23,7 +23,12 @@ import {
   UploadOutlined,
 } from '@ant-design/icons'
 import { history, useParams } from 'umi'
-import { getHadoopConfig, createHadoop } from '@/pages/RegistrationCenter/ClusterManage/service'
+import {
+  getHadoopConfig,
+  createHadoop,
+  getUuid,
+  postUploadXml,
+} from '@/pages/RegistrationCenter/ClusterManage/service'
 import {
   formLayout,
   IHadoop,
@@ -44,6 +49,77 @@ const Address = ({ value }: any) => {
   ))
 }
 
+const XMLUpload = ({ value, onChange, disabled, data, ...props }: any) => {
+  const fileState: any = useRef()
+  const [uploadFiles, setUploadFiles] = useState([])
+
+  const updateFiles = (() => {
+    let fileList: any = null
+    return (list: any, setState: any) => {
+      if (!fileList) {
+        fileList = list
+        setState && setState(list)
+      }
+      return {
+        fileList,
+        reset() {
+          fileList = null
+        },
+      }
+    }
+  })()
+
+  useEffect(() => {
+    if (uploadFiles.length > 0) {
+      customRequest()
+      fileState.current.reset()
+    }
+  }, [uploadFiles])
+
+  const customRequest = async () => {
+    let formData = new FormData()
+
+    uploadFiles.forEach((file: any, index: any) => {
+      formData.append(`files`, file)
+    })
+
+    Object.keys(data).forEach((key: any, index: any) => {
+      formData.append(key, data[key])
+    })
+    const result = await postUploadXml(formData)
+
+    if (result && result.length) {
+      message.success('上传成功')
+      onChange && onChange(JSON.stringify(result.map((item) => item.datas)))
+    } else {
+      message.success('上传失败')
+    }
+  }
+
+  const beforeUpload = (file, fileList) => {
+    fileState.current = updateFiles(fileList, setUploadFiles)
+    return false
+  }
+
+  const getUrls = () => {
+    const urls = JSON.parse(value || '[]')
+    return urls.map((url) => (
+      <div key={url} style={{ width: 500 }}>
+        {url}
+      </div>
+    ))
+  }
+  return (
+    <>
+      <Upload beforeUpload={beforeUpload} {...props}>
+        <Button disabled={props.disabled} style={{ width: 80 }} icon={<UploadOutlined />}>
+          上传
+        </Button>
+      </Upload>
+      {getUrls()}
+    </>
+  )
+}
 const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   const pageParams: { id?: string } = useParams()
   const { mode, detailInfo, refreshHadoopInfo } = props
@@ -59,11 +135,22 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   const onLoadConfig = async () => {
     const formRes = await basicForm.validateFields()
     setIsLoading(true)
+
+    const extraObj = {
+      CDH: {
+        url: formRes.url,
+        username: formRes.username,
+        password: formRes.password,
+      },
+      Apache: {
+        xmlUrls: formRes.xmlUrls,
+        uuid: formRes.uuid,
+      },
+    }
+
     const params = {
       type: formRes.type,
-      password: formRes.password,
-      url: formRes.url,
-      username: formRes.username,
+      ...(extraObj[formRes.type] || {}),
     }
     const configRes = await getHadoopConfig(params)
 
@@ -106,20 +193,35 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   }
 
   const setBasicFormValue = (info: IHadoop) => {
+    const extraObj = {
+      CDH: {
+        url: info.url,
+        username: info.username,
+        password: info.password,
+      },
+      Apache: {
+        xmlUrls: info.xmlUrls,
+        uuid: info.uuid,
+      },
+    }
+
     basicForm.setFieldsValue({
       type: info.type,
       name: info.name,
-      url: info.url,
-      username: info.username,
-      password: info.password,
+      ...(extraObj[info.type] || {}),
     })
   }
 
   const setConfigFormValue = (info: IHadoop) => {
+    const extraObj = {
+      CDH: {
+        uuid: info.uuid,
+        version: info.version,
+        clusterStatus: info.clusterStatus,
+      },
+    }
     configForm.setFieldsValue({
       clusterName: info.clusterName,
-      clusterStatus: info.clusterStatus,
-      version: info.version,
       hdfsHa: info.hdfsHa,
       namenodeAddress: info.namenodeAddress,
       hiveHa: info.hiveHa,
@@ -128,7 +230,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       yarnHa: info.yarnHa,
       resourcemanagerAddress: info.resourcemanagerAddress,
       zkQuorum: info.zkQuorum,
-      uuid: info.uuid,
+      ...(extraObj[info.type] || {}),
     })
   }
   const setKerberosFormValue = (info: IHadoop) => {
@@ -151,13 +253,28 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       setCacheConfig(detailInfo)
     }
   }, [])
-
+  const onGetUuid = async () => {
+    const result = await getUuid()
+    if (result) {
+      basicForm.setFieldValue('uuid', result)
+      basicForm.setFieldValue('xmlUrls', '')
+    }
+  }
   const submitVisible = () => {
     if (mode === 'view') return false
     if (mode === 'edit' || mode === 'create') return configLoaded
     return false
   }
-  const getUploadProps = (fieldIndex) => {
+  const getXmlUploadProps = (uuid) => {
+    return {
+      multiple: true,
+      showUploadList: false,
+      data: {
+        uuid,
+      },
+    }
+  }
+  const getKeytabUploadProps = (fieldIndex) => {
     const uuid = configForm.getFieldValue('uuid')
     return {
       name: 'files',
@@ -215,6 +332,75 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       },
     }
   }
+  const getBasicContent = (type) => {
+    if (type === 'CDH') {
+      return (
+        <>
+          <Form.Item label="地址" name="url" rules={[{ required: true, message: '请输入地址！' }]}>
+            <Input
+              disabled={configLoaded || mode === 'edit'}
+              placeholder="请输入地址"
+              style={{ width: 500 }}
+            />
+          </Form.Item>
+          <Form.Item
+            label="用户名"
+            name="username"
+            rules={[{ required: true, message: '请输入用户名！' }]}
+          >
+            <Input
+              disabled={configLoaded || mode === 'edit'}
+              placeholder="请输入用户名"
+              style={{ width: 500 }}
+            />
+          </Form.Item>
+          <Form.Item
+            label="密码"
+            name="password"
+            rules={[{ required: true, message: '请输入密码！' }]}
+          >
+            <Input.Password
+              disabled={configLoaded || mode === 'edit'}
+              placeholder="请输入密码"
+              style={{ width: 500 }}
+              iconRender={(visible) => null}
+            />
+          </Form.Item>
+        </>
+      )
+    } else if (type === 'Apache') {
+      return (
+        <>
+          <Form.Item label="uuid" name="uuid" rules={[{ required: true, message: '请获取uuid！' }]}>
+            <Input.Group compact>
+              <Form.Item noStyle name="uuid">
+                <Input readOnly style={{ width: 500 }} placeholder="请获取uuid" />
+              </Form.Item>
+            </Input.Group>
+          </Form.Item>
+
+          <Form.Item
+            noStyle
+            shouldUpdate={(prevValues, currentValues) => prevValues.uuid !== currentValues.uuid}
+          >
+            {({ getFieldValue }) => (
+              <Form.Item
+                label="XML"
+                name="xmlUrls"
+                rules={[{ required: true, message: '请上传XML文件' }]}
+              >
+                <XMLUpload
+                  {...getXmlUploadProps(getFieldValue('uuid'))}
+                  disabled={mode === 'view'}
+                />
+              </Form.Item>
+            )}
+          </Form.Item>
+        </>
+      )
+    }
+    return null
+  }
   return (
     <>
       <Collapse
@@ -228,7 +414,15 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
         <Collapse.Panel header="Hadoop 平台" key="hadoop">
           <Form {...formLayout} form={basicForm} name="basic-form" initialValues={{ type: 'CDH' }}>
             <Form.Item label="Hadoop 平台类型" name="type">
-              <Radio.Group disabled={configLoaded} options={transferEnumToOptions(EHadoopType)} />
+              <Radio.Group
+                disabled={configLoaded}
+                onChange={(e) => {
+                  if (e.target.value && mode === 'create') {
+                    onGetUuid()
+                  }
+                }}
+                options={transferEnumToOptions(EHadoopType)}
+              />
             </Form.Item>
             <Form.Item
               label="名称"
@@ -237,40 +431,14 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
             >
               <Input readOnly={mode === 'view'} placeholder="请输入名称" style={{ width: 500 }} />
             </Form.Item>
+
             <Form.Item
-              label="地址"
-              name="url"
-              rules={[{ required: true, message: '请输入地址！' }]}
+              noStyle
+              shouldUpdate={(prevValues, currentValues) => prevValues.type !== currentValues.type}
             >
-              <Input
-                disabled={configLoaded || mode === 'edit'}
-                placeholder="请输入地址"
-                style={{ width: 500 }}
-              />
+              {({ getFieldValue }) => getBasicContent(getFieldValue('type'))}
             </Form.Item>
-            <Form.Item
-              label="用户名"
-              name="username"
-              rules={[{ required: true, message: '请输入用户名！' }]}
-            >
-              <Input
-                disabled={configLoaded || mode === 'edit'}
-                placeholder="请输入用户名"
-                style={{ width: 500 }}
-              />
-            </Form.Item>
-            <Form.Item
-              label="密码"
-              name="password"
-              rules={[{ required: true, message: '请输入密码！' }]}
-            >
-              <Input.Password
-                disabled={configLoaded || mode === 'edit'}
-                placeholder="请输入密码"
-                style={{ width: 500 }}
-                iconRender={(visible) => null}
-              />
-            </Form.Item>
+
             {mode === 'create' ? (
               <Form.Item>
                 <Button loading={isLoading} onClick={onLoadConfig}>
@@ -303,15 +471,20 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
                 <Form.Item label="集群名称" name="clusterName">
                   <Input readOnly style={{ width: 500 }} />
                 </Form.Item>
-                <Form.Item label="集群状态" name="clusterStatus">
-                  <Input readOnly style={{ width: 500 }} />
-                </Form.Item>
-                <Form.Item label="集群版本" name="version">
-                  <Input readOnly style={{ width: 500 }} />
-                </Form.Item>
-                <Form.Item label="uuid" name="uuid">
-                  <Input readOnly style={{ width: 500 }} />
-                </Form.Item>
+
+                {basicForm.getFieldValue('type') === 'CDH' ? (
+                  <>
+                    <Form.Item label="集群状态" name="clusterStatus">
+                      <Input readOnly style={{ width: 500 }} />
+                    </Form.Item>
+                    <Form.Item label="集群版本" name="version">
+                      <Input readOnly style={{ width: 500 }} />
+                    </Form.Item>
+                    <Form.Item label="uuid" name="uuid">
+                      <Input readOnly style={{ width: 500 }} />
+                    </Form.Item>
+                  </>
+                ) : null}
                 <Divider orientation="left" orientationMargin="0">
                   Hdfs 信息
                 </Divider>
@@ -458,7 +631,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
                                           </Form.Item>
                                           <Upload
                                             disabled={mode === 'view'}
-                                            {...getUploadProps(fieldIndex)}
+                                            {...getKeytabUploadProps(fieldIndex)}
                                           >
                                             <Button
                                               disabled={mode === 'view'}

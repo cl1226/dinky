@@ -134,6 +134,57 @@ export const getTenantList = async (params) => {
   }
 }
 
+// 获取uuid
+export const requestUuid = async () => {
+  return request2('/api/hadoop/cluster/getUuid', {
+    method: 'GET',
+    params: {},
+  })
+}
+
+// 获取uuid
+export const getUuid = async () => {
+  try {
+    const { code, msg, datas } = await requestUuid()
+    if (code == CODE.SUCCESS) {
+      return datas || ''
+    } else {
+      message.warn(msg)
+      return ''
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return ''
+  }
+}
+
+// 上传xml
+export const requestUploadXml = (params) => {
+  return request2('/api/hadoop/cluster/uploadXml ', {
+    method: 'POST',
+    // headers: {
+    //   // 'Content-Type': 'multipart/form-data;',
+    // },
+    requestType: 'form',
+    data: params,
+  })
+}
+// 上传xml
+export const postUploadXml = async (params: any) => {
+  try {
+    const { code, msg, datas } = await requestUploadXml(params)
+    if (code == CODE.SUCCESS) {
+      return datas || []
+    } else {
+      message.warn(msg)
+      return []
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return []
+  }
+}
+
 // 删除租户
 export async function requestDeleteTenant(id: number) {
   return request2(`/api/hadoop/tenant?id=${id}`, {
