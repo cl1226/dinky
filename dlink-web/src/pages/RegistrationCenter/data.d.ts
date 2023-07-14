@@ -103,6 +103,9 @@ export type DataBaseItem = {
   enabled: boolean
   createTime: Date
   updateTime: Date
+  kerberos?: boolean
+  principalName?: string
+  keytabName?: string
 }
 
 export type Column = {

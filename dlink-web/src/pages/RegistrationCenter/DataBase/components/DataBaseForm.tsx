@@ -17,33 +17,30 @@
  *
  */
 
+import React, { useState } from 'react'
+import { Button, Divider, Form, Input, Select, Space } from 'antd'
 
-import React, {useState} from 'react';
-import {Button, Divider, Form, Input, Select, Space} from 'antd';
-
-import Switch from "antd/es/switch";
-import TextArea from "antd/es/input/TextArea";
-import {DataBaseItem} from "@/pages/RegistrationCenter/data";
-import {l} from "@/utils/intl";
-
+import Switch from 'antd/es/switch'
+import TextArea from 'antd/es/input/TextArea'
+import { DataBaseItem } from '@/pages/RegistrationCenter/data'
+import { l } from '@/utils/intl'
 
 export type ClickHouseFormProps = {
-  onCancel: (flag?: boolean, formVals?: Partial<DataBaseItem>) => void;
-  onSubmit: (values: Partial<DataBaseItem>) => void;
-  onTest: (values: Partial<DataBaseItem>) => void;
-  modalVisible: boolean;
-  values: Partial<DataBaseItem>;
-  type?: string;
-};
-const Option = Select.Option;
+  onCancel: (flag?: boolean, formVals?: Partial<DataBaseItem>) => void
+  onSubmit: (values: Partial<DataBaseItem>) => void
+  onTest: (values: Partial<DataBaseItem>) => void
+  modalVisible: boolean
+  values: Partial<DataBaseItem>
+  type?: string
+}
+const Option = Select.Option
 
 const formLayout = {
-  labelCol: {span: 7},
-  wrapperCol: {span: 13},
-};
+  labelCol: { span: 7 },
+  wrapperCol: { span: 13 },
+}
 
 const DataBaseForm: React.FC<ClickHouseFormProps> = (props) => {
-
   const [formVals, setFormVals] = useState<Partial<DataBaseItem>>({
     id: props.values.id,
     name: props.values.name,
@@ -57,33 +54,36 @@ const DataBaseForm: React.FC<ClickHouseFormProps> = (props) => {
     flinkTemplate: props.values.flinkTemplate,
     note: props.values.note,
     enabled: props.values.enabled,
-  });
+    kerberos: props.values.kerberos,
+    principalName: props.values.principalName,
+    keytabName: props.values.keytabName,
+  })
 
-  const [form] = Form.useForm();
+  const [form] = Form.useForm()
   const {
     onSubmit: handleUpdate,
     onTest: handleTest,
     onCancel: handleModalVisible,
     modalVisible,
     values,
-    type
-  } = props;
+    type,
+  } = props
 
   const submitForm = async () => {
-    const fieldsValue = await form.validateFields();
-    setFormVals({type, ...formVals, ...fieldsValue});
-    handleUpdate({type, ...formVals, ...fieldsValue});
-  };
+    const fieldsValue = await form.validateFields()
+    setFormVals({ type, ...formVals, ...fieldsValue })
+    handleUpdate({ type, ...formVals, ...fieldsValue })
+  }
 
   const testForm = async () => {
-    const fieldsValue = await form.validateFields();
-    setFormVals({type, ...formVals, ...fieldsValue});
-    handleTest({type, ...formVals, ...fieldsValue});
-  };
+    const fieldsValue = await form.validateFields()
+    setFormVals({ type, ...formVals, ...fieldsValue })
+    handleTest({ type, ...formVals, ...fieldsValue })
+  }
 
   const onReset = () => {
-    form.resetFields();
-  };
+    form.resetFields()
+  }
 
   const renderContent = (formVals) => {
     return (
@@ -92,19 +92,14 @@ const DataBaseForm: React.FC<ClickHouseFormProps> = (props) => {
         <Form.Item
           name="name"
           label={l('pages.rc.db.name')}
-          rules={[{required: true, message: l('pages.rc.db.namePlaceholder')}]}>
-          <Input placeholder={l('pages.rc.db.namePlaceholder')}/>
-        </Form.Item>
-        <Form.Item
-          name="alias"
-          label={l('pages.rc.db.alias')}
+          rules={[{ required: true, message: l('pages.rc.db.namePlaceholder') }]}
         >
-          <Input placeholder={l('pages.rc.db.aliasPlaceholder')}/>
+          <Input placeholder={l('pages.rc.db.namePlaceholder')} />
         </Form.Item>
-        <Form.Item
-          name="groupName"
-          label={l('pages.rc.db.groupName')}
-        >
+        <Form.Item name="alias" label={l('pages.rc.db.alias')}>
+          <Input placeholder={l('pages.rc.db.aliasPlaceholder')} />
+        </Form.Item>
+        <Form.Item name="groupName" label={l('pages.rc.db.groupName')}>
           <Select>
             <Option value="source">{l('pages.rc.db.source')}</Option>
             <Option value="warehouse">{l('pages.rc.db.warehouse')}</Option>
@@ -113,62 +108,93 @@ const DataBaseForm: React.FC<ClickHouseFormProps> = (props) => {
             <Option value="other">{l('pages.rc.db.other')}</Option>
           </Select>
         </Form.Item>
-        <Form.Item
-          name="url"
-          label={l('pages.rc.db.url')}
-        >
-          <TextArea placeholder={l('pages.rc.db.urlPlaceholder')} allowClear
-                    autoSize={{minRows: 3, maxRows: 10}}/>
+        <Form.Item name="url" label={l('pages.rc.db.url')}>
+          <TextArea
+            placeholder={l('pages.rc.db.urlPlaceholder')}
+            allowClear
+            autoSize={{ minRows: 3, maxRows: 10 }}
+          />
         </Form.Item>
-        <Form.Item
-          name="username"
-          label={l('pages.rc.db.username')}
-        >
-          <Input/>
-        </Form.Item>
-        <Form.Item
-          name="password"
-          label={l('pages.rc.db.password')}
-        >
-          <Input.Password/>
-        </Form.Item>
-        {type !== "Hive" && type !== "Presto" &&
+        {type === 'Hive' && (
           <>
-            <Form.Item
-              name="flinkConfig"
-              label={l('pages.rc.db.flinkConfig')}
-            >
-              <TextArea placeholder={l('pages.rc.db.flinkConfigPlaceholder')} allowClear
-                        autoSize={{minRows: 3, maxRows: 10}}/>
+            <Form.Item name="kerberos" label="Kerberos认证">
+              <Switch
+                checkedChildren={'是'}
+                unCheckedChildren={'否'}
+                defaultChecked={formVals.kerberos}
+              />
             </Form.Item>
+
             <Form.Item
-              name="flinkTemplate"
-              label={l('pages.rc.db.flinkTemplate')}
+              noStyle
+              shouldUpdate={(prevValues, currentValues) =>
+                prevValues.kerberos !== currentValues.kerberos
+              }
             >
-              <TextArea placeholder={l('pages.rc.db.flinkTemplatePlaceholder')} allowClear
-                        autoSize={{minRows: 3, maxRows: 10}}/>
+              {({ getFieldValue }) =>
+                getFieldValue('kerberos') ? (
+                  <>
+                    <Form.Item
+                      rules={[{ required: true, message: '请输入principal' }]}
+                      name="principalName"
+                      label={'principal'}
+                    >
+                      <Input />
+                    </Form.Item>
+                    <Form.Item
+                      name="keytabName"
+                      rules={[{ required: true, message: '请输入keytab' }]}
+                      label={'keytab'}
+                    >
+                      <Input />
+                    </Form.Item>
+                  </>
+                ) : null
+              }
             </Form.Item>
-          </>}
-        <Form.Item
-          name="note"
-          label={l('global.table.note')}
-        >
-          <Input placeholder={l('global.table.notePlaceholder')}/>
+          </>
+        )}
+        <Form.Item name="username" label={l('pages.rc.db.username')}>
+          <Input />
         </Form.Item>
-        <Form.Item
-          name="enabled"
-          label={l('global.table.isEnable')}
-        >
-          <Switch  checkedChildren={l('button.enable')} unCheckedChildren={l('button.disable')}
-                  defaultChecked={formVals.enabled}/>
+        <Form.Item name="password" label={l('pages.rc.db.password')}>
+          <Input.Password />
+        </Form.Item>
+        {type !== 'Hive' && type !== 'Presto' && (
+          <>
+            <Form.Item name="flinkConfig" label={l('pages.rc.db.flinkConfig')}>
+              <TextArea
+                placeholder={l('pages.rc.db.flinkConfigPlaceholder')}
+                allowClear
+                autoSize={{ minRows: 3, maxRows: 10 }}
+              />
+            </Form.Item>
+            <Form.Item name="flinkTemplate" label={l('pages.rc.db.flinkTemplate')}>
+              <TextArea
+                placeholder={l('pages.rc.db.flinkTemplatePlaceholder')}
+                allowClear
+                autoSize={{ minRows: 3, maxRows: 10 }}
+              />
+            </Form.Item>
+          </>
+        )}
+        <Form.Item name="note" label={l('global.table.note')}>
+          <Input placeholder={l('global.table.notePlaceholder')} />
+        </Form.Item>
+        <Form.Item name="enabled" label={l('global.table.isEnable')}>
+          <Switch
+            checkedChildren={l('button.enable')}
+            unCheckedChildren={l('button.disable')}
+            defaultChecked={formVals.enabled}
+          />
         </Form.Item>
       </>
-    );
-  };
+    )
+  }
 
   return (
-    <>{
-      modalVisible && (
+    <>
+      {modalVisible && (
         <>
           <Form
             {...formLayout}
@@ -189,15 +215,18 @@ const DataBaseForm: React.FC<ClickHouseFormProps> = (props) => {
             }}
           >
             {renderContent(formVals)}
-            <Form.Item wrapperCol={{offset: 8, span: 16}}>
+            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
               <Space>
-                {!formVals.id ?
-                  <Button htmlType="button" onClick={() => {
-                    handleModalVisible(false)
-                  }}>
+                {!formVals.id ? (
+                  <Button
+                    htmlType="button"
+                    onClick={() => {
+                      handleModalVisible(false)
+                    }}
+                  >
                     {l('button.cancel')}
-                  </Button> : undefined
-                }
+                  </Button>
+                ) : undefined}
                 <Button htmlType="button" onClick={onReset}>
                   {l('button.reset')}
                 </Button>
@@ -211,9 +240,9 @@ const DataBaseForm: React.FC<ClickHouseFormProps> = (props) => {
             </Form.Item>
           </Form>
         </>
-      )
-    }</>
-  );
-};
+      )}
+    </>
+  )
+}
 
-export default DataBaseForm;
+export default DataBaseForm
