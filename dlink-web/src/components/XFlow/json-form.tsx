@@ -510,7 +510,7 @@ export namespace NodeCustomForm {
           <Input style={{ width: '100%' }} placeholder="请输入Driver内存数"></Input>
         </Form.Item>
         <Form.Item label="Executor数量" name="executorInstances">
-          <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'次'} />
+          <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'个'} />
         </Form.Item>
         <Form.Item label="Executor内存数" name="executorMemory">
           <Input style={{ width: '100%' }} placeholder="请输入Driver内存数"></Input>
