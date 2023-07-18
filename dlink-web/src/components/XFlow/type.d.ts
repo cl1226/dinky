@@ -26,3 +26,13 @@ export enum ESparkVersion {
   SPARK2 = 'SPARK2',
   SPARK1 = 'SPARK1',
 }
+
+// 文件类型
+export enum EFileType {
+  txt = 'txt',
+  json = 'json',
+  csv = 'csv',
+  excel = 'excel',
+  parquet = 'parquet',
+  orc = 'orc',
+}

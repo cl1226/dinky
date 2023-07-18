@@ -35,7 +35,6 @@ export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta
       jobId: '0',
       nodeType: jtem.type,
       nodeInfo: '',
-      params: { type: jtem.type },
     })),
   }))
 }

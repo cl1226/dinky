@@ -5,4 +5,6 @@ export enum EAsyncCode {
   'rootCatalogue' = 'rootCatalogue',
   'DBTYPE' = 'DBTYPE',
   'ITEMTYPE' = 'ITEMTYPE',
+  'cluster' = 'cluster',
+  'tenant' = 'tenant',
 }

@@ -33,9 +33,11 @@ import { Cron } from '@/components/Cron'
 import { JobSelect } from '@/components/XFlow/components/JobSelect'
 import { JarSelect } from '@/components/XFlow/components/JarSelect'
 import { SourceSelect } from '@/components/XFlow/components/SourceSelect'
+import SelectHelp from '@/components/SelectHelp'
+import { EAsyncCode } from '@/components/SelectHelp/type.d'
 import { NS_CANVAS_FORM } from './config-model-service'
 import { IMeta, ESchedulerType, getJsonCron, DIALECT } from './service'
-import { EDeployMode, EPriority, ESparkVersion, EProgramType } from './type.d'
+import { EDeployMode, EFileType, ESparkVersion, EProgramType } from './type.d'
 import { transferEnumToOptions } from '@/utils/utils'
 
 const RangePicker: any = DatePicker.RangePicker
@@ -54,7 +56,7 @@ const formLayout: any = {
 }
 
 const getNodeParams = (nodeType, formResult) => {
-  if (nodeType === DIALECT.SPARK) {
+  if (nodeType === DIALECT.SPARK || nodeType === DIALECT.FILE || nodeType === DIALECT.FTP) {
     return formResult
   }
   const { jobObj } = formResult
@@ -74,8 +76,12 @@ const getNodeDefaultFormValue = (nodeType) => {
       executorCores: 2,
       version: ESparkVersion.SPARK2,
       programType: EProgramType.SCALA,
-      // priority: EPriority.MEDIUM,
       maxAppAttempts: 0,
+    }
+  } else if (nodeType === DIALECT.FILE) {
+    return {
+      delimiter: ',',
+      header: true,
     }
   }
   return {}
@@ -400,10 +406,13 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
     const type = props.targetData?.nodeType
     switch (type) {
       case DIALECT.SPARK:
-        return NodeCustomForm.Spark()
-
+        return NodeCustomForm.Spark(form)
+      case DIALECT.FILE:
+        return NodeCustomForm.File()
+      case DIALECT.FTP:
+        return NodeCustomForm.Ftp()
       default:
-        return NodeCustomForm.Default()
+        return NodeCustomForm.Default(type)
     }
   }
 
@@ -454,7 +463,7 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
 }
 
 export namespace NodeCustomForm {
-  export const Spark = () => {
+  export const Spark = (form) => {
     return (
       <>
         <Form.Item label="描述" name="description">
@@ -464,13 +473,6 @@ export namespace NodeCustomForm {
             rows={3}
           ></Input.TextArea>
         </Form.Item>
-        {/* <Form.Item
-          label="任务优先级"
-          name="priority"
-          rules={[{ required: true, message: '请选择任务优先级' }]}
-        >
-          <Select style={{ width: '100%' }} options={transferEnumToOptions(EPriority)} />
-        </Form.Item> */}
 
         <Form.Item label="失败重试次数" name="maxAppAttempts">
           <InputNumber style={{ width: '100%' }} min={0} precision={0} addonAfter={'次'} />
@@ -541,10 +543,141 @@ export namespace NodeCustomForm {
         >
           <SourceSelect style={{ width: '100%' }} placeholder="请选择资源" />
         </Form.Item>
+
+        <Form.Item
+          label="Hadoop集群"
+          name="clusterId"
+          rules={[{ required: true, message: '请选择Hadoop集群' }]}
+        >
+          <SelectHelp
+            placeholder="请选择"
+            style={{ width: '100%' }}
+            asyncCode={EAsyncCode.cluster}
+            optionFormatter={(options) =>
+              options.map((option) => ({ label: option.name, value: option.id }))
+            }
+            onChange={() => {
+              form.setFieldsValue({
+                tenantId: '',
+              })
+            }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues.clusterId !== currentValues.clusterId
+          }
+        >
+          {({ getFieldValue }) =>
+            getFieldValue('clusterId') ? (
+              <Form.Item label="租户" name="tenantId">
+                <SelectHelp
+                  placeholder="请选择"
+                  style={{ width: '100%' }}
+                  asyncCode={EAsyncCode.tenant}
+                  asyncParams={{ clusterId: getFieldValue('clusterId') }}
+                  optionFormatter={(options) =>
+                    options.map((option) => ({ label: option.name, value: option.id }))
+                  }
+                ></SelectHelp>
+              </Form.Item>
+            ) : null
+          }
+        </Form.Item>
       </>
     )
   }
-  export const Default = () => {
+  export const File = () => {
+    return (
+      <>
+        <Form.Item label="路径" name="path" rules={[{ required: true, message: '请输入路径' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入路径"></Input>
+        </Form.Item>
+        <Form.Item label="类型" name="type" rules={[{ required: true, message: '请选择类型' }]}>
+          <Select
+            style={{ width: '100%' }}
+            placeholder="请选择类型"
+            options={transferEnumToOptions(EFileType)}
+          />
+        </Form.Item>
+
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) => prevValues.type !== currentValues.type}
+        >
+          {({ getFieldValue }) => {
+            if (getFieldValue('type') === EFileType.csv) {
+              return (
+                <>
+                  <Form.Item
+                    label="分隔符"
+                    name="delimiter"
+                    rules={[{ required: true, message: '请输入分隔符' }]}
+                  >
+                    <Input style={{ width: '100%' }} placeholder="请输入分隔符"></Input>
+                  </Form.Item>
+
+                  <Form.Item label="包含头" valuePropName="checked" name="header">
+                    <Switch />
+                  </Form.Item>
+                </>
+              )
+            }
+            if (getFieldValue('type') === EFileType.excel) {
+              return (
+                <Form.Item
+                  label="分隔符"
+                  name="delimiter"
+                  rules={[{ required: true, message: '请输入分隔符' }]}
+                >
+                  <Input style={{ width: '100%' }} placeholder="请输入分隔符"></Input>
+                </Form.Item>
+              )
+            }
+            return null
+          }}
+        </Form.Item>
+      </>
+    )
+  }
+  export const Ftp = () => {
+    return (
+      <>
+        <Form.Item label="主机" name="host" rules={[{ required: true, message: '请输入主机' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入主机"></Input>
+        </Form.Item>
+        <Form.Item label="端口" name="port" rules={[{ required: true, message: '请输入端口' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入端口"></Input>
+        </Form.Item>
+        <Form.Item
+          label="用户名"
+          name="username"
+          rules={[{ required: true, message: '请输入用户名' }]}
+        >
+          <Input style={{ width: '100%' }} placeholder="请输入用户名"></Input>
+        </Form.Item>
+        <Form.Item label="密码" name="password" rules={[{ required: true, message: '请输入密码' }]}>
+          <Input.Password style={{ width: '100%' }} placeholder="请输入密码"></Input.Password>
+        </Form.Item>
+        <Form.Item
+          label="路径"
+          name="directory"
+          rules={[{ required: true, message: '请输入路径' }]}
+        >
+          <Input style={{ width: '100%' }} placeholder="请输入路径"></Input>
+        </Form.Item>
+      </>
+    )
+  }
+  export const Default = (type) => {
+    const jobSelectDefaultParams: any = {}
+    if (type === DIALECT.FLINKSQL) {
+      jobSelectDefaultParams.dialect = 'FlinkSql'
+    } else if (type === DIALECT.HIVE) {
+      jobSelectDefaultParams.dialect = 'Hive'
+    }
     return (
       <>
         <Descriptions title="关联脚本" column={1}></Descriptions>
@@ -554,7 +687,11 @@ export namespace NodeCustomForm {
           rules={[{ required: true, message: '请选择关联脚本' }]}
           style={{ width: '100%' }}
         >
-          <JobSelect valueKey="Object" placeholder="请选择关联脚本" />
+          <JobSelect
+            defaultParams={jobSelectDefaultParams}
+            valueKey="Object"
+            placeholder="请选择关联脚本"
+          />
         </Form.Item>
       </>
     )

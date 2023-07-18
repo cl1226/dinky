@@ -18,7 +18,14 @@ export interface TaskTableItem {
 }
 // valueKey: id Object
 export const JobSelect: React.FC<any> = (props) => {
-  const { value, valueKey = 'id', onChange, placeholder = '请选择关联脚本', ...resetProps } = props
+  const {
+    value,
+    valueKey = 'id',
+    defaultParams = {},
+    onChange,
+    placeholder = '请选择关联脚本',
+    ...resetProps
+  } = props
 
   const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
@@ -39,6 +46,7 @@ export const JobSelect: React.FC<any> = (props) => {
       name: searchKey || '',
       dialect: '',
       ...(extra || {}),
+      ...defaultParams,
     }
 
     setLoading(true)

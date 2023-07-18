@@ -298,6 +298,23 @@ export const getCommonSelectOptions = async (menuCode: EAsyncCode, params?: any)
         ...(params || {}),
       },
     }
+  } else if (menuCode === EAsyncCode.cluster) {
+    url = '/api/hadoop/cluster'
+    option = {
+      method: 'GET',
+      params: {
+        ...(params || {}),
+      },
+    }
+  } else if (menuCode === EAsyncCode.tenant) {
+    console.log('params', params)
+    url = '/api/hadoop/tenant'
+    option = {
+      method: 'GET',
+      params: {
+        ...(params || {}),
+      },
+    }
   } else if (
     menuCode === EAsyncCode.datasourceDb ||
     menuCode === EAsyncCode.datasourceId ||
