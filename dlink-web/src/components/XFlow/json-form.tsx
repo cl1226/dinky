@@ -38,7 +38,7 @@ import SelectHelp from '@/components/SelectHelp'
 import { EAsyncCode } from '@/components/SelectHelp/type.d'
 import { NS_CANVAS_FORM } from './config-model-service'
 import { IMeta, ESchedulerType, getJsonCron, DIALECT } from './service'
-import { EDeployMode, EFileType, ESparkVersion, EProgramType } from './type.d'
+import { EDeployMode, EFileType, EReadType, ESparkVersion, EProgramType } from './type.d'
 import { transferEnumToOptions } from '@/utils/utils'
 
 const RangePicker: any = DatePicker.RangePicker
@@ -56,14 +56,21 @@ const formLayout: any = {
   colon: true,
 }
 
+// form值 => 接口参数
 const getNodeParams = (nodeType, formResult) => {
   if (
     nodeType === DIALECT.SPARK ||
     nodeType === DIALECT.FILE ||
     nodeType === DIALECT.FTP ||
-    nodeType === DIALECT.Console
+    nodeType === DIALECT.Console ||
+    nodeType === DIALECT.Mysql
   ) {
     return formResult
+  } else if (nodeType === DIALECT.HDFS) {
+    return {
+      ...formResult,
+      path: `hdfs://${formResult.path}`,
+    }
   }
   const { jobObj } = formResult
   return {
@@ -71,15 +78,22 @@ const getNodeParams = (nodeType, formResult) => {
     jobName: jobObj?.name || '',
   }
 }
+// 接口参数 => form值
 const transferNodeInfo = (nodeType, nodeInfo) => {
   if (!nodeInfo) return {}
   if (
     nodeType === DIALECT.SPARK ||
     nodeType === DIALECT.FILE ||
     nodeType === DIALECT.FTP ||
-    nodeType === DIALECT.Console
+    nodeType === DIALECT.Console ||
+    nodeType === DIALECT.Mysql
   ) {
     return nodeInfo
+  } else if (nodeType === DIALECT.HDFS) {
+    return {
+      ...nodeInfo,
+      path: nodeInfo?.path?.split('hdfs://')?.[1] || '',
+    }
   }
 
   const { jobId, jobName } = nodeInfo
@@ -87,6 +101,7 @@ const transferNodeInfo = (nodeType, nodeInfo) => {
     jobObj: { id: jobId, name: jobName },
   }
 }
+// form默认值
 const getNodeDefaultFormValue = (nodeType) => {
   if (nodeType === DIALECT.SPARK) {
     return {
@@ -100,7 +115,7 @@ const getNodeDefaultFormValue = (nodeType) => {
       programType: EProgramType.SCALA,
       maxAppAttempts: 0,
     }
-  } else if (nodeType === DIALECT.FILE) {
+  } else if (nodeType === DIALECT.FILE || nodeType === DIALECT.HDFS) {
     return {
       delimiter: ',',
       header: true,
@@ -108,6 +123,11 @@ const getNodeDefaultFormValue = (nodeType) => {
   } else if (nodeType === DIALECT.Console) {
     return {
       maxLine: 10,
+    }
+  } else if (nodeType === DIALECT.Mysql) {
+    return {
+      numPartitions: 1,
+      readType: 'full',
     }
   }
   return {}
@@ -446,6 +466,11 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
         return NodeCustomForm.Ftp()
       case DIALECT.Console:
         return NodeCustomForm.Console()
+      case DIALECT.HDFS:
+        return NodeCustomForm.Hdfs()
+      case DIALECT.Mysql:
+        return NodeCustomForm.Mysql()
+
       default:
         return NodeCustomForm.Default(type)
     }
@@ -670,6 +695,124 @@ export namespace NodeCustomForm {
                 </Form.Item>
               )
             }
+            return null
+          }}
+        </Form.Item>
+      </>
+    )
+  }
+  export const Hdfs = () => {
+    return (
+      <>
+        <Form.Item label="路径" name="path" rules={[{ required: true, message: '请输入路径' }]}>
+          <Input addonBefore="hdfs://" style={{ width: '100%' }} placeholder="请输入路径"></Input>
+        </Form.Item>
+        <Form.Item label="类型" name="type" rules={[{ required: true, message: '请选择类型' }]}>
+          <Select
+            style={{ width: '100%' }}
+            placeholder="请选择类型"
+            options={transferEnumToOptions(EFileType)}
+          />
+        </Form.Item>
+
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) => prevValues.type !== currentValues.type}
+        >
+          {({ getFieldValue }) => {
+            if (getFieldValue('type') === EFileType.csv) {
+              return (
+                <>
+                  <Form.Item
+                    label="分隔符"
+                    name="delimiter"
+                    rules={[{ required: true, message: '请输入分隔符' }]}
+                  >
+                    <Input style={{ width: '100%' }} placeholder="请输入分隔符"></Input>
+                  </Form.Item>
+
+                  <Form.Item label="包含头" valuePropName="checked" name="header">
+                    <Switch />
+                  </Form.Item>
+                </>
+              )
+            }
+            if (getFieldValue('type') === EFileType.excel) {
+              return (
+                <Form.Item
+                  label="分隔符"
+                  name="delimiter"
+                  rules={[{ required: true, message: '请输入分隔符' }]}
+                >
+                  <Input style={{ width: '100%' }} placeholder="请输入分隔符"></Input>
+                </Form.Item>
+              )
+            }
+            return null
+          }}
+        </Form.Item>
+      </>
+    )
+  }
+  export const Mysql = () => {
+    return (
+      <>
+        <Form.Item label="URL" name="url" rules={[{ required: true, message: '请输入URL' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入URL"></Input>
+        </Form.Item>
+        <Form.Item
+          label="用户名"
+          name="username"
+          rules={[{ required: true, message: '请输入用户名' }]}
+        >
+          <Input style={{ width: '100%' }} placeholder="请输入用户名"></Input>
+        </Form.Item>
+        <Form.Item label="密码" name="password" rules={[{ required: true, message: '请输入密码' }]}>
+          <Input.Password style={{ width: '100%' }} placeholder="请输入密码"></Input.Password>
+        </Form.Item>
+
+        <Form.Item
+          label="读取方式"
+          name="readType"
+          rules={[{ required: true, message: '请选择读取方式' }]}
+        >
+          <Select
+            style={{ width: '100%' }}
+            placeholder="请选择读取方式"
+            options={transferEnumToOptions(EReadType)}
+          />
+        </Form.Item>
+
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues.readType !== currentValues.readType
+          }
+        >
+          {({ getFieldValue }) => {
+            if (getFieldValue('readType') === 'full') {
+              return (
+                <>
+                  <Form.Item label="分区字段" name="partColumnName ">
+                    <Input style={{ width: '100%' }} placeholder="请输入分区字段（选填）"></Input>
+                  </Form.Item>
+
+                  <Form.Item
+                    label="分区数"
+                    name="numPartitions"
+                    rules={[{ required: true, message: '请输入分区数' }]}
+                  >
+                    <InputNumber
+                      style={{ width: '100%' }}
+                      min={1}
+                      precision={0}
+                      addonAfter={'个'}
+                    />
+                  </Form.Item>
+                </>
+              )
+            }
+
             return null
           }}
         </Form.Item>
