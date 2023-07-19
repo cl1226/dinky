@@ -8,6 +8,7 @@ import {
   useXFlowApp,
   XFlowGraphCommands,
   NsGraph,
+  useModelAsync,
 } from '@antv/xflow'
 import type { NsNodeCmd, IGraphCommandService, IModelService } from '@antv/xflow'
 import { Scrollbars } from 'react-custom-scrollbars'
@@ -56,13 +57,34 @@ const formLayout: any = {
 }
 
 const getNodeParams = (nodeType, formResult) => {
-  if (nodeType === DIALECT.SPARK || nodeType === DIALECT.FILE || nodeType === DIALECT.FTP) {
+  if (
+    nodeType === DIALECT.SPARK ||
+    nodeType === DIALECT.FILE ||
+    nodeType === DIALECT.FTP ||
+    nodeType === DIALECT.Console
+  ) {
     return formResult
   }
   const { jobObj } = formResult
   return {
     jobId: jobObj?.id || '',
     jobName: jobObj?.name || '',
+  }
+}
+const transferNodeInfo = (nodeType, nodeInfo) => {
+  if (!nodeInfo) return {}
+  if (
+    nodeType === DIALECT.SPARK ||
+    nodeType === DIALECT.FILE ||
+    nodeType === DIALECT.FTP ||
+    nodeType === DIALECT.Console
+  ) {
+    return nodeInfo
+  }
+
+  const { jobId, jobName } = nodeInfo
+  return {
+    jobObj: { id: jobId, name: jobName },
   }
 }
 const getNodeDefaultFormValue = (nodeType) => {
@@ -82,6 +104,10 @@ const getNodeDefaultFormValue = (nodeType) => {
     return {
       delimiter: ',',
       header: true,
+    }
+  } else if (nodeType === DIALECT.Console) {
+    return {
+      maxLine: 10,
     }
   }
   return {}
@@ -394,6 +420,13 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
           const nodes = await MODELS.SELECTED_NODES.useValue(modelService)
           if (nodes !== null && nodes.length > 0) {
             nodes[0].data.nodeInfo = dataParams
+
+            commandService.executeCommand<NsNodeCmd.UpdateNode.IArgs>(
+              XFlowNodeCommands.UPDATE_NODE.id,
+              {
+                nodeConfig: { ...nodes[0].data, label: nodeName },
+              },
+            )
           }
           message.success('暂存成功')
           onClose && onClose(true)
@@ -411,6 +444,8 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
         return NodeCustomForm.File()
       case DIALECT.FTP:
         return NodeCustomForm.Ftp()
+      case DIALECT.Console:
+        return NodeCustomForm.Console()
       default:
         return NodeCustomForm.Default(type)
     }
@@ -426,7 +461,7 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
           nodeId: props.targetData?.id,
           nodeType: props.targetData?.nodeType,
           ...(props.targetData?.nodeInfo
-            ? props.targetData?.nodeInfo || {}
+            ? transferNodeInfo(props.targetData?.nodeType, props.targetData?.nodeInfo)
             : getNodeDefaultFormValue(props.targetData?.nodeType)),
         }}
         onValuesChange={onValuesChange}
@@ -443,11 +478,10 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
         <Form.Item
           label="节点名称"
           name="nodeName"
-          // rules={[{ required: true, message: '请输入节点名称' }]}
-          style={{ width: '100%', marginBottom: 0 }}
+          rules={[{ required: true, message: '请输入节点名称' }]}
+          style={{ width: '100%' }}
         >
-          <DescriptionsText />
-          {/* <Input placeholder="请输入节点名称" /> */}
+          <Input placeholder="请输入节点名称" />
         </Form.Item>
 
         {getFormContent()}
@@ -667,6 +701,19 @@ export namespace NodeCustomForm {
           rules={[{ required: true, message: '请输入路径' }]}
         >
           <Input style={{ width: '100%' }} placeholder="请输入路径"></Input>
+        </Form.Item>
+      </>
+    )
+  }
+  export const Console = () => {
+    return (
+      <>
+        <Form.Item
+          label="最大行数"
+          name="maxLine"
+          rules={[{ required: true, message: '请输入最大行数' }]}
+        >
+          <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'行'} />
         </Form.Item>
       </>
     )

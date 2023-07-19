@@ -28,12 +28,14 @@ export const useCmdConfig = createCmdConfig((config) => {
       hooks.addNode.registerHook({
         name: 'get node config from backend api',
         handler: async (args) => {
+          console.log('add', args)
           args.createNodeService = XFlowApi.addNode
         },
       }),
       hooks.delNode.registerHook({
         name: 'get edge config from backend api',
         handler: async (args) => {
+          console.log('del', args)
           args.deleteNodeService = XFlowApi.delNode
         },
       }),
@@ -107,7 +109,7 @@ export const initGraphCmds = async (
       commandId: XFlowGraphCommands.GRAPH_RENDER.id,
       getCommandOption: async (ctx) => {
         const { graphData } = ctx.getResult()
-        for (var i=0; i<graphData.edges.length; i++) {
+        for (var i = 0; i < graphData.edges.length; i++) {
           graphData.edges[i].edge.attrs.line = {
             targetMarker: {
               name: 'Classic',
@@ -117,7 +119,7 @@ export const initGraphCmds = async (
             stroke: 'rgb(51, 170, 153)',
             strokeWidth: 2,
           }
-        };
+        }
         return {
           args: {
             graphData,

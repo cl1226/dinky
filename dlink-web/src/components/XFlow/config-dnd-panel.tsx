@@ -23,16 +23,14 @@ export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta
     children: item.res.map((jtem) => ({
       id: jtem.label,
       label: jtem.label,
-      type: jtem.type,
-      parentId: '1',
       // renderKey: DND_RENDER_ID,
       renderComponent: (props) => (
-        <div className="react-dnd-node react-custom-node">
+        <div className="custom-dnd-node">
           <Avatar src={getIcon(jtem.type)}></Avatar>
-          <p>{props.data.label}</p>
+          <div>{props.data.label}</div>
         </div>
       ),
-      jobId: '0',
+      group: jtem.group,
       nodeType: jtem.type,
       nodeInfo: '',
     })),

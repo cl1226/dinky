@@ -33,6 +33,10 @@ export const DIALECT = {
   FLINK: 'Flink',
   SQL: 'SQL',
   QUALITY: 'Quality',
+  HDFS: 'HDFS',
+  Mysql: 'Mysql',
+  Filter: 'Filter',
+  Console: 'Console',
 }
 
 /** 状态 类型 */

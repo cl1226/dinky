@@ -63,7 +63,7 @@ export namespace NsMenuItemConfig {
   }
 }
 
-export const useMenuConfig = createCtxMenuConfig(config => {
+export const useMenuConfig = createCtxMenuConfig((config) => {
   config.setMenuModelService(async (target, model, modelService, toDispose) => {
     const { type, cell } = target
     switch (type) {
@@ -72,7 +72,7 @@ export const useMenuConfig = createCtxMenuConfig(config => {
         model.setValue({
           id: 'root',
           type: MenuItemType.Root,
-          submenu: [NsMenuItemConfig.DELETE_NODE, NsMenuItemConfig.RENAME_NODE],
+          submenu: [NsMenuItemConfig.DELETE_NODE],
         })
         break
       /** 边菜单 */
