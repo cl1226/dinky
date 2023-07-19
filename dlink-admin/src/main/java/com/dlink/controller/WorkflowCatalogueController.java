@@ -276,8 +276,8 @@ public class WorkflowCatalogueController {
     }
 
     @GetMapping("/getTaskEnum")
-    public Result getTaskEnum() {
-        List<JSONObject> taskEnum = catalogueService.getTaskEnum();
+    public Result getTaskEnum(@RequestParam(required = false) String type) {
+        List<JSONObject> taskEnum = catalogueService.getTaskEnum(type);
         return Result.succeed(taskEnum, "获取成功");
     }
 }

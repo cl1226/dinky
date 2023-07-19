@@ -4,10 +4,8 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jcraft.jsch.*;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -130,6 +128,42 @@ public class ShellUtil {
                 channel.disconnect();
             }
         }
+    }
+
+    // 执行Linux命令
+    public void execute(String command) {
+        BufferedReader reader = null;
+        Channel channel = null;
+        System.out.println("---------------------------");
+        System.out.println("input:" + "【" + command + "】");
+        System.out.println("---------------------------");
+        try {
+            channel = session.openChannel("exec");
+            ((ChannelExec) channel).setCommand(command);
+            channel.setInputStream(null);
+            ((ChannelExec) channel).setErrStream(System.err);
+            channel.connect();
+            InputStream in = channel.getInputStream();
+            reader = new BufferedReader(new InputStreamReader(in,
+                    Charset.forName("UTF-8")));
+            String buf = null;
+            System.out.println("output:" + "\n");
+            StringBuffer buffer = new StringBuffer();
+            while ((buf = reader.readLine()) != null) {
+                System.out.println(buf);
+                buffer.append(buf);
+                buffer.append("\n");
+            }
+            System.out.println("---------------------------");
+            channel.disconnect();
+        } catch (JSchException | IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (channel != null && channel.isConnected()) {
+                channel.disconnect();
+            }
+        }
+
     }
 
     /**

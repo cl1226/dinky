@@ -19,6 +19,7 @@
 
 package com.dlink.service.impl;
 
+import cn.hutool.core.io.FileUtil;
 import com.dlink.api.FlinkAPI;
 import com.dlink.assertion.Asserts;
 import com.dlink.config.Dialect;
@@ -37,17 +38,11 @@ import com.dlink.gateway.result.SavePointResult;
 import com.dlink.job.JobConfig;
 import com.dlink.job.JobManager;
 import com.dlink.job.JobResult;
+import com.dlink.mapper.HadoopClusterMapper;
 import com.dlink.metadata.driver.Driver;
 import com.dlink.metadata.result.JdbcSelectResult;
-import com.dlink.model.Catalog;
-import com.dlink.model.Cluster;
-import com.dlink.model.DataBase;
-import com.dlink.model.FlinkColumn;
-import com.dlink.model.RoleSelectPermissions;
-import com.dlink.model.Savepoints;
-import com.dlink.model.Schema;
-import com.dlink.model.Table;
-import com.dlink.model.Task;
+import com.dlink.minio.MinioStorageService;
+import com.dlink.model.*;
 import com.dlink.process.context.ProcessContextHolder;
 import com.dlink.process.model.ProcessEntity;
 import com.dlink.process.model.ProcessType;
@@ -69,14 +64,20 @@ import com.dlink.session.SessionPool;
 import com.dlink.sql.FlinkQuery;
 import com.dlink.utils.RunTimeUtil;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -104,6 +105,11 @@ public class StudioServiceImpl implements StudioService {
     private final TaskService taskService;
     private final FragmentVariableService fragmentVariableService;
     private final UserService userService;
+
+    @Autowired
+    private HadoopClusterMapper hadoopClusterMapper;
+    @Autowired
+    private MinioStorageService minioStorageService;
 
     public StudioServiceImpl(ClusterService clusterService,
             ClusterConfigurationService clusterConfigurationService,
@@ -382,6 +388,30 @@ public class StudioServiceImpl implements StudioService {
         return JobManager.listSession(createUser);
     }
 
+    private boolean initKerberos(DataBase dataBase) {
+        HadoopCluster hadoopCluster = hadoopClusterMapper.getOneByAddress(dataBase.getUrl());
+        if (hadoopCluster == null) {
+            return false;
+        }
+        String krb5Path = "/hadoop/" + hadoopCluster.getUuid() + "/keytab/krb5.conf";
+        String keytabPath =  "/hadoop/" + hadoopCluster.getUuid() + "/keytab/" + dataBase.getKeytabName();
+        InputStream krb5in = minioStorageService.downloadFile(krb5Path);
+        InputStream keytabin = minioStorageService.downloadFile(keytabPath);
+        FileUtil.writeFromStream(krb5in, new File(krb5Path));
+        FileUtil.writeFromStream(keytabin, new File(keytabPath));
+        System.setProperty("java.security.krb5.conf", krb5Path);
+        Configuration configuration = new Configuration();
+        configuration.set("hadoop.security.authentication" , "Kerberos");
+        configuration.setBoolean("hadoop.security.authorization", true);
+        UserGroupInformation.setConfiguration(configuration);
+        try {
+            UserGroupInformation.loginUserFromKeytab(dataBase.getPrincipalName() , keytabPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
     @Override
     public LineageResult getLineage(StudioLineageDTO studioCADTO) {
         if (Asserts.isNotNullString(studioCADTO.getDialect())
@@ -390,6 +420,9 @@ public class StudioServiceImpl implements StudioService {
                 return null;
             }
             DataBase dataBase = dataBaseService.getById(studioCADTO.getDatabaseId());
+            if (dataBase.getKerberos() != null && dataBase.getKerberos()) {
+                initKerberos(dataBase);
+            }
             if (Asserts.isNull(dataBase)) {
                 return null;
             }

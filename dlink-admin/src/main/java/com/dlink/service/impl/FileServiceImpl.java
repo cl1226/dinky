@@ -5,12 +5,14 @@ import com.dlink.minio.MinioStorageService;
 import com.dlink.service.FileCatalogueService;
 import com.dlink.service.FileService;
 import com.dlink.service.JarCatalogueService;
+import io.minio.errors.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -49,6 +51,22 @@ public class FileServiceImpl implements FileService {
             return Result.succeed(res, "上传成功");
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ServerException e) {
+            e.printStackTrace();
+        } catch (InsufficientDataException e) {
+            e.printStackTrace();
+        } catch (ErrorResponseException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (InvalidResponseException e) {
+            e.printStackTrace();
+        } catch (XmlParserException e) {
+            e.printStackTrace();
+        } catch (InternalException e) {
+            e.printStackTrace();
         }
         return Result.failed("上传失败");
     }
@@ -65,7 +83,28 @@ public class FileServiceImpl implements FileService {
             Collections.reverse(pathList);
             path = pathList.stream().map(String::valueOf).collect(Collectors.joining("/"));
         }
-        String res = minioStorageService.uploadFile(bytes, "/" + path + "/" + filename);
+        String res = null;
+        try {
+            res = minioStorageService.uploadFile(bytes, "/" + path + "/" + filename);
+        } catch (ServerException e) {
+            e.printStackTrace();
+        } catch (InsufficientDataException e) {
+            e.printStackTrace();
+        } catch (ErrorResponseException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (InvalidResponseException e) {
+            e.printStackTrace();
+        } catch (XmlParserException e) {
+            e.printStackTrace();
+        } catch (InternalException e) {
+            e.printStackTrace();
+        }
         return res;
     }
 }

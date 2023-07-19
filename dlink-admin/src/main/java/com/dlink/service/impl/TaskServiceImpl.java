@@ -19,6 +19,9 @@
 
 package com.dlink.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.json.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.alert.Alert;
 import com.dlink.alert.AlertConfig;
@@ -70,28 +73,13 @@ import com.dlink.process.model.ProcessEntity;
 import com.dlink.process.model.ProcessType;
 import com.dlink.result.SqlExplainResult;
 import com.dlink.result.TaskOperatingResult;
-import com.dlink.service.AlertGroupService;
-import com.dlink.service.AlertHistoryService;
-import com.dlink.service.CatalogueService;
-import com.dlink.service.ClusterConfigurationService;
-import com.dlink.service.ClusterService;
-import com.dlink.service.DataBaseService;
-import com.dlink.service.FragmentVariableService;
-import com.dlink.service.HistoryService;
-import com.dlink.service.JarService;
-import com.dlink.service.JobHistoryService;
-import com.dlink.service.JobInstanceService;
-import com.dlink.service.SavepointsService;
-import com.dlink.service.StatementService;
-import com.dlink.service.TaskService;
-import com.dlink.service.TaskVersionService;
-import com.dlink.service.UDFService;
-import com.dlink.service.UDFTemplateService;
-import com.dlink.service.UserService;
+import com.dlink.service.*;
 import com.dlink.utils.DockerClientUtils;
 import com.dlink.utils.JSONUtil;
+import com.dlink.utils.ShellUtil;
 import com.dlink.utils.UDFUtils;
 
+import com.jcraft.jsch.JSchException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -105,17 +93,14 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
+import org.apache.spark.launcher.SparkLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -179,6 +164,10 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
     private UDFTemplateService udfTemplateService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private HadoopClientService hadoopClientService;
+    @Autowired
+    private HadoopTenantService hadoopTenantService;
 
     @Value("${spring.datasource.driver-class-name}")
     private String driver;
@@ -191,6 +180,10 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
     @Value("${server.port}")
     private String serverPort;
 
+    @Value("${dinky.minio.url}")
+    private String minioUrl;
+    @Value("${dinky.minio.bucket-name}")
+    private String bucket;
     @Autowired
     private UDFService udfService;
 
@@ -236,6 +229,101 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
             process.finish("Submit Flink Jar finished.");
             return jobResult;
         }
+    }
+
+    @Override
+    public JobResult submitSparkTask(Integer id) {
+        JobResult jobResult = new JobResult();
+        Task task = this.getById(id);
+        Asserts.checkNull(task, Tips.TASK_NOT_EXIST);
+        String nodeInfo = task.getNodeInfo();
+        JSONObject jsonObject = cn.hutool.json.JSONUtil.parseObj(nodeInfo);
+        Integer clusterId = jsonObject.getInt("clusterId");
+        Integer tenantId = jsonObject.getInt("tenantId");
+        List<HadoopClient> list = hadoopClientService.list(Wrappers.<HadoopClient>lambdaQuery().eq(HadoopClient::getClusterId, clusterId));
+        if (list == null || list.size() == 0) {
+            jobResult.setError("Spark任务没有关联集群信息");
+            return jobResult;
+        }
+        HadoopTenant hadoopTenant = hadoopTenantService.getById(tenantId);
+        String tenantName = "spark";
+        String queueName = "default";
+        if (hadoopTenant != null) {
+            tenantName = hadoopTenant.getName();
+            queueName = hadoopTenant.getQueueName();
+        }
+        if (StringUtils.isBlank(tenantName)) {
+            tenantName = "spark";
+        }
+        if (StringUtils.isBlank(queueName)) {
+            queueName = "default";
+        }
+        int i = RandomUtil.randomInt(0, list.size());
+        HadoopClient hadoopClient = list.get(i);
+        String envStr = hadoopClient.getEnv();
+        if (StringUtils.isBlank(envStr)) {
+            jobResult.setError("集群客户端没有配置环境变量");
+            return jobResult;
+        }
+        Map<String, String> env = new HashMap<>();
+        Arrays.stream(envStr.split("\\n")).forEach(line -> {
+            String[] lines = line.split("=");
+            env.put(lines[0].trim(), lines[1].trim());
+        });
+        List<String> noContainsKey = Arrays.stream("HADOOP_CONF_DIR,JAVA_HOME,YARN_CONF_DIR,SPARK_HOME".split(","))
+                .filter(confName -> !env.containsKey(confName)).collect(Collectors.toList());
+        if (noContainsKey != null && noContainsKey.size() > 0) {
+            jobResult.setError("缺少环境配置项: " + noContainsKey.stream().collect(Collectors.joining(",")));
+            return jobResult;
+        }
+        ShellUtil instance = ShellUtil.getInstance();
+        StringBuffer buffer = new StringBuffer();
+        try {
+            instance.init(hadoopClient.getIp(), hadoopClient.getPort(), hadoopClient.getUsername(), hadoopClient.getPassword());
+            buffer.append("spark-submit ")
+                .append("--master yarn ")
+                .append("--queue ").append(queueName).append(" ")
+                .append("--deploy-mode ").append(jsonObject.getStr("deployMOde", "cluster")).append(" ")
+                .append("--class ").append(jsonObject.getStr("mainClass")).append(" ")
+                .append("--conf spark.driver.memory=").append(jsonObject.getStr("driverMemory", "1024m")).append(" ")
+                .append("--conf spark.executor.cores=").append(jsonObject.getStr("executorCores", "1")).append(" ")
+                .append("--conf spark.executor.memory=").append(jsonObject.getStr("executorMemory", "1024m")).append(" ")
+                .append("--conf spark.executor.instances=").append(jsonObject.getStr("executorInstances", "2")).append(" ")
+                .append("--conf spark.yarn.maxAppAttempts=").append(jsonObject.getStr("maxAppAttempts", "1")).append(" ")
+                .append("--conf spark.yarn.submit.waitAppCompletion=false ");
+
+            Arrays.stream(jsonObject.getStr("optionParameters", "")
+                .split("\\n"))
+                .forEach(parameter -> {
+                    buffer.append(parameter.trim()).append(" ");
+                });
+            StringBuffer jarPath= new StringBuffer();
+            StringBuffer filePath= new StringBuffer();
+            jsonObject.getJSONArray("resourcePaths").stream().forEach(path -> {
+                if (String.valueOf(path).trim().endsWith(".jar")) {
+                    jarPath.append(",").append(minioUrl + "/" + bucket + String.valueOf(path).trim());
+                } else {
+                    filePath.append(",").append(minioUrl + "/" + bucket + String.valueOf(path).trim());
+                }
+            });
+            if (StringUtils.isNotBlank(jarPath)) {
+                buffer.append("--jars " + jarPath.toString().substring(1)).append(" ");
+            }
+            if (StringUtils.isNotBlank(filePath)) {
+                buffer.append("--files " + filePath.toString().substring(1)).append(" ");
+            }
+            buffer.append(minioUrl + "/" + bucket + jsonObject.getStr("mainJarPath")).append(" ")
+                    .append(jsonObject.getStr("mainClassParameters", ""));
+            System.out.println(buffer);
+            instance.execCmd("source /etc/profile && export HADOOP_USER_NAME=" + env.getOrDefault("HADOOP_USER_NAME", "spark") + " && " + buffer);
+            jobResult.setStartTime(LocalDateTime.now());
+            return jobResult;
+        } catch (JSchException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private void loadDocker(Integer taskId, Integer clusterConfigurationId, GatewayConfig gatewayConfig) {

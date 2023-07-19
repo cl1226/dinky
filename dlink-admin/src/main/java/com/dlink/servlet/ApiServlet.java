@@ -7,22 +7,27 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dlink.common.result.Result;
+import com.dlink.configure.CacheConfigure;
 import com.dlink.model.ApiConfig;
 import com.dlink.model.DataBase;
 import com.dlink.service.ApiConfigService;
 import com.dlink.service.DataBaseService;
+import com.dlink.utils.CacheUtil;
 import com.dlink.utils.JdbcUtil;
 import com.dlink.utils.PoolUtils;
 import com.dlink.utils.SqlEngineUtils;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.github.freakchick.orange.SqlMeta;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,13 +49,13 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 @Component
+@WebServlet(asyncSupported = true)
 public class ApiServlet extends HttpServlet {
 
     @Autowired
     private ApiConfigService apiConfigService;
     @Autowired
     private DataBaseService dataBaseService;
-
     @Value("${dinky.api.context}")
     String apiContext;
 
@@ -62,7 +67,7 @@ public class ApiServlet extends HttpServlet {
         PrintWriter out = null;
         try {
             out = resp.getWriter();
-            Result responseDto = process(servletPath, req, resp);
+            Result responseDto = process(servletPath, req, resp, out);
             out.append(JSON.toJSONString(responseDto));
 
         } catch (Exception e) {
@@ -81,7 +86,7 @@ public class ApiServlet extends HttpServlet {
         doGet(req, resp);
     }
 
-    private Result process(String path, HttpServletRequest request, HttpServletResponse response) {
+    private Result process(String path, HttpServletRequest request, HttpServletResponse response, PrintWriter writer) {
         long now = System.currentTimeMillis();
 
         ApiConfig config = apiConfigService.getOne(new QueryWrapper<ApiConfig>().eq("path", path));
@@ -105,32 +110,28 @@ public class ApiServlet extends HttpServlet {
 
             connection = PoolUtils.getPooledConnection(dataBase);
             String unParsedSql = config.getSegment();
-            String fixUnParsedSql = "";
-            if (!unParsedSql.contains("limit")) {
-                fixUnParsedSql = unParsedSql + " limit ${limit}, ${offset}";
-            }
+            String fixUnParsedSql = unParsedSql;
             SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(fixUnParsedSql, sqlParam);
             String sql = sqlMeta.getSql();
-            Object data = JdbcUtil.executeSql(connection, sql, sqlMeta.getJdbcParamValues());
-//            JSONObject jsonObject = new JSONObject();
-//            jsonObject.put("timeConsuming", System.currentTimeMillis() - now);
-//            jsonObject.put("requestPath", request.getRequestURI());
-//            StringBuilder sb = new StringBuilder();
-//            sb.append(request.getMethod()).append(" ").
-//                    append(request.getServletPath()).append(request.getPathInfo()).append(" ")
-//                    .append(request.getProtocol()).append("\n")
-//                    .append("User-Agent: " + request.getHeader("user-agent"));
-//            StringBuilder sb2 = new StringBuilder();
-//            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//            sb2.append("Response-Status: " + request.getProtocol()).append(" ").append(response.getStatus()).append(" ")
-//                    .append("\n")
-//                    .append("Content-Length: " + data.toString().length()).append("\n")
-//                    .append("Content-Type:" + request.getContentType()).append("\n")
-//                    .append("Date: " + format.format(Calendar.getInstance().getTime())).append("\n");
-//            jsonObject.put("data", data);
-//            jsonObject.put("request", sb.toString());
-//            jsonObject.put("response", sb2.toString());
-            return Result.succeed(data, "Interface request successful!");
+            List<Object> jdbcParamValues = sqlMeta.getJdbcParamValues();
+            if (StringUtils.isNotBlank(config.getCachePlugin()) && "Memory".equals(config.getCachePlugin())) {
+                Cache<String, Object> cache = CacheUtil.getInstance();
+                String key = sql + "~~~" + jdbcParamValues.stream().map(String::valueOf).collect(Collectors.joining(","));
+                Object ifPresent = cache.getIfPresent(key);
+                if (ifPresent != null) {
+                    return Result.succeed(ifPresent, "success");
+                } else {
+                    Object res = JdbcUtil.executeSql(connection, sql, jdbcParamValues, writer);
+                    JSONObject jsonObject = (JSONObject) res;
+                    List<JSONObject> result = (List<JSONObject>) jsonObject.get("result");
+                    if (result != null  && result.size() > 0) {
+                        cache.put(key, result);
+                    }
+                    return Result.succeed(result, "success");
+                }
+            }
+            Object data = JdbcUtil.executeSql(connection, sql, jdbcParamValues, writer);
+            return Result.succeed(data, "success");
 
         } catch (Exception e) {
             response.setStatus(400);
@@ -142,7 +143,7 @@ public class ApiServlet extends HttpServlet {
             jsonObject.put("requestPath", request.getRequestURI());
             jsonObject.put("request", sb.toString());
             jsonObject.put("response", e.getMessage());
-            return Result.failed(jsonObject, "Interface request failed");
+            return Result.failed(jsonObject, "failed");
         } finally {
             if (connection != null) {
                 try {
@@ -209,17 +210,11 @@ public class ApiServlet extends HttpServlet {
 
     public Map<String, Object> getSqlParam(HttpServletRequest request, ApiConfig config) {
         Map<String, Object> map = new HashMap<>();
-        boolean limitFlag = false;
-        boolean offsetFlag = false;
         JSONArray requestParams = JSON.parseArray(config.getParams());
         for (int i = 0; i < requestParams.size(); i++) {
             JSONObject jo = requestParams.getJSONObject(i);
             String name = jo.getString("name");
             String type = jo.getString("type");
-
-            if ("limit".equals(name)) {
-                limitFlag = true;
-            }
 
             //数组类型参数
             if (type.startsWith("Array")) {
@@ -270,13 +265,6 @@ public class ApiServlet extends HttpServlet {
                     map.put(name, value);
                 }
             }
-        }
-
-        if (!limitFlag) {
-            map.put("limit", request.getParameter("limit") != null ? request.getParameter("limit") : 0);
-        }
-        if (!offsetFlag) {
-            map.put("offset", request.getParameter("offset") != null ? request.getParameter("offset") : 10);
         }
         return map;
     }

@@ -275,46 +275,67 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
     }
 
     @Override
-    public List<JSONObject> getTaskEnum() {
-        List<JSONObject> list1 = new ArrayList<>();
-        list1.add(new JSONObject().set("label", "RestClient").set("type", "Rest"));
-        list1.add(new JSONObject().set("label", "KafkaClient").set("type", "Kafka"));
-        list1.add(new JSONObject().set("label", "File").set("type", "File"));
-
-        List<JSONObject> list2 = new ArrayList<>();
-        list2.add(new JSONObject().set("label", "FLinkSQL").set("type", "FlinkSQL"));
-        list2.add(new JSONObject().set("label", "Hive").set("type", "Hive"));
-        list2.add(new JSONObject().set("label", "Mysql").set("type", "Mysql"));
-        list2.add(new JSONObject().set("label", "Sqlserver").set("type", "Sqlserver"));
-        list2.add(new JSONObject().set("label", "StarRocks").set("type", "StarRocks"));
-        list2.add(new JSONObject().set("label", "ClickHouse").set("type", "ClickHouse"));
-        list2.add(new JSONObject().set("label", "Doris").set("type", "Doris"));
+    public List<JSONObject> getTaskEnum(String type) {
 
         List<JSONObject> list3 = new ArrayList<>();
-        list3.add(new JSONObject().set("label", "Data Quality").set("type", "Quality"));
+        list3.add(new JSONObject().set("label", "数据质量").set("type", "Quality").set("group", "quality"));
 
-        List<JSONObject> result = new ArrayList<>();
-        JSONObject jsonObject1 = new JSONObject();
-        jsonObject1.set("key", "data integration");
-        jsonObject1.set("title", "数据集成");
-        jsonObject1.set("order", "1");
-        jsonObject1.set("res", list1);
-        result.add(jsonObject1);
+//        JSONObject jsonObject5 = new JSONObject();
+//        jsonObject5.set("key", "data quality");
+//        jsonObject5.set("title", "数据稽核");
+//        jsonObject5.set("order", "5");
+//        jsonObject5.set("res", list3);
+//        result.add(jsonObject5);
 
-        JSONObject jsonObject2 = new JSONObject();
-        jsonObject2.set("key", "data compute");
-        jsonObject2.set("title", "计算&分析");
-        jsonObject2.set("order", "2");
-        jsonObject2.set("res", list2);
-        result.add(jsonObject2);
+        if (StringUtils.isNotBlank(type) && "dinky".equals(type)) {
+            List<JSONObject> list2 = new ArrayList<>();
+            list2.add(new JSONObject().set("label", "SHELL").set("type", "Shell").set("group", "compute"));
+            list2.add(new JSONObject().set("label", "FlinkSQL").set("type", "FlinkSQL").set("group", "compute"));
+            list2.add(new JSONObject().set("label", "HiveSQL").set("type", "Hive").set("group", "compute"));
+            list2.add(new JSONObject().set("label", "Spark").set("type", "Spark").set("group", "compute"));
+            List<JSONObject> res = new ArrayList<>();
+            JSONObject jsonObject4 = new JSONObject();
+            jsonObject4.set("key", "data compute");
+            jsonObject4.set("title", "节点库");
+            jsonObject4.set("order", "1");
+            jsonObject4.set("res", list2);
+            res.add(jsonObject4);
+            return res;
+        } else {
+            List<JSONObject> inputs = new ArrayList<>();
+            inputs.add(new JSONObject().set("label", "FTP").set("type", "Ftp").set("group", "input"));
+            inputs.add(new JSONObject().set("label", "File").set("type", "File").set("group", "input"));
+            inputs.add(new JSONObject().set("label", "HDFS").set("type", "HDFS").set("group", "input"));
+            inputs.add(new JSONObject().set("label", "Mysql").set("type", "Mysql").set("group", "input"));
+            inputs.add(new JSONObject().set("label", "Kafka").set("type", "Kafka").set("group", "input"));
 
-        JSONObject jsonObject3 = new JSONObject();
-        jsonObject3.set("key", "data quality");
-        jsonObject3.set("title", "数据监控");
-        jsonObject3.set("order", "3");
-        jsonObject3.set("res", list3);
-        result.add(jsonObject3);
+            List<JSONObject> transforms = new ArrayList<>();
+            transforms.add(new JSONObject().set("label", "Filter").set("type", "Filter").set("group", "transform"));
 
-        return result;
+            List<JSONObject> outputs = new ArrayList<>();
+            outputs.add(new JSONObject().set("label", "Console").set("type", "Console").set("group", "output"));
+            List<JSONObject> result = new ArrayList<>();
+            JSONObject jsonObject1 = new JSONObject();
+            jsonObject1.set("key", "input");
+            jsonObject1.set("title", "输入");
+            jsonObject1.set("order", "1");
+            jsonObject1.set("res", inputs);
+            result.add(jsonObject1);
+
+            JSONObject jsonObject2 = new JSONObject();
+            jsonObject2.set("key", "transform");
+            jsonObject2.set("title", "转换");
+            jsonObject2.set("order", "2");
+            jsonObject2.set("res", transforms);
+            result.add(jsonObject2);
+
+            JSONObject jsonObject3 = new JSONObject();
+            jsonObject3.set("key", "output");
+            jsonObject3.set("title", "输出");
+            jsonObject3.set("order", "3");
+            jsonObject3.set("res", outputs);
+            result.add(jsonObject3);
+            return result;
+        }
     }
 }

@@ -69,7 +69,7 @@ public class FileEntityServiceImpl extends SuperServiceImpl<FileEntityMapper, Fi
                 filename = fileModel.getFilePath().split("\\/")[fileModel.getFilePath().split("\\/").length - 1];
             }
             String path = fileService.upload(fileModel.getStr().getBytes(StandardCharsets.UTF_8), filename, fileModel.getCatalogueId(), fileModel.getType());
-            BeanUtil.copyProperties(fileModel, fileEntity);
+            BeanUtil.copyProperties(fileModel, fileEntity, CopyOptions.create(null, true));
             if (StringUtils.isBlank(path)) {
                 return null;
             }

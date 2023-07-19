@@ -59,4 +59,8 @@ public class ApiConfig extends SuperEntity {
 
     private String description;
 
+    private String cachePlugin;
+
+    private String pagingMode;
+
 }

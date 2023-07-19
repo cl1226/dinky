@@ -4,6 +4,9 @@ import com.dlink.common.result.Result;
 import com.dlink.db.service.ISuperService;
 import com.dlink.model.HadoopCluster;
 import com.dlink.model.HadoopClusterModel;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * HadoopClusterService
@@ -14,6 +17,12 @@ import com.dlink.model.HadoopClusterModel;
 public interface HadoopClusterService extends ISuperService<HadoopCluster> {
 
     Result save(HadoopClusterModel model);
+
+    List<HadoopClusterModel> listAll();
+
+    Result detail(Integer id);
+
+    Result upload(MultipartFile file, String uuid);
 
     Result load(HadoopClusterModel model);
 

@@ -45,4 +45,10 @@ public class SearchCondition {
 
     private String type;
 
+    private Integer clusterId;
+
+    private String clusterName;
+
+    private String hostname;
+
 }

@@ -2,6 +2,8 @@ package com.dlink.controller;
 
 import com.dlink.common.result.Result;
 import com.dlink.model.FileCatalogue;
+import com.dlink.model.FileCatalogueDto;
+import com.dlink.model.JarCatalogueDto;
 import com.dlink.service.FileCatalogueService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,15 @@ public class FileCatalogueController {
     @GetMapping("/getCatalogueTreeData")
     public Result getCatalogueTreeData() throws Exception {
         List<FileCatalogue> catalogues = fileCatalogueService.getAllData();
+        return Result.succeed(catalogues, "获取成功");
+    }
+
+    /**
+     * 获取所有目录/File
+     */
+    @GetMapping("/getAllTreeAndData")
+    public Result getAllTreeAndData() throws Exception {
+        List<FileCatalogueDto> catalogues = fileCatalogueService.getAllTreeAndData();
         return Result.succeed(catalogues, "获取成功");
     }
 

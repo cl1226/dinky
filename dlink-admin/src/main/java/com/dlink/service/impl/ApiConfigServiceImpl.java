@@ -26,6 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -130,7 +131,7 @@ public class ApiConfigServiceImpl extends SuperServiceImpl<ApiConfigMapper, ApiC
             connection = PoolUtils.getPooledConnection(dataBase);
             Map<String, Object> map = JSON.parseObject(debugDTO.getParams(), Map.class);
             SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(debugDTO.getSql(), map);
-            Object data = JdbcUtil.executeSql(connection, sqlMeta.getSql(), sqlMeta.getJdbcParamValues());
+            Object data = JdbcUtil.executeSqlLimit10(connection, sqlMeta.getSql(), sqlMeta.getJdbcParamValues());
             return Result.succeed(data, "调试成功");
         } catch (SQLException e) {
             e.printStackTrace();

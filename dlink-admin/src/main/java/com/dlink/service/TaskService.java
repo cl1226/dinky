@@ -46,6 +46,8 @@ public interface TaskService extends ISuperService<Task> {
 
     JobResult submitTask(Integer id);
 
+    JobResult submitSparkTask(Integer id);
+
     JobResult submitTaskToOnline(Task dtoTask, Integer id);
 
     JobResult restartTask(Integer id, String savePointPath);

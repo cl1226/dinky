@@ -208,7 +208,7 @@ public class LineageBuilder {
                     srcMap.put(n, srcLists);
                     tgtMap.put(n, tgtList);
                 } else {
-                    return null;
+                    continue;
                 }
             }
             // 构建 List<LineageTable>

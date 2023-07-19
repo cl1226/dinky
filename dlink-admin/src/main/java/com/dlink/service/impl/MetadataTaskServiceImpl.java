@@ -2,6 +2,7 @@ package com.dlink.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -10,24 +11,32 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.SearchCondition;
+import com.dlink.mapper.HadoopClusterMapper;
 import com.dlink.mapper.MetadataTaskMapper;
 import com.dlink.metadata.driver.Driver;
 import com.dlink.metadata.result.JdbcSelectResult;
+import com.dlink.minio.MinioStorageService;
 import com.dlink.model.*;
 import com.dlink.service.*;
 import com.dlink.utils.QuartzUtil;
 import com.dlink.utils.ShellUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.*;
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.Calendar;
 
 /**
  * MetadataTaskServiceImpl
@@ -51,9 +60,13 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
     @Autowired
     private Scheduler scheduler;
     @Autowired
-    private EnvironmentInstanceService environmentInstanceService;
+    private HadoopClientService hadoopClientService;
     @Autowired
     private MetadataVolumeService metadataVolumeService;
+    @Autowired
+    private MinioStorageService minioStorageService;
+    @Autowired
+    private HadoopClusterMapper hadoopClusterMapper;
 
     @Override
     public Page<MetadataTask> page(SearchCondition searchCondition) {
@@ -177,6 +190,30 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
         return Result.succeed(list, "获取成功");
     }
 
+    private boolean initKerberos(DataBase dataBase) {
+        HadoopCluster hadoopCluster = hadoopClusterMapper.getOneByAddress(dataBase.getUrl());
+        if (hadoopCluster == null) {
+            return false;
+        }
+        String krb5Path = "/hadoop/" + hadoopCluster.getUuid() + "/keytab/krb5.conf";
+        String keytabPath =  "/hadoop/" + hadoopCluster.getUuid() + "/keytab/" + dataBase.getKeytabName();
+        InputStream krb5in = minioStorageService.downloadFile(krb5Path);
+        InputStream keytabin = minioStorageService.downloadFile(keytabPath);
+        FileUtil.writeFromStream(krb5in, new File(krb5Path));
+        FileUtil.writeFromStream(keytabin, new File(keytabPath));
+        System.setProperty("java.security.krb5.conf", krb5Path);
+        Configuration configuration = new Configuration();
+        configuration.set("hadoop.security.authentication" , "Kerberos");
+        configuration.setBoolean("hadoop.security.authorization", true);
+        UserGroupInformation.setConfiguration(configuration);
+        try {
+            UserGroupInformation.loginUserFromKeytab(dataBase.getPrincipalName() , keytabPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
     @Override
     public Result execute(Integer id) {
         MetadataTask task = this.getById(id);
@@ -186,6 +223,12 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
         DataBase dataBase = dataBaseService.getById(task.getDatasourceId());
         if (dataBase == null) {
             return Result.failed("数据源不存在!");
+        }
+        List<String> logs = new ArrayList<>();
+        logs.add("=====数据源: 【" + dataBase.getName() + "】的元数据采集=====");
+        if (dataBase.getKerberos() != null && dataBase.getKerberos()) {
+            initKerberos(dataBase);
+            logs.add("数据源: 【" + dataBase.getName() + "】开启了kerberos认证, 开始进行安全认证, principal: " + dataBase.getPrincipalName() + ", keytab: " + dataBase.getKeytabName());
         }
         task.setRunStatus("Running");
         if ("CYCLE".equals(task.getScheduleType()) && StringUtils.isNotBlank(task.getCronExpression())) {
@@ -220,7 +263,7 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
         List<MetadataColumn> cols = new ArrayList<>();
         try {
             List<Schema> schemasAndTables = dataBaseService.getSchemasAndTablesV2(task.getDatasourceId());
-
+            logs.add("Schema数量: " + schemasAndTables.size() + " 个");
             if (schemasAndTables != null && schemasAndTables.size() > 0) {
                 for (Schema schema : schemasAndTables) {
                     MetadataDb metadataDb = new MetadataDb();
@@ -235,6 +278,7 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
                     metadataDb.setDatasourceType(task.getDatasourceType());
                     metadataDb.setDatasourceName(dataBase.getName());
                     dbs.add(metadataDb);
+                    logs.add("【" + schema.getName() + "】表数量: " + schema.getTables().size() + " 个");
                     for (Table table : schema.getTables()) {
                         if (task.getDatasourceType().equals("Hive")) {
                             Map<String, Object> map = dataBaseService.showFormattedTable(task.getDatasourceId(), schema.getName(), table.getName());
@@ -250,7 +294,7 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
                                 metadataTable.setAttributes(JSONUtil.toJsonStr(detailTableInfo));
                                 metadataTable.setPosition(task.getDatasourceId() + "_" + metadataDb.getName());
                                 tbls.add(metadataTable);
-
+                                logs.add("【" + schema.getName() + "." + table.getName() + "】字段数量: " + columns.size() + " 个");
                                 for (Column column : columns) {
                                     MetadataColumn metadataColumn = new MetadataColumn();
                                     metadataColumn.setName(column.getName());
@@ -268,6 +312,7 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
                             }
                         } else {
                             List<Column> columns = dataBaseService.listColumns(task.getDatasourceId(), schema.getName(), table.getName());
+                            logs.add("【" + schema.getName() + "." + table.getName() + "】字段数量: " + columns.size() + " 个");
                             MetadataTable metadataTable = new MetadataTable();
                             metadataTable.setName(table.getName());
                             metadataTable.setDatasourceName(dataBase.getName());
@@ -298,7 +343,7 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
                 }
                 this.saveOrUpdateMetadataDb(task, dbs, tbls, cols);
             }
-
+            logs.add("-----开始统计数据源: 【" + dataBase.getName() + "】的数据量-----");
             long duration = System.currentTimeMillis() - beginTime;
             metadataTaskInstance.setDuration(duration);
             metadataTaskInstance.setEndTime(LocalDateTime.now());
@@ -307,14 +352,31 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
             task.setRunStatus("Success");
             this.saveOrUpdate(task);
             this.statistics(task, dataBase, dbs, tbls);
+            logs.add("......");
+            logs.add("-----统计数据源: 【" + dataBase.getName() + "】的数据量完成-----");
+            logs.add("=====数据源: 【" + dataBase.getName() + "】的元数据采集成功！=====");
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - beginTime;
             metadataTaskInstance.setDuration(duration);
             metadataTaskInstance.setStatus("Failed");
             metadataTaskInstance.setEndTime(LocalDateTime.now());
+            metadataTaskInstance.setErrorLog(e.getMessage());
             metadataTaskInstanceService.saveOrUpdate(metadataTaskInstance);
             task.setRunStatus("Failed");
             this.saveOrUpdate(task);
+            log.error(e.getMessage());
+            logs.add("数据源: 【" + dataBase.getName() + "】的元数据采集失败！");
+            logs.add("失败原因: ");
+            logs.add(e.getMessage());
+        }
+        // 记录采集日志
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        String fileName = "instance-" + metadataTaskInstance.getId() + ".log";
+        File tempFile = FileUtil.createTempFile();
+        FileUtil.appendUtf8Lines(logs, tempFile);
+        try {
+            minioStorageService.uploadFile(new FileInputStream(tempFile), "/log/metadata/" + task.getName() + "/" + format.format(Calendar.getInstance().getTime()) + "/" + fileName, "application/octet-stream");
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         return Result.succeed("采集成功");
@@ -342,17 +404,21 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
             String url = dataBase.getDriverConfig().getUrl();
             String[] split = url.split("/|:");
             String ip = split[4];
-            QueryWrapper<EnvironmentInstance> queryWrapper = Wrappers.<EnvironmentInstance>query().eq("ip", ip);
-            queryWrapper.or().eq("host_name", ip);
-            EnvironmentInstance environmentInstance = environmentInstanceService.getOne(queryWrapper);
+            QueryWrapper<HadoopClient> queryWrapper = Wrappers.<HadoopClient>query().eq("ip", ip);
+            queryWrapper.or().eq("hostname", ip);
+            HadoopClient hadoopClient = hadoopClientService.getOne(queryWrapper);
             String res = "0";
-            if (environmentInstance != null) {
+            if (hadoopClient != null) {
                 ShellUtil instance = ShellUtil.getInstance();
-                instance.init(environmentInstance.getIp(), environmentInstance.getPort(), environmentInstance.getUsername(), environmentInstance.getPassword());
-                res = instance.execCmd("hadoop fs -du -v /user/hive/warehouse |awk '{ SUM += $1 } END { print SUM}'");
+                instance.init(hadoopClient.getIp(), hadoopClient.getPort(), hadoopClient.getUsername(), hadoopClient.getPassword());
+                res = instance.execCmd("source /etc/profile && hadoop fs -du -v /user/hive/warehouse |awk '{ SUM += $1 } END { print SUM}'");
             }
-            totalHiveVol = BigDecimal.valueOf(Double.valueOf(res));
-            origin.setDataVol(BigDecimal.valueOf(Double.valueOf(res)));
+            if (!res.trim().equals("")) {
+                totalHiveVol = BigDecimal.valueOf(Double.valueOf(res));
+                origin.setDataVol(BigDecimal.valueOf(Double.valueOf(res)));
+            } else {
+                origin.setDataVol(BigDecimal.ZERO);
+            }
         } else {
             Driver driver = Driver.build(dataBase.getDriverConfig());
             String sql = "";
@@ -417,17 +483,21 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
                 String url = dataBase.getDriverConfig().getUrl();
                 String[] split = url.split("/|:");
                 String ip = split[4];
-                QueryWrapper<EnvironmentInstance> q = Wrappers.<EnvironmentInstance>query().eq("ip", ip);
-                q.or().eq("host_name", ip);
-                EnvironmentInstance environmentInstance = environmentInstanceService.getOne(q);
+                QueryWrapper<HadoopClient> q = Wrappers.<HadoopClient>query().eq("ip", ip);
+                q.or().eq("hostname", ip);
+                HadoopClient hadoopClient = hadoopClientService.getOne(q);
                 String r = "0";
-                if (environmentInstance != null) {
+                if (hadoopClient != null) {
                     ShellUtil instance = ShellUtil.getInstance();
-                    instance.init(environmentInstance.getIp(), environmentInstance.getPort(), environmentInstance.getUsername(), environmentInstance.getPassword());
-                    String str = "hadoop fs -du -v /user/hive/warehouse/" + dbName + " |awk '{ SUM += $1 } END { print SUM}'";
+                    instance.init(hadoopClient.getIp(), hadoopClient.getPort(), hadoopClient.getUsername(), hadoopClient.getPassword());
+                    String str = "source /etc/profile && hadoop fs -du -v /user/hive/warehouse/" + dbName + " |awk '{ SUM += $1 } END { print SUM}'";
                     r = instance.execCmd(str);
-                    otherHiveVol = otherHiveVol.add(BigDecimal.valueOf(Double.valueOf(r)));
-                    volume.setDataVol(BigDecimal.valueOf(Double.valueOf(r)));
+                    if (!r.trim().equals("")) {
+                        otherHiveVol = otherHiveVol.add(BigDecimal.valueOf(Double.valueOf(r)));
+                        volume.setDataVol(BigDecimal.valueOf(Double.valueOf(r)));
+                    } else {
+                        volume.setDataVol(BigDecimal.ZERO);
+                    }
                 }
             } else {
                 Driver driver = Driver.build(dataBase.getDriverConfig());

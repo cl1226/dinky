@@ -19,29 +19,34 @@
 
 package com.dlink.service.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONObject;
 import com.dlink.assertion.Asserts;
 import com.dlink.constant.CommonConstant;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.mapper.DataBaseMapper;
+import com.dlink.mapper.HadoopClusterMapper;
 import com.dlink.metadata.driver.Driver;
 import com.dlink.metadata.result.JdbcSelectResult;
-import com.dlink.model.Column;
-import com.dlink.model.DataBase;
-import com.dlink.model.QueryData;
-import com.dlink.model.Schema;
-import com.dlink.model.SqlGeneration;
-import com.dlink.model.Table;
+import com.dlink.minio.MinioStorageService;
+import com.dlink.model.*;
 import com.dlink.service.DataBaseService;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.UserGroupInformation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -55,9 +60,50 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 @Service
 public class DataBaseServiceImpl extends SuperServiceImpl<DataBaseMapper, DataBase> implements DataBaseService {
 
+    @Autowired
+    private HadoopClusterMapper hadoopClusterMapper;
+    @Autowired
+    private MinioStorageService minioStorageService;
+    @Value("${dinky.minio.url}")
+    private String url;
+    @Value("${dinky.minio.access-key}")
+    private String accessKey;
+    @Value("${dinky.minio.secret-key}")
+    private String secretKey;
+    @Value("${dinky.minio.bucket-name}")
+    private String bucketName;
+
     @Override
     public String testConnect(DataBase dataBase) {
+        // hive数据库，根据URL判断是否进行kerberos认证
+        if (dataBase.getKerberos()) {
+            initKerberos(dataBase);
+        }
         return Driver.buildUnconnected(dataBase.getDriverConfig()).test();
+    }
+
+    private boolean initKerberos(DataBase dataBase) {
+        HadoopCluster hadoopCluster = hadoopClusterMapper.getOneByAddress(dataBase.getUrl());
+        if (hadoopCluster == null) {
+            return false;
+        }
+        String krb5Path = "/hadoop/" + hadoopCluster.getUuid() + "/keytab/krb5.conf";
+        String keytabPath =  "/hadoop/" + hadoopCluster.getUuid() + "/keytab/" + dataBase.getKeytabName();
+        InputStream krb5in = minioStorageService.downloadFile(krb5Path);
+        InputStream keytabin = minioStorageService.downloadFile(keytabPath);
+        FileUtil.writeFromStream(krb5in, new File(krb5Path));
+        FileUtil.writeFromStream(keytabin, new File(keytabPath));
+        System.setProperty("java.security.krb5.conf", krb5Path);
+        Configuration configuration = new Configuration();
+        configuration.set("hadoop.security.authentication" , "Kerberos");
+        configuration.setBoolean("hadoop.security.authorization", true);
+        UserGroupInformation.setConfiguration(configuration);
+        try {
+            UserGroupInformation.loginUserFromKeytab(dataBase.getPrincipalName() , keytabPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
     @Override
@@ -65,6 +111,9 @@ public class DataBaseServiceImpl extends SuperServiceImpl<DataBaseMapper, DataBa
         boolean isHealthy = false;
         dataBase.setHeartbeatTime(LocalDateTime.now());
         try {
+            if (dataBase.getKerberos()) {
+                initKerberos(dataBase);
+            }
             isHealthy = Asserts.isEquals(
                     CommonConstant.HEALTHY,
                     Driver.buildUnconnected(dataBase.getDriverConfig()).test());

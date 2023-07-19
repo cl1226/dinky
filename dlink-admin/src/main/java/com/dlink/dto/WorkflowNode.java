@@ -16,5 +16,8 @@ public class WorkflowNode {
     private String id;
     private String label;
     private Integer jobId;
+    private String nodeType;
+    private String nodeInfo;
+    private String group;
 
 }

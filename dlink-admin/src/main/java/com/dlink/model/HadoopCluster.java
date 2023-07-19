@@ -22,6 +22,8 @@ public class HadoopCluster extends SuperEntity {
 
     private String password;
 
+    private String uuid;
+
     private String clusterName;
 
     private String type;
@@ -51,5 +53,9 @@ public class HadoopCluster extends SuperEntity {
     private String kdcHost;
 
     private String realm;
+
+    private String krb5;
+
+    private String keytabJson;
 
 }

@@ -208,27 +208,35 @@ public class HiveDriver extends AbstractJdbcDriver implements Driver {
                         break;
 
                     case "table_info":
-                        key = results.getString(1).trim().replace(":", "");
-                        value = results.getString(2).trim();
-                        detailTableInfo.put(key, value);
+                        if (results.getString(1) != null && results.getString(2) != null) {
+                            key = results.getString(1).trim().replace(":", "");
+                            value = results.getString(2).trim();
+                            detailTableInfo.put(key, value);
+                        }
                         break;
 
                     case "table_param":
-                        key = results.getString(2).trim().replace(":", "");
-                        value = results.getString(3).trim();
-                        tableParams.put(key, value);
+                        if (results.getString(2) != null && results.getString(3) != null) {
+                            key = results.getString(2).trim().replace(":", "");
+                            value = results.getString(3).trim();
+                            tableParams.put(key, value);
+                        }
                         break;
 
                     case "storage_info":
-                        key = results.getString(1).trim().replace(":", "");
-                        value = results.getString(2).trim();
-                        storageInfo.put(key, value);
+                        if (results.getString(1) != null && results.getString(2) != null) {
+                            key = results.getString(1).trim().replace(":", "");
+                            value = results.getString(2).trim();
+                            storageInfo.put(key, value);
+                        }
                         break;
 
                     case "storage_desc":
-                        key = results.getString(2).trim().replace(":", "");
-                        value = results.getString(3).trim();
-                        storageDescParams.put(key, value);
+                        if (results.getString(2) != null && results.getString(3) != null) {
+                            key = results.getString(2).trim().replace(":", "");
+                            value = results.getString(3).trim();
+                            storageDescParams.put(key, value);
+                        }
                         break;
 
                     case "not_null_constraint":

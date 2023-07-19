@@ -128,6 +128,10 @@ public class Task extends SuperEntity {
     @TableField(exist = false)
     private String alertGroupName;
 
+    private String nodeId;
+
+    private String nodeInfo;
+
     public List<Map<String, String>> parseConfig() {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
