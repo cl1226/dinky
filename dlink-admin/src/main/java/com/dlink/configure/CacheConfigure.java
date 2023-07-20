@@ -19,12 +19,18 @@
 
 package com.dlink.configure;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -35,6 +41,15 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  */
 @Configuration
 public class CacheConfigure {
+
+    @Value("${dinky.api.cache.initial-capacity}")
+    private String initialCapacity;
+
+    @Value("${dinky.api.cache.maximum-size}")
+    private String maximumSize;
+
+    @Value("${dinky.api.cache.expire-after-write}")
+    private String expireAfterWrite;
 
     /**
      * 配置Redis缓存注解的value序列化方式
@@ -49,6 +64,18 @@ public class CacheConfigure {
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));
     }
 
+    /**
+     * 配置api服务的缓存
+     * @return
+     */
+    @Bean(name = "caffeineCache")
+    public Cache<String, Object> caffeineCache() {
+        return Caffeine.newBuilder()
+                .initialCapacity(Integer.valueOf(initialCapacity))
+                .maximumSize(Integer.valueOf(maximumSize))
+                .expireAfterWrite(Long.valueOf(expireAfterWrite), TimeUnit.SECONDS)
+                .build();
+    }
 
     //    /**
     //     * 配置RedisTemplate的序列化方式

@@ -1,11 +1,15 @@
 package com.dlink.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.mapper.FileCatalogueMapper;
-import com.dlink.model.FileCatalogue;
+import com.dlink.model.*;
 import com.dlink.service.FileCatalogueService;
+import com.dlink.service.FileEntityService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,9 +27,33 @@ import static com.dlink.assertion.Asserts.isNull;
  **/
 @Service
 public class FileCatalogueServiceImpl extends SuperServiceImpl<FileCatalogueMapper, FileCatalogue> implements FileCatalogueService {
+
+    @Autowired
+    private FileEntityService fileEntityService;
+
     @Override
     public List<FileCatalogue> getAllData() {
         return this.list();
+    }
+
+    @Override
+    public List<FileCatalogueDto> getAllTreeAndData() {
+        List<FileCatalogue> catalogues = this.list();
+        List<FileEntity> fileEntities = fileEntityService.list();
+        List<FileCatalogueDto> result = new ArrayList<>();
+        for (FileCatalogue fileCatalogue : catalogues) {
+            FileCatalogueDto fileCatalogueDto = new FileCatalogueDto();
+            List<FileEntity> entities = new ArrayList<>();
+            BeanUtil.copyProperties(fileCatalogue, fileCatalogueDto, CopyOptions.create(null, true));
+            for (FileEntity fileEntity : fileEntities) {
+                if (fileEntity.getCatalogueId().intValue() == fileCatalogue.getId().intValue()) {
+                    entities.add(fileEntity);
+                }
+            }
+            fileCatalogueDto.setFileEntities(entities);
+            result.add(fileCatalogueDto);
+        }
+        return result;
     }
 
     @Override

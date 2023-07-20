@@ -27,6 +27,7 @@ import com.dlink.dto.APIExplainSqlDTO;
 import com.dlink.dto.APISavePointDTO;
 import com.dlink.dto.APISavePointTaskDTO;
 import com.dlink.job.JobResult;
+import com.dlink.model.Task;
 import com.dlink.service.APIService;
 import com.dlink.service.JobInstanceService;
 import com.dlink.service.StudioService;
@@ -65,11 +66,24 @@ public class APIController {
     @GetMapping("/submitTask")
     public Result submitTask(@RequestParam Integer id) {
         taskService.initTenantByTaskId(id);
-        JobResult jobResult = taskService.submitTask(id);
-        if (jobResult.isSuccess()) {
-            return Result.succeed(jobResult, "执行成功");
+        Task task = taskService.getById(id);
+        if (task == null) {
+            return Result.failed("任务不存在, id = " + id);
+        }
+        if (task.getDialect().equals("Spark")) {
+            JobResult jobResult = taskService.submitSparkTask(id);
+            if (jobResult.isSuccess()) {
+                return Result.succeed(jobResult, "执行成功");
+            } else {
+                return Result.failed(jobResult, jobResult.getError());
+            }
         } else {
-            return Result.failed(jobResult, jobResult.getError());
+            JobResult jobResult = taskService.submitTask(id);
+            if (jobResult.isSuccess()) {
+                return Result.succeed(jobResult, "执行成功");
+            } else {
+                return Result.failed(jobResult, jobResult.getError());
+            }
         }
     }
 

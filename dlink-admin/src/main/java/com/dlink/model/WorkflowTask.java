@@ -59,6 +59,12 @@ public class WorkflowTask extends SuperEntity {
 
     private String lockUser;
 
+    private Integer clusterId;
+
+    private Integer clusterTenantId;
+
+    private String attributes;
+
     public WorkflowTask() {
     }
 

@@ -13,16 +13,24 @@ import lombok.EqualsAndHashCode;
  **/
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("dlink_environment_instance")
-public class EnvironmentInstance extends SuperEntity {
+@TableName("dlink_hadoop_client")
+public class HadoopClient extends SuperEntity {
 
     private String ip;
 
-    private String hostName;
+    private Integer clusterId;
+
+    private String clusterName;
+
+    private String hostname;
 
     private Integer port;
 
     private String username;
 
     private String password;
+
+    private String env;
+
+    private String description;
 }

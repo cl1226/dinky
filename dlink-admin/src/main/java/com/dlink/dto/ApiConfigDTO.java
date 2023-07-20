@@ -37,5 +37,6 @@ public class ApiConfigDTO {
     private String description;
     private String domain;
     private String apiPrefix;
+    private String cachePlugin;
 
 }

@@ -51,4 +51,7 @@ public class WorkflowTaskDTO {
     private String lockUser;
     private boolean lockStatus;
     private String projectCode;
+    private Integer clusterId;
+    private Integer clusterTenantId;
+    private String attributes;
 }

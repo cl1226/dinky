@@ -96,7 +96,7 @@ public class DebugApiServlet extends HttpServlet {
 
             connection = PoolUtils.getPooledConnection(database);
             SqlMeta sqlMeta = SqlEngineUtils.getEngine().parse(String.valueOf(requestInfo.get("sql")), params);
-            Object data = JdbcUtil.executeSql(connection, sqlMeta.getSql(), sqlMeta.getJdbcParamValues());
+            Object data = JdbcUtil.executeSqlLimit10(connection, sqlMeta.getSql(), sqlMeta.getJdbcParamValues());
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("timeConsuming", System.currentTimeMillis() - now);
             jsonObject.put("requestPath", apiContext + request.getPathInfo());
@@ -116,7 +116,7 @@ public class DebugApiServlet extends HttpServlet {
             jsonObject.put("request", sb.toString());
             jsonObject.put("response", sb2.toString());
             API_DEBUG_STATUS.put(path, true);
-            return Result.succeed(jsonObject, "Interface request successful!");
+            return Result.succeed(jsonObject, "success");
 
         } catch (Exception e) {
             JSONObject jsonObject = new JSONObject();
@@ -128,7 +128,7 @@ public class DebugApiServlet extends HttpServlet {
             jsonObject.put("request", sb.toString());
             jsonObject.put("response", e.getMessage());
             API_DEBUG_STATUS.put(path, false);
-            return Result.failed(jsonObject, "Interface request failed");
+            return Result.failed(jsonObject, "failed");
         } finally {
             if (connection != null) {
                 try {

@@ -2,6 +2,7 @@ package com.dlink.service;
 
 import com.dlink.db.service.ISuperService;
 import com.dlink.model.JarCatalogue;
+import com.dlink.model.JarCatalogueDto;
 
 import java.util.List;
 
@@ -14,6 +15,8 @@ import java.util.List;
 public interface JarCatalogueService extends ISuperService<JarCatalogue> {
 
     List<JarCatalogue> getAllData();
+
+    List<JarCatalogueDto> getAllTreeAndData();
 
     JarCatalogue findByParentIdAndName(Integer parentId, String name);
 

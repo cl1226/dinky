@@ -120,16 +120,8 @@ public abstract class AbstractJdbcDriver extends AbstractDriver {
     public Driver setDriverConfig(DriverConfig config) {
         this.config = config;
         try {
-            if (config.getType().equals("Hive") && config.getUrl().contains("principal")) {
-                System.setProperty("java.security.krb5.conf", "/etc/krb5.conf");
-                Configuration configuration = new Configuration();
-                configuration.set("hadoop.security.authentication" , "Kerberos");
-                configuration.setBoolean("hadoop.security.authorization", true);
-                UserGroupInformation.setConfiguration(configuration);
-                UserGroupInformation.loginUserFromKeytab("svolt@SVOLT.COM" , "/opt/keytab/svolt.keytab");
-            }
             this.dataSource = createDataSource();
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return this;

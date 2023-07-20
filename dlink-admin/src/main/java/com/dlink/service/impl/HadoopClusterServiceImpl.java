@@ -1,8 +1,11 @@
 package com.dlink.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.lang.UUID;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.cloudera.api.ClouderaManagerClientBuilder;
@@ -14,21 +17,38 @@ import com.cloudera.api.v33.ServicesResourceV33;
 import com.dlink.common.result.Result;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.mapper.HadoopClusterMapper;
+import com.dlink.minio.MinioStorageService;
 import com.dlink.model.HadoopCluster;
 import com.dlink.model.HadoopClusterModel;
 import com.dlink.model.YarnQueue;
 import com.dlink.model.YarnQueueModel;
 import com.dlink.service.HadoopClusterService;
 import com.dlink.service.YarnQueueService;
+import io.minio.errors.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * HadoopClusterServiceImpl
@@ -42,36 +62,185 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
 
     @Autowired
     private YarnQueueService yarnQueueService;
+    @Autowired
+    private MinioStorageService minioStorageService;
 
     @Override
     @Transactional
     public Result save(HadoopClusterModel model) {
-        HadoopCluster hadoopCluster = new HadoopCluster();
-        BeanUtil.copyProperties(model, hadoopCluster);
-        this.saveOrUpdate(hadoopCluster);
-        List<YarnQueueModel> yarnQueueModels = model.getYarnQueueModels();
-        LambdaQueryWrapper<YarnQueue> wrapper = Wrappers.<YarnQueue>lambdaQuery().eq(YarnQueue::getClusterId, hadoopCluster.getId());
-        boolean b = yarnQueueService.remove(wrapper);
-        List<YarnQueue> list = new ArrayList<>();
-        if (b) {
-            for (YarnQueueModel queueModel : yarnQueueModels) {
-                YarnQueue yarnQueue = new YarnQueue();
-                yarnQueue.setName(queueModel.getName());
-                yarnQueue.setClusterName(hadoopCluster.getName());
-                yarnQueue.setClusterId(hadoopCluster.getId());
-                yarnQueue.setPolicy(queueModel.getPolicy());
-                yarnQueue.setParentName(queueModel.getParentName());
-                yarnQueue.setAclSubmitApps(queueModel.getAclSubmitApps());
-                list.add(yarnQueue);
-            }
-            yarnQueueService.saveOrUpdateBatch(list);
+        HadoopCluster cluster = this.getOne(Wrappers.<HadoopCluster>lambdaQuery().eq(HadoopCluster::getUuid, model.getUuid()));
+        if (cluster == null) {
+            cluster = new HadoopCluster();
         }
+        BeanUtil.copyProperties(model, cluster, CopyOptions.create(null, true));
+        this.saveOrUpdate(cluster);
+        List<YarnQueueModel> yarnQueueModels = model.getYarnQueueModels();
+        LambdaQueryWrapper<YarnQueue> wrapper = Wrappers.<YarnQueue>lambdaQuery().eq(YarnQueue::getClusterId, cluster.getId());
+        yarnQueueService.remove(wrapper);
+        List<YarnQueue> list = new ArrayList<>();
+        for (YarnQueueModel queueModel : yarnQueueModels) {
+            YarnQueue yarnQueue = new YarnQueue();
+            yarnQueue.setName(queueModel.getName());
+            yarnQueue.setClusterName(cluster.getName());
+            yarnQueue.setClusterId(cluster.getId());
+            yarnQueue.setPolicy(queueModel.getPolicy());
+            yarnQueue.setParentName(queueModel.getParentName());
+            yarnQueue.setAclSubmitApps(queueModel.getAclSubmitApps());
+            list.add(yarnQueue);
+        }
+        yarnQueueService.saveOrUpdateBatch(list);
 
-        return Result.succeed(hadoopCluster, "保存成功");
+        return Result.succeed(cluster, "保存成功");
+    }
+
+    @Override
+    public List<HadoopClusterModel> listAll() {
+        List<HadoopCluster> clusters = this.list();
+        List<YarnQueue> queues = yarnQueueService.list();
+        List<HadoopClusterModel> res = new ArrayList<>();
+        if (clusters != null) {
+            for (HadoopCluster cluster : clusters) {
+                HadoopClusterModel hadoopClusterModel = new HadoopClusterModel();
+                BeanUtil.copyProperties(cluster, hadoopClusterModel, CopyOptions.create(null, true));
+                List<YarnQueue> yarnQueues = new ArrayList<>();
+                for (YarnQueue queue : queues) {
+                    if (cluster.getId().intValue() == queue.getClusterId().intValue()) {
+                        yarnQueues.add(queue);
+                    }
+                }
+                List<YarnQueueModel> yarnQueueModels = BeanUtil.copyToList(yarnQueues, YarnQueueModel.class);
+                hadoopClusterModel.setYarnQueueModels(yarnQueueModels);
+                res.add(hadoopClusterModel);
+            }
+        }
+        return res;
+    }
+
+    @Override
+    public Result detail(Integer id) {
+        HadoopCluster cluster = this.getById(id);
+        if (cluster == null) {
+            return Result.failed("获取失败");
+        }
+        List<YarnQueue> yarnQueues = yarnQueueService.list(Wrappers.<YarnQueue>lambdaQuery().eq(YarnQueue::getClusterId, cluster.getId()));
+        HadoopClusterModel hadoopClusterModel = new HadoopClusterModel();
+        BeanUtil.copyProperties(cluster, hadoopClusterModel, CopyOptions.create(null, true));
+        List<YarnQueueModel> yarnQueueModels = BeanUtil.copyToList(yarnQueues, YarnQueueModel.class);
+        hadoopClusterModel.setYarnQueueModels(yarnQueueModels);
+        return Result.succeed(hadoopClusterModel, "获取成功");
+    }
+
+    @Override
+    public Result upload(MultipartFile file, String path) {
+        String res = null;
+        try {
+            res = minioStorageService.uploadFile(file.getBytes(), path + "/" + file.getOriginalFilename());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ServerException e) {
+            e.printStackTrace();
+        } catch (InsufficientDataException e) {
+            e.printStackTrace();
+        } catch (ErrorResponseException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (InvalidResponseException e) {
+            e.printStackTrace();
+        } catch (XmlParserException e) {
+            e.printStackTrace();
+        } catch (InternalException e) {
+            e.printStackTrace();
+        }
+        return Result.succeed(res, "上传成功");
     }
 
     @Override
     public Result load(HadoopClusterModel model) {
+        if (model.getType().equals("CDH")) {
+            Result result = this.loadCDH(model);
+            return result;
+        } else {
+            return this.loadApache(model);
+        }
+    }
+
+    public Result loadApache(HadoopClusterModel model) {
+        List<YarnQueueModel> yarnQueues = new ArrayList<>();
+        Configuration configuration = new Configuration(false);
+        String xmlUrls = model.getXmlUrls();
+        if (StringUtils.isBlank(xmlUrls)) {
+            return Result.failed("缺少配置文件");
+        }
+        JSONArray ja = JSONUtil.parseArray(xmlUrls);
+        for (int i = 0; i < ja.size(); i++) {
+            InputStream inputStream = minioStorageService.downloadFile(ja.get(i).toString());
+            configuration.addResource(inputStream);
+        }
+
+        HadoopCluster hadoopCluster = new HadoopCluster();
+        // 集群信息
+        String defaultFS = configuration.get("fs.defaultFS");
+        String clusterName = defaultFS.split("//")[1];
+        System.out.println("集群名称: " + clusterName);
+        hadoopCluster.setClusterName(clusterName);
+        hadoopCluster.setType(model.getType());
+        hadoopCluster.setUuid(model.getUuid());
+        // namenode信息
+        String namenodes = configuration.get("dfs.ha.namenodes." + clusterName);
+        String[] names = namenodes.split(",");
+        System.out.println("Hdfs高可用: " + (names.length > 1));
+        List<String> namenodeAddresses = new ArrayList<>();
+        Arrays.stream(names).forEach(name -> {
+            String s = configuration.get("dfs.namenode.http-address." + clusterName + "." + name);
+            namenodeAddresses.add("http://" + s);
+        });
+        hadoopCluster.setHdfsHa(names.length > 1);
+        hadoopCluster.setNamenodeAddress(String.join(",", namenodeAddresses.stream().collect(Collectors.joining(","))));
+
+        // hive信息
+        String s = configuration.get("hive.zookeeper.quorum");
+        hadoopCluster.setHiveHa(StringUtils.isNotBlank(s));
+        hadoopCluster.setHiveserverAddress(configuration.get("hive.server2.thrift.bind.host") + ":" + configuration.get("hive.server2.thrift.port"));
+        hadoopCluster.setMetastoreAddress(configuration.get("hive.metastore.uris"));
+
+        // yarn信息
+        String rms = configuration.get("yarn.resourcemanager.ha.rm-ids");
+        List<String> rmAddresses = new ArrayList<>();
+        Arrays.stream(rms.split(",")).forEach(rm -> {
+            rmAddresses.add("http://" + configuration.get("yarn.resourcemanager.webapp.address." + rm));
+        });
+        hadoopCluster.setYarnHa(configuration.get("yarn.resourcemanager.ha.enabled").equals("true"));
+        hadoopCluster.setResourcemanagerAddress(rmAddresses.stream().collect(Collectors.joining(",")));
+        // zookeeper信息
+        hadoopCluster.setZkQuorum(configuration.get("ha.zookeeper.quorum"));
+        // yarn队列信息
+        RestTemplate restTemplate = new RestTemplate();
+        String body = restTemplate.exchange(rmAddresses.get(0) + "/ws/v1/cluster/scheduler", HttpMethod.GET, null, String.class).getBody();
+        if (StringUtils.isNotBlank(body)) {
+            JSONObject jo = new JSONObject(body);
+            JSONObject schedulerJSON = jo.getJSONObject("scheduler");
+            JSONObject schedulerInfo = schedulerJSON.getJSONObject("schedulerInfo");
+            JSONObject q = schedulerInfo.getJSONObject("queues");
+            JSONArray queues = q.getJSONArray("queue");
+            JSONArray jsonArray = new JSONArray();
+            jsonArray.set(schedulerInfo);
+            resolveQueue(null, jsonArray, yarnQueues, "Apache");
+            for (YarnQueueModel yarnQueueModel : yarnQueues) {
+                yarnQueueModel.setClusterName(hadoopCluster.getName());
+                yarnQueueModel.setClusterUUID(hadoopCluster.getUuid());
+            }
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.set("Cluster", hadoopCluster);
+        jsonObject.set("YarnQueue", yarnQueues);
+        return Result.succeed(jsonObject, "加载成功");
+    }
+
+    public Result loadCDH(HadoopClusterModel model) {
         RootResourceV33 apiRoot = null;
         try {
             URL url = new URL(model.getUrl());
@@ -94,6 +263,7 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
             hadoopCluster.setClusterStatus(apiCluster.getEntityStatus().name());
             hadoopCluster.setVersion(apiCluster.getFullVersion());
             hadoopCluster.setType(model.getType());
+            hadoopCluster.setUuid(apiCluster.getUuid());
 
             ClustersResourceV33 clustersResource = apiRoot.getClustersResource();
             // kerberos信息
@@ -136,12 +306,12 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
                     ApiConfigList configs = servicesResource.getRolesResource("hive").readRoleConfig(role.getName(), DataView.FULL);
                     String nnPort = "";
                     for (ApiConfig config : configs.getConfigs()) {
-                        if (config.getName().equals("hiveserver2_webui_port")) {
+                        if (config.getName().equals("hs2_thrift_address_port")) {
                             nnPort = config.getValue() != null ? config.getValue() : config.getDefaultValue();
                             break;
                         }
                     }
-                    String hiveServer2Address = "http://" + hostname + ":" + nnPort;
+                    String hiveServer2Address = "jdbc:hive2://" + hostname + ":" + nnPort;
                     hs2Addresses.add(hiveServer2Address);
                 }
             }
@@ -161,7 +331,7 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
                             break;
                         }
                     }
-                    String hmAddress = "http://" + hostname + ":" + nnPort;
+                    String hmAddress = "thrift://" + hostname + ":" + nnPort;
                     hmAddresses.add(hmAddress);
                 }
             }
@@ -189,7 +359,7 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
             hadoopCluster.setResourcemanagerAddress(String.join(",", rmAddresses));
 
             // yarn队列信息
-            ApiServiceConfig yarnConfig = servicesResource.readServiceConfig("yarn", DataView.SUMMARY);
+            ApiServiceConfig yarnConfig = servicesResource.readServiceConfig("yarn", DataView.FULL);
             List<ApiConfig> yarnConfigs = yarnConfig.getConfigs();
             String json = "";
             for (ApiConfig apiConfig : yarnConfigs) {
@@ -198,12 +368,22 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
                     break;
                 }
             }
-            JSONObject jsonObject = new JSONObject(json);
-            JSONArray queues = jsonObject.getJSONArray("queues");
-            resolveQueue(null, queues, yarnQueues);
-            for (YarnQueueModel yarnQueueModel : yarnQueues) {
-                yarnQueueModel.setClusterName(apiCluster.getName());
-                yarnQueueModel.setClusterUUID(apiCluster.getUuid());
+            if (StringUtils.isBlank(json)) {
+                for (ApiConfig apiConfig : yarnConfigs) {
+                    if (apiConfig.getName().equals("yarn_fs_scheduled_allocations")) {
+                        json = apiConfig.getValue() == null ? apiConfig.getDefaultValue() : apiConfig.getValue();
+                        break;
+                    }
+                }
+            }
+            if (StringUtils.isNotBlank(json)) {
+                JSONObject jsonObject = new JSONObject(json);
+                JSONArray queues = jsonObject.getJSONArray("queues");
+                resolveQueue(null, queues, yarnQueues, "CDH");
+                for (YarnQueueModel yarnQueueModel : yarnQueues) {
+                    yarnQueueModel.setClusterName(apiCluster.getName());
+                    yarnQueueModel.setClusterUUID(apiCluster.getUuid());
+                }
             }
 
             // zk信息
@@ -231,18 +411,46 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
         return Result.succeed(jsonObject, "加载成功");
     }
 
-    private void resolveQueue(JSONObject parent, JSONArray queues, List<YarnQueueModel> yarnQueues) {
+    private void resolveQueue(JSONObject parent, JSONArray queues, List<YarnQueueModel> yarnQueues, String type) {
         queues.jsonIter().forEach(q -> {
+            String queueName = q.getStr("name");
+            if (StringUtils.isBlank(queueName)) {
+                queueName = q.getStr("queueName");
+            }
             YarnQueueModel yarnQueue = new YarnQueueModel();
-            yarnQueue.setName(q.getStr("name"));
-            yarnQueue.setAclSubmitApps(q.getStr("aclSubmitApps"));
+            yarnQueue.setName(queueName);
+            final String[] aclSubmitApps = {q.getStr("aclSubmitApps")};
+            if (StringUtils.isBlank(aclSubmitApps[0])) {
+                JSONObject queueAcls = q.getJSONObject("queueAcls");
+                if (queueAcls != null) {
+                    JSONArray queueAcl = queueAcls.getJSONArray("queueAcl");
+                    queueAcl.jsonIter().forEach(acl -> {
+                        if (acl.getStr("accessType").equals("SUBMIT_APP")) {
+                            aclSubmitApps[0] = acl.getStr("accessControlList");
+                        }
+                    });
+                }
+            }
+            yarnQueue.setAclSubmitApps(aclSubmitApps[0]);
             yarnQueue.setPolicy(q.getStr("schedulingPolicy"));
             if (parent != null) {
-                yarnQueue.setParentName(parent.getStr("name"));
+                String parentQueueName = parent.getStr("name");
+                if (StringUtils.isBlank(parentQueueName)) {
+                    parentQueueName = parent.getStr("queueName");
+                }
+                yarnQueue.setParentName(parentQueueName);
             }
             yarnQueues.add(yarnQueue);
-            JSONArray children = q.getJSONArray("queues");
-            this.resolveQueue(q, children, yarnQueues);
+            if ("CDH".equals(type)) {
+                JSONArray children = q.getJSONArray("queues");
+                this.resolveQueue(q, children, yarnQueues, type);
+            } else {
+                JSONObject jsonObject = q.getJSONObject("queues");
+                if (jsonObject != null) {
+                    JSONArray children = jsonObject.getJSONArray("queue");
+                    this.resolveQueue(q, children, yarnQueues, type);
+                }
+            }
         });
     }
 }

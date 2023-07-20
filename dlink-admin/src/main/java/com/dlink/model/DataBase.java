@@ -73,6 +73,12 @@ public class DataBase extends SuperEntity {
 
     private LocalDateTime heartbeatTime;
 
+    private Boolean kerberos;
+
+    private String principalName;
+
+    private String keytabName;
+
     public DriverConfig getDriverConfig() {
         return new DriverConfig(getName(), type, url, username, password);
     }

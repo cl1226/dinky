@@ -2,6 +2,7 @@ package com.dlink.service;
 
 import com.dlink.db.service.ISuperService;
 import com.dlink.model.FileCatalogue;
+import com.dlink.model.FileCatalogueDto;
 
 import java.util.List;
 
@@ -14,6 +15,8 @@ import java.util.List;
 public interface FileCatalogueService extends ISuperService<FileCatalogue> {
 
     List<FileCatalogue> getAllData();
+
+    List<FileCatalogueDto> getAllTreeAndData();
 
     FileCatalogue findByParentIdAndName(Integer parentId, String name);
 

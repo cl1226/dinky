@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.dlink.assertion.Assert;
 import com.dlink.common.result.Result;
+import com.dlink.context.TenantContextHolder;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.DsSearchCondition;
 import com.dlink.dto.WorkflowEdge;
@@ -21,9 +22,8 @@ import com.dlink.scheduler.config.DolphinSchedulerProperties;
 import com.dlink.scheduler.enums.Flag;
 import com.dlink.scheduler.enums.ReleaseState;
 import com.dlink.scheduler.model.*;
-import com.dlink.service.CatalogueService;
-import com.dlink.service.WorkflowCatalogueService;
-import com.dlink.service.WorkflowTaskService;
+import com.dlink.service.*;
+import com.dlink.utils.SparkUtil;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.TriggerUtils;
@@ -58,6 +58,10 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     private WorkflowCatalogueService catalogueService;
     @Autowired
     private CatalogueService service;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private SparkUtil sparkUtil;
 
     @Override
     public WorkflowTaskDTO getTaskInfoById(Integer id) {
@@ -95,12 +99,33 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
                     || WorkflowLifeCycle.CANCEL.getValue().equals(taskInfo.getStatus())) {
                 throw new BusException("该作业已" + WorkflowLifeCycle.get(taskInfo.getStatus()).getLabel() + "，禁止修改！");
             }
-            task.setStatus(WorkflowLifeCycle.CREATE.getValue());
-            this.updateById(task);
-        } else {
-            task.setStatus(WorkflowLifeCycle.CREATE.getValue());
-            this.save(task);
         }
+        task.setStatus(WorkflowLifeCycle.CREATE.getValue());
+        String graphData = task.getGraphData();
+        WorkflowTaskDTO workflowTaskDTO = JSONUtil.toBean(graphData, WorkflowTaskDTO.class);
+        workflowTaskDTO.getNodes().stream().forEach(x -> {
+            String nodeType = x.getNodeType();
+            String nodeInfo = x.getNodeInfo();
+            String nodeGroup = x.getGroup();
+            if ("compute".equals(nodeGroup) && "Spark".equals(nodeType)) {
+                String nodeId = x.getId();
+
+                Task nodeTask = taskService.getOne(Wrappers.<Task>lambdaQuery().eq(Task::getNodeId, nodeId));
+                if (nodeTask == null) {
+                    nodeTask = new Task();
+                }
+                nodeTask.setEnabled(true);
+                Integer tenantId = (Integer) TenantContextHolder.get();
+                nodeTask.setTenantId(tenantId);
+                nodeTask.setName(x.getLabel());
+                nodeTask.setNodeId(nodeId);
+                nodeTask.setDialect(nodeType);
+                nodeTask.setNodeInfo(nodeInfo);
+                taskService.saveOrUpdate(nodeTask);
+            }
+        });
+
+        this.updateById(task);
         return true;
     }
 
@@ -118,6 +143,11 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
 
         if (StringUtils.isBlank(taskInfo.getGraphData())) {
             return Result.failed("工作流程中缺少节点");
+        }
+        if (taskInfo.getType().equals("octopus")) {
+            taskInfo.setStatus(WorkflowLifeCycle.DEPLOY.getValue());
+            this.saveOrUpdate(taskInfo);
+            return Result.succeed(taskInfo, "部署成功");
         }
         // 获取根目录
         WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
@@ -151,7 +181,26 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             TaskRequest taskRequest = new TaskRequest();
             DlinkTaskParams dlinkTaskParams = new DlinkTaskParams();
 //            Catalogue catalogue1 = service.getById(x.getJobId());
-            dlinkTaskParams.setTaskId(String.valueOf(x.getJobId()));
+            String nodeType = x.getNodeType();
+            String nodeInfo = x.getNodeInfo();
+            if (nodeType.equals("Spark")) {
+                String nodeId = x.getId();
+                Task nodeTask = taskService.getOne(Wrappers.<Task>lambdaQuery().eq(Task::getNodeId, nodeId));
+                if (nodeTask != null) {
+                    dlinkTaskParams.setTaskId(String.valueOf(nodeTask.getId()));
+                } else {
+                    nodeTask = new Task();
+                    nodeTask.setName(x.getLabel());
+                    nodeTask.setNodeId(nodeId);
+                    nodeTask.setDialect(nodeType);
+                    nodeTask.setNodeInfo(nodeInfo);
+                    taskService.saveOrUpdate(nodeTask);
+                    dlinkTaskParams.setTaskId(String.valueOf(nodeTask.getId()));
+                }
+            } else {
+                JSONObject jsonObject = JSONUtil.parseObj(nodeInfo);
+                dlinkTaskParams.setTaskId(jsonObject.getStr("jobId"));
+            }
             dlinkTaskParams.setAddress(dolphinSchedulerProperties.getAddress());
             taskRequest.setTaskParams(JSONUtil.parseObj(dlinkTaskParams).toString());
             taskRequest.setTaskType("DINKY");
@@ -216,6 +265,12 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
+        if (taskInfo.getType().equals("octopus")) {
+            taskInfo.setStatus(WorkflowLifeCycle.ONLINE.getValue());
+            this.saveOrUpdate(taskInfo);
+            return Result.succeed(taskInfo, "上线成功");
+        }
+
         // 获取根目录
         WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
         if (catalogue == null) {
@@ -262,6 +317,12 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
 
         if (StringUtils.isBlank(taskInfo.getGraphData())) {
             return Result.failed("工作流程中缺少节点");
+        }
+
+        if (taskInfo.getType().equals("octopus")) {
+            taskInfo.setStatus(WorkflowLifeCycle.OFFLINE.getValue());
+            this.saveOrUpdate(taskInfo);
+            return Result.succeed(taskInfo, "下线成功");
         }
 
         // 获取根目录
@@ -359,6 +420,13 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         WorkflowTask taskInfo = getById(id);
         if (taskInfo == null) {
             return Result.failed("启动失败，作业不存在");
+        }
+        if (!taskInfo.getStatus().equals(WorkflowLifeCycle.ONLINE.getValue())) {
+            return Result.failed("启动失败，作业未上线");
+        }
+        if (taskInfo.getType().equals("octopus")) {
+            Result result = sparkUtil.submitSparkTask(taskInfo);
+            return result;
         }
         // 获取根目录
         WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));

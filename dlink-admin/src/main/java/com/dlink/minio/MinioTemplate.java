@@ -3,6 +3,7 @@ package com.dlink.minio;
 import io.minio.*;
 import io.minio.errors.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
@@ -19,12 +20,16 @@ import java.security.NoSuchAlgorithmException;
  * @since 2023/6/27 14:43
  **/
 @Component
-@Configuration
-@EnableConfigurationProperties(MinioProperties.class)
 public class MinioTemplate {
 
-    @Autowired
-    private MinioProperties minioProperties;
+    @Value("${dinky.minio.url}")
+    private String url;
+    @Value("${dinky.minio.access-key}")
+    private String accessKey;
+    @Value("${dinky.minio.secret-key}")
+    private String secretKey;
+    @Value("${dinky.minio.bucket-name}")
+    private String bucketName;
 
     private MinioClient minioClient;
 
@@ -33,8 +38,8 @@ public class MinioTemplate {
     public MinioClient getMinioClient() {
         if (minioClient == null) {
             MinioClient client = MinioClient.builder()
-                    .endpoint(minioProperties.getUrl())
-                    .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
+                    .endpoint(url)
+                    .credentials(accessKey, secretKey)
                     .build();
             return client;
         }

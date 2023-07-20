@@ -92,6 +92,7 @@ public class AppConfiguration implements WebMvcConfigurer {
                 .addPathPatterns("/api/role/**")
                 .addPathPatterns("/api/fragment/**")
                 .addPathPatterns("/api/jar/*")
-                .addPathPatterns("/api/metadata/**");
+                .addPathPatterns("/api/metadata/**")
+                .addPathPatterns("/api/workflow/task/**");
     }
 }

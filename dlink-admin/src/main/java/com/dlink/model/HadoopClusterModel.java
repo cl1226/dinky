@@ -1,5 +1,6 @@
 package com.dlink.model;
 
+import com.dlink.db.model.SuperEntity;
 import lombok.Data;
 
 import java.util.List;
@@ -11,9 +12,9 @@ import java.util.List;
  * @since 2023/6/28 15:22
  **/
 @Data
-public class HadoopClusterModel {
+public class HadoopClusterModel extends SuperEntity {
 
-    private String name;
+    private String uuid;
 
     private String type;
 
@@ -51,6 +52,12 @@ public class HadoopClusterModel {
 
     private String realm;
 
+    private String krb5;
+
+    private String keytabJson;
+
     private List<YarnQueueModel> yarnQueueModels;
+
+    private String xmlUrls;
 
 }

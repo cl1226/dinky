@@ -40,4 +40,6 @@ public class MetadataTaskInstance extends SuperEntity {
 
     private Long duration;
 
+    private String errorLog;
+
 }

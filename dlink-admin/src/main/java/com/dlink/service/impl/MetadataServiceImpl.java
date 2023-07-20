@@ -2,6 +2,7 @@ package com.dlink.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -15,15 +16,22 @@ import com.dlink.explainer.lineage.LineageBuilder;
 import com.dlink.explainer.lineage.LineageRelation;
 import com.dlink.explainer.lineage.LineageResult;
 import com.dlink.explainer.lineage.LineageTable;
+import com.dlink.mapper.HadoopClusterMapper;
+import com.dlink.minio.MinioStorageService;
 import com.dlink.model.*;
 import com.dlink.process.context.ProcessContextHolder;
 import com.dlink.process.model.ProcessEntity;
 import com.dlink.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,6 +64,10 @@ public class MetadataServiceImpl implements MetadataService {
     private MetadataTableLineageService metadataTableLineageService;
     @Autowired
     private MetadataColumnLineageService metadataColumnLineageService;
+    @Autowired
+    private HadoopClusterMapper hadoopClusterMapper;
+    @Autowired
+    private MinioStorageService minioStorageService;
 
     @Override
     public Result statistics() {
@@ -90,13 +102,13 @@ public class MetadataServiceImpl implements MetadataService {
         List<MetadataVolume> metadataVolumes = metadataVolumeService.list(queryWrapper);
         Map<String, List<MetadataVolume>> map = new HashMap<>();
         for (MetadataVolume volume : metadataVolumes) {
-            if (map.containsKey(volume.getDatasourceType())) {
-                List<MetadataVolume> dbs = map.get(volume.getDatasourceType());
+            if (map.containsKey(volume.getDatasourceType() + "__" + volume.getDatasourceName())) {
+                List<MetadataVolume> dbs = map.get(volume.getDatasourceType() + "__" + volume.getDatasourceName());
                 dbs.add(volume);
             } else {
                 List<MetadataVolume> volumes = new ArrayList<>();
                 volumes.add(volume);
-                map.put(volume.getDatasourceType(), volumes);
+                map.put(volume.getDatasourceType() + "__" + volume.getDatasourceName(), volumes);
             }
         }
         List<JSONObject> list = new ArrayList<>();
@@ -104,7 +116,7 @@ public class MetadataServiceImpl implements MetadataService {
             JSONObject jsonObject = new JSONObject();
             String mapKey = (String) entry.getKey();
             List<MetadataVolume> mapValue = (List<MetadataVolume>) entry.getValue();
-            jsonObject.set("datasourceType", mapKey);
+            jsonObject.set("datasourceType", mapKey.split("__")[0]);
             if (mapValue != null && mapValue.size() > 0) {
                 jsonObject.set("datasourceId", mapValue.get(0).getDatasourceId());
                 jsonObject.set("datasourceName", mapValue.get(0).getDatasourceName());
@@ -112,7 +124,7 @@ public class MetadataServiceImpl implements MetadataService {
                 BigDecimal dataVol = BigDecimal.ZERO;
                 for (MetadataVolume volume : mapValue) {
                     tableNum = tableNum + volume.getTableNum().intValue();
-                    dataVol = dataVol.add(volume.getDataVol());
+                    dataVol = dataVol.add(volume.getDataVol() == null ? BigDecimal.ZERO : volume.getDataVol());
                 }
                 jsonObject.set("tableNum", tableNum);
                 jsonObject.set("dataVol", dataVol);
@@ -130,6 +142,30 @@ public class MetadataServiceImpl implements MetadataService {
         return Result.succeed(list, "获取成功");
     }
 
+    private boolean initKerberos(DataBase dataBase) {
+        HadoopCluster hadoopCluster = hadoopClusterMapper.getOneByAddress(dataBase.getUrl());
+        if (hadoopCluster == null) {
+            return false;
+        }
+        String krb5Path = "/hadoop/" + hadoopCluster.getUuid() + "/keytab/krb5.conf";
+        String keytabPath =  "/hadoop/" + hadoopCluster.getUuid() + "/keytab/" + dataBase.getKeytabName();
+        InputStream krb5in = minioStorageService.downloadFile(krb5Path);
+        InputStream keytabin = minioStorageService.downloadFile(keytabPath);
+        FileUtil.writeFromStream(krb5in, new File(krb5Path));
+        FileUtil.writeFromStream(keytabin, new File(keytabPath));
+        System.setProperty("java.security.krb5.conf", krb5Path);
+        Configuration configuration = new Configuration();
+        configuration.set("hadoop.security.authentication" , "Kerberos");
+        configuration.setBoolean("hadoop.security.authorization", true);
+        UserGroupInformation.setConfiguration(configuration);
+        try {
+            UserGroupInformation.loginUserFromKeytab(dataBase.getPrincipalName() , keytabPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
     @Override
     public Result calcLineage(Integer taskId) {
         List<Task> tasks = taskService.list();
@@ -139,9 +175,14 @@ public class MetadataServiceImpl implements MetadataService {
             if (dataBase == null || StringUtils.isBlank(task.getStatement())) {
                 continue;
             }
+            if (dataBase.getKerberos() != null && dataBase.getKerberos()) {
+                initKerberos(dataBase);
+            }
+            log.info("开始解析任务【" + task.getName() + "】的血缘关系......");
             LineageResult lineage = new LineageResult();
             if (!task.getDialect().toLowerCase().equalsIgnoreCase("flinksql")) {
-                if (task.getDialect().toLowerCase().equalsIgnoreCase("doris")) {
+                if (task.getDialect().toLowerCase().equalsIgnoreCase("doris")
+                || task.getDialect().toLowerCase().equalsIgnoreCase("starrocks")) {
                     lineage = com.dlink.explainer.sqllineage.LineageBuilder.getSqlLineage(task.getStatement(), "mysql",
                             dataBase.getDriverConfig());
                 } else {
@@ -150,11 +191,12 @@ public class MetadataServiceImpl implements MetadataService {
                 }
 
             } else {
-//            StudioLineageDTO studioLineageDTO = new StudioLineageDTO();
-//            BeanUtil.copyProperties(task, studioLineageDTO, CopyOptions.create(null, true));
-//            addFlinkSQLEnv(studioLineageDTO);
-//            lineage = LineageBuilder.getColumnLineageByLogicalPlan(task.getStatement());
+                StudioLineageDTO studioLineageDTO = new StudioLineageDTO();
+                BeanUtil.copyProperties(task, studioLineageDTO, CopyOptions.create(null, true));
+                addFlinkSQLEnv(studioLineageDTO);
+                lineage = LineageBuilder.getColumnLineageByLogicalPlan(task.getStatement());
             }
+            log.info("成功解析任务【" + task.getName() + "】的血缘关系。");
             if (lineage == null) {
                 continue;
             }
@@ -164,7 +206,7 @@ public class MetadataServiceImpl implements MetadataService {
             if (tables == null || tables.size() == 0) {
                 continue;
             }
-
+            log.info("开始记录血缘关系：" + task.getId() + "," + task.getName());
             Map<String, LineageTable> tableMap = new HashMap<>();
             for (LineageTable table : tables) {
                 tableMap.put(table.getId(), table);
