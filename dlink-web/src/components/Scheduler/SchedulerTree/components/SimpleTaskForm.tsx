@@ -89,7 +89,7 @@ const SimpleTaskForm: React.FC<UpdateFormProps> = (props) => {
         <Form.Item label="模式" name="type" rules={[{ required: true, message: '请选择模式' }]}>
           <Select
             style={{ width: '100%' }}
-            placeholder="请选择读取方式"
+            placeholder="请选择流程模式"
             options={transferEnumToOptions(EJobType)}
           />
         </Form.Item>

@@ -59,50 +59,35 @@ const formLayout: any = {
 
 // form值 => 接口参数
 const getNodeParams = (nodeType, formResult) => {
-  if (
-    nodeType === DIALECT.SPARK ||
-    nodeType === DIALECT.FILE ||
-    nodeType === DIALECT.FTP ||
-    nodeType === DIALECT.Console ||
-    nodeType === DIALECT.Mysql ||
-    nodeType === DIALECT.Shell
-  ) {
-    return formResult
+  if (nodeType === DIALECT.FLINKSQL || nodeType === DIALECT.HIVE) {
+    const { jobObj } = formResult
+    return {
+      jobId: jobObj?.id || '',
+      jobName: jobObj?.name || '',
+    }
   } else if (nodeType === DIALECT.HDFS) {
     return {
       ...formResult,
       path: `hdfs://${formResult.path}`,
     }
   }
-  const { jobObj } = formResult
-  return {
-    jobId: jobObj?.id || '',
-    jobName: jobObj?.name || '',
-  }
+  return formResult
 }
 // 接口参数 => form值
 const transferNodeInfo = (nodeType, nodeInfo) => {
   if (!nodeInfo) return {}
-  if (
-    nodeType === DIALECT.SPARK ||
-    nodeType === DIALECT.FILE ||
-    nodeType === DIALECT.FTP ||
-    nodeType === DIALECT.Console ||
-    nodeType === DIALECT.Mysql ||
-    nodeType === DIALECT.Shell
-  ) {
-    return nodeInfo
-  } else if (nodeType === DIALECT.HDFS) {
+  if (nodeType === DIALECT.HDFS) {
     return {
       ...nodeInfo,
       path: nodeInfo?.path?.split('hdfs://')?.[1] || '',
     }
+  } else if (nodeType === DIALECT.FLINKSQL || nodeType === DIALECT.HIVE) {
+    const { jobId, jobName } = nodeInfo
+    return {
+      jobObj: { id: jobId, name: jobName },
+    }
   }
-
-  const { jobId, jobName } = nodeInfo
-  return {
-    jobObj: { id: jobId, name: jobName },
-  }
+  return nodeInfo
 }
 // form默认值
 const getNodeDefaultFormValue = (nodeType) => {
@@ -354,6 +339,7 @@ export const CanvasCustomRender: React.FC<ICustomFormProps> = (props) => {
         <Descriptions.Item label="作业ID">{baseInfo.flowId}</Descriptions.Item>
         <Descriptions.Item label="作业名称">{baseInfo.flowName}</Descriptions.Item>
         <Descriptions.Item label="作业状态">{baseInfo.status}</Descriptions.Item>
+        <Descriptions.Item label="作业模式">{baseInfo.type}</Descriptions.Item>
       </Descriptions>
       <Form
         name="canvasForm"

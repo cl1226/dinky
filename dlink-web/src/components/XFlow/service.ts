@@ -20,6 +20,7 @@ export interface IMeta {
   status?: string
   schedulerType?: boolean
   cron?: string
+  type?: string
 }
 
 // 节点类型
