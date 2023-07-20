@@ -16,7 +16,8 @@ export const onNodeDrop: NsNodeCollapsePanel.IOnNodeDrop = async (node, commands
 }
 
 export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta, modelService) => {
-  const allTaskEnum = await getFlowTaskEnum()
+  if (!meta?.meta.type) return []
+  const allTaskEnum = await getFlowTaskEnum(meta?.meta.type)
   return allTaskEnum.map((item) => ({
     id: item.key,
     header: item.title,

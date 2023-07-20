@@ -17,22 +17,26 @@
  *
  */
 
-
 export type CatalogueTableListItem = {
-  id: number,
-  taskId: number,
-  name: string,
-  isLeaf: string,
-  parentId: number,
-  projectCode: string,
-};
+  id: number
+  taskId: number
+  name: string
+  isLeaf: string
+  parentId: number
+  projectCode: string
+}
 
 export type TaskTableListItem = {
-  id: number,
-  name: string,
-  alias: string,
-  dialect: string,
-  config: Object<string, object>,
-  parentId: number,
-  projectCode: string,
-};
+  id: number
+  name: string
+  alias: string
+  dialect: string
+  config: Object<string, object>
+  parentId: number
+  projectCode: string
+  type: string
+}
+export enum EJobType {
+  dinky = 'SQL/JAR',
+  octopus = '算子',
+}

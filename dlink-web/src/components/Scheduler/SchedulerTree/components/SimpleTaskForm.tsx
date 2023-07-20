@@ -18,10 +18,13 @@
  */
 
 import React, { useState } from 'react'
-import { Button, Form, Input, Modal } from 'antd'
+import { Button, Form, Input, Modal, Select } from 'antd'
 
 import type { TaskTableListItem } from '../data.d'
+import { EJobType } from '../data.d'
+
 import { l } from '@/utils/intl'
+import { transferEnumToOptions } from '@/utils/utils'
 
 export type UpdateFormProps = {
   onCancel: (flag?: boolean, formVals?: Partial<TaskTableListItem>) => void
@@ -43,6 +46,7 @@ const SimpleTaskForm: React.FC<UpdateFormProps> = (props) => {
     alias: props.values.alias,
     parentId: props.values.parentId,
     config: props.values.config,
+    type: props.values.type,
   })
 
   const [form] = Form.useForm()
@@ -80,6 +84,14 @@ const SimpleTaskForm: React.FC<UpdateFormProps> = (props) => {
         </Form.Item>
         <Form.Item name="alias" label="别名" rules={[{ required: true, message: '请输入别名！' }]}>
           <Input placeholder="请输入" />
+        </Form.Item>
+
+        <Form.Item label="模式" name="type" rules={[{ required: true, message: '请选择模式' }]}>
+          <Select
+            style={{ width: '100%' }}
+            placeholder="请选择读取方式"
+            options={transferEnumToOptions(EJobType)}
+          />
         </Form.Item>
       </>
     )

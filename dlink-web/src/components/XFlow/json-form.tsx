@@ -30,6 +30,7 @@ import { CloseCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icon
 import type { FormInstance } from 'antd'
 import moment from 'moment'
 
+import AceEditor from 'react-ace'
 import { Cron } from '@/components/Cron'
 import { JobSelect } from '@/components/XFlow/components/JobSelect'
 import { JarSelect } from '@/components/XFlow/components/JarSelect'
@@ -63,7 +64,8 @@ const getNodeParams = (nodeType, formResult) => {
     nodeType === DIALECT.FILE ||
     nodeType === DIALECT.FTP ||
     nodeType === DIALECT.Console ||
-    nodeType === DIALECT.Mysql
+    nodeType === DIALECT.Mysql ||
+    nodeType === DIALECT.Shell
   ) {
     return formResult
   } else if (nodeType === DIALECT.HDFS) {
@@ -86,7 +88,8 @@ const transferNodeInfo = (nodeType, nodeInfo) => {
     nodeType === DIALECT.FILE ||
     nodeType === DIALECT.FTP ||
     nodeType === DIALECT.Console ||
-    nodeType === DIALECT.Mysql
+    nodeType === DIALECT.Mysql ||
+    nodeType === DIALECT.Shell
   ) {
     return nodeInfo
   } else if (nodeType === DIALECT.HDFS) {
@@ -470,7 +473,8 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
         return NodeCustomForm.Hdfs()
       case DIALECT.Mysql:
         return NodeCustomForm.Mysql()
-
+      case DIALECT.Shell:
+        return NodeCustomForm.Shell()
       default:
         return NodeCustomForm.Default(type)
     }
@@ -857,6 +861,15 @@ export namespace NodeCustomForm {
           rules={[{ required: true, message: '请输入最大行数' }]}
         >
           <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'行'} />
+        </Form.Item>
+      </>
+    )
+  }
+  export const Shell = () => {
+    return (
+      <>
+        <Form.Item name="script" label="脚本" rules={[{ required: true, message: '请输入脚本' }]}>
+          <AceEditor width="100%" mode="mysql" theme="github" showPrintMargin={false} />
         </Form.Item>
       </>
     )

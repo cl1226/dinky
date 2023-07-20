@@ -50,10 +50,35 @@ export const getIcon = (type: string) => {
       return <Icon component={MysqlSvg} />
     case DIALECT.Filter:
       return <Icon component={FilterSvg} />
+    case DIALECT.Shell:
+      return <Icon component={ShellSvg} />
     default:
       return <Icon component={FlinkSQLSvg} />
   }
 }
+export const ShellSvg = () => (
+  <svg
+    t="1689817008611"
+    class="icon"
+    viewBox="0 0 1024 1024"
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+    p-id="4718"
+    width={svgSize}
+    height={svgSize}
+  >
+    <path
+      d="M917.504 835.584H106.496V188.416h810.496l0.512 647.168zM186.88 755.2h650.752v-486.4H186.88v486.4z"
+      fill="#FF6A00"
+      p-id="4719"
+    ></path>
+    <path
+      d="M343.04 648.704l-56.32-56.32 88.064-88.064L286.72 415.744l56.32-56.832 144.896 144.896L343.04 648.704z m163.84-63.488h230.4v79.872H506.88v-79.872z"
+      fill="#FF6A00"
+      p-id="4720"
+    ></path>
+  </svg>
+)
 export const SparkSvg = () => (
   <svg
     t="1688634594973"

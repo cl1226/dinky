@@ -266,9 +266,13 @@ export const getSchedulerStatistics = async (key) => {
   })
 }
 
-export const getTaskEnum = async () => {
+export const getTaskEnum = async (type) => {
+  console.log('getTaskEnum', type)
   return request2('/api/workflow/catalogue/getTaskEnum', {
     method: 'GET',
+    params: {
+      type,
+    },
   })
 }
 

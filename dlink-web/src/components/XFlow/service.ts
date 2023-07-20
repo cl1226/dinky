@@ -37,6 +37,7 @@ export const DIALECT = {
   Mysql: 'Mysql',
   Filter: 'Filter',
   Console: 'Console',
+  Shell: 'Shell',
 }
 
 /** 状态 类型 */
@@ -78,7 +79,7 @@ export namespace XFlowApi {
     const result = await getInfoById('/api/workflow/task', graphMeta.meta.flowId)
     let nodes: NsGraph.INodeConfig[] = []
     let edges: NsGraph.IEdgeConfig[] = []
-    const { graphData, id, name, lockStatus, status, schedulerType, cron } = result.datas
+    const { graphData, id, name, lockStatus, status, schedulerType, cron, type } = result.datas
     if (!!graphData) {
       const graphDataObj = JSON.parse(graphData)
       nodes = graphDataObj.nodes
@@ -94,6 +95,7 @@ export namespace XFlowApi {
       status,
       schedulerType,
       cron,
+      type,
     }
   }
 
@@ -356,8 +358,8 @@ export const getJsonCron = (formValues) => {
 }
 
 /** 枚举的数据类型api */
-export const getFlowTaskEnum: any = async () => {
-  const result = await getTaskEnum()
+export const getFlowTaskEnum: any = async (type) => {
+  const result = await getTaskEnum(type)
   if (result.code == 0) {
     return result.datas
   } else {
