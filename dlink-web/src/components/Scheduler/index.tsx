@@ -67,9 +67,9 @@ const Scheduler = (props: any) => {
   }
 
   return (
-    <div onClick={onClick} style={{ margin: '-24px', overflow: 'hidden' }}>
+    <div onClick={onClick} style={{ margin: '-24px', overflow: 'hidden' }} className={styles['scheduler-page']}>
       <SchedulerMenu />
-      <Card bordered={false} className={styles.card} size="small" id="studio_card">
+      <Card bordered={false} className={styles.card} size="small" id="scheduler_card">
         <Row>
           <DraggleLayout
             containerWidth={size.width - (initialState.collapsed ? 48 : 208)}

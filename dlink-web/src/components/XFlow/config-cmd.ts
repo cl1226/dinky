@@ -28,7 +28,6 @@ export const useCmdConfig = createCmdConfig((config) => {
       hooks.addNode.registerHook({
         name: 'get node config from backend api',
         handler: async (args) => {
-          console.log('add', args)
           args.createNodeService = XFlowApi.addNode
         },
       }),

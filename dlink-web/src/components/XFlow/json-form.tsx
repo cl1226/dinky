@@ -40,6 +40,7 @@ import { EAsyncCode } from '@/components/SelectHelp/type.d'
 import { NS_CANVAS_FORM } from './config-model-service'
 import { IMeta, ESchedulerType, getJsonCron, DIALECT } from './service'
 import { EDeployMode, EFileType, EReadType, ESparkVersion, EProgramType } from './type.d'
+import { EJobType } from '@/components/Scheduler/SchedulerTree/data.d'
 import { transferEnumToOptions } from '@/utils/utils'
 
 const RangePicker: any = DatePicker.RangePicker
@@ -56,9 +57,12 @@ const formLayout: any = {
   labelWrap: true,
   colon: true,
 }
+const DescriptionsText = (props) => {
+  return <span>{props.value}</span>
+}
 
 // form值 => 接口参数
-const getNodeParams = (nodeType, formResult) => {
+const transferFormToParams = (nodeType, formResult) => {
   if (nodeType === DIALECT.FLINKSQL || nodeType === DIALECT.HIVE) {
     const { jobObj } = formResult
     return {
@@ -74,7 +78,7 @@ const getNodeParams = (nodeType, formResult) => {
   return formResult
 }
 // 接口参数 => form值
-const transferNodeInfo = (nodeType, nodeInfo) => {
+const transferParamsToForm = (nodeType, nodeInfo) => {
   if (!nodeInfo) return {}
   if (nodeType === DIALECT.HDFS) {
     return {
@@ -119,10 +123,6 @@ const getNodeDefaultFormValue = (nodeType) => {
     }
   }
   return {}
-}
-
-const DescriptionsText = (props) => {
-  return <span>{props.value}</span>
 }
 
 export const getVerticalTabs: (options) => React.FC<NsJsonSchemaForm.ICustomProps> =
@@ -339,7 +339,9 @@ export const CanvasCustomRender: React.FC<ICustomFormProps> = (props) => {
         <Descriptions.Item label="作业ID">{baseInfo.flowId}</Descriptions.Item>
         <Descriptions.Item label="作业名称">{baseInfo.flowName}</Descriptions.Item>
         <Descriptions.Item label="作业状态">{baseInfo.status}</Descriptions.Item>
-        <Descriptions.Item label="作业模式">{baseInfo.type}</Descriptions.Item>
+        <Descriptions.Item label="作业模式">
+          {baseInfo.type ? EJobType[baseInfo.type] : '-'}
+        </Descriptions.Item>
       </Descriptions>
       <Form
         name="canvasForm"
@@ -419,7 +421,7 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
     const result = await form.validateFields()
     const { nodeId, nodeName, nodeType, ...resetRes } = result
 
-    const dataParams = getNodeParams(nodeType, resetRes)
+    const dataParams = transferFormToParams(nodeType, resetRes)
 
     commandService.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
       XFlowGraphCommands.SAVE_GRAPH_DATA.id,
@@ -476,7 +478,7 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
           nodeId: props.targetData?.id,
           nodeType: props.targetData?.nodeType,
           ...(props.targetData?.nodeInfo
-            ? transferNodeInfo(props.targetData?.nodeType, props.targetData?.nodeInfo)
+            ? transferParamsToForm(props.targetData?.nodeType, props.targetData?.nodeInfo)
             : getNodeDefaultFormValue(props.targetData?.nodeType)),
         }}
         onValuesChange={onValuesChange}

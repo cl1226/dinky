@@ -47,7 +47,6 @@ export namespace NSToolbarConfig {
     graphMeta: NsGraph.IGraphMeta,
     modelService: IModelService,
   ) => {
-    console.log('workflow status: ' + graphMeta.meta.status)
     return {
       status: graphMeta.meta.status,
       lockStatus: graphMeta.meta.lockStatus,
@@ -194,7 +193,6 @@ export const useToolbarConfig = createToolbarConfig((toolbarConfig) => {
     const updateToolbarModel = async () => {
       const graphMeta = await MODELS.GRAPH_META.useValue(modelService)
       const state = await NSToolbarConfig.getToolbarState(graphMeta, modelService)
-      console.log('graphMeta: ' + JSON.stringify(graphMeta.meta))
       const toolbarItems = await NSToolbarConfig.getToolbarItems(state, graphMeta, modelService)
       toolbarModel.setValue((toolbar) => {
         toolbar.mainGroups = toolbarItems

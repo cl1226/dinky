@@ -101,7 +101,7 @@ const Studio = (props: any) => {
   }
 
   return (
-    <div onClick={onClick} style={{ margin: '-24px' }}>
+    <div onClick={onClick} style={{ margin: '-24px' }} className={styles['studio-page']}>
       <StudioMenu />
       <Card bordered={false} className={styles.card} size="small" id="studio_card">
         <Row>
