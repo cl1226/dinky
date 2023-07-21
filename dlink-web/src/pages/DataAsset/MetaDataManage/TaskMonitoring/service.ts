@@ -48,3 +48,13 @@ export const getApiConfigList = async (params: IGetListParams) => {
     }
   }
 }
+
+// 获取日志
+export const requestTaskLog = (id?: number) => {
+  return request2('/api/metadata/task/showLog', {
+    method: 'GET',
+    params: {
+      id,
+    },
+  })
+}

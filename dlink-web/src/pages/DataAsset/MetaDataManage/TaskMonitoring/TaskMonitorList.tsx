@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import styles from './index.less'
 import { SyncOutlined } from '@ant-design/icons'
-import { Button, Row, Input, Table, Space, Badge, Divider, message } from 'antd'
+import { Modal, Button, Spin, Row, Input, Table, Space, Badge, Divider, message } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 
-import { getApiConfigList } from './service'
+import { getApiConfigList, requestTaskLog } from './service'
 import type { TreeDataNode } from '@/components/Scheduler/SchedulerTree/Function'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { debounce } from 'lodash'
@@ -72,6 +72,11 @@ export default (props: IApiListProps) => {
   const [starting, setstarting] = useState(false)
   const [listData, setlistData] = useState([])
   const { catalogue, tableProps = {} } = props
+
+  const [logModalVisible, setLogModalVisible] = useState(false)
+  const [logText, setLogText] = useState('')
+  const [logId, setLogId] = useState<any>(null)
+  const [logLoading, setLogLoading] = useState(false)
 
   const getList = async (extra?: IGetListParams) => {
     if (!catalogue?.id && !extra?.catalogueId) return
@@ -190,7 +195,7 @@ export default (props: IApiListProps) => {
     },
     {
       title: '操作',
-      width: 80,
+      width: 120,
       key: 'action',
       fixed: 'right',
       render: (cellValue, record) => (
@@ -205,15 +210,21 @@ export default (props: IApiListProps) => {
           >
             重跑
           </Button>
-          {/* <Button
+          <Button
             size="small"
             type="link"
-            onClick={() => {
-              handleLog(record)
+            onClick={async () => {
+              setLogModalVisible(true)
+              setLogId(record.id)
+              setLogLoading(true)
+              const res = await requestTaskLog(record.id)
+              setLogLoading(false)
+              const { datas } = res
+              setLogText(datas || '暂无日志')
             }}
           >
             日志
-          </Button> */}
+          </Button>
         </Space>
       ),
     },
@@ -270,6 +281,48 @@ export default (props: IApiListProps) => {
           />
         </div>
       </Scrollbars>
+
+      <Modal
+        title="查看日志"
+        open={logModalVisible}
+        width={1000}
+        footer={[
+          <Button
+            key="refresh"
+            onClick={async () => {
+              if (!logId) return
+              setLogLoading(true)
+              const res = await requestTaskLog(logId)
+              setLogLoading(false)
+              const { datas } = res
+              setLogText(datas || '暂无日志')
+            }}
+          >
+            刷新
+          </Button>,
+          <Button
+            key="close"
+            onClick={() => {
+              setLogModalVisible(false)
+              setLogText('')
+            }}
+          >
+            关闭
+          </Button>,
+        ]}
+        onCancel={() => {
+          setLogModalVisible(false)
+          setLogText('')
+        }}
+      >
+        <Spin spinning={logLoading}>
+          <Input.TextArea
+            value={logText}
+            readOnly
+            autoSize={{ minRows: 30, maxRows: 30 }}
+          ></Input.TextArea>
+        </Spin>
+      </Modal>
     </div>
   )
 }
