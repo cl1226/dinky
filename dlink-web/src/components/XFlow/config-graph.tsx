@@ -1,6 +1,6 @@
 import type { IProps } from './index'
-import type { NsGraph, NsNodeCmd } from '@antv/xflow'
-import { XFlowNodeCommands, createGraphConfig, IEvent, useXFlowApp } from '@antv/xflow'
+import type { NsNodeCmd } from '@antv/xflow'
+import { NsGraph, XFlowNodeCommands, createGraphConfig, IEvent, useXFlowApp } from '@antv/xflow'
 import { createHookConfig, DisposableCollection } from '@antv/xflow'
 import { DND_RENDER_ID, GROUP_NODE_RENDER_ID } from './constant'
 import { AlgoNode } from './react-node/algo-node'
@@ -29,6 +29,45 @@ export const useGraphHookConfig = createHookConfig<IProps>((config, proxy) => {
           options.keyboard = {
             enabled: true,
           }
+
+          const graphOptions = {
+            connecting: {
+              // 是否触发交互事件
+              validateMagnet() {
+                // return magnet.getAttribute('port-group') !== NsGraph.AnchorGroup.TOP
+                return true
+              },
+              // 显示可用的链接桩
+              validateConnection({ sourceView, targetView, sourceMagnet, targetMagnet }) {
+                // 不允许连接到自己
+                if (sourceView === targetView) {
+                  return false
+                }
+                // 没有起点的返回false
+                if (!sourceMagnet) {
+                  return false
+                }
+                if (!targetMagnet) {
+                  return false
+                }
+                // 只能从上游节点的输出链接桩创建连接
+                if (sourceMagnet.getAttribute('port-group') === NsGraph.AnchorGroup.TOP) {
+                  return false
+                }
+                // 只能连接到下游节点的输入桩
+                if (targetMagnet.getAttribute('port-group') !== NsGraph.AnchorGroup.TOP) {
+                  return false
+                }
+
+                const node = targetView!.cell as any
+                // 判断目标链接桩是否可连接
+                const portId = targetMagnet.getAttribute('port')!
+                const port = node.getPort(portId)
+                return !!port
+              },
+            },
+          }
+          options.connecting = { ...options.connecting, ...graphOptions.connecting }
         },
       }),
       // 注册增加 graph event

@@ -26,7 +26,7 @@ export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta
       label: jtem.label,
       // renderKey: DND_RENDER_ID,
       renderComponent: (props) => (
-        <div className="custom-dnd-node">
+        <div className="xflow-custom-dnd-node">
           <Avatar src={getIcon(jtem.type)}></Avatar>
           <div>{props.data.label}</div>
         </div>
