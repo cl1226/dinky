@@ -127,6 +127,10 @@ const getNodeDefaultFormValue = (nodeType, nodeProps) => {
       numPartitions: 1,
       driver: 'com.microsoft.sqlserver.jdbc.SQLServerDriver',
     }
+  } else if (nodeType === DIALECT.Repartition) {
+    return {
+      numPartitions: 1,
+    }
   }
   return {}
 }
@@ -474,6 +478,13 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
         return NodeCustomForm.Mysql(props.targetData?.group)
       case DIALECT.Shell:
         return NodeCustomForm.Shell()
+      case DIALECT.Join:
+        return NodeCustomForm.Join()
+      case DIALECT.Repartition:
+        return NodeCustomForm.Repartition()
+      case DIALECT.Filter:
+        return NodeCustomForm.Filter()
+
       default:
         return NodeCustomForm.Default(type)
     }
@@ -824,6 +835,15 @@ export namespace NodeCustomForm {
       </>
     )
   }
+  export const Repartition = () => {
+    return (
+      <>
+        <Form.Item label="分区数" name="numPartitions">
+          <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'个'} />
+        </Form.Item>
+      </>
+    )
+  }
   export const Ftp = () => {
     return (
       <>
@@ -875,6 +895,25 @@ export namespace NodeCustomForm {
       </>
     )
   }
+  export const Filter = () => {
+    return (
+      <>
+        <Form.Item label="条件" name="condition">
+          <Input style={{ width: '100%' }} placeholder="请输入条件"></Input>
+        </Form.Item>
+      </>
+    )
+  }
+  export const Join = () => {
+    return (
+      <>
+        <Form.Item name="sql" label="SQL">
+          <AceEditor width="100%" mode="mysql" theme="github" showPrintMargin={false} />
+        </Form.Item>
+      </>
+    )
+  }
+
   export const Default = (type) => {
     const jobSelectDefaultParams: any = {}
     if (type === DIALECT.FLINKSQL) {
