@@ -36,8 +36,3 @@ export enum EFileType {
   parquet = 'parquet',
   orc = 'orc',
 }
-
-// 读取方式
-export enum EReadType {
-  full = '全量',
-}

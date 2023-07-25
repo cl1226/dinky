@@ -39,7 +39,7 @@ import SelectHelp from '@/components/SelectHelp'
 import { EAsyncCode } from '@/components/SelectHelp/type.d'
 import { NS_CANVAS_FORM } from './config-model-service'
 import { IMeta, ESchedulerType, getJsonCron, DIALECT } from './service'
-import { EDeployMode, EFileType, EReadType, ESparkVersion, EProgramType } from './type.d'
+import { EDeployMode, EFileType, ESparkVersion, EProgramType } from './type.d'
 import { EJobType } from '@/components/Scheduler/SchedulerTree/data.d'
 import { transferEnumToOptions } from '@/utils/utils'
 
@@ -78,7 +78,8 @@ const transferFormToParams = (nodeType, formResult) => {
   return formResult
 }
 // 接口参数 => form值
-const transferParamsToForm = (nodeType, nodeInfo) => {
+const transferParamsToForm = (nodeType, nodeProps) => {
+  const { nodeInfo } = nodeProps
   if (!nodeInfo) return {}
   if (nodeType === DIALECT.HDFS) {
     return {
@@ -94,7 +95,7 @@ const transferParamsToForm = (nodeType, nodeInfo) => {
   return nodeInfo
 }
 // form默认值
-const getNodeDefaultFormValue = (nodeType) => {
+const getNodeDefaultFormValue = (nodeType, nodeProps) => {
   if (nodeType === DIALECT.SPARK) {
     return {
       deployMode: EDeployMode.local,
@@ -117,9 +118,12 @@ const getNodeDefaultFormValue = (nodeType) => {
       maxLine: 10,
     }
   } else if (nodeType === DIALECT.Mysql) {
-    return {
-      numPartitions: 1,
-      readType: 'full',
+    const { group } = nodeProps
+    if (group === 'input') {
+      return {
+        numPartitions: 1,
+        driver: 'com.mysql.cj.jdbc.Driver',
+      }
     }
   }
   return {}
@@ -304,6 +308,7 @@ export const CanvasCustomRender: React.FC<ICustomFormProps> = (props) => {
       const model = await MODELS.GRAPH_META.getModel(modelService)
       model.watch(async (value) => {
         const { schedulerType, cron, ...remainMeta } = value.meta
+        console.log('remainMeta', remainMeta)
         setBaseInfo(remainMeta)
         if (compareMeta(value.meta)) return
 
@@ -460,7 +465,7 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
       case DIALECT.HDFS:
         return NodeCustomForm.Hdfs()
       case DIALECT.Mysql:
-        return NodeCustomForm.Mysql()
+        return NodeCustomForm.Mysql(props.targetData?.group)
       case DIALECT.Shell:
         return NodeCustomForm.Shell()
       default:
@@ -477,9 +482,10 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
           nodeName: props.targetData?.label,
           nodeId: props.targetData?.id,
           nodeType: props.targetData?.nodeType,
+          nodeGroup: props.targetData?.group,
           ...(props.targetData?.nodeInfo
-            ? transferParamsToForm(props.targetData?.nodeType, props.targetData?.nodeInfo)
-            : getNodeDefaultFormValue(props.targetData?.nodeType)),
+            ? transferParamsToForm(props.targetData?.nodeType, props.targetData)
+            : getNodeDefaultFormValue(props.targetData?.nodeType, props.targetData)),
         }}
         onValuesChange={onValuesChange}
         {...formLayout}
@@ -487,6 +493,9 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
         <Descriptions title="基本信息" column={1}></Descriptions>
 
         <Form.Item label="节点类型" name="nodeType" style={{ width: '100%', marginBottom: 0 }}>
+          <DescriptionsText />
+        </Form.Item>
+        <Form.Item label="节点分组" name="nodeGroup" style={{ width: '100%', marginBottom: 0 }}>
           <DescriptionsText />
         </Form.Item>
         <Form.Item label="节点ID" name="nodeId" style={{ width: '100%', marginBottom: 0 }}>
@@ -746,70 +755,52 @@ export namespace NodeCustomForm {
       </>
     )
   }
-  export const Mysql = () => {
-    return (
-      <>
-        <Form.Item label="URL" name="url" rules={[{ required: true, message: '请输入URL' }]}>
-          <Input style={{ width: '100%' }} placeholder="请输入URL"></Input>
-        </Form.Item>
-        <Form.Item
-          label="用户名"
-          name="username"
-          rules={[{ required: true, message: '请输入用户名' }]}
-        >
-          <Input style={{ width: '100%' }} placeholder="请输入用户名"></Input>
-        </Form.Item>
-        <Form.Item label="密码" name="password" rules={[{ required: true, message: '请输入密码' }]}>
-          <Input.Password style={{ width: '100%' }} placeholder="请输入密码"></Input.Password>
-        </Form.Item>
+  export const Mysql = (group) => {
+    console.log('group', group)
+    if (group === 'input') {
+      return (
+        <>
+          <Form.Item label="URL" name="url" rules={[{ required: true, message: '请输入URL' }]}>
+            <Input style={{ width: '100%' }} placeholder="请输入URL"></Input>
+          </Form.Item>
+          <Form.Item
+            label="用户名"
+            name="username"
+            rules={[{ required: true, message: '请输入用户名' }]}
+          >
+            <Input style={{ width: '100%' }} placeholder="请输入用户名"></Input>
+          </Form.Item>
+          <Form.Item
+            label="密码"
+            name="password"
+            rules={[{ required: true, message: '请输入密码' }]}
+          >
+            <Input.Password style={{ width: '100%' }} placeholder="请输入密码"></Input.Password>
+          </Form.Item>
 
-        <Form.Item
-          label="读取方式"
-          name="readType"
-          rules={[{ required: true, message: '请选择读取方式' }]}
-        >
-          <Select
-            style={{ width: '100%' }}
-            placeholder="请选择读取方式"
-            options={transferEnumToOptions(EReadType)}
-          />
-        </Form.Item>
+          <Form.Item label="驱动" name="driver" rules={[{ required: true, message: '请输入驱动' }]}>
+            <Input style={{ width: '100%' }} placeholder="请输入驱动"></Input>
+          </Form.Item>
 
-        <Form.Item
-          noStyle
-          shouldUpdate={(prevValues, currentValues) =>
-            prevValues.readType !== currentValues.readType
-          }
-        >
-          {({ getFieldValue }) => {
-            if (getFieldValue('readType') === 'full') {
-              return (
-                <>
-                  <Form.Item label="分区字段" name="partColumnName ">
-                    <Input style={{ width: '100%' }} placeholder="请输入分区字段（选填）"></Input>
-                  </Form.Item>
+          <Form.Item label="表" name="dbtable" rules={[{ required: true, message: '请输入表' }]}>
+            <Input style={{ width: '100%' }} placeholder="请输入表"></Input>
+          </Form.Item>
 
-                  <Form.Item
-                    label="分区数"
-                    name="numPartitions"
-                    rules={[{ required: true, message: '请输入分区数' }]}
-                  >
-                    <InputNumber
-                      style={{ width: '100%' }}
-                      min={1}
-                      precision={0}
-                      addonAfter={'个'}
-                    />
-                  </Form.Item>
-                </>
-              )
-            }
+          <Form.Item label="分区字段" name="partColumnName ">
+            <Input style={{ width: '100%' }} placeholder="请输入分区字段（选填）"></Input>
+          </Form.Item>
 
-            return null
-          }}
-        </Form.Item>
-      </>
-    )
+          <Form.Item label="分区数" name="numPartitions">
+            <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'个'} />
+          </Form.Item>
+
+          <Form.Item name="sql" label="SQL">
+            <AceEditor width="100%" mode="mysql" theme="github" showPrintMargin={false} />
+          </Form.Item>
+        </>
+      )
+    }
+    return null
   }
   export const Ftp = () => {
     return (
