@@ -36,3 +36,8 @@ export enum EFileType {
   parquet = 'parquet',
   orc = 'orc',
 }
+// 文件类型
+export enum ESaveMode {
+  append = 'append',
+  overwrite = 'overwrite',
+}

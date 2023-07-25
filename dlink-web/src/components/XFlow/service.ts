@@ -39,6 +39,11 @@ export const DIALECT = {
   Filter: 'Filter',
   Console: 'Console',
   Shell: 'Shell',
+  Sqlserver: 'Sqlserver',
+  InfluxDB: 'InfluxDB',
+  Join: 'Join',
+  Repartition:'Repartition',
+  AddColumn:'AddColumn'
 }
 
 /** 状态 类型 */

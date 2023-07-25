@@ -39,7 +39,7 @@ import SelectHelp from '@/components/SelectHelp'
 import { EAsyncCode } from '@/components/SelectHelp/type.d'
 import { NS_CANVAS_FORM } from './config-model-service'
 import { IMeta, ESchedulerType, getJsonCron, DIALECT } from './service'
-import { EDeployMode, EFileType, ESparkVersion, EProgramType } from './type.d'
+import { EDeployMode, EFileType, ESaveMode, ESparkVersion, EProgramType } from './type.d'
 import { EJobType } from '@/components/Scheduler/SchedulerTree/data.d'
 import { transferEnumToOptions } from '@/utils/utils'
 
@@ -118,12 +118,14 @@ const getNodeDefaultFormValue = (nodeType, nodeProps) => {
       maxLine: 10,
     }
   } else if (nodeType === DIALECT.Mysql) {
-    const { group } = nodeProps
-    if (group === 'input') {
-      return {
-        numPartitions: 1,
-        driver: 'com.mysql.cj.jdbc.Driver',
-      }
+    return {
+      numPartitions: 1,
+      driver: 'com.mysql.cj.jdbc.Driver',
+    }
+  } else if (nodeType === DIALECT.Sqlserver) {
+    return {
+      numPartitions: 1,
+      driver: 'com.microsoft.sqlserver.jdbc.SQLServerDriver',
     }
   }
   return {}
@@ -466,6 +468,8 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
         return NodeCustomForm.Hdfs()
       case DIALECT.Mysql:
         return NodeCustomForm.Mysql(props.targetData?.group)
+      case DIALECT.Sqlserver:
+        return NodeCustomForm.Mysql(props.targetData?.group)
       case DIALECT.Shell:
         return NodeCustomForm.Shell()
       default:
@@ -756,51 +760,67 @@ export namespace NodeCustomForm {
     )
   }
   export const Mysql = (group) => {
-    console.log('group', group)
-    if (group === 'input') {
-      return (
-        <>
-          <Form.Item label="URL" name="url" rules={[{ required: true, message: '请输入URL' }]}>
-            <Input style={{ width: '100%' }} placeholder="请输入URL"></Input>
-          </Form.Item>
-          <Form.Item
-            label="用户名"
-            name="username"
-            rules={[{ required: true, message: '请输入用户名' }]}
-          >
-            <Input style={{ width: '100%' }} placeholder="请输入用户名"></Input>
-          </Form.Item>
-          <Form.Item
-            label="密码"
-            name="password"
-            rules={[{ required: true, message: '请输入密码' }]}
-          >
-            <Input.Password style={{ width: '100%' }} placeholder="请输入密码"></Input.Password>
-          </Form.Item>
+    const otherContent = () => {
+      if (group === 'input') {
+        return (
+          <>
+            <Form.Item label="分区字段" name="partColumnName ">
+              <Input style={{ width: '100%' }} placeholder="请输入分区字段（选填）"></Input>
+            </Form.Item>
 
-          <Form.Item label="驱动" name="driver" rules={[{ required: true, message: '请输入驱动' }]}>
-            <Input style={{ width: '100%' }} placeholder="请输入驱动"></Input>
-          </Form.Item>
+            <Form.Item label="分区数" name="numPartitions">
+              <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'个'} />
+            </Form.Item>
 
-          <Form.Item label="表" name="dbtable" rules={[{ required: true, message: '请输入表' }]}>
-            <Input style={{ width: '100%' }} placeholder="请输入表"></Input>
-          </Form.Item>
-
-          <Form.Item label="分区字段" name="partColumnName ">
-            <Input style={{ width: '100%' }} placeholder="请输入分区字段（选填）"></Input>
-          </Form.Item>
-
-          <Form.Item label="分区数" name="numPartitions">
-            <InputNumber style={{ width: '100%' }} min={1} precision={0} addonAfter={'个'} />
-          </Form.Item>
-
-          <Form.Item name="sql" label="SQL">
-            <AceEditor width="100%" mode="mysql" theme="github" showPrintMargin={false} />
-          </Form.Item>
-        </>
-      )
+            <Form.Item name="sql" label="SQL">
+              <AceEditor width="100%" mode="mysql" theme="github" showPrintMargin={false} />
+            </Form.Item>
+          </>
+        )
+      } else if (group === 'output') {
+        return (
+          <>
+            <Form.Item
+              label="写入模式"
+              name="saveMode"
+              rules={[{ required: true, message: '请选择写入模式' }]}
+            >
+              <Select
+                style={{ width: '100%' }}
+                placeholder="请选择写入模式"
+                options={transferEnumToOptions(ESaveMode)}
+              />
+            </Form.Item>
+          </>
+        )
+      }
+      return null
     }
-    return null
+
+    return (
+      <>
+        <Form.Item label="URL" name="url" rules={[{ required: true, message: '请输入URL' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入URL"></Input>
+        </Form.Item>
+        <Form.Item
+          label="用户名"
+          name="username"
+          rules={[{ required: true, message: '请输入用户名' }]}
+        >
+          <Input style={{ width: '100%' }} placeholder="请输入用户名"></Input>
+        </Form.Item>
+        <Form.Item label="密码" name="password" rules={[{ required: true, message: '请输入密码' }]}>
+          <Input.Password style={{ width: '100%' }} placeholder="请输入密码"></Input.Password>
+        </Form.Item>
+        <Form.Item label="驱动" name="driver" rules={[{ required: true, message: '请输入驱动' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入驱动"></Input>
+        </Form.Item>
+        <Form.Item label="表" name="dbtable" rules={[{ required: true, message: '请输入表' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入表"></Input>
+        </Form.Item>
+        {otherContent()}
+      </>
+    )
   }
   export const Ftp = () => {
     return (
