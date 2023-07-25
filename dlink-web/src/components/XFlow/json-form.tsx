@@ -117,7 +117,7 @@ const getNodeDefaultFormValue = (nodeType, nodeProps) => {
     return {
       maxLine: 10,
     }
-  } else if (nodeType === DIALECT.Mysql) {
+  } else if (nodeType === DIALECT.Mysql || nodeType === DIALECT.StarRocks) {
     return {
       numPartitions: 1,
       driver: 'com.mysql.cj.jdbc.Driver',
@@ -466,6 +466,8 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
         return NodeCustomForm.Console()
       case DIALECT.HDFS:
         return NodeCustomForm.Hdfs()
+      case DIALECT.StarRocks:
+        return NodeCustomForm.Mysql(props.targetData?.group)
       case DIALECT.Mysql:
         return NodeCustomForm.Mysql(props.targetData?.group)
       case DIALECT.Sqlserver:

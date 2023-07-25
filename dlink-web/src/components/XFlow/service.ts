@@ -42,8 +42,9 @@ export const DIALECT = {
   Sqlserver: 'Sqlserver',
   InfluxDB: 'InfluxDB',
   Join: 'Join',
-  Repartition:'Repartition',
-  AddColumn:'AddColumn'
+  Repartition: 'Repartition',
+  AddColumn: 'AddColumn',
+  StarRocks: 'StarRocks',
 }
 
 /** 状态 类型 */
