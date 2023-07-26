@@ -32,6 +32,7 @@ import moment from 'moment'
 
 import AceEditor from 'react-ace'
 import { Cron } from '@/components/Cron'
+import { KeyValue } from '@/components/KeyValue'
 import { JobSelect } from '@/components/XFlow/components/JobSelect'
 import { JarSelect } from '@/components/XFlow/components/JarSelect'
 import { SourceSelect } from '@/components/XFlow/components/SourceSelect'
@@ -39,7 +40,15 @@ import SelectHelp from '@/components/SelectHelp'
 import { EAsyncCode } from '@/components/SelectHelp/type.d'
 import { NS_CANVAS_FORM } from './config-model-service'
 import { IMeta, ESchedulerType, getJsonCron, DIALECT } from './service'
-import { EDeployMode, EFileType, ESaveMode, ESparkVersion, EProgramType } from './type.d'
+import {
+  EDeployMode,
+  EFileType,
+  EDataFormatType,
+  ESaveMode,
+  ESparkVersion,
+  EProgramType,
+} from './type.d'
+import { ETrueFalse } from '@/utils/enum'
 import { EJobType } from '@/components/Scheduler/SchedulerTree/data.d'
 import { transferEnumToOptions } from '@/utils/utils'
 
@@ -55,6 +64,7 @@ const formLayout: any = {
   labelCol: { flex: '110px' },
   labelAlign: 'left',
   labelWrap: true,
+  wrapperCol: { flex: 1 },
   colon: true,
 }
 const DescriptionsText = (props) => {
@@ -74,6 +84,14 @@ const transferFormToParams = (nodeType, formResult) => {
       ...formResult,
       path: `hdfs://${formResult.path}`,
     }
+  } else if (nodeType === DIALECT.InfluxDB) {
+    const { startEndRange, ...resetForm } = formResult
+    const [startTime, stopTime] = startEndRange || []
+    return {
+      ...resetForm,
+      startTime: moment(startTime).format('YYYY-MM-DD HH:mm:ss'),
+      stopTime: moment(stopTime).format('YYYY-MM-DD HH:mm:ss'),
+    }
   }
   return formResult
 }
@@ -90,6 +108,13 @@ const transferParamsToForm = (nodeType, nodeProps) => {
     const { jobId, jobName } = nodeInfo
     return {
       jobObj: { id: jobId, name: jobName },
+    }
+  } else if (nodeType === DIALECT.InfluxDB) {
+    const { startTime, stopTime, ...resetInfo } = nodeInfo
+
+    return {
+      ...resetInfo,
+      startEndRange: [moment(startTime), moment(stopTime)],
     }
   }
   return nodeInfo
@@ -130,6 +155,10 @@ const getNodeDefaultFormValue = (nodeType, nodeProps) => {
   } else if (nodeType === DIALECT.Repartition) {
     return {
       numPartitions: 1,
+    }
+  } else if (nodeType === DIALECT.KAFKA) {
+    return {
+      enableKerberos: false,
     }
   }
   return {}
@@ -484,7 +513,12 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
         return NodeCustomForm.Repartition()
       case DIALECT.Filter:
         return NodeCustomForm.Filter()
-
+      case DIALECT.AddColumn:
+        return NodeCustomForm.AddColumn()
+      case DIALECT.InfluxDB:
+        return NodeCustomForm.InfluxDB()
+      case DIALECT.KAFKA:
+        return NodeCustomForm.Kafka()
       default:
         return NodeCustomForm.Default(type)
     }
@@ -835,6 +869,15 @@ export namespace NodeCustomForm {
       </>
     )
   }
+  export const AddColumn = () => {
+    return (
+      <>
+        <Form.Item wrapperCol={{ flex: '1 1' }} label="键值对" name="constantMap">
+          <KeyValue name="constantMap"></KeyValue>
+        </Form.Item>
+      </>
+    )
+  }
   export const Repartition = () => {
     return (
       <>
@@ -913,7 +956,108 @@ export namespace NodeCustomForm {
       </>
     )
   }
+  export const Kafka = () => {
+    return (
+      <>
+        <Form.Item
+          label="集群地址"
+          name="servers"
+          rules={[{ required: true, message: '请输入集群地址' }]}
+        >
+          <Input style={{ width: '100%' }} placeholder="请输入集群地址"></Input>
+        </Form.Item>
 
+        <Form.Item label="主题" name="topic" rules={[{ required: true, message: '请输入主题' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入主题"></Input>
+        </Form.Item>
+
+        <Form.Item label="分组" name="groupId">
+          <Input style={{ width: '100%' }} placeholder="请输入分组"></Input>
+        </Form.Item>
+        <Form.Item label="格式化" name="dataFormatType">
+          <Select
+            allowClear
+            style={{ width: '100%' }}
+            placeholder="请选择格式化"
+            options={transferEnumToOptions(EDataFormatType)}
+          />
+        </Form.Item>
+        <Form.Item label="认证" name="enableKerberos">
+          <Radio.Group options={transferEnumToOptions(ETrueFalse)} />
+        </Form.Item>
+
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues.enableKerberos !== currentValues.enableKerberos
+          }
+        >
+          {({ getFieldValue }) =>
+            getFieldValue('enableKerberos') ? (
+              <>
+                <Form.Item label="安全协议" name="protocol">
+                  <Input style={{ width: '100%' }} placeholder="security.protocol"></Input>
+                </Form.Item>
+                <Form.Item label="认证机制" name="sasl">
+                  <Input style={{ width: '100%' }} placeholder="sasl.mechanism"></Input>
+                </Form.Item>
+                <Form.Item label="kerberos服务名" name="saslName">
+                  <Input style={{ width: '100%' }} placeholder="sasl.kerberos.service.name"></Input>
+                </Form.Item>
+                <Form.Item label="krb5Conf" name="krb5Conf">
+                  <Input style={{ width: '100%' }} placeholder="krb5Conf"></Input>
+                </Form.Item>
+                <Form.Item label="jaasConf" name="jaasConf">
+                  <Input style={{ width: '100%' }} placeholder="jaasConf"></Input>
+                </Form.Item>
+              </>
+            ) : null
+          }
+        </Form.Item>
+      </>
+    )
+  }
+  export const InfluxDB = () => {
+    return (
+      <>
+        <Form.Item label="URL" name="url" rules={[{ required: true, message: '请输入URL' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入URL"></Input>
+        </Form.Item>
+        <Form.Item label="Token" name="token" rules={[{ required: true, message: '请输入Token' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入Token"></Input>
+        </Form.Item>
+        <Form.Item label="Org" name="org" rules={[{ required: true, message: '请输入Org' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入Org"></Input>
+        </Form.Item>
+
+        <Form.Item
+          label="Bucket"
+          name="bucket"
+          rules={[{ required: true, message: '请输入Bucket' }]}
+        >
+          <Input style={{ width: '100%' }} placeholder="请输入Bucket"></Input>
+        </Form.Item>
+        <Form.Item
+          label="Measurement"
+          name="measurement"
+          rules={[{ required: true, message: '请输入Measurement' }]}
+        >
+          <Input style={{ width: '100%' }} placeholder="请输入Measurement"></Input>
+        </Form.Item>
+        <Form.Item label="Fields" name="fields" rules={[{ required: true, message: 'Fields' }]}>
+          <Input style={{ width: '100%' }} placeholder="请输入Fields"></Input>
+        </Form.Item>
+
+        <Form.Item
+          label="起止时间"
+          name="startEndRange"
+          rules={[{ required: true, message: '请选择起止时间！' }]}
+        >
+          <RangePicker style={{ width: '100%' }} placeholder={['开始时间', '结束时间']} showTime />
+        </Form.Item>
+      </>
+    )
+  }
   export const Default = (type) => {
     const jobSelectDefaultParams: any = {}
     if (type === DIALECT.FLINKSQL) {

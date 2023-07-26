@@ -36,8 +36,14 @@ export enum EFileType {
   parquet = 'parquet',
   orc = 'orc',
 }
-// 文件类型
+// 写入模式
 export enum ESaveMode {
   append = 'append',
   overwrite = 'overwrite',
+}
+
+// 格式化类型
+export enum EDataFormatType {
+  json = 'json',
+  csv = 'csv',
 }
