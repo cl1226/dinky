@@ -1,0 +1,55 @@
+.cluster-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+    min-width: 960px;
+    :global {
+      .cluster-card {
+        width: 22%;
+        height: 300px;
+        margin-right: 4%;
+        margin-bottom: 30px;
+        &:nth-child(4n) {
+          margin-right: 0;
+        }
+        :global {
+          .ant-card-body {
+            height: 100%;
+            padding: 10px 20px;
+          }
+          .add-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-size: 40px;
+          }
+          .title-row {
+            line-height: 30px;
+          }
+          .img-row {
+            width: 100%;
+            height: 164px;
+            img {
+              display: block;
+              margin: 0 auto;
+            }
+          }
+          .action-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 30px;
+            .ant-btn {
+              margin-right: 20px;
+              &:last-child {
+                margin-right: 0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }

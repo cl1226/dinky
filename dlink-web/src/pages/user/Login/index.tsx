@@ -58,7 +58,7 @@ const Login: React.FC = () => {
         }
         setTimeout(() => {
           if (userInfo?.sa) {
-            history.push('/sa/cluster')
+            history.push('/sa/cluster/list')
           } else {
             const { query } = history.location
             const { redirect } = query as { redirect: string }

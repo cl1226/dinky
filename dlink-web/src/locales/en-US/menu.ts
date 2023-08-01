@@ -33,7 +33,11 @@ export default {
   'menu.dashboard.workspace': 'Workspace',
 
   'menu.superAdmin': 'Super Admin Center',
-  'menu.superAdmin.cluster': 'Cluster Management',
+  'menu.superAdmin.clusterList': 'Cluster Management',
+  'menu.superAdmin.clusterCreate': 'Cluster Create',
+  'menu.superAdmin.clusterEdit': 'Cluster Edit',
+  'menu.superAdmin.clusterView': 'Cluster View',
+
   'menu.superAdmin.role': 'Role Management',
   'menu.superAdmin.user': 'User Management',
 

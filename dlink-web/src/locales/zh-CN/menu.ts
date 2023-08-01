@@ -33,7 +33,11 @@ export default {
   'menu.dashboard.workspace': '工作空间',
 
   'menu.superAdmin': '超级管理员中心',
-  'menu.superAdmin.cluster': '集群管理',
+  'menu.superAdmin.clusterList': '集群管理',
+  'menu.superAdmin.clusterCreate': '集群创建',
+  'menu.superAdmin.clusterEdit': '集群配置',
+  'menu.superAdmin.clusterView': '集群',
+
   'menu.superAdmin.role': '角色管理',
   'menu.superAdmin.user': '用户管理',
 

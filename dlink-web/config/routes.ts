@@ -45,11 +45,6 @@ export default [
             path: '/user/login',
             component: './user/Login',
           },
-          {
-            name: 'workspace',
-            path: '/user/workspace',
-            component: './user/Workspace',
-          },
         ],
       },
     ],
@@ -61,9 +56,41 @@ export default [
     hideInHeaderMenu: true,
     routes: [
       {
-        name: 'cluster',
-        path: '/sa/cluster',
+        path: '/sa',
+        redirect: '/sa/cluster/list',
+      },
+      {
+        name: 'clusterList',
+        path: '/sa/cluster/list',
         component: './SuperAdmin/Cluster',
+      },
+      {
+        path: '/sa/cluster/create',
+        name: 'clusterCreate',
+        component: './SuperAdmin/Cluster/Create',
+        hideInMenu: true,
+      },
+      {
+        path: '/sa/cluster/edit/:id',
+        name: 'clusterEdit',
+        component: './SuperAdmin/Cluster/Edit',
+        hideInMenu: true,
+      },
+      {
+        path: '/sa/cluster/view/:id',
+        name: 'clusterView',
+        component: './SuperAdmin/Cluster/View',
+        hideInMenu: true,
+      },
+      {
+        name: 'role',
+        path: '/sa/role',
+        component: './SuperAdmin/Role',
+      },
+      {
+        name: 'user',
+        path: '/sa/user',
+        component: './SuperAdmin/User',
       },
     ],
   },
