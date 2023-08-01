@@ -26,6 +26,17 @@ export default {
   'menu.account.checkTenantConfirm': '你确定切换租户【{tenantCode}】吗？',
   'menu.account.logout': '退出登录',
 
+  'menu.dashboard': '首页',
+  'menu.cluster': '集群',
+  'menu.dashboard.cluster': '集群',
+  'menu.workspace': '工作空间',
+  'menu.dashboard.workspace': '工作空间',
+
+  'menu.superAdmin': '超级管理员中心',
+  'menu.superAdmin.cluster': '集群管理',
+  'menu.superAdmin.role': '角色管理',
+  'menu.superAdmin.user': '用户管理',
+
   'menu.dataStudio': '数据开发',
 
   'menu.dataDev': '数据开发',
@@ -53,7 +64,7 @@ export default {
   'menu.dataService.devApi.detail': 'API详情',
   'menu.dataService.application': '应用管理',
   'menu.dataService.applicationDetail': '应用详情',
-  
+
   'menu.dataAsset': '数据资产',
   'menu.dataAsset.dataMap': '数据地图',
   'menu.dataAsset.dataMap.overview': '总览',
@@ -63,9 +74,8 @@ export default {
   'menu.dataAsset.metaDataManage.overview': '总览',
   'menu.dataAsset.metaDataManage.taskManage': '任务管理',
   'menu.dataAsset.metaDataManage.taskMonitoring': '任务监控',
-  "menu.dataAsset.metaDataManage.create": '创建',
-  "menu.dataAsset.metaDataManage.detail": '详情',
-
+  'menu.dataAsset.metaDataManage.create': '创建',
+  'menu.dataAsset.metaDataManage.detail': '详情',
 
   'menu.devops': '运维中心',
   'menu.job': '作业实例',

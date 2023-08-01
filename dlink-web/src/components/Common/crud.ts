@@ -24,8 +24,12 @@ import { l } from '@/utils/intl'
 import { EAsyncCode } from '@/components/SelectHelp/type.d'
 
 export const request2 = extend({
-  headers: { tenantId: localStorage.getItem('dlink-tenantId') || '' },
+  headers: { clusterId: localStorage.getItem('dlink-clusterId') || '' },
 })
+
+export const getStorageClusterId = () => {
+  return localStorage.getItem('dlink-clusterId') || ''
+}
 
 export const getStorageTenantId = () => {
   return localStorage.getItem('dlink-tenantId') || ''

@@ -1,0 +1,59 @@
+.cluster-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 960px;
+  :global {
+    .cluster-card {
+      width: 32%;
+      //   height: 300px;
+      margin-right: 2%;
+      margin-bottom: 30px;
+      &:nth-child(3n) {
+        margin-right: 0;
+      }
+      :global {
+        .ant-card-body {
+          height: 100%;
+          padding: 20px;
+          padding-top: 10px;
+        }
+        .add-wrap {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+          font-size: 40px;
+        }
+        .title-row {
+          font-weight: 700;
+          font-size: 15px;
+          line-height: 30px;
+        }
+        .info-row {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          line-height: 28px;
+          .label-text {
+            margin-right: 8px;
+          }
+        }
+        .action-row {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          margin-top: 30px;
+          .ant-btn {
+            margin-right: 20px;
+            &:last-child {
+              margin-right: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}

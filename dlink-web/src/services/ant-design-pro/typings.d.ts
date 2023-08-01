@@ -19,49 +19,49 @@
 
 declare namespace API {
   type Result = {
-    code: number;
-    datas: any;
-    msg: string;
-  };
+    code: number
+    datas: any
+    msg: string
+  }
 
   type CurrentUser = {
-    id?: number;
-    username?: string;
-    password?: string;
-    nickname?: string;
-    worknum?: string;
-    avatar?: string;
-    mobile?: string;
-    enabled?: boolean;
-    isDelete?: boolean;
-    isAdmin?: boolean;
-    createTime?: Date;
-    updateTime?: Date;
-    roleList?: Role[];
-    tenantList?: Tenant[];
-    currentTenant?: Tenant;
-  };
+    id?: number
+    username?: string
+    password?: string
+    nickname?: string
+    worknum?: string
+    avatar?: string
+    mobile?: string
+    enabled?: boolean
+    isDelete?: boolean
+    isAdmin?: boolean
+    createTime?: Date
+    updateTime?: Date
+    roleList?: Role[]
+    tenantList?: Tenant[]
+    currentTenant?: Tenant
+    sa?: boolean
+  }
   type Role = {
-    id?: number;
-    tenantId?: number;
-    roleCode?: string;
-    roleName?: string;
-    note?: string;
-    isDelete?: boolean;
-    createTime?: Date;
-    updateTime?: Date;
-    tenant?: Tenant;
-  };
+    id?: number
+    tenantId?: number
+    roleCode?: string
+    roleName?: string
+    note?: string
+    isDelete?: boolean
+    createTime?: Date
+    updateTime?: Date
+    tenant?: Tenant
+  }
 
   type Tenant = {
-    id?: number;
-    tenantCode?: string;
-    note?: string;
-    isDelete?: boolean;
-    createTime?: Date;
-    updateTime?: Date;
-  };
-
+    id?: number
+    tenantCode?: string
+    note?: string
+    isDelete?: boolean
+    createTime?: Date
+    updateTime?: Date
+  }
 
   /*type LoginResult = {
     code?: number;
@@ -76,82 +76,82 @@ declare namespace API {
   };*/
 
   type LoginResult = {
-    access_token?: string;
-    expires_in?: number;
-    refresh_token?: string;
-    scope?: string;
-    token_type?: string;
-  };
+    access_token?: string
+    expires_in?: number
+    refresh_token?: string
+    scope?: string
+    token_type?: string
+  }
 
   type PageParams = {
-    current?: number;
-    pageSize?: number;
-  };
+    current?: number
+    pageSize?: number
+  }
 
   type RuleListItem = {
-    key?: number;
-    disabled?: boolean;
-    href?: string;
-    avatar?: string;
-    name?: string;
-    owner?: string;
-    desc?: string;
-    callNo?: number;
-    status?: number;
-    updatedAt?: string;
-    createdAt?: string;
-    progress?: number;
-  };
+    key?: number
+    disabled?: boolean
+    href?: string
+    avatar?: string
+    name?: string
+    owner?: string
+    desc?: string
+    callNo?: number
+    status?: number
+    updatedAt?: string
+    createdAt?: string
+    progress?: number
+  }
 
   type RuleList = {
-    data?: RuleListItem[];
+    data?: RuleListItem[]
     /** 列表的内容总数 */
-    total?: number;
-    success?: boolean;
-  };
+    total?: number
+    success?: boolean
+  }
 
   type FakeCaptcha = {
-    code?: number;
-    status?: string;
-  };
+    code?: number
+    status?: string
+  }
 
   type LoginParams = {
-    username?: string;
-    password?: string;
-    autoLogin?: boolean;
-    tenantId?: number;
-    type?: string;
-    grant_type?: string;
-  };
+    username?: string
+    password?: string
+    autoLogin?: boolean
+    tenantId?: number
+    type?: string
+    grant_type?: string
+  }
 
   type ErrorResponse = {
     /** 业务约定的错误码 */
-    errorCode: string;
+    errorCode: string
     /** 业务上的错误信息 */
-    errorMessage?: string;
+    errorMessage?: string
     /** 业务上的请求是否成功 */
-    success?: boolean;
-  };
+    success?: boolean
+  }
 
   type NoticeIconList = {
-    data?: NoticeIconItem[];
+    data?: NoticeIconItem[]
     /** 列表的内容总数 */
-    total?: number;
-    success?: boolean;
-  };
+    total?: number
+    success?: boolean
+  }
 
-  type NoticeIconItemType = 'notification' | 'message' | 'event';
+  type NoticeIconItemType = 'notification' | 'message' | 'event'
 
   type NoticeIconItem = {
-    id?: string;
-    extra?: string;
-    key?: string;
-    read?: boolean;
-    avatar?: string;
-    title?: string;
-    status?: string;
-    datetime?: string;
-    description?: string;
-    type?: NoticeIconItemType;
-  };
+    id?: string
+    extra?: string
+    key?: string
+    read?: boolean
+    avatar?: string
+    title?: string
+    status?: string
+    datetime?: string
+    description?: string
+    type?: NoticeIconItemType
+  }
 }

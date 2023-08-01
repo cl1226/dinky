@@ -43,7 +43,9 @@ export default (props) => {
     <PageContainer title={false} {...otherProps}>
       <div
         style={{
-          height: height || 'calc(100vh - 48px - 50px - 48px)',
+          height:
+            height ||
+            `calc(100vh - 48px ${otherProps.pageHeaderRender === false ? '' : '- 50px '}- 48px)`,
           width: '100%',
           backgroundColor: backgroundColor || '#fff',
           padding: tabs && tabs.length ? '0 10px' : 0,

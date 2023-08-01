@@ -26,6 +26,17 @@ export default {
   'menu.account.checkTenantConfirm': 'Are you sure to switch  tenant [ {tenantCode} ] ?',
   'menu.account.logout': 'Logout',
 
+  'menu.dashboard': 'Home',
+  'menu.cluster': 'Cluster',
+  'menu.dashboard.cluster': 'Cluster',
+  'menu.workspace': 'Workspace',
+  'menu.dashboard.workspace': 'Workspace',
+
+  'menu.superAdmin': 'Super Admin Center',
+  'menu.superAdmin.cluster': 'Cluster Management',
+  'menu.superAdmin.role': 'Role Management',
+  'menu.superAdmin.user': 'User Management',
+
   'menu.dataStudio': 'Data Studio',
 
   'menu.dataDev': 'Data Develop',
@@ -63,10 +74,9 @@ export default {
   'menu.dataAsset.metaDataManage.overview': 'Overview',
   'menu.dataAsset.metaDataManage.taskManage': 'Task Manage',
   'menu.dataAsset.metaDataManage.taskMonitoring': 'Task Monitoring',
-  "menu.dataAsset.metaDataManage.create": 'Create',
-  "menu.dataAsset.metaDataManage.detail": 'Detail',
+  'menu.dataAsset.metaDataManage.create': 'Create',
+  'menu.dataAsset.metaDataManage.detail': 'Detail',
 
-  
   'menu.devops': 'Devops',
   'menu.job': 'Job Instance',
 

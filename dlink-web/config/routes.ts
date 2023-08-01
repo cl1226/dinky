@@ -45,28 +45,55 @@ export default [
             path: '/user/login',
             component: './user/Login',
           },
+          {
+            name: 'workspace',
+            path: '/user/workspace',
+            component: './user/Workspace',
+          },
         ],
       },
     ],
   },
   {
-    path: '/',
-    redirect: '/dataDev/home',
+    path: '/sa',
+    name: 'superAdmin',
+    footerRender: false,
+    hideInHeaderMenu: true,
+    routes: [
+      {
+        name: 'cluster',
+        path: '/sa/cluster',
+        component: './SuperAdmin/Cluster',
+      },
+    ],
   },
-  // {
-  //   path: '/dataStudio',
-  //   name: 'dataStudio',
-  //   icon: 'consoleSql',
-  //   footerRender: false,
-  //   component: './DataStudio',
-  // },
-  // {
-  //   path: '/scheduler',
-  //   name: 'scheduler',
-  //   icon: 'nodeExpand',
-  //   footerRender: false,
-  //   component: './Scheduler',
-  // },
+  {
+    path: '/',
+    redirect: '/dashboard/cluster',
+  },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    footerRender: false,
+    routes: [
+      {
+        path: '/dashboard',
+        redirect: '/dashboard/workspace',
+      },
+      {
+        path: '/dashboard/cluster',
+        name: 'cluster',
+        component: './user/Cluster',
+        hideInMenu: true,
+      },
+      {
+        path: '/dashboard/workspace',
+        name: 'workspace',
+        component: './user/Workspace',
+        hideInMenu: true,
+      },
+    ],
+  },
   {
     path: '/dataDev',
     name: 'dataDev',

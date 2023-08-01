@@ -51,9 +51,9 @@ const loginOut = async () => {
   if (window.location.pathname !== '/user/login' && !redirect) {
     history.replace({
       pathname: '/user/login',
-      search: stringify({
-        redirect: pathname,
-      }),
+      // search: stringify({
+      //   redirect: pathname,
+      // }),
     })
   }
 }

@@ -27,9 +27,12 @@ import Footer from '@/components/Footer'
 import type { ResponseError } from 'umi-request'
 import { currentUser as queryCurrentUser } from './services/ant-design-pro/api'
 import { BookOutlined, LinkOutlined } from '@ant-design/icons'
+import HeaderMenu from './layouts/HeaderMenu'
+import { getStorageClusterId } from '@/components/Common/crud'
 
 const isDev = process.env.NODE_ENV === 'development'
 const loginPath = '/user/login'
+const clusterPath = '/dashboard/cluster'
 
 /** 获取用户信息比较慢的时候会展示一个 loading */
 export const initialStateConfig = {
@@ -63,6 +66,7 @@ export async function getInitialState(): Promise<{
         roleList: result.datas.roleList,
         tenantList: result.datas.tenantList,
         currentTenant: result.datas.currentTenant,
+        sa: result.datas.user.sa,
       }
       return currentUser
     } catch (error) {
@@ -146,11 +150,15 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       content: initialState?.currentUser?.name,
     },*/
     footerRender: () => <Footer />,
-    onPageChange: () => {
+    onPageChange: (local) => {
       const { location } = history
       // 如果没有登录，重定向到 login
       if (!initialState?.currentUser && location.pathname !== loginPath) {
         history.push(loginPath)
+      } else if (initialState?.currentUser?.sa === false) {
+        if (location.pathname !== clusterPath && !getStorageClusterId()) {
+          history.push(clusterPath)
+        }
       }
     },
     links: isDev
@@ -166,6 +174,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         ]
       : [],
     menuHeaderRender: undefined,
+    headerContentRender: HeaderMenu,
     onCollapse: (collapsed: boolean) => {
       setInitialState({ ...initialState, collapsed })
     },
