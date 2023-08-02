@@ -141,7 +141,7 @@ export const handleAddOrUpdateWithResult = async (url: string, fields: any) => {
   }
 }
 
-export const handleRemove = async (url: string, selectedRows: []) => {
+export const handleRemove = async (url: string, selectedRows: any) => {
   const hide = message.loading(l('app.request.delete'))
   if (!selectedRows) return true
   try {
@@ -203,7 +203,7 @@ export const handleSubmit = async (url: string, title: string, selectedRows: any
   }
 }
 
-export const updateEnabled = (url: string, selectedRows: [], enabled: boolean) => {
+export const updateEnabled = (url: string, selectedRows: any, enabled: boolean) => {
   selectedRows.forEach((item) => {
     handleAddOrUpdate(url, { id: item.id, enabled: enabled })
   })

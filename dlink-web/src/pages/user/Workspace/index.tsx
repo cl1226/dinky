@@ -1,5 +1,15 @@
+import PageWrap from '@/components/Common/PageWrap'
+
 const Workspace = () => {
-  return <span>222</span>
+  const tabs = [
+    {
+      label: `概览`,
+      key: 'summary',
+      children: <>11111</>,
+    },
+  ]
+
+  return <PageWrap tabs={tabs}></PageWrap>
 }
 
 export default Workspace

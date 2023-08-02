@@ -72,23 +72,16 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   }, [detailInfo])
   const columns = [
     {
-      title: '操作系统租户',
+      title: '账号',
       dataIndex: 'name',
       key: 'name',
       width: 200,
     },
     {
-      title: '描述',
+      title: '用户ID',
       dataIndex: 'description',
       key: 'description',
     },
-    {
-      title: '队列',
-      dataIndex: 'queueName',
-      key: 'queueName',
-      width: 180,
-    },
-
     {
       title: '创建时间',
       dataIndex: 'createTime',
@@ -96,7 +89,7 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       width: 180,
     },
     {
-      title: '更新时间',
+      title: '角色',
       dataIndex: 'updateTime',
       key: 'updateTime',
       width: 180,
@@ -133,7 +126,7 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   return (
     <div className={styles['user-wrap']}>
       <Row justify={'space-between'} style={{ marginBottom: 10 }}>
-        <Button onClick={() => handleCreate()}>新建</Button>
+        <Button onClick={() => handleCreate()}>添加</Button>
       </Row>
 
       <Table
@@ -147,20 +140,12 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
         width={640}
         bodyStyle={{ padding: '32px 40px 48px' }}
         destroyOnClose
-        title={'租户'}
+        title={'绑定用户'}
         open={modalVisible}
         onOk={() => hanldeConfirm()}
         onCancel={() => setModalVisible(false)}
       >
         <Form {...formLayout} form={form}>
-          <Form.Item
-            name="name"
-            label="操作系统租户"
-            rules={[{ required: true, message: '请输入操作系统租户！' }]}
-          >
-            <Input placeholder="请输入操作系统租户" />
-          </Form.Item>
-
           <Form.Item
             name="queueId"
             label="队列"

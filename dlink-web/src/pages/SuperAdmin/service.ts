@@ -163,3 +163,73 @@ export const getUuid = async () => {
     return ''
   }
 }
+
+// 获取角色列表
+export async function requestRoleList(params) {
+  return request2('/api/role/page', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  })
+}
+
+// 获取角色列表
+export const getRoleList = async (params) => {
+  try {
+    const { code, msg, datas } = await requestRoleList(params)
+    if (code == CODE.SUCCESS) {
+      const { records, total, current, size } = datas
+      return {
+        list: records,
+        total,
+        pn: current,
+        ps: size,
+      }
+    } else {
+      message.warn(msg)
+      return {
+        list: [],
+        total: 0,
+        pn: 1,
+        ps: 10,
+      }
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return {
+      list: [],
+      total: 0,
+      pn: 1,
+      ps: 10,
+    }
+  }
+}
+
+// 删除角色
+export async function requestDeleteRole(ids: (string | number)[]) {
+  return request2('/api/dataservice/config', {
+    method: 'DELETE',
+    data: { ids },
+  })
+}
+
+// 删除角色
+export const deleteRole = async (ids: (string | number)[]) => {
+  const hide = message.loading(l('app.request.delete'))
+  try {
+    const { code, msg } = await requestDeleteRole(ids)
+    hide()
+    if (code == CODE.SUCCESS) {
+      message.success(msg)
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    hide()
+    message.error(l('app.request.delete.error'))
+    return false
+  }
+}

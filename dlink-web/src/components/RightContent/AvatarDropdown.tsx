@@ -112,63 +112,8 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
     return loading
   }
 
-  const getChooseTenantListForm = () => {
-    let chooseTenantList: JSX.Element[] = []
-    currentUser.tenantList?.map((item) => {
-      chooseTenantList.push(
-        <Menu.Item
-          // If the current key (tenant id) is equal to the tenant the current user chooses to log in, this item is not optional
-          disabled={item.id === currentUser.currentTenant?.id}
-          key={item.id}
-          title={item.tenantCode}
-          icon={<SecurityScanOutlined />}
-          onClick={(e: any) => {
-            // get choose tenant title
-            let title: string = e.domEvent.target.textContent
-            // get choose tenantId
-            let tenantInfoId = e.key
-            Modal.confirm({
-              title: l('menu.account.checkTenant'),
-              content: l('menu.account.checkTenantConfirm', '', { tenantCode: title }),
-              okText: l('button.confirm'),
-              cancelText: l('button.cancel'),
-              onOk: async () => {
-                // 目前先直接退出登录 重新选择租户登录
-                loginOut()
-                // todo 切换租户需要将租户id 传入后端 以及本地存储中
-                // const {code, msg} = await postAll(requestUrl, {tenantId: tenantInfoId});
-                // localStorage.clear() // clear local storage
-                // localStorage.setItem('dlink-tenantId',tenantInfoId) // set tenant to localStorage
-                // code == 0 ? message.success(msg) : message.error(msg);
-                // todo
-                //  1.切换租户后 需要重新调用 /api/current接口获取用户的信息  (目前此接口从cookie直接取数 ,达不到预期效果)
-                //  2.同步刷新所有页面 获取该租户id下的数据
-                //actionRef.current?.reload()
-                // actionRef.current?.reloadAndRest?.();
-              },
-            })
-          }}
-        >
-          {item.tenantCode}
-        </Menu.Item>,
-      )
-    })
-    return (
-      <>
-        <Menu.SubMenu
-          key="chooseTenantList"
-          title={l('menu.account.checkTenant')}
-          icon={<UserSwitchOutlined />}
-        >
-          {chooseTenantList}
-        </Menu.SubMenu>
-      </>
-    )
-  }
-
   const menuHeaderDropdown = (
     <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
-      {menu && getChooseTenantListForm()}
       {menu && (
         <Menu.Item key="personSettings" disabled>
           <SettingOutlined />

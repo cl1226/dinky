@@ -12,6 +12,8 @@ import {
   Typography,
   message,
   Space,
+  Table,
+  Empty,
 } from 'antd'
 import { EHadoopType, ETrueFalse } from '@/utils/enum'
 import { transferEnumToOptions } from '@/utils/utils'
@@ -19,10 +21,79 @@ import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/i
 import { history, useParams } from 'umi'
 
 import { getClusterConfig, createCluster, postUploadXml, getUuid } from '@/pages/SuperAdmin/service'
-import { formLayout, ICluster, ITabComProps } from '@/pages/SuperAdmin/type.d'
+import { formLayout, ICluster, ITabComProps, IYarnQueueItem } from '@/pages/SuperAdmin/type.d'
 import { CODE } from '@/components/Common/crud'
 const { Link } = Typography
 
+// tree树 匹配方法
+const loopTree = (arr): any => {
+  if (!Array.isArray(arr) || arr.length < 1) return null
+  const [root] = arr.filter((item) => item.name === 'root')
+  const addChildren = (node, dataList) => {
+    const children = dataList
+      .filter((item) => item?.parentName === node.name)
+      .map((item) => ({
+        ...addChildren(item, dataList),
+        aclSubmitApps: item.aclSubmitApps || node.aclSubmitApps || '',
+      }))
+    return { ...node, ...(children && children.length ? { children } : {}) }
+  }
+  return addChildren(root, arr)
+}
+
+const YarnQueueTable = (props) => {
+  const { value } = props
+  const yarnColumns = [
+    {
+      title: '名称',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: '提交用户限制',
+      dataIndex: 'aclSubmitApps',
+      key: 'aclSubmitApps',
+      width: 150,
+      render: (text) => {
+        if (text === '*') return `* (无限制)`
+        return text
+      },
+    },
+
+    {
+      title: '集群名称',
+      dataIndex: 'clusterName',
+      key: 'clusterName',
+      width: 150,
+    },
+    {
+      title: '调度策略',
+      dataIndex: 'policy',
+      key: 'policy',
+      width: 150,
+    },
+  ]
+  return (
+    <>
+      {value && value.length ? (
+        <div className={styles['yarn-wrap']}>
+          <Table
+            size={'small'}
+            rowKey={'name'}
+            columns={yarnColumns}
+            dataSource={[loopTree(value)]}
+            expandable={{
+              defaultExpandAllRows: true,
+            }}
+            pagination={false}
+          />
+        </div>
+      ) : (
+        <Empty />
+      )}
+    </>
+  )
+}
 const Address = ({ value }: any) => {
   const linkList = (value || '').split(',')
   return linkList.map((str, index) => (
@@ -106,9 +177,10 @@ const XMLUpload = ({ value, onChange, disabled, data, ...props }: any) => {
     </>
   )
 }
+
 const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   const pageParams: { id?: string } = useParams()
-  const { mode, detailInfo, refreshClusterInfo } = props
+  const { mode, detailInfo } = props
 
   const [basicForm] = Form.useForm()
   const [configForm] = Form.useForm()
@@ -116,7 +188,6 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const [collapseKey, setCollapseKey] = useState<any>(['hadoop'])
   const [configLoaded, setConfigLoaded] = useState(false)
-  const [cacheConfig, setCacheConfig] = useState<any>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const onLoadConfig = async () => {
     const formRes = await basicForm.validateFields()
@@ -143,12 +214,10 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
     setIsLoading(false)
     if (configRes) {
       const { cluster, yarnQueue }: any = configRes
-      setCacheConfig(configRes)
       setCollapseKey([...collapseKey, 'config', 'kerberos'])
       setConfigLoaded(true)
-      setConfigFormValue(cluster)
+      setConfigFormValue(cluster, yarnQueue)
       setKerberosFormValue(cluster)
-      refreshClusterInfo && refreshClusterInfo(cluster, yarnQueue)
     }
   }
   const onSubmit = async () => {
@@ -164,12 +233,12 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
     })
 
     setIsSubmitting(true)
+
     const result = await createCluster({
       ...basicFormRes,
       ...configFormRes,
       ...kerberosFormRes,
       keytabJson: JSON.stringify(keytabArr),
-      yarnQueueModels: cacheConfig.yarnQueue || [],
     })
     setIsSubmitting(false)
     if (result) {
@@ -198,7 +267,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
     })
   }
 
-  const setConfigFormValue = (info: ICluster) => {
+  const setConfigFormValue = (info: ICluster, yarnQueueModels: IYarnQueueItem[] = []) => {
     const extraObj = {
       CDH: {
         uuid: info.uuid,
@@ -215,6 +284,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       metastoreAddress: info.metastoreAddress,
       yarnHa: info.yarnHa,
       resourcemanagerAddress: info.resourcemanagerAddress,
+      yarnQueueModels,
       zkQuorum: info.zkQuorum,
       ...(extraObj[info.type] || {}),
     })
@@ -234,9 +304,8 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       setCollapseKey([...collapseKey, 'config', 'kerberos'])
       setConfigLoaded(true)
       setBasicFormValue(detailInfo.cluster)
-      setConfigFormValue(detailInfo.cluster)
+      setConfigFormValue(detailInfo.cluster, detailInfo.yarnQueue)
       setKerberosFormValue(detailInfo.cluster)
-      setCacheConfig(detailInfo)
     }
   }, [])
   const onGetUuid = async () => {
@@ -318,6 +387,7 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       },
     }
   }
+
   const getBasicContent = (type) => {
     if (type === 'CDH') {
       return (
@@ -501,6 +571,11 @@ const BasicTab: React.FC<ITabComProps> = (props: ITabComProps) => {
                 <Form.Item label="Resourcemanager地址" name="resourcemanagerAddress">
                   <Address />
                 </Form.Item>
+
+                <Form.Item label="Yarn队列" name="yarnQueueModels">
+                  <YarnQueueTable />
+                </Form.Item>
+
                 <Divider orientation="left" orientationMargin="0">
                   Zookeeper 信息
                 </Divider>

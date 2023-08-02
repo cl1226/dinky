@@ -5,6 +5,7 @@ import { history } from 'umi'
 import styles from './index.less'
 import { useState } from 'react'
 const saPath = '/sa'
+const dashboardPath = '/dashboard'
 
 export default (props: HeaderViewProps, defaultDom: React.ReactNode) => {
   const { matchMenuKeys, menuData, history } = props as any
@@ -12,7 +13,7 @@ export default (props: HeaderViewProps, defaultDom: React.ReactNode) => {
   console.log('props', props)
   const pathName = menuData?.find((item) => item.path === matchMenuKeys[0])?.name || ''
 
-  if (matchMenuKeys[0] === saPath || location.pathname === '/dashboard/cluster') {
+  if (matchMenuKeys[0] === saPath || matchMenuKeys[0] === dashboardPath) {
     return false
   }
   const onMenuClick: MenuProps['onClick'] = ({ item, key }) => {

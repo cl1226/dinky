@@ -4,7 +4,6 @@ import { Tabs } from 'antd'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { useParams } from 'umi'
 import Basic from './Basic'
-import Yarn from './Yarn'
 import User from './User'
 import { getClusterDetail } from '@/pages/SuperAdmin/service'
 import { ICluster, IYarnQueueItem } from '@/pages/SuperAdmin/type.d'
@@ -25,10 +24,7 @@ const ClusterConfig: React.FC<{ mode: 'create' | 'view' | 'edit' }> = (props: an
       setIsInited(true)
     }
   }
-  const refreshClusterInfo = (cluster, yarnQueue) => {
-    setClusterDetail(cluster)
-    setYarnQueue(yarnQueue)
-  }
+
   useEffect(() => {
     if ((mode === 'view' || mode === 'edit') && pageParams.id) {
       initClusterDetail()
@@ -51,7 +47,6 @@ const ClusterConfig: React.FC<{ mode: 'create' | 'view' | 'edit' }> = (props: an
                       <Basic
                         mode={mode}
                         detailInfo={{ cluster: clusterDetail, yarnQueue: yarnQueue }}
-                        refreshClusterInfo={refreshClusterInfo}
                       />
                     </div>
                   </Scrollbars>
@@ -59,20 +54,7 @@ const ClusterConfig: React.FC<{ mode: 'create' | 'view' | 'edit' }> = (props: an
               ),
             },
             {
-              label: `Yarn队列`,
-              key: 'yarn',
-              children: (
-                <div className={styles['tab-wrap']}>
-                  <Scrollbars style={{ height: '100%' }}>
-                    <div style={{ padding: 10 }}>
-                      <Yarn mode={mode} detailInfo={yarnQueue} />
-                    </div>
-                  </Scrollbars>
-                </div>
-              ),
-            },
-            {
-              label: `用户`,
+              label: `绑定用户`,
               key: 'user',
               children: (
                 <div className={styles['tab-wrap']}>
