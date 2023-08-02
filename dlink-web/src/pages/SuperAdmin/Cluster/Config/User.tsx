@@ -1,15 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
 import styles from './index.less'
-import { Input, Select, Space, Form, Empty, Table, Button, Row, Modal } from 'antd'
+import { Input, Tag, Select, Space, Form, Empty, Table, Button, Row, Modal } from 'antd'
 import { ITabComProps } from '@/pages/RegistrationCenter/ClusterManage/Hadoop/data.d'
 import { debounce } from 'lodash'
 import {
-  getTenantList,
-  deleteTenant,
-  addorUpdateTenant,
-  getQueueOptions,
-} from '@/pages/RegistrationCenter/ClusterManage/service'
-
+  getRoleOptions,
+  getUserOptions,
+  getBindUserList,
+  addorUpdateBindUser,
+  deleteBindUser,
+} from '@/pages/SuperAdmin/service'
 const formLayout = {
   labelCol: { span: 6 },
   wrapperCol: { span: 16 },
@@ -21,16 +21,23 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   const [modalVisible, setModalVisible] = useState(false)
   const [currentRow, setCurrentRow] = useState<any>({})
   const [dataSource, setDataSource] = useState<any>([])
-  const [queueOptions, setQueueOptions] = useState<any>([])
+  const [roleOptions, setRoleOptions] = useState<any>([])
+  const [userOptions, setUserOptions] = useState<any>([])
   const getDataSource = async () => {
-    const list = await getTenantList({ clusterId: detailInfo })
+    const list = await getBindUserList({ clusterId: detailInfo })
     setDataSource(list)
   }
-  const initQueueOptions = async () => {
-    const list = await getQueueOptions({ clusterId: detailInfo })
-    setQueueOptions(
-      list.map((item) => ({
-        label: item.name,
+  const initOptions = async () => {
+    const [roleList, userList] = await Promise.all([getRoleOptions(), getUserOptions()])
+    setRoleOptions(
+      roleList.map((item) => ({
+        label: item.roleName,
+        value: item.id,
+      })),
+    )
+    setUserOptions(
+      userList.map((item) => ({
+        label: `${item.username} ${item.nickname}`,
         value: item.id,
       })),
     )
@@ -43,7 +50,7 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   const hanldeConfirm = async () => {
     const formVal = await form.validateFields()
 
-    const result = await addorUpdateTenant({
+    const result = await addorUpdateBindUser({
       ...currentRow,
       ...formVal,
       clusterId: detailInfo,
@@ -57,13 +64,13 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
     Modal.confirm({
       content: '确定删除该用户吗？',
       onOk: async () => {
-        const result = await deleteTenant(record?.id)
+        const result = await deleteBindUser(record?.id)
         result && getDataSource()
       },
     })
   }
   useEffect(() => {
-    mode !== 'create' && initQueueOptions()
+    mode !== 'create' && initOptions()
   }, [])
   useEffect(() => {
     if (detailInfo && mode !== 'create') {
@@ -72,15 +79,16 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   }, [detailInfo])
   const columns = [
     {
-      title: '账号',
-      dataIndex: 'name',
-      key: 'name',
+      title: '用户',
+      dataIndex: 'username',
+      key: 'username',
       width: 200,
     },
     {
-      title: '用户ID',
-      dataIndex: 'description',
-      key: 'description',
+      title: '用户名',
+      dataIndex: 'nickname',
+      key: 'nickname',
+      width: 180,
     },
     {
       title: '创建时间',
@@ -90,9 +98,16 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
     },
     {
       title: '角色',
-      dataIndex: 'updateTime',
-      key: 'updateTime',
+      dataIndex: 'roleList',
+      key: 'roleList',
       width: 180,
+      render: (roleList, record) => (
+        <Space>
+          {roleList.map((item) => (
+            <Tag>{item.roleName}</Tag>
+          ))}
+        </Space>
+      ),
     },
     {
       title: '操作',
@@ -101,19 +116,6 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       width: 180,
       render: (_, record) => (
         <Space>
-          <a
-            onClick={() => {
-              setModalVisible(true)
-              setCurrentRow(record)
-              form.setFieldsValue({
-                name: record.name,
-                queueId: record.queueId,
-                description: record.description,
-              })
-            }}
-          >
-            编辑
-          </a>
           <a onClick={() => handleDelete(record)}>删除</a>
         </Space>
       ),
@@ -147,19 +149,19 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
       >
         <Form {...formLayout} form={form}>
           <Form.Item
-            name="queueId"
-            label="队列"
-            rules={[{ required: true, message: '请选择队列！' }]}
+            name="userId"
+            label="账号"
+            rules={[{ required: true, message: '请选择账号！' }]}
           >
-            <Select placeholder="请选择" allowClear={true} options={queueOptions}></Select>
+            <Select placeholder="请选择" allowClear={true} options={userOptions}></Select>
           </Form.Item>
 
-          <Form.Item name="description" label="描述">
-            <Input.TextArea
-              placeholder="请输入"
-              style={{ resize: 'none' }}
-              rows={3}
-            ></Input.TextArea>
+          <Form.Item
+            name="roleId"
+            label="角色"
+            rules={[{ required: true, message: '请选择角色！' }]}
+          >
+            <Select placeholder="请选择" allowClear={true} options={roleOptions}></Select>
           </Form.Item>
         </Form>
       </Modal>

@@ -233,3 +233,148 @@ export const deleteRole = async (ids: (string | number)[]) => {
     return false
   }
 }
+
+// 获取角色下拉
+export const requestRoleOptions = async (params) => {
+  return request2('/api/role', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+  })
+}
+
+// 获取角色下拉
+export const getRoleOptions = async (params?: any) => {
+  try {
+    const { code, msg, datas } = await requestRoleOptions(params)
+    if (code == CODE.SUCCESS) {
+      return datas || []
+    } else {
+      message.warn(msg)
+      return []
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return []
+  }
+}
+
+// 获取用户下拉
+export const requestUserOptions = async (params) => {
+  return request2('/api/user', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+  })
+}
+
+// 获取用户下拉
+export const getUserOptions = async (params?: any) => {
+  try {
+    const { code, msg, datas } = await requestUserOptions(params)
+    if (code == CODE.SUCCESS) {
+      return datas || []
+    } else {
+      message.warn(msg)
+      return []
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return []
+  }
+}
+
+// 获取集群绑定用户
+export const requestBindUserList = async (params) => {
+  return request2('/api/hadoop/cluster/listBindUser', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+  })
+}
+
+// 获取集群绑定用户
+export const getBindUserList = async (params) => {
+  try {
+    const { code, msg, datas } = await requestBindUserList(params)
+    if (code == CODE.SUCCESS) {
+      return (datas || []).map((item) => {
+        const { roleList, user, id } = item
+        return {
+          ...user,
+          roleList,
+          id,
+          userId: user.id,
+        }
+      })
+    } else {
+      message.warn(msg)
+      return []
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return []
+  }
+}
+
+// 创建集群绑定用户
+export const requestAddorUpdateBindUser = (params) => {
+  return request2('/api/hadoop/cluster/bindUser ', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  })
+}
+// 创建集群绑定用户
+export const addorUpdateBindUser = async (fields: any) => {
+  const tipsTitle = fields.id ? l('app.request.update') : l('app.request.add')
+  const hide = message.loading(l('app.request.running') + tipsTitle)
+  try {
+    const { code, msg } = await requestAddorUpdateBindUser({ ...fields })
+    hide()
+    if (code == CODE.SUCCESS) {
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    hide()
+    message.error(l('app.request.error'))
+    return false
+  }
+}
+
+// 删除集群绑定用户
+export async function requestDeleteBindUser(id: number) {
+  return request2(`/api/hadoop/cluster/unbindUser`, {
+    method: 'POST',
+    data: {
+      id,
+    },
+  })
+}
+
+// 删除集群绑定用户
+export const deleteBindUser = async (id: number) => {
+  const hide = message.loading(l('app.request.delete'))
+  try {
+    const { code, msg } = await requestDeleteBindUser(id)
+    hide()
+    if (code == CODE.SUCCESS) {
+      message.success(msg)
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    hide()
+    message.error(l('app.request.delete.error'))
+    return false
+  }
+}
