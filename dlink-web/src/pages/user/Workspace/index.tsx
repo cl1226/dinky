@@ -1,11 +1,17 @@
 import PageWrap from '@/components/Common/PageWrap'
-
+import WorkspaceTable from './WorkspaceTable'
+import Summary from './Summary'
 const Workspace = () => {
   const tabs = [
     {
       label: `概览`,
       key: 'summary',
-      children: <>11111</>,
+      children: <Summary />,
+    },
+    {
+      label: `空间管理`,
+      key: 'workspace',
+      children: <WorkspaceTable />,
     },
   ]
 
