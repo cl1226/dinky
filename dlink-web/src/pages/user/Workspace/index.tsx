@@ -1,21 +1,32 @@
 import PageWrap from '@/components/Common/PageWrap'
 import WorkspaceTable from './WorkspaceTable'
 import Summary from './Summary'
+import { connect, useModel } from 'umi'
 const Workspace = () => {
-  const tabs = [
-    {
-      label: `概览`,
-      key: 'summary',
-      children: <Summary />,
-    },
-    {
-      label: `空间管理`,
-      key: 'workspace',
-      children: <WorkspaceTable />,
-    },
-  ]
+  const { initialState } = useModel('@@initialState')
+  const { currentUser } = initialState || {}
 
-  return <PageWrap tabs={tabs}></PageWrap>
+  const getTabs = () => {
+    const tabs = [
+      {
+        label: `概览`,
+        key: 'summary',
+        children: <Summary />,
+      },
+    ]
+
+    const { roleList } = currentUser || {}
+    if (roleList && roleList.some((item) => item.roleCode === 'ClusterAdmin')) {
+      tabs.push({
+        label: `空间管理`,
+        key: 'workspace',
+        children: <WorkspaceTable />,
+      })
+    }
+    return tabs
+  }
+
+  return <PageWrap tabs={getTabs()}></PageWrap>
 }
 
 export default Workspace
