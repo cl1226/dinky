@@ -49,7 +49,6 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
   }
   const hanldeConfirm = async () => {
     const formVal = await form.validateFields()
-
     const result = await addorUpdateBindUser({
       ...currentRow,
       ...formVal,
@@ -153,7 +152,13 @@ const UserTab: React.FC<ITabComProps> = (props: ITabComProps) => {
             label="账号"
             rules={[{ required: true, message: '请选择账号！' }]}
           >
-            <Select placeholder="请选择" allowClear={true} options={userOptions}></Select>
+            <Select
+              placeholder="请选择"
+              showSearch
+              optionFilterProp="label"
+              allowClear={true}
+              options={userOptions}
+            ></Select>
           </Form.Item>
 
           <Form.Item
