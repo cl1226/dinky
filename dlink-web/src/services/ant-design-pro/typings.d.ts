@@ -39,7 +39,6 @@ declare namespace API {
     updateTime?: Date
     roleList?: Role[]
     tenantList?: Tenant[]
-    currentTenant?: Tenant
     sa?: boolean
   }
   type Role = {

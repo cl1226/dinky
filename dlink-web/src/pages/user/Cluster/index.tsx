@@ -4,9 +4,10 @@ import styles from './index.less'
 import { getClusterByUser } from '@/pages/user/service'
 import { Button, Card, Col, Empty, Row } from 'antd'
 import cookies from 'js-cookie'
-import { history } from 'umi'
+import { history, useModel } from 'umi'
 
 const Cluster = () => {
+  const { initialState, setInitialState } = useModel('@@initialState')
   const [clusterList, setClusterList] = useState<any>([])
   const initHadoop = async () => {
     const result = await getClusterByUser()
@@ -16,9 +17,19 @@ const Cluster = () => {
     localStorage.removeItem('dlink-clusterName')
     initHadoop()
   }, [])
-  const onSelectCluster = (item) => {
+
+  const onSelectCluster = async (item) => {
+    cookies.set('clusterId', item.id.toString(), { path: '/' }) // 放入cookie中，优先，在fetchUserInfo中需传参
+
+    const userInfo = await initialState?.fetchUserInfo?.()
+    if (userInfo) {
+      setInitialState({
+        ...initialState,
+        currentUser: userInfo,
+      })
+    }
+
     localStorage.setItem('dlink-clusterName', item.name.toString())
-    cookies.set('clusterId', item.id.toString(), { path: '/' }) // 放入cookie中
     cookies.remove('worksapceId')
     history.push(`/dashboard/workspace`)
   }

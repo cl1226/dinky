@@ -101,19 +101,20 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
       />
     </span>
   )
+  console.log('currentUser', initialState)
 
   if (!initialState) {
     return loading
   }
 
   const { currentUser } = initialState
-
+  console.log('currentUser', currentUser)
   if (!currentUser || !currentUser.username) {
     return loading
   }
 
   const menuHeaderDropdown = (
-    <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
+    <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick as any}>
       {menu && (
         <Menu.Item key="personSettings" disabled>
           <SettingOutlined />

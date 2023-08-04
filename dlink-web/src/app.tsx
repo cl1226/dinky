@@ -63,9 +63,8 @@ export async function getInitialState(): Promise<{
         createTime: result.datas.user.createTime,
         updateTime: result.datas.user.updateTime,
         isAdmin: result.datas.user.isAdmin,
-        roleList: result.datas.roleList,
+        roleList: result.datas.roleList || [],
         tenantList: result.datas.tenantList,
-        currentTenant: result.datas.currentTenant,
         sa: result.datas.user.sa,
       }
       return currentUser
@@ -159,12 +158,12 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         const clusterId = getStorageClusterId()
         const workspaceId = getStorageWorkspaceId()
 
-        if (!clusterId) {
-          if (location.pathname !== clusterPath) {
-            history.push(clusterPath)
-          }
-        } else if (!workspaceId) {
-          if (location.pathname !== worksapcePath) {
+        if (!clusterId && location.pathname !== clusterPath) {
+          history.push(clusterPath)
+          return
+        }
+        if (!workspaceId) {
+          if (location.pathname !== worksapcePath && location.pathname !== clusterPath) {
             history.push(worksapcePath)
           }
         }
