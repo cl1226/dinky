@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { PageContainer } from '@ant-design/pro-layout'
 import styles from './index.less'
-import { getClusterList } from '@/pages/user/service'
+import { getClusterByUser } from '@/pages/user/service'
 import { Button, Card, Col, Form, Row } from 'antd'
 import cookies from 'js-cookie'
 import { history } from 'umi'
@@ -9,18 +9,17 @@ import { history } from 'umi'
 const Cluster = () => {
   const [clusterList, setClusterList] = useState<any>([])
   const initHadoop = async () => {
-    const result = await getClusterList()
+    const result = await getClusterByUser()
     setClusterList(result)
   }
   useEffect(() => {
-    localStorage.removeItem('dlink-clusterId')
     localStorage.removeItem('dlink-clusterName')
     initHadoop()
   }, [])
   const onSelectCluster = (item) => {
-    localStorage.setItem('dlink-clusterId', item.id.toString()) // 放入本地存储中 request2请求时会放入header
-    localStorage.setItem('dlink-clusterName', item.name.toString()) // 放入本地存储中 request2请求时会放入header
+    localStorage.setItem('dlink-clusterName', item.name.toString())
     cookies.set('clusterId', item.id.toString(), { path: '/' }) // 放入cookie中
+    cookies.remove('worksapceId')
     history.push(`/dashboard/workspace`)
   }
 

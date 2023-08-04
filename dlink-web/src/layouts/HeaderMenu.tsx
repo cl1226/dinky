@@ -3,7 +3,7 @@ import { Dropdown, Select, Space } from 'antd'
 import type { MenuProps } from 'antd'
 import { history } from 'umi'
 import styles from './index.less'
-import { getWorkspaceList } from '@/pages/user/service'
+import { getWorkspaceByUser } from '@/pages/user/service'
 import { getStorageClusterId } from '@/components/Common/crud'
 import { useState, useEffect } from 'react'
 import cookies from 'js-cookie'
@@ -13,12 +13,11 @@ const dashboardPath = '/dashboard'
 
 const SpaceSelector = () => {
   const [dataSource, setDataSource] = useState<any>([])
-  const [currentSpace, setCurrentSpace] = useState(
-    Number(localStorage.getItem('dlink-workspaceId')),
-  )
+  const [currentSpace, setCurrentSpace] = useState(Number(cookies.get('workspaceId')))
 
   const getDataSource = async () => {
-    const list = await getWorkspaceList(getStorageClusterId())
+    if (!getStorageClusterId()) return
+    const list = await getWorkspaceByUser()
 
     setDataSource(list)
   }
@@ -46,14 +45,51 @@ const SpaceSelector = () => {
 }
 
 export default (props: HeaderViewProps, defaultDom: React.ReactNode) => {
-  const { matchMenuKeys, menuData, history } = props as any
-  const { location } = history
+  const { matchMenuKeys, menuData, location } = props as any
 
   const pathName = menuData?.find((item) => item.path === matchMenuKeys[0])?.name || ''
 
   // 匹配到sa及dashboard路由时隐藏
-  if (matchMenuKeys[0] === saPath || matchMenuKeys[0] === dashboardPath) {
-    return false
+
+  const getContent = () => {
+    if (matchMenuKeys[0] === saPath) {
+      return null
+    } else if (matchMenuKeys[0] === dashboardPath) {
+      if (location.pathname === '/dashboard/cluster') {
+        return null
+      }
+      return (
+        <div className="cluster-box">
+          <span>{localStorage.getItem('dlink-clusterName')}</span>
+        </div>
+      )
+    }
+
+    return (
+      <>
+        <Dropdown
+          overlayClassName={styles['header-drop-menu']}
+          overlayStyle={{ top: 48 }}
+          menu={{
+            items: filterMenuData(menuData),
+            onClick: ({ key }) => {
+              history.push(key)
+            },
+          }}
+        >
+          <div className="btn-box">{pathName}</div>
+        </Dropdown>
+        <div className="driver"></div>
+        <div className="workspace-box">
+          <span>工作空间</span>
+          <SpaceSelector />
+        </div>
+        <div className="driver"></div>
+        <div className="cluster-box">
+          <span>{localStorage.getItem('dlink-clusterName')}</span>
+        </div>
+      </>
+    )
   }
 
   const filterMenuData = (list) => {
@@ -66,29 +102,5 @@ export default (props: HeaderViewProps, defaultDom: React.ReactNode) => {
         key: item.path,
       }))
   }
-  return (
-    <div className={styles['header-menu']}>
-      <Dropdown
-        overlayClassName={styles['header-drop-menu']}
-        overlayStyle={{ top: 48 }}
-        menu={{
-          items: filterMenuData(menuData),
-          onClick: ({ key }) => {
-            history.push(key)
-          },
-        }}
-      >
-        <div className="btn-box">{pathName}</div>
-      </Dropdown>
-      <div className="driver"></div>
-      <div className="workspace-box">
-        <span>工作空间</span>
-        <SpaceSelector />
-      </div>
-      <div className="driver"></div>
-      <div className="cluster-box">
-        <span>{localStorage.getItem('dlink-clusterName')}</span>
-      </div>
-    </div>
-  )
+  return <div className={styles['header-menu']}>{getContent()}</div>
 }

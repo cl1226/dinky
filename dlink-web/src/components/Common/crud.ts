@@ -22,15 +22,17 @@ import { TableListParams } from '@/components/Common/data'
 import { message } from 'antd'
 import { l } from '@/utils/intl'
 import { EAsyncCode } from '@/components/SelectHelp/type.d'
+import cookies from 'js-cookie'
 
 export const request2 = extend({
   headers: {},
 })
 
+export const getStorageWorkspaceId = () => {
+  return cookies.get('workspaceId') ? Number(cookies.get('workspaceId')) : ''
+}
 export const getStorageClusterId = () => {
-  return localStorage.getItem('dlink-clusterId')
-    ? Number(localStorage.getItem('dlink-clusterId'))
-    : ''
+  return cookies.get('clusterId') ? Number(cookies.get('clusterId')) : ''
 }
 
 export const getStorageTenantId = () => {
