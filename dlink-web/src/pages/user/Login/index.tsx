@@ -74,7 +74,10 @@ const Login: React.FC = () => {
     }
     setSubmitting(false)
   }
-
+  useEffect(() => {
+    cookies.remove('workspaceId')
+    cookies.remove('clusterId')
+  }, [])
   return (
     <div className={styles.container}>
       <div className={styles.lang}>

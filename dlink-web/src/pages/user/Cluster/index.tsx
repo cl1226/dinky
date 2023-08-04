@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { PageContainer } from '@ant-design/pro-layout'
 import styles from './index.less'
 import { getClusterByUser } from '@/pages/user/service'
-import { Button, Card, Col, Form, Row } from 'antd'
+import { Button, Card, Col, Empty, Row } from 'antd'
 import cookies from 'js-cookie'
 import { history } from 'umi'
 
@@ -53,6 +53,7 @@ const Cluster = () => {
           </Card>
         ))}
       </div>
+      {!clusterList.length && <Empty description="暂无集群" />}
     </PageContainer>
   )
 }
