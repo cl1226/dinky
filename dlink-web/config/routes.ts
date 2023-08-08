@@ -377,18 +377,18 @@ export default [
     routes: [
       {
         path: '/registration',
-        redirect: '/registration/cluster/hadoop',
+        redirect: '/registration/cluster/clusterInstance',
       },
       {
         path: '/registration/cluster',
         name: 'cluster',
         icon: 'cluster',
         routes: [
-          {
-            path: '/registration/cluster/shell',
-            name: 'shell',
-            component: './RegistrationCenter/ClusterManage/Shell',
-          },
+          // {
+          //   path: '/registration/cluster/shell',
+          //   name: 'shell',
+          //   component: './RegistrationCenter/ClusterManage/Shell',
+          // },
           {
             path: '/registration/cluster/clusterInstance',
             name: 'clusterInstance',
@@ -398,6 +398,16 @@ export default [
             path: '/registration/cluster/clusterConfiguration',
             name: 'clusterConfiguration',
             component: './RegistrationCenter/ClusterManage/ClusterConfiguration',
+          },
+          {
+            path: '/registration/cluster/flinkSettings',
+            name: 'flinkConfig',
+            component: './SettingCenter/FlinkSettings',
+          },
+          {
+            path: '/registration/cluster/udfTemplate',
+            name: 'udfTemplate',
+            component: './SettingCenter/UDFTemplate',
           },
         ],
       },
@@ -503,29 +513,6 @@ export default [
         name: 'tenantManager',
         icon: 'SecurityScanOutlined',
         component: './AuthenticationCenter/TenantManager',
-      },
-    ],
-  },
-  {
-    name: 'settings',
-    icon: 'setting',
-    path: '/settingCenter',
-    routes: [
-      {
-        path: '/settingCenter',
-        redirect: '/settingCenter/flinkSettings',
-      },
-      {
-        path: '/settingCenter/flinkSettings',
-        name: 'flinkConfig',
-        icon: 'setting',
-        component: './SettingCenter/FlinkSettings',
-      },
-      {
-        path: '/settingCenter/udfTemplate',
-        name: 'udfTemplate',
-        icon: 'setting',
-        component: './SettingCenter/UDFTemplate',
       },
     ],
   },

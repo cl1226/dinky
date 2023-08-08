@@ -42,7 +42,7 @@ const StudioMsg = (props: any) => {
 
   useEffect(() => {
     refreshConsoleInfo()
-    let dataPolling = setInterval(refreshConsoleInfo, 3000)
+    let dataPolling = setInterval(refreshConsoleInfo, 5000)
     return () => {
       clearInterval(dataPolling)
     }

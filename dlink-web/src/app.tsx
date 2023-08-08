@@ -157,7 +157,8 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       } else if (initialState?.currentUser?.sa === false) {
         const clusterId = getStorageClusterId()
         const workspaceId = getStorageWorkspaceId()
-
+        console.log('init', clusterId, '-----', workspaceId)
+        
         if (!clusterId && location.pathname !== clusterPath) {
           history.push(clusterPath)
           return

@@ -41,6 +41,7 @@ const formLayout = {
 }
 
 const DataBaseForm: React.FC<ClickHouseFormProps> = (props) => {
+  console.log('kerberos', props.values.kerberos)
   const [formVals, setFormVals] = useState<Partial<DataBaseItem>>({
     id: props.values.id,
     name: props.values.name,
@@ -212,6 +213,7 @@ const DataBaseForm: React.FC<ClickHouseFormProps> = (props) => {
               flinkConfig: formVals.flinkConfig,
               flinkTemplate: formVals.flinkTemplate,
               enabled: formVals.enabled,
+              kerberos: formVals.kerberos,
             }}
           >
             {renderContent(formVals)}

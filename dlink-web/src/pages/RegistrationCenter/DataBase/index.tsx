@@ -42,7 +42,7 @@ import { showDataBase } from '@/components/Studio/StudioEvent/DDL'
 import { l } from '@/utils/intl'
 
 const url = '/api/database'
-const cardBodyStyle = {
+const cardBodyStyle: any = {
   backgroundColor: 'rgba(0, 0, 0, 0.08)',
   position: 'relative',
   zIndex: 999,
@@ -111,7 +111,7 @@ const DataBaseTableList: React.FC<{}> = (props: any) => {
         }}
         grid={{ gutter: 16, column: 4 }}
         request={(params, sorter, filter) =>
-          queryData(url, { ...params, sorter: { id: 'descend' }, filter })
+          queryData(url, { ...params, sorter: { id: 'descend' }, filter } as any)
         }
         renderItem={(row) => {
           return (

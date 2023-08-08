@@ -43,7 +43,7 @@ import {
   showSessionCluster,
 } from '@/components/Studio/StudioEvent/DDL'
 import DraggleLayout from '@/components/DraggleLayout'
-import { loadSettings } from '@/pages/SettingCenter/FlinkSettings/function'
+import { loadSettings } from '@/pages/DataStudio/service'
 
 const Studio = (props: any) => {
   const { initialState }: any = useModel('@@initialState')

@@ -130,3 +130,124 @@ export const deleteWorkspace = async (id: (string | number)[]) => {
     return false
   }
 }
+
+// 客户端管理-获取列表
+export async function requestClientList(params) {
+  return request2('/api/environment/instance/page', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  })
+}
+
+// 客户端管理-获取列表
+export const getClientList = async (params) => {
+  try {
+    const { code, msg, datas } = await requestClientList(params)
+    if (code == CODE.SUCCESS) {
+      const { records, total, current, size } = datas
+      return {
+        current: current,
+        data: records,
+        pageSize: size,
+        success: true,
+        total: total,
+      }
+    } else {
+      message.warn(msg)
+      return {
+        data: [],
+        success: false,
+      }
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return {
+      data: [],
+      success: false,
+    }
+  }
+}
+
+// 客户端管理-创建
+export const requestAddorUpdateClient = (params) => {
+  return request2('/api/environment/instance ', {
+    method: 'PUT',
+    data: {
+      ...params,
+    },
+  })
+}
+// 客户端管理-创建
+export const addorUpdateClient = async (fields: any) => {
+  const tipsTitle = fields.id ? l('app.request.update') : l('app.request.add')
+  const hide = message.loading(l('app.request.running') + tipsTitle)
+  try {
+    const { code, msg } = await requestAddorUpdateClient({ ...fields })
+    hide()
+    if (code == CODE.SUCCESS) {
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    hide()
+    message.error(l('app.request.error'))
+    return false
+  }
+}
+
+// 客户端管理-删除
+export const requestDeleteClient = async (id: number) => {
+  return request2(`/api/environment/instance?id=${id}`, {
+    method: 'DELETE',
+  })
+}
+
+// 客户端管理-删除
+export const deleteClient = async (id: number) => {
+  const hide = message.loading(l('app.request.delete'))
+  try {
+    const { code, msg } = await requestDeleteClient(id)
+    hide()
+    if (code == CODE.SUCCESS) {
+      message.success(msg)
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    hide()
+    message.error(l('app.request.delete.error'))
+    return false
+  }
+}
+
+// 客户端管理-测试
+export const requestClientTest = async (params: any) => {
+  return request2('/api/environment/instance/testConnect', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  })
+}
+
+// 客户端管理-测试
+export const postClientTest = async (params: any) => {
+  try {
+    const { code, msg } = await requestClientTest(params)
+    if (code == CODE.SUCCESS) {
+      return true
+    } else {
+      message.warn(msg)
+      return false
+    }
+  } catch (error) {
+    message.error(l('app.request.geterror.try'))
+    return false
+  }
+}

@@ -26,6 +26,18 @@ import {
 import { request2, getData } from '@/components/Common/crud'
 import { request } from 'umi'
 
+export function loadSettings(dispatch: any) {
+  const res = getData('api/sysConfig/getAll')
+  res.then((result) => {
+    result.datas &&
+      dispatch &&
+      dispatch({
+        type: 'Settings/saveSettings',
+        payload: result.datas,
+      })
+  })
+}
+
 export function getConsoleInfo() {
   return getData('api/process/getConsoleByUserId')
 }
