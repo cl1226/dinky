@@ -17,8 +17,8 @@
  *
  */
 
-import {getData} from "@/components/Common/crud";
+import { getData } from '@/components/Common/crud'
 
 export function getRootLog() {
-  return getData("api/system/getRootLog");
+  return getData('api/system/getRootLog')
 }

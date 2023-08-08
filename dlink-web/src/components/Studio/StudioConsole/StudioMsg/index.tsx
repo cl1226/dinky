@@ -21,9 +21,9 @@ import { StateType } from '@/pages/DataStudio/model'
 import { connect } from 'umi'
 import React, { useEffect, useState } from 'react'
 import CodeShow from '@/components/Common/CodeShow'
-import { getConsoleInfo } from '@/pages/SettingCenter/ProcessList/service'
 import { clearConsole } from '../../StudioEvent/DDL'
 import { l } from '@/utils/intl'
+import { getConsoleInfo } from '@/pages/DataStudio/service'
 
 const StudioMsg = (props: any) => {
   const { current, height, isActive } = props

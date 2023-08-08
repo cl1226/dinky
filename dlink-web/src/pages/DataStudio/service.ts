@@ -23,8 +23,12 @@ import {
   StudioParam,
   IGetShellListParams,
 } from '@/components/Studio/StudioEdit/data'
-import { request2 } from '@/components/Common/crud'
+import { request2, getData } from '@/components/Common/crud'
 import { request } from 'umi'
+
+export function getConsoleInfo() {
+  return getData('api/process/getConsoleByUserId')
+}
 
 export async function executeSql(params: StudioParam) {
   return request<API.Result>('/api/studio/executeSql', {

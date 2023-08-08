@@ -40,6 +40,7 @@ export default {
 
   'menu.superAdmin.role': 'Role Management',
   'menu.superAdmin.user': 'User Management',
+  'menu.superAdmin.systemInfo': 'SystemInfo',
 
   'menu.dataStudio': 'Data Studio',
 

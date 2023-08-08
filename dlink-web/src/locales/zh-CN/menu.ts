@@ -37,9 +37,10 @@ export default {
   'menu.superAdmin.clusterCreate': '集群创建',
   'menu.superAdmin.clusterEdit': '集群配置',
   'menu.superAdmin.clusterView': '集群',
-
+  
   'menu.superAdmin.role': '角色管理',
   'menu.superAdmin.user': '用户管理',
+  'menu.superAdmin.systemInfo': '系统信息',
 
   'menu.dataStudio': '数据开发',
 

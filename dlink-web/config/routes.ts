@@ -101,6 +101,11 @@ export default [
         path: '/sa/user',
         component: './SuperAdmin/User',
       },
+      {
+        name: 'systemInfo',
+        path: '/sa/systemInfo',
+        component: './SuperAdmin/SystemInfo',
+      },
     ],
   },
   {
@@ -521,18 +526,6 @@ export default [
         name: 'udfTemplate',
         icon: 'setting',
         component: './SettingCenter/UDFTemplate',
-      },
-      {
-        path: '/settingCenter/systemInfo',
-        name: 'systemInfo',
-        icon: 'desktop',
-        component: './SettingCenter/SystemInfo',
-      },
-      {
-        path: '/settingCenter/processList',
-        name: 'processList',
-        icon: 'desktop',
-        component: './SettingCenter/ProcessList',
       },
     ],
   },
