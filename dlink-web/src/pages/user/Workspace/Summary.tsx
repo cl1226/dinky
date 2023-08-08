@@ -31,8 +31,8 @@ export default () => {
       url: '/dataAsset',
     },
     {
-      label: '元数据中心',
-      url: '/datacenter',
+      label: '资源中心',
+      url: '/registration',
     },
   ]
   return (

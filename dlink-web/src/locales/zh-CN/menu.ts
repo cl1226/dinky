@@ -37,7 +37,7 @@ export default {
   'menu.superAdmin.clusterCreate': '集群创建',
   'menu.superAdmin.clusterEdit': '集群配置',
   'menu.superAdmin.clusterView': '集群',
-  
+
   'menu.superAdmin.role': '角色管理',
   'menu.superAdmin.user': '用户管理',
   'menu.superAdmin.systemInfo': '系统信息',
@@ -72,7 +72,8 @@ export default {
   'menu.dataService.application': '应用管理',
   'menu.dataService.applicationDetail': '应用详情',
 
-  'menu.dataAsset': '数据资产',
+  'menu.dataAsset': '数据目录',
+  'menu.dataAsset.metaDataCenter': '元数据中心',
   'menu.dataAsset.dataMap': '数据地图',
   'menu.dataAsset.dataMap.overview': '总览',
   'menu.dataAsset.dataMap.dataDirectory': '数据目录',
@@ -90,7 +91,7 @@ export default {
   'menu.datacenter': '元数据中心',
   'menu.datacenter.metadata': '元数据',
 
-  'menu.registration': '注册中心',
+  'menu.registration': '资源中心',
   'menu.registration.cluster': 'Flink 管理',
   'menu.registration.cluster.clusterInstance': 'Flink Session管理',
   'menu.registration.cluster.clusterConfiguration': 'Flink集群管理',
@@ -116,12 +117,6 @@ export default {
   'menu.authenticationCenter.roleManager': '角色管理',
   'menu.authenticationCenter.roleSelectPermissions': '角色数据权限',
   'menu.authenticationCenter.tenantManager': '租户管理',
-
-  'menu.settings': '配置中心',
-  'menu.settings.flinkConfig': 'Flink 配置',
-  'menu.settings.udfTemplate': 'UDF 模板配置',
-  'menu.settings.systemInfo': '系统信息',
-  'menu.settings.processList': '进程列表',
 
   'menu.about': '关于',
 }

@@ -73,6 +73,7 @@ export default {
   'menu.dataService.applicationDetail': 'Application Detail',
 
   'menu.dataAsset': 'Data Asset',
+  'menu.dataAsset.metaDataCenter': 'Meta Data Center',
   'menu.dataAsset.dataMap': 'Data Map',
   'menu.dataAsset.dataMap.overview': 'Overview',
   'menu.dataAsset.dataMap.dataDirectory': 'Data Directory',
@@ -116,12 +117,6 @@ export default {
   'menu.authenticationCenter.roleManager': 'Role Management',
   'menu.authenticationCenter.roleSelectPermissions': 'Role Data Permissions',
   'menu.authenticationCenter.tenantManager': 'Tenant Management',
-
-  'menu.settings': 'Setting Center',
-  'menu.settings.flinkConfig': 'Flink Settings',
-  'menu.settings.udfTemplate': 'UDF Template Settings',
-  'menu.settings.systemInfo': 'System Info',
-  'menu.settings.processList': 'Process List',
 
   'menu.about': 'About',
 }

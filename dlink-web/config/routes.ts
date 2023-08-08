@@ -282,7 +282,13 @@ export default [
     routes: [
       {
         path: '/dataAsset',
-        redirect: '/dataAsset/dataMap',
+        redirect: '/dataAsset/metaDataCenter',
+      },
+      {
+        path: '/dataAsset/metaDataCenter',
+        name: 'metaDataCenter',
+        component: './DataAsset/MetaDataCenter',
+        icon: 'cluster',
       },
       {
         path: '/dataAsset/dataMap',
@@ -352,24 +358,6 @@ export default [
     ],
   },
   {
-    path: '/datacenter',
-    name: 'datacenter',
-    icon: 'database',
-    routes: [
-      {
-        path: '/datacenter',
-        redirect: '/datacenter/metadata',
-      },
-      {
-        component: './DataCenter/MetaData',
-        path: '/datacenter/metadata',
-        name: 'metadata',
-        icon: 'cluster',
-      },
-    ],
-  },
-
-  {
     path: '/registration',
     name: 'registration',
     icon: 'appstore',
@@ -384,11 +372,6 @@ export default [
         name: 'cluster',
         icon: 'cluster',
         routes: [
-          // {
-          //   path: '/registration/cluster/shell',
-          //   name: 'shell',
-          //   component: './RegistrationCenter/ClusterManage/Shell',
-          // },
           {
             path: '/registration/cluster/clusterInstance',
             name: 'clusterInstance',
