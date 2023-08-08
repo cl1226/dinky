@@ -17,24 +17,16 @@
  *
  */
 
-export type TableListPagination = {
-  total: number
-  pageSize: number
-  current: number
+import CodeShow from '@/components/Common/CodeShow'
+
+const FlinkSQL = (props: any) => {
+  const { job } = props
+
+  return (
+    <>
+      <CodeShow code={job.history?.statement} language="sql" height="500px" />
+    </>
+  )
 }
 
-export type TableListData = {
-  list: TableListItem[]
-  pagination: Partial<TableListPagination>
-}
-
-export type TableListParams = {
-  status?: string
-  name?: string
-  desc?: string
-  key?: number
-  pageSize?: number
-  currentPage?: number
-  filter?: Record<string, any[]>
-  sorter?: Record<string, any>
-}
+export default FlinkSQL

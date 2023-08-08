@@ -20,6 +20,8 @@
 /**
  * @name umi 的路由配置
  * @description 只支持 path,component,routes,redirect,wrappers,name,icon 的配置
+ * @param hideInHeaderMenu 隐藏nav头的菜单
+ * @param hideInMenu 隐藏菜单
  * @param path  path 只支持两种占位符配置，第一种是动态参数 :id 的形式，第二种是 * 通配符，通配符只能出现路由字符串的最后。
  * @param component 配置 location 和 path 匹配后用于渲染的 React 组件路径。可以是绝对路径，也可以是相对路径，如果是相对路径，会从 src/pages 开始找起。
  * @param routes 配置子路由，通常在需要为多个路径增加 layout 组件时使用。
@@ -35,15 +37,22 @@
 export default [
   {
     path: '/user',
-    layout: false,
     routes: [
       {
         path: '/user',
         routes: [
           {
+            layout: false,
             name: 'login',
             path: '/user/login',
             component: './user/Login',
+          },
+          {
+            path: '/user/cluster',
+            name: 'cluster',
+            component: './user/Cluster',
+            hideInMenu: true,
+            footerRender: false,
           },
         ],
       },
@@ -96,7 +105,7 @@ export default [
   },
   {
     path: '/',
-    redirect: '/dashboard/cluster',
+    redirect: '/user/cluster',
   },
   {
     path: '/dashboard',
@@ -106,12 +115,6 @@ export default [
       {
         path: '/dashboard',
         redirect: '/dashboard/workspace',
-      },
-      {
-        path: '/dashboard/cluster',
-        name: 'cluster',
-        component: './user/Cluster',
-        hideInMenu: true,
       },
       {
         path: '/dashboard/workspace',
@@ -159,6 +162,17 @@ export default [
         name: 'devops',
         icon: 'cluster',
         routes: [
+          {
+            path: '/dataDev/devops/logCenter',
+            name: 'logCenter',
+            component: './DataDev/Devops/LogCenter',
+          },
+          {
+            path: '/dataDev/devops/JobInfo',
+            name: 'JobInfo',
+            component: './DataDev/Devops/LogCenter/JobInfo',
+            hideInMenu: true,
+          },
           {
             path: '/dataDev/devops/overview',
             name: 'overview',
@@ -333,18 +347,6 @@ export default [
     ],
   },
   {
-    path: '/devops',
-    name: 'devops',
-    icon: 'control',
-    component: './DevOps',
-  },
-  {
-    path: '/job',
-    name: 'job',
-    component: './DevOps/JobInfo',
-    hideInMenu: true,
-  },
-  {
     path: '/datacenter',
     name: 'datacenter',
     icon: 'database',
@@ -378,29 +380,6 @@ export default [
         icon: 'cluster',
         routes: [
           {
-            path: '/registration/cluster/hadoop',
-            name: 'hadoop',
-            component: './RegistrationCenter/ClusterManage/Hadoop',
-          },
-          {
-            path: '/registration/cluster/hadoop/create',
-            name: 'hadoopCreate',
-            component: './RegistrationCenter/ClusterManage/Hadoop/Create',
-            hideInMenu: true,
-          },
-          {
-            path: '/registration/cluster/hadoop/edit/:id',
-            name: 'hadoopEdit',
-            component: './RegistrationCenter/ClusterManage/Hadoop/Edit',
-            hideInMenu: true,
-          },
-          {
-            path: '/registration/cluster/hadoop/view/:id',
-            name: 'hadoopView',
-            component: './RegistrationCenter/ClusterManage/Hadoop/View',
-            hideInMenu: true,
-          },
-          {
             path: '/registration/cluster/shell',
             name: 'shell',
             component: './RegistrationCenter/ClusterManage/Shell',
@@ -415,11 +394,6 @@ export default [
             name: 'clusterConfiguration',
             component: './RegistrationCenter/ClusterManage/ClusterConfiguration',
           },
-          // {
-          //   path: '/registration/cluster/yarn',
-          //   name: 'yarn',
-          //   component: './RegistrationCenter/ClusterManage/Yarn',
-          // },
         ],
       },
       {

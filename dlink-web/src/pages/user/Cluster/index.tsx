@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { PageContainer } from '@ant-design/pro-layout'
+import React, { useEffect, useState } from 'react'
 import styles from './index.less'
-import { getClusterByUser } from '@/pages/user/service'
-import { Button, Card, Col, Empty, Row } from 'antd'
+import { Button, Card, Empty } from 'antd'
+
 import cookies from 'js-cookie'
 import { history, useModel } from 'umi'
+import { getClusterByUser } from '@/pages/user/service'
+import PageWrap from '@/components/Common/PageWrap'
 
 const Cluster = () => {
   const { initialState, setInitialState } = useModel('@@initialState')
@@ -35,7 +36,7 @@ const Cluster = () => {
   }
 
   return (
-    <PageContainer pageHeaderRender={false} title={false}>
+    <PageWrap pageHeaderRender={false} backgroundColor="transparent">
       <div className={styles['cluster-list']}>
         {clusterList.map((item) => (
           <Card className={'cluster-card'} hoverable bordered={false}>
@@ -65,7 +66,7 @@ const Cluster = () => {
         ))}
       </div>
       {!clusterList.length && <Empty description="暂无集群" />}
-    </PageContainer>
+    </PageWrap>
   )
 }
 

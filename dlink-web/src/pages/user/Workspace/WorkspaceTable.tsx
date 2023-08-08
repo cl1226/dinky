@@ -14,7 +14,7 @@ const UserTable = (props) => {
   const { value, onChange } = props
   const [form] = Form.useForm()
   const [modalVisible, setModalVisible] = useState(false)
-  const [selectUser, setSelectUser] = useState<any>(null)
+  const [selectUser, setSelectUser] = useState<any>([])
   const [userOptions, setUserOptions] = useState<any>([])
 
   const initOptions = async () => {
@@ -33,14 +33,14 @@ const UserTable = (props) => {
 
   const handleCreate = () => {
     setModalVisible(true)
-    setSelectUser(null)
+    setSelectUser([])
     form.resetFields()
   }
 
   const hanldeConfirm = async () => {
     await form.validateFields()
 
-    onChange && onChange([...(value || []), selectUser])
+    onChange && onChange([...(value || []), ...selectUser])
     setModalVisible(false)
   }
   const handleDelete = async (record) => {
@@ -126,6 +126,7 @@ const UserTable = (props) => {
             rules={[{ required: true, message: '请选择用户！' }]}
           >
             <Select
+              mode="multiple"
               onChange={(value, option) => {
                 setSelectUser(option)
               }}

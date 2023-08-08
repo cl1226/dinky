@@ -30,11 +30,6 @@ export default () => {
       label: '数据资产',
       url: '/dataAsset',
     },
-
-    {
-      label: '运维中心',
-      url: '/devops',
-    },
     {
       label: '元数据中心',
       url: '/datacenter',
@@ -48,7 +43,7 @@ export default () => {
           style={{ cursor: 'pointer', marginLeft: 10 }}
           color="blue"
           onClick={() => {
-            history.replace('/dashboard/cluster')
+            history.replace('/user/cluster')
           }}
         >
           返回集群列表

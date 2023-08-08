@@ -2,10 +2,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import styles from './index.less'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Card } from 'antd'
-import { PageContainer } from '@ant-design/pro-layout'
 import { history } from 'umi'
+
 import { getClusterList } from '@/pages/SuperAdmin/service'
 import { ICluster } from '@/pages/SuperAdmin/type.d'
+import PageWrap from '@/components/Common/PageWrap'
+
 const ClusterPage: React.FC<{}> = (props: any) => {
   const [clusterList, setClusterList] = useState<ICluster[]>([])
   const initCluster = async () => {
@@ -15,8 +17,9 @@ const ClusterPage: React.FC<{}> = (props: any) => {
   useEffect(() => {
     initCluster()
   }, [])
+
   return (
-    <PageContainer title={false}>
+    <PageWrap backgroundColor="transparent">
       <div className={styles['cluster-list']}>
         {clusterList.map((item) => (
           <Card className={'cluster-card'} hoverable bordered={false}>
@@ -43,7 +46,7 @@ const ClusterPage: React.FC<{}> = (props: any) => {
           </div>
         </Card>
       </div>
-    </PageContainer>
+    </PageWrap>
   )
 }
 

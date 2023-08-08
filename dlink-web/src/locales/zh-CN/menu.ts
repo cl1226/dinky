@@ -52,6 +52,8 @@ export default {
   'menu.dataDev.develop.dataStudio': '脚本开发',
   'menu.dataDev.develop.dataJob': '流程开发',
   'menu.dataDev.devops': '运维调度',
+  'menu.dataDev.devops.logCenter': 'Flink日志中心',
+  'menu.dataDev.devops.JobInfo': 'Flink日志详情',
   'menu.dataDev.devops.overview': '运维概览',
   'menu.dataDev.devops.processInstance': '作业监控',
   'menu.dataDev.devops.taskInstance': '实例监控',

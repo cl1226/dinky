@@ -1,11 +1,12 @@
 import React from 'react'
-import { PageContainer } from '@ant-design/pro-layout'
 import ClusterConfig from './Config'
+import PageWrap from '@/components/Common/PageWrap'
+
 const ClusterCreate: React.FC<{}> = (props: any) => {
   return (
-    <PageContainer title={false}>
+    <PageWrap noScroll={true}>
       <ClusterConfig mode={'create'} />
-    </PageContainer>
+    </PageWrap>
   )
 }
 

@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react'
-import { PageContainer } from '@ant-design/pro-layout'
+import PageWrap from '@/components/Common/PageWrap'
 import ClusterConfig from './Config'
 const ClusterEdit: React.FC<{}> = (props: any) => {
   return (
-    <PageContainer title={false}>
+    <PageWrap noScroll={true}>
       <ClusterConfig mode={'edit'} />
-    </PageContainer>
+    </PageWrap>
   )
 }
 

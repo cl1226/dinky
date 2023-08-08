@@ -1,13 +1,12 @@
 import React, { useRef, useState } from 'react'
-import styles from './index.less'
-import { PageContainer } from '@ant-design/pro-layout'
+import PageWrap from '@/components/Common/PageWrap'
 import ClusterConfig from './Config'
 
 const ClusterView: React.FC<{}> = (props: any) => {
   return (
-    <PageContainer title={false}>
+    <PageWrap noScroll={true}>
       <ClusterConfig mode={'view'} />
-    </PageContainer>
+    </PageWrap>
   )
 }
 

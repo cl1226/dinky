@@ -52,6 +52,8 @@ export default {
   'menu.dataDev.develop.dataStudio': 'Shell Develop',
   'menu.dataDev.develop.dataJob': 'Workflow Develop',
   'menu.dataDev.devops': 'DevOps',
+  'menu.dataDev.devops.logCenter': 'Flink Log Center',
+  'menu.dataDev.devops.JobInfo': 'Flink Job Detail',
   'menu.dataDev.devops.overview': 'DevOps Overview',
   'menu.dataDev.devops.processInstance': 'ProcessInstance Monitor',
   'menu.dataDev.devops.taskInstance': 'TaskInstance Monitor',

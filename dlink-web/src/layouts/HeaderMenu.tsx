@@ -10,6 +10,7 @@ import cookies from 'js-cookie'
 
 const saPath = '/sa'
 const dashboardPath = '/dashboard'
+const userPath = '/user'
 
 const SpaceSelector = () => {
   const [dataSource, setDataSource] = useState<any>([])
@@ -45,19 +46,17 @@ const SpaceSelector = () => {
 }
 
 export default (props: HeaderViewProps, defaultDom: React.ReactNode) => {
-  const { matchMenuKeys, menuData, location } = props as any
+  const { matchMenuKeys, menuData } = props as any
 
   const pathName = menuData?.find((item) => item.path === matchMenuKeys[0])?.name || ''
 
   // 匹配到sa及dashboard路由时隐藏
 
   const getContent = () => {
-    if (matchMenuKeys[0] === saPath) {
+    // 登录或超管页面 无附加header
+    if (matchMenuKeys[0] === saPath || matchMenuKeys[0] === userPath) {
       return null
     } else if (matchMenuKeys[0] === dashboardPath) {
-      if (location.pathname === '/dashboard/cluster') {
-        return null
-      }
       return (
         <div className="cluster-box">
           <span>{localStorage.getItem('dlink-clusterName')}</span>

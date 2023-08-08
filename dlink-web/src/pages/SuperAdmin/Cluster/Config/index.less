@@ -1,10 +1,25 @@
 .config-wrap {
-  height: calc(100vh - 48px - 50px - 48px);
+  height: 100%;
   padding: 0 10px;
   background-color: #fff;
+  :global {
+    .tabs-wrap.ant-tabs {
+      height: 100%;
+      > .ant-tabs-content-holder {
+        height: 100%;
+        > .ant-tabs-content {
+          height: 100%;
+          > .ant-tabs-tabpane {
+            height: 100%;
+          }
+        }
+      }
+    }
+  }
 }
+
 .tab-wrap {
-  height: calc(100vh - 48px - 50px - 48px - 46px);
+  height: 100%;
   margin: 0 -10px;
 }
 
@@ -25,7 +40,4 @@
       border-bottom: 0 !important;
     }
   }
-}
-
-.yarn-wrap {
 }

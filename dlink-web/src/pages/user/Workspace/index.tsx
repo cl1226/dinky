@@ -26,7 +26,7 @@ const Workspace = () => {
     return tabs
   }
 
-  return <PageWrap tabs={getTabs()}></PageWrap>
+  return <PageWrap pageHeaderRender={false} tabs={getTabs()}></PageWrap>
 }
 
 export default Workspace

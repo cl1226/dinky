@@ -32,7 +32,7 @@ import { getStorageClusterId, getStorageWorkspaceId } from '@/components/Common/
 
 const isDev = process.env.NODE_ENV === 'development'
 const loginPath = '/user/login'
-const clusterPath = '/dashboard/cluster'
+const clusterPath = '/user/cluster'
 const worksapcePath = '/dashboard/workspace'
 /** 获取用户信息比较慢的时候会展示一个 loading */
 export const initialStateConfig = {

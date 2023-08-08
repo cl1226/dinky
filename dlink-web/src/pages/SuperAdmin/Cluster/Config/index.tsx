@@ -36,6 +36,7 @@ const ClusterConfig: React.FC<{ mode: 'create' | 'view' | 'edit' }> = (props: an
     <div className={styles['config-wrap']}>
       {isInited ? (
         <Tabs
+          className={'tabs-wrap'}
           items={[
             {
               label: `基本配置`,
