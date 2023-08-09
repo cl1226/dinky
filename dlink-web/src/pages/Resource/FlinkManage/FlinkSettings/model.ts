@@ -17,28 +17,47 @@
  *
  */
 
+import { Reducer } from 'umi'
 
-import {getData, postAll} from "@/components/Common/crud";
-import {message} from "antd";
-import {l} from "@/utils/intl";
-
-export function loadSettings(dispatch: any) {
-  const res = getData('api/sysConfig/getAll');
-  res.then((result) => {
-    result.datas && dispatch && dispatch({
-      type: "Settings/saveSettings",
-      payload: result.datas,
-    });
-  });
+export type SettingsStateType = {
+  sqlSubmitJarPath: string
+  sqlSubmitJarParas: string
+  sqlSubmitJarMainAppClass: string
+  useRestAPI: boolean
+  sqlSeparator: string
+  jobIdWait: number
 }
 
-export function saveSettings(values:{},dispatch: any) {
-  const res = postAll("api/sysConfig/updateSysConfigByJson",values);
-  res.then((result) => {
-    message.success(l('app.request.update.setting.success'));
-    dispatch && dispatch({
-      type: "Settings/saveSettings",
-      payload: values,
-    });
-  });
+export type ModelType = {
+  namespace: string
+  state: SettingsStateType
+  effects: {}
+  reducers: {
+    saveSettings: Reducer<SettingsStateType>
+  }
 }
+
+const SettingsModel: ModelType = {
+  namespace: 'FlinkSettings',
+  state: {
+    sqlSubmitJarPath: '',
+    sqlSubmitJarParas: '',
+    sqlSubmitJarMainAppClass: '',
+    useRestAPI: true,
+    sqlSeparator: ',\n',
+    jobIdWait: 30,
+  },
+
+  effects: {},
+
+  reducers: {
+    saveSettings(state, { payload }) {
+      return {
+        ...state,
+        ...payload,
+      }
+    },
+  },
+}
+
+export default SettingsModel

@@ -32,7 +32,7 @@ export function loadSettings(dispatch: any) {
     result.datas &&
       dispatch &&
       dispatch({
-        type: 'Settings/saveSettings',
+        type: 'FlinkSettings/saveSettings',
         payload: result.datas,
       })
   })

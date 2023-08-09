@@ -385,7 +385,7 @@ export default [
           {
             path: '/resource/flink/flinkSettings',
             name: 'flinkConfig',
-            component: './SettingCenter/FlinkSettings',
+            component: './Resource/FlinkManage/FlinkSettings',
           },
           {
             path: '/resource/flink/udfTemplate',

@@ -17,33 +17,29 @@
  *
  */
 
-
-import React from 'react';
-import FlinkConfigView from './components/flinkConfig';
-import {connect} from "umi";
-import {PageContainer} from "@ant-design/pro-layout";
-import {SettingsStateType} from "@/pages/SettingCenter/FlinkSettings/model";
-import {loadSettings} from "@/pages/SettingCenter/FlinkSettings/function";
-
+import React from 'react'
+import FlinkConfigView from './components/flinkConfig'
+import { connect } from 'umi'
+import { PageContainer } from '@ant-design/pro-layout'
+import { SettingsStateType } from '@/pages/Resource/FlinkManage/FlinkSettings/model'
+import { loadSettings } from '@/pages/Resource/FlinkManage/FlinkSettings/function'
 
 type SettingsProps = {
-  dispatch: any;
-};
+  dispatch: any
+}
 
-const Settings: React.FC<SettingsProps> = (props) => {
-
-  const {dispatch} = props;
-  loadSettings(dispatch);
-
+const FlinkSettings: React.FC<SettingsProps> = (props) => {
+  const { dispatch } = props
+  loadSettings(dispatch)
 
   return (
     <PageContainer title={false}>
-      <FlinkConfigView/>
+      <FlinkConfigView />
     </PageContainer>
-  );
-};
-export default connect(({Settings}: { Settings: SettingsStateType }) => ({
-  sqlSubmitJarPath: Settings.sqlSubmitJarPath,
-  sqlSubmitJarParas: Settings.sqlSubmitJarParas,
-  sqlSubmitJarMainAppClass: Settings.sqlSubmitJarMainAppClass,
-}))(Settings);
+  )
+}
+export default connect(({ FlinkSettings }: { FlinkSettings: SettingsStateType }) => ({
+  sqlSubmitJarPath: FlinkSettings.sqlSubmitJarPath,
+  sqlSubmitJarParas: FlinkSettings.sqlSubmitJarParas,
+  sqlSubmitJarMainAppClass: FlinkSettings.sqlSubmitJarMainAppClass,
+}))(FlinkSettings)
