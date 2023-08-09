@@ -26,7 +26,6 @@ import RightContent from '@/components/RightContent'
 import Footer from '@/components/Footer'
 import type { ResponseError } from 'umi-request'
 import { currentUser as queryCurrentUser } from './services/ant-design-pro/api'
-import { BookOutlined, LinkOutlined } from '@ant-design/icons'
 import HeaderMenu from './layouts/HeaderMenu'
 import { getStorageClusterId, getStorageWorkspaceId } from '@/components/Common/crud'
 
@@ -157,8 +156,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       } else if (initialState?.currentUser?.sa === false) {
         const clusterId = getStorageClusterId()
         const workspaceId = getStorageWorkspaceId()
-        console.log('init', clusterId, '-----', workspaceId)
-        
+
         if (!clusterId && location.pathname !== clusterPath) {
           history.push(clusterPath)
           return
@@ -183,7 +181,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         ]
       : [],
     menuHeaderRender: undefined,
-    headerContentRender: HeaderMenu,
+    headerContentRender: (props, defaultDom) => <HeaderMenu instance={props}></HeaderMenu>,
     onCollapse: (collapsed: boolean) => {
       setInitialState({ ...initialState, collapsed })
     },
