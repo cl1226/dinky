@@ -38,7 +38,7 @@ import {
 } from '@/components/Common/crud'
 import { showCluster, showSessionCluster } from '@/components/Studio/StudioEvent/DDL'
 import { RUN_MODE } from '@/components/Studio/conf'
-import ClusterForm from '@/pages/Resource/ClusterManage/Cluster/components/ClusterForm'
+import ClusterForm from '@/pages/Resource/FlinkManage/Cluster/components/ClusterForm'
 import { l } from '@/utils/intl'
 
 const TextArea = Input.TextArea

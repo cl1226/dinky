@@ -23,14 +23,14 @@ import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/i
 import {
   getConfig,
   getConfigFormValues,
-} from '@/pages/Resource/ClusterManage/ClusterConfiguration/function'
+} from '@/pages/Resource/FlinkManage/ClusterConfiguration/function'
 import {
   DOCKER_CONFIG_LIST,
   FLINK_CONFIG_LIST,
   HADOOP_CONFIG_LIST,
   KUBERNETES_CONFIG_LIST,
-} from '@/pages/Resource/ClusterManage/ClusterConfiguration/conf'
-import { testClusterConfigurationConnect } from '@/pages/Resource/ClusterManage/ClusterConfiguration/service'
+} from '@/pages/Resource/FlinkManage/ClusterConfiguration/conf'
+import { testClusterConfigurationConnect } from '@/pages/Resource/FlinkManage/ClusterConfiguration/service'
 import type { ClusterConfigurationTableListItem } from '@/pages/Resource/data'
 import { CODE } from '@/components/Common/crud'
 import { l } from '@/utils/intl'

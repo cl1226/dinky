@@ -22,7 +22,7 @@ import {
   FLINK_CONFIG_NAME_LIST,
   HADOOP_CONFIG_NAME_LIST,
   KUBERNETES_CONFIG_NAME_LIST,
-} from '@/pages/Resource/ClusterManage/ClusterConfiguration/conf'
+} from '@/pages/Resource/FlinkManage/ClusterConfiguration/conf'
 import { ClusterConfigurationTableListItem } from '@/pages/Resource/data'
 
 export function getConfig(values: any) {

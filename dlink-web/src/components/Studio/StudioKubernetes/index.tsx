@@ -17,68 +17,65 @@
  *
  */
 
-import {Divider, Form, Input, Space,} from 'antd';
-import {Dispatch, DocumentStateType} from "@@/plugin-dva/connect";
-import {connect} from "umi";
-import Button from "antd/es/button/button";
-import {useState} from "react";
+import { Divider, Form, Input, Space } from 'antd'
+import { Dispatch, DocumentStateType } from '@@/plugin-dva/connect'
+import { connect } from 'umi'
+import Button from 'antd/es/button/button'
+import { useState } from 'react'
 import {
   APP_CONFIG_LIST,
   Config,
   FLINK_CONFIG_NAME_LIST,
-  KUBERNETES_CONFIG_NAME_LIST
-} from "@/pages/Resource/ClusterManage/ClusterConfiguration/conf";
-import {MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
-import {getConfig} from "@/pages/Resource/ClusterManage/ClusterConfiguration/function";
-import {l} from "@/utils/intl";
-
+  KUBERNETES_CONFIG_NAME_LIST,
+} from '@/pages/Resource/FlinkManage/ClusterConfiguration/conf'
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { getConfig } from '@/pages/Resource/FlinkManage/ClusterConfiguration/function'
+import { l } from '@/utils/intl'
 
 const formLayout = {
-  labelCol: {span: 7},
-  wrapperCol: {span: 13},
-};
+  labelCol: { span: 7 },
+  wrapperCol: { span: 13 },
+}
 
 const StudioKubernetes = (props: any) => {
+  const { height = '100%', width = '100%', conf } = props
 
-  const {
-    height = '100%',
-    width = '100%',
-    conf,
-  } = props;
-
-  const [form] = Form.useForm();
+  const [form] = Form.useForm()
 
   const CUSTOM_KUBERNETS_CONFIG_LIST: Config[] = [
     {
-    name: 'kubernetes.jobmanager.cpu',
-    lable: 'kubernetes.jobmanager.cpu',
-    showType: 'input',
+      name: 'kubernetes.jobmanager.cpu',
+      lable: 'kubernetes.jobmanager.cpu',
+      showType: 'input',
       placeholder: l('pages.rc.clusterConfig.help.kubernets.jmcpu'),
-  }, {
-    name: 'kubernetes.taskmanager.cpu',
-    lable: 'kubernetes.taskmanager.cpu',
-    showType: 'input',
-    placeholder: l('pages.rc.clusterConfig.help.kubernets.tmcpu'),
-  },
-  ];
+    },
+    {
+      name: 'kubernetes.taskmanager.cpu',
+      lable: 'kubernetes.taskmanager.cpu',
+      showType: 'input',
+      placeholder: l('pages.rc.clusterConfig.help.kubernets.tmcpu'),
+    },
+  ]
   const CUSTOM_FLINK_CONFIG_LIST: Config[] = [
     {
       name: 'jobmanager.memory.process.size',
       lable: 'jobmanager.memory.process.size',
       placeholder: l('pages.rc.clusterConfig.help.kubernets.jobManagerMemory'),
-    }, {
+    },
+    {
       name: 'taskmanager.memory.process.size',
       lable: 'taskmanager.memory.process.size',
       placeholder: l('pages.rc.clusterConfig.help.kubernets.taskManagerMemory'),
-    }, {
+    },
+    {
       name: 'taskmanager.numberOfTaskSlots',
       lable: 'taskmanager.numberOfTaskSlots',
       placeholder: '',
-    }
-  ];
+    },
+  ]
   //Separate normal configuration and user-defined configuration.
   function addMapToList(map: Record<string, unknown>, keys: string[]) {
-    const list = [];
+    const list = []
     for (const i in map) {
       if (!keys.includes(i)) {
         list.push({
@@ -87,15 +84,15 @@ const StudioKubernetes = (props: any) => {
         })
       }
     }
-    return list;
+    return list
   }
 
   //Merge pre-defined config
   function mergeConfig(source: Record<string, unknown>, from: Record<string, unknown>) {
     for (const key in from) {
-      source[key] = from[key];
+      source[key] = from[key]
     }
-    return source;
+    return source
   }
 
   const initValue = (configJson: string) => {
@@ -106,81 +103,74 @@ const StudioKubernetes = (props: any) => {
     //Normal configuration and user-defined configuration are mixed together
     // need to be separated
     //Normal config set
-    if (config["kubernetesConfig"]) {
-      initValues = mergeConfig(initValues, config["kubernetesConfig"])
+    if (config['kubernetesConfig']) {
+      initValues = mergeConfig(initValues, config['kubernetesConfig'])
     }
-    if (config["flinkConfig"]) {
-      initValues = mergeConfig(initValues, config["flinkConfig"])
+    if (config['flinkConfig']) {
+      initValues = mergeConfig(initValues, config['flinkConfig'])
     }
-    if (config["appConfig"]) {
-      initValues = mergeConfig(initValues, config["appConfig"])
+    if (config['appConfig']) {
+      initValues = mergeConfig(initValues, config['appConfig'])
     }
     //user custom config set
-    initValues["flinkConfigList"] = addMapToList(config["flinkConfig"], FLINK_CONFIG_NAME_LIST())
-    initValues["kubernetesConfigList"] = addMapToList(config["kubernetesConfig"], KUBERNETES_CONFIG_NAME_LIST())
-    return initValues;
+    initValues['flinkConfigList'] = addMapToList(config['flinkConfig'], FLINK_CONFIG_NAME_LIST())
+    initValues['kubernetesConfigList'] = addMapToList(
+      config['kubernetesConfig'],
+      KUBERNETES_CONFIG_NAME_LIST(),
+    )
+    return initValues
   }
 
-  const [formVals, setFormVals] = useState<Record<string, unknown>>(initValue(conf));
-
+  const [formVals, setFormVals] = useState<Record<string, unknown>>(initValue(conf))
 
   const onValuesChange = (change: any, all: any) => {
-    all.type = "Kubernetes"
+    all.type = 'Kubernetes'
     const values = getConfig(all)
     let appConfig = {}
     APP_CONFIG_LIST.forEach((value, index) => {
       appConfig[APP_CONFIG_LIST[index].name] = all[APP_CONFIG_LIST[index].name]
     })
     setFormVals(all)
-    props.saveSql(JSON.stringify({...values,"appConfig":appConfig}))
+    props.saveSql(JSON.stringify({ ...values, appConfig: appConfig }))
   }
 
   // build pre-defined config item
   const buildConfig = (config: Config[]) => {
-    const itemList: JSX.Element[] = [];
-    config.forEach(configItem => {
-      itemList.push(<Form.Item
-        key={configItem.name}
-        name={configItem.name}
-        label={configItem.lable}
-        help={configItem.help}
-      >
-        <Input placeholder={configItem.placeholder}/>
-
-      </Form.Item>)
-    });
-    return itemList;
-  };
+    const itemList: JSX.Element[] = []
+    config.forEach((configItem) => {
+      itemList.push(
+        <Form.Item
+          key={configItem.name}
+          name={configItem.name}
+          label={configItem.lable}
+          help={configItem.help}
+        >
+          <Input placeholder={configItem.placeholder} />
+        </Form.Item>,
+      )
+    })
+    return itemList
+  }
   // build user-defined config item
   const buildOtherConfig = (itemName: string, configName: string, addDescription: string) => {
     return (
-      <Form.Item
-        label={itemName}
-      >
+      <Form.Item label={itemName}>
         <Form.List name={configName}>
-          {(fields, {add, remove}) => (
+          {(fields, { add, remove }) => (
             <>
-              {fields.map(({key, name, fieldKey, ...restField}) => (
-                <Space key={key} style={{display: 'flex'}} align="baseline">
-                  <Form.Item
-                    {...restField}
-                    name={[name, 'name']}
-                    fieldKey={[fieldKey, 'name']}
-                  >
-                    <Input placeholder="name"/>
+              {fields.map(({ key, name, fieldKey, ...restField }) => (
+                <Space key={key} style={{ display: 'flex' }} align="baseline">
+                  <Form.Item {...restField} name={[name, 'name']} fieldKey={[fieldKey, 'name']}>
+                    <Input placeholder="name" />
                   </Form.Item>
-                  <Form.Item
-                    {...restField}
-                    name={[name, 'value']}
-                    fieldKey={[fieldKey, 'value']}
-                  >
-                    <Input placeholder="value"/>
+                  <Form.Item {...restField} name={[name, 'value']} fieldKey={[fieldKey, 'value']}>
+                    <Input placeholder="value" />
                   </Form.Item>
-                  <MinusCircleOutlined onClick={() => remove(name)}/>
+                  <MinusCircleOutlined onClick={() => remove(name)} />
                 </Space>
               ))}
               <Form.Item>
-                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined/>}>
+                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
                   {addDescription}
                 </Button>
               </Form.Item>
@@ -200,25 +190,27 @@ const StudioKubernetes = (props: any) => {
         {buildConfig(CUSTOM_KUBERNETS_CONFIG_LIST)}
         <Divider>{l('pages.rc.clusterConfig.flinkConfig')}</Divider>
         {buildConfig(CUSTOM_FLINK_CONFIG_LIST)}
-        {buildOtherConfig(l('pages.rc.clusterConfig.otherConfig'),
-          "flinkConfigList",
-          l('pages.rc.clusterConfig.addDefineConfig'))}
-
+        {buildOtherConfig(
+          l('pages.rc.clusterConfig.otherConfig'),
+          'flinkConfigList',
+          l('pages.rc.clusterConfig.addDefineConfig'),
+        )}
       </>
-    );
-  };
-
+    )
+  }
 
   return (
-    <div style={{
-      width: width,
-      height: height,
-      padding: "10px",
-      overflowY: "scroll"
-    }}>
+    <div
+      style={{
+        width: width,
+        height: height,
+        padding: '10px',
+        overflowY: 'scroll',
+      }}
+    >
       <Form
-        style={{width: "1000px"}}
-        labelAlign={"left"}
+        style={{ width: '1000px' }}
+        labelAlign={'left'}
         {...formLayout}
         form={form}
         initialValues={formVals}
@@ -227,24 +219,29 @@ const StudioKubernetes = (props: any) => {
         {renderContent()}
       </Form>
     </div>
-  );
+  )
 }
 
-
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  saveSql: (val: any) => dispatch({
-    type: "Studio/saveSql",
-    payload: val,
-  }), saveSqlMetaData: (sqlMetaData: any, key: number) => dispatch({
-    type: "Studio/saveSqlMetaData",
-    payload: {
-      activeKey: key,
-      sqlMetaData,
-      isModified: true,
-    }
-  }),
+  saveSql: (val: any) =>
+    dispatch({
+      type: 'Studio/saveSql',
+      payload: val,
+    }),
+  saveSqlMetaData: (sqlMetaData: any, key: number) =>
+    dispatch({
+      type: 'Studio/saveSqlMetaData',
+      payload: {
+        activeKey: key,
+        sqlMetaData,
+        isModified: true,
+      },
+    }),
 })
 
-export default connect(({Document}: { Document: DocumentStateType }) => ({
-  fillDocuments: Document.fillDocuments,
-}), mapDispatchToProps)(StudioKubernetes);
+export default connect(
+  ({ Document }: { Document: DocumentStateType }) => ({
+    fillDocuments: Document.fillDocuments,
+  }),
+  mapDispatchToProps,
+)(StudioKubernetes)

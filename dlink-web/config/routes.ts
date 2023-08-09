@@ -365,32 +365,32 @@ export default [
     routes: [
       {
         path: '/resource',
-        redirect: '/resource/cluster/clusterInstance',
+        redirect: '/resource/flink/clusterInstance',
       },
       {
-        path: '/resource/cluster',
-        name: 'cluster',
+        path: '/resource/flink',
+        name: 'flink',
         icon: 'cluster',
         routes: [
           {
-            path: '/resource/cluster/clusterInstance',
+            path: '/resource/flink/clusterInstance',
             name: 'clusterInstance',
-            component: './Resource/ClusterManage/Cluster',
+            component: './Resource/FlinkManage/Cluster',
           },
           {
-            path: '/resource/cluster/clusterConfiguration',
+            path: '/resource/flink/clusterConfiguration',
             name: 'clusterConfiguration',
-            component: './Resource/ClusterManage/ClusterConfiguration',
+            component: './Resource/FlinkManage/ClusterConfiguration',
           },
           {
-            path: '/resource/cluster/flinkSettings',
+            path: '/resource/flink/flinkSettings',
             name: 'flinkConfig',
             component: './SettingCenter/FlinkSettings',
           },
           {
-            path: '/resource/cluster/udfTemplate',
+            path: '/resource/flink/udfTemplate',
             name: 'udfTemplate',
-            component: './SettingCenter/UDFTemplate',
+            component: './Resource/FlinkManage/UDFTemplate',
           },
         ],
       },

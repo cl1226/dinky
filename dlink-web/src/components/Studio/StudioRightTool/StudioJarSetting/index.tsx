@@ -46,7 +46,7 @@ import { JarStateType } from '@/pages/Resource/Jar/model'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { RUN_MODE } from '@/components/Studio/conf'
 import { CODE } from '@/components/Common/crud'
-import { getHadoopConfigPathFromClusterConfigurationsById } from '@/pages/Resource/ClusterManage/ClusterConfiguration/function'
+import { getHadoopConfigPathFromClusterConfigurationsById } from '@/pages/Resource/FlinkManage/ClusterConfiguration/function'
 import { l } from '@/utils/intl'
 import { AlertStateType } from '@/pages/Resource/AlertManage/AlertInstance/model'
 

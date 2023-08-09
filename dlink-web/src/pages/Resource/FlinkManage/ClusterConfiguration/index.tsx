@@ -32,7 +32,7 @@ import {
   updateEnabled,
 } from '@/components/Common/crud'
 import { showClusterConfiguration } from '@/components/Studio/StudioEvent/DDL'
-import ClusterConfigurationForm from '@/pages/Resource/ClusterManage/ClusterConfiguration/components/ClusterConfigurationForm'
+import ClusterConfigurationForm from '@/pages/Resource/FlinkManage/ClusterConfiguration/components/ClusterConfigurationForm'
 import { l } from '@/utils/intl'
 
 const url = '/api/clusterConfiguration'
