@@ -27,9 +27,9 @@ import {
   Config,
   FLINK_CONFIG_NAME_LIST,
   KUBERNETES_CONFIG_NAME_LIST
-} from "@/pages/RegistrationCenter/ClusterManage/ClusterConfiguration/conf";
+} from "@/pages/Resource/ClusterManage/ClusterConfiguration/conf";
 import {MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
-import {getConfig} from "@/pages/RegistrationCenter/ClusterManage/ClusterConfiguration/function";
+import {getConfig} from "@/pages/Resource/ClusterManage/ClusterConfiguration/function";
 import {l} from "@/utils/intl";
 
 

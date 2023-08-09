@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Select, Input, Modal, message, Table, Tag } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import type { CustomTagProps } from 'rc-select/lib/BaseSelect'
-import { getSourceTree } from '@/pages/RegistrationCenter/ResourceManage/service'
+import { getSourceTree } from '@/pages/Resource/ResourceManage/service'
 import { TreeSelector } from './TreeSelector'
 
 export function convertToTreeData(data, pid: number, path?: string[]) {

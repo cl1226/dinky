@@ -43,7 +43,7 @@ const StudioHome = (props: any) => {
       description:
         '通过配置数据源信息、建立数据连接，配置的数据连接会在脚本和作业的开发过程中用到，用于访问数据源',
       type: '新建数据连接',
-      url: '/registration/database',
+      url: '/resource/database',
     },
   ]
 

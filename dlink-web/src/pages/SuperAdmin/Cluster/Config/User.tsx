@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import styles from './index.less'
 import { Input, Tag, Select, Space, Form, Empty, Table, Button, Row, Modal } from 'antd'
-import { ITabComProps } from '@/pages/RegistrationCenter/ClusterManage/Hadoop/data.d'
+import { ITabComProps } from '@/pages/SuperAdmin/type.d'
 import { debounce } from 'lodash'
 import {
   getRoleOptions,

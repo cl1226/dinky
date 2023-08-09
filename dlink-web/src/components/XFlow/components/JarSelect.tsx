@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Select, Input, Modal, message, Table, Tree } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import { getJarTree } from '@/pages/RegistrationCenter/ResourceManage/service'
+import { getJarTree } from '@/pages/Resource/ResourceManage/service'
 import { TreeSelector } from './TreeSelector'
 
 export function convertToTreeData(data, pid: number, path?: string[]) {

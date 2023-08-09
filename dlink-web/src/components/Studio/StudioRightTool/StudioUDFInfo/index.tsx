@@ -22,7 +22,7 @@ import { StateType } from '@/pages/DataStudio/model'
 import { Col, Form, Input, Row } from 'antd'
 import styles from './index.less'
 import { useEffect } from 'react'
-import { JarStateType } from '@/pages/RegistrationCenter/Jar/model'
+import { JarStateType } from '@/pages/Resource/Jar/model'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { l } from '@/utils/intl'
 

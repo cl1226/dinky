@@ -17,8 +17,8 @@
  *
  */
 
-import { ClusterTableListItem, JarTableListItem } from '@/pages/RegistrationCenter/data'
-import { ClusterConfigurationTableListItem } from '@/pages/RegistrationCenter/data'
+import { ClusterTableListItem, JarTableListItem } from '@/pages/Resource/data'
+import { ClusterConfigurationTableListItem } from '@/pages/Resource/data'
 import { HistoryItem } from '@/components/Studio/StudioConsole/StudioHistory/data'
 import { List } from 'antd'
 

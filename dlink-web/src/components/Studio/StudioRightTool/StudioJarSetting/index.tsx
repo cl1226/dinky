@@ -42,13 +42,13 @@ import {
 } from '@ant-design/icons'
 import styles from './index.less'
 import React, { useEffect, useState } from 'react'
-import { JarStateType } from '@/pages/RegistrationCenter/Jar/model'
+import { JarStateType } from '@/pages/Resource/Jar/model'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { RUN_MODE } from '@/components/Studio/conf'
 import { CODE } from '@/components/Common/crud'
-import { getHadoopConfigPathFromClusterConfigurationsById } from '@/pages/RegistrationCenter/ClusterManage/ClusterConfiguration/function'
+import { getHadoopConfigPathFromClusterConfigurationsById } from '@/pages/Resource/ClusterManage/ClusterConfiguration/function'
 import { l } from '@/utils/intl'
-import { AlertStateType } from '@/pages/RegistrationCenter/AlertManage/AlertInstance/model'
+import { AlertStateType } from '@/pages/Resource/AlertManage/AlertInstance/model'
 
 const { Option } = Select
 

@@ -25,7 +25,7 @@ const ClusterPage: React.FC<{}> = (props: any) => {
           <Card className={'cluster-card'} hoverable bordered={false}>
             <div className="title-row">{item.name}</div>
             <div className="img-row">
-              <img src="/registration/cluster/hadoop-card.svg" alt="" />
+              <img src="/resource/cluster/hadoop-card.svg" alt="" />
             </div>
             <div className="action-row">
               <Button onClick={() => history.push(`/sa/cluster/view/${item.id}`)}>查看详情</Button>

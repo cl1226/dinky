@@ -24,7 +24,7 @@ import type {ActionType, ProColumns} from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
 import ProDescriptions from '@ant-design/pro-descriptions';
 
-import type {DocumentTableListItem} from '@/pages/RegistrationCenter/data';
+import type {DocumentTableListItem} from '@/pages/Resource/data';
 
 import {queryData,} from "@/components/Common/crud";
 import {l} from "@/utils/intl";

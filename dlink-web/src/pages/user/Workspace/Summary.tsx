@@ -32,7 +32,7 @@ export default () => {
     },
     {
       label: '资源中心',
-      url: '/registration',
+      url: '/resource',
     },
   ]
   return (
