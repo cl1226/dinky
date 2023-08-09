@@ -124,7 +124,7 @@ export default [
       {
         path: '/dashboard/workspace',
         name: 'workspace',
-        component: './user/Workspace',
+        component: './Dashboard/Workspace',
         hideInMenu: true,
       },
     ],

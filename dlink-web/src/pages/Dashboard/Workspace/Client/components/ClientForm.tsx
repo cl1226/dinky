@@ -3,8 +3,9 @@ import { Button, Form, Input, message, Modal, Select } from 'antd'
 import MonacoEditor from 'react-monaco-editor'
 import styles from '../index.less'
 import { l } from '@/utils/intl'
-import { getClusterByUser, postClientTest } from '@/pages/user/service'
-import { ClientTableListItem } from '@/pages/user/data.d'
+import { postClientTest } from '@/pages/Dashboard/service'
+import { getClusterByUser } from '@/pages/user/service'
+import { ClientTableListItem } from '@/pages/Dashboard/data.d'
 
 export type ClusterFormProps = {
   onCancel: (flag?: boolean) => void

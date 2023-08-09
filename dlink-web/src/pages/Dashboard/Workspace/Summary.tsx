@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Empty, Tag } from 'antd'
 import styles from './index.less'
 import { history } from 'umi'
-import { getWorkspaceByUser } from '@/pages/user/service'
+import { getWorkspaceByUser } from '@/pages/Dashboard/service'
 import cookies from 'js-cookie'
 
 export default () => {
@@ -27,7 +27,7 @@ export default () => {
       url: '/dataService',
     },
     {
-      label: '数据资产',
+      label: '数据目录',
       url: '/dataAsset',
     },
     {

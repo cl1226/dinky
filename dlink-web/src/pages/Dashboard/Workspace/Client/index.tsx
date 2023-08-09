@@ -23,16 +23,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import type { ActionType, ProColumns } from '@ant-design/pro-table'
 import ProTable from '@ant-design/pro-table'
 
-import ClientForm from '@/pages/user/Workspace/Client/components/ClientForm'
+import ClientForm from '@/pages/Dashboard/Workspace/Client/components/ClientForm'
 
-import { ClientTableListItem } from '@/pages/user/data.d'
+import { ClientTableListItem } from '@/pages/Dashboard/data.d'
 
-import {
-  getClusterByUser,
-  getClientList,
-  addorUpdateClient,
-  deleteClient,
-} from '@/pages/user/service'
+import { getClientList, addorUpdateClient, deleteClient } from '@/pages/Dashboard/service'
+import { getClusterByUser } from '@/pages/user/service'
 
 const ShellTableList: React.FC<{}> = (props: any) => {
   const { dispatch } = props

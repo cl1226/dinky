@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Col, Space, Input, Tag, Modal, Row, Table, Form, Select } from 'antd'
 import styles from './index.less'
-import { getWorkspaceList, createWorkspace, deleteWorkspace } from '@/pages/user/service'
+import { getWorkspaceList, createWorkspace, deleteWorkspace } from '@/pages/Dashboard/service'
 import { getStorageClusterId } from '@/components/Common/crud'
 import { getBindUserList } from '@/pages/SuperAdmin/service'
 
