@@ -110,7 +110,7 @@ export default [
   },
   {
     path: '/',
-    redirect: '/user/cluster',
+    redirect: '/dashboard/workspace',
   },
   {
     path: '/dashboard',

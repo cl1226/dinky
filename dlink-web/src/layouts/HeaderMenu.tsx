@@ -1,7 +1,7 @@
 import { HeaderViewProps } from '@ant-design/pro-layout/lib/Header'
 import { Dropdown, Select, Space } from 'antd'
 import type { MenuProps } from 'antd'
-import { history } from 'umi'
+import { history, useModel } from 'umi'
 import styles from './index.less'
 import { getWorkspaceByUser } from '@/pages/Dashboard/service'
 import { getStorageClusterId } from '@/components/Common/crud'
@@ -45,13 +45,12 @@ const SpaceSelector = () => {
   )
 }
 
-export default (props: HeaderViewProps, defaultDom: React.ReactNode) => {
-  const { matchMenuKeys, menuData } = props as any
-
-  const pathName = menuData?.find((item) => item.path === matchMenuKeys[0])?.name || ''
-
-  // 匹配到sa及dashboard路由时隐藏
-
+const HeaderMenu = (props) => {
+  const { instance } = props
+  const { matchMenuKeys, menuData } = instance
+  const getPathName = () => {
+    return menuData?.find((item) => item.path === matchMenuKeys[0])?.name || ''
+  }
   const getContent = () => {
     // 登录或超管页面 无附加header
     if (matchMenuKeys[0] === saPath || matchMenuKeys[0] === userPath) {
@@ -76,7 +75,7 @@ export default (props: HeaderViewProps, defaultDom: React.ReactNode) => {
             },
           }}
         >
-          <div className="btn-box">{pathName}</div>
+          <div className="btn-box">{getPathName()}</div>
         </Dropdown>
         <div className="driver"></div>
         <div className="workspace-box">
@@ -101,5 +100,8 @@ export default (props: HeaderViewProps, defaultDom: React.ReactNode) => {
         key: item.path,
       }))
   }
+
   return <div className={styles['header-menu']}>{getContent()}</div>
 }
+
+export default HeaderMenu

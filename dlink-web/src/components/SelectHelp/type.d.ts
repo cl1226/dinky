@@ -6,5 +6,4 @@ export enum EAsyncCode {
   'DBTYPE' = 'DBTYPE',
   'ITEMTYPE' = 'ITEMTYPE',
   'cluster' = 'cluster',
-  'tenant' = 'tenant',
 }
