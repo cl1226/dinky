@@ -58,6 +58,8 @@ public interface TaskService extends ISuperService<Task> {
 
     void initTenantByTaskId(Integer id);
 
+    void initWorkspaceByTaskId(Integer id);
+
     boolean saveOrUpdateTask(Task task);
 
     List<Task> listFlinkSQLEnv();

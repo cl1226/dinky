@@ -76,7 +76,7 @@ public class AdminController {
     @GetMapping("/current")
     public Result current() throws Exception {
         try {
-            return Result.succeed(StpUtil.getSession().get("user"), "获取成功");
+            return userService.current();
         } catch (Exception e) {
             return Result.failed("获取失败");
         }

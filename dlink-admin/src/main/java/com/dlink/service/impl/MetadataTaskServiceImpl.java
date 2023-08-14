@@ -20,6 +20,7 @@ import com.dlink.model.*;
 import com.dlink.service.*;
 import com.dlink.utils.QuartzUtil;
 import com.dlink.utils.ShellUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.UserGroupInformation;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -215,6 +217,24 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
     }
 
     @Override
+    public Result showLog(Integer id) {
+        MetadataTaskInstance instance = metadataTaskInstanceService.getById(id);
+        if (instance == null) {
+            return Result.failed("任务实例为空");
+        }
+        if (StringUtils.isNotBlank(instance.getLogPath())) {
+            InputStream inputStream = minioStorageService.downloadFile(instance.getLogPath());
+            try {
+                String s = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                return Result.succeed(s, "获取成功");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return Result.succeed("");
+    }
+
+    @Override
     public Result execute(Integer id) {
         MetadataTask task = this.getById(id);
         if (task == null) {
@@ -261,6 +281,8 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
         List<MetadataDb> dbs = new ArrayList<>();
         List<MetadataTable> tbls = new ArrayList<>();
         List<MetadataColumn> cols = new ArrayList<>();
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        String logPath = "/log/metadata/" + task.getName() + "/" + format.format(Calendar.getInstance().getTime()) + "/instance-" + metadataTaskInstance.getId() + ".log";
         try {
             List<Schema> schemasAndTables = dataBaseService.getSchemasAndTablesV2(task.getDatasourceId());
             logs.add("Schema数量: " + schemasAndTables.size() + " 个");
@@ -348,6 +370,7 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
             metadataTaskInstance.setDuration(duration);
             metadataTaskInstance.setEndTime(LocalDateTime.now());
             metadataTaskInstance.setStatus("Success");
+            metadataTaskInstance.setLogPath(logPath);
             metadataTaskInstanceService.saveOrUpdate(metadataTaskInstance);
             task.setRunStatus("Success");
             this.saveOrUpdate(task);
@@ -361,6 +384,7 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
             metadataTaskInstance.setStatus("Failed");
             metadataTaskInstance.setEndTime(LocalDateTime.now());
             metadataTaskInstance.setErrorLog(e.getMessage());
+            metadataTaskInstance.setLogPath(logPath);
             metadataTaskInstanceService.saveOrUpdate(metadataTaskInstance);
             task.setRunStatus("Failed");
             this.saveOrUpdate(task);
@@ -370,12 +394,10 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
             logs.add(e.getMessage());
         }
         // 记录采集日志
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        String fileName = "instance-" + metadataTaskInstance.getId() + ".log";
         File tempFile = FileUtil.createTempFile();
         FileUtil.appendUtf8Lines(logs, tempFile);
         try {
-            minioStorageService.uploadFile(new FileInputStream(tempFile), "/log/metadata/" + task.getName() + "/" + format.format(Calendar.getInstance().getTime()) + "/" + fileName, "application/octet-stream");
+            minioStorageService.uploadFile(new FileInputStream(tempFile), logPath, "application/octet-stream");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

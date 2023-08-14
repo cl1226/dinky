@@ -47,18 +47,4 @@ public class WorkflowCatalogue extends SuperEntity {
 
     private Boolean isLeaf;
 
-    // 对应dolphinscheduler的项目CODE
-    private String projectCode;
-
-    public WorkflowCatalogue() {
-    }
-
-    public WorkflowCatalogue(String name, Integer taskId, String type, Integer parentId, Boolean isLeaf, String projectCdoe) {
-        this.setName(name);
-        this.taskId = taskId;
-        this.type = type;
-        this.parentId = parentId;
-        this.isLeaf = isLeaf;
-        this.projectCode = projectCdoe;
-    }
 }

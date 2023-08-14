@@ -60,6 +60,8 @@ public class User implements Serializable {
 
     private String worknum;
 
+    private Boolean sa;
+
     private byte[] avatar;
 
     private String mobile;

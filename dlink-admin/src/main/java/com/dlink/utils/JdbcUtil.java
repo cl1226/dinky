@@ -5,15 +5,17 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.select.Limit;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.*;
 
 import java.io.PrintWriter;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,11 +34,13 @@ public class JdbcUtil {
         log.debug(sql);
         log.debug(JSON.toJSONString(jdbcParamValues));
         PreparedStatement statement = null;
+        PreparedStatement counterStatement = null;
         JSONObject jsonObject = new JSONObject();
         String executeSQL = "";
         Select select = null;
         String parsedSQL = sql;
         String pagingMsg = "";
+        String parsedCounterSQL = "";
         try {
             select = (Select) CCJSqlParserUtil.parse(sql);
             PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
@@ -47,23 +51,53 @@ public class JdbcUtil {
                 lim.setOffset(new LongValue(0));
                 plainSelect.setLimit(lim);
                 pagingMsg = "查询未分页，避免返回数据太多，最多仅展示500条数据";
-            } else {
-                Expression rowCount = plainSelect.getLimit().getRowCount();
-                Integer count = Integer.valueOf(rowCount.toString());
-                if (count > 500) {
-                    plainSelect.setLimit(null);
-                    Limit lim = new Limit();
-                    lim.setRowCount(new LongValue(500));
-                    lim.setOffset(new LongValue(0));
-                    plainSelect.setLimit(lim);
-                    pagingMsg = "分页数据太多，最多仅展示500条数据";
-                }
             }
+//            else {
+//                Expression rowCount = plainSelect.getLimit().getRowCount();
+//                Integer count = Integer.valueOf(rowCount.toString());
+//                if (count > 500) {
+//                    plainSelect.setLimit(null);
+//                    Limit lim = new Limit();
+//                    lim.setRowCount(new LongValue(500));
+//                    lim.setOffset(new LongValue(0));
+//                    plainSelect.setLimit(lim);
+//                    pagingMsg = "分页数据太多，最多仅展示500条数据";
+//                }
+//            }
             parsedSQL = plainSelect.toString();
+            // 获取总数sql
+            PlainSelect plainSelect1 = (PlainSelect) select.getSelectBody();
+            plainSelect1.setLimit(null);
+            parsedCounterSQL = "select count(1) from (" + plainSelect1.toString() + ")tmp";
         } catch (JSQLParserException e) {
             e.printStackTrace();
+            jsonObject.put("errorMsg", e.getMessage());
+            jsonObject.put("executeSQL", "");
+            return jsonObject;
         }
-
+        int count = 0;
+        try {
+            // 查询总数sql
+            counterStatement = connection.prepareStatement(parsedCounterSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            counterStatement.setFetchSize(Integer.MIN_VALUE);
+            boolean res = counterStatement.execute();
+            if (res) {
+                ResultSet resultSet = counterStatement.getResultSet();
+                while (resultSet.next()) {
+                    count = resultSet.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (counterStatement != null) {
+                    counterStatement.close();
+                }
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
         try {
             statement = connection.prepareStatement(parsedSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             statement.setFetchSize(Integer.MIN_VALUE);
@@ -98,6 +132,7 @@ public class JdbcUtil {
 
                 rs.close();
                 jsonObject.put("result", list);
+                jsonObject.put("count", count);
                 jsonObject.put("remark", pagingMsg);
                 jsonObject.put("executeSQL", executeSQL.split(":")[1]);
                 return jsonObject;

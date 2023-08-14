@@ -110,6 +110,12 @@ public class MetadataTaskController {
         return result;
     }
 
+    @GetMapping("/showLog")
+    public Result showLog(@RequestParam Integer id) {
+        Result result = metadataTaskService.showLog(id);
+        return result;
+    }
+
     @GetMapping("/statistics/metadata")
     public Result statisticsMetadata() {
         return metadataTaskService.statisticsMetadata();

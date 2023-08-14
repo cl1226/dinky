@@ -502,7 +502,7 @@ public class ProcessClient {
      */
     public JSONObject getTaskStateCount(JSONObject condition) {
         Map<String, Object> map = new HashMap<>();
-        map.put("projectCode", 0);
+        map.put("projectCode", condition.getStr("projectCode", "0"));
         map.put("startDate", condition.getStr("startDate"));
         map.put("endDate", condition.getStr("endDate"));
         String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
@@ -526,7 +526,7 @@ public class ProcessClient {
      */
     public JSONObject getProcessStateCount(JSONObject condition) {
         Map<String, Object> map = new HashMap<>();
-        map.put("projectCode", 0);
+        map.put("projectCode", condition.getStr("projectCode", "0"));
         map.put("startDate", condition.getStr("startDate"));
         map.put("endDate", condition.getStr("endDate"));
         String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
@@ -550,7 +550,7 @@ public class ProcessClient {
      */
     public JSONObject getTaskDefineCount(JSONObject condition) {
         Map<String, Object> map = new HashMap<>();
-        map.put("projectCode", 0);
+        map.put("projectCode", condition.getStr("projectCode", "0"));
         String format = StrUtil.format(dolphinSchedulerProperties.getUrl() +
                         "/projects/analysis/define-user-count?projectCode=0",
                 map);

@@ -19,8 +19,12 @@
 
 package com.dlink.controller;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.ProTableResult;
 import com.dlink.common.result.Result;
+import com.dlink.dto.SearchCondition;
+import com.dlink.model.ApiConfig;
 import com.dlink.model.Role;
 import com.dlink.model.UserRole;
 import com.dlink.service.RoleService;
@@ -54,6 +58,18 @@ public class RoleController {
     private RoleService roleService;
     @Autowired
     private UserRoleService userRoleService;
+
+    @PostMapping("/page")
+    public Result page(@RequestBody SearchCondition searchCondition) throws Exception {
+        Page<Role> page = roleService.page(searchCondition);
+        return Result.succeed(page, "获取成功");
+    }
+
+    @GetMapping
+    public Result list() throws Exception {
+        List<Role> list = roleService.list(Wrappers.<Role>lambdaQuery().ne(Role::getIsDelete, true));
+        return Result.succeed(list, "获取成功");
+    }
 
     /**
      * create or update role

@@ -22,6 +22,8 @@ public interface MetadataTaskService extends ISuperService<MetadataTask> {
 
     Result execute(Integer id);
 
+    Result showLog(Integer id);
+
     Result statisticsMetadata();
 
     Result statisticsTaskInstance();

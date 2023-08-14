@@ -59,7 +59,7 @@ public class ProjectClient {
      */
     public Project createProjectByName(String name) {
         Map<String, Object> map = new HashMap<>();
-        map.put("projectName", name + "_dinky");
+        map.put("projectName", name);
         map.put("description", "自动创建");
 
         String content = HttpRequest.post(dolphinSchedulerProperties.getUrl() + "/projects")
@@ -78,7 +78,7 @@ public class ProjectClient {
      */
     public Project updateProjectByName(String code, String name) {
         Map<String, Object> map = new HashMap<>();
-        map.put("projectName", name + "_dinky");
+        map.put("projectName", name);
         map.put("userName", "admin");
 
         String content = HttpRequest.put(dolphinSchedulerProperties.getUrl() + "/projects/" + code)

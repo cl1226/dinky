@@ -73,7 +73,7 @@ const DescriptionsText = (props) => {
 
 // form值 => 接口参数
 const transferFormToParams = (nodeType, formResult) => {
-  if (nodeType === DIALECT.FLINKSQL || nodeType === DIALECT.HIVE) {
+  if (nodeType === DIALECT.FLINKSQL || nodeType === DIALECT.HIVE || nodeType === DIALECT.StarRocks) {
     const { jobObj } = formResult
     return {
       jobId: jobObj?.id || '',
@@ -104,7 +104,7 @@ const transferParamsToForm = (nodeType, nodeProps) => {
       ...nodeInfo,
       path: nodeInfo?.path?.split('hdfs://')?.[1] || '',
     }
-  } else if (nodeType === DIALECT.FLINKSQL || nodeType === DIALECT.HIVE) {
+  } else if (nodeType === DIALECT.FLINKSQL || nodeType === DIALECT.HIVE || nodeType === DIALECT.StarRocks) {
     const { jobId, jobName } = nodeInfo
     return {
       jobObj: { id: jobId, name: jobName },
@@ -500,7 +500,7 @@ export const NodeCustomRender: React.FC<ICustomFormProps> = (props) => {
       case DIALECT.HDFS:
         return NodeCustomForm.Hdfs()
       case DIALECT.StarRocks:
-        return NodeCustomForm.Mysql(props.targetData?.group)
+        return NodeCustomForm.Default(type)
       case DIALECT.Mysql:
         return NodeCustomForm.Mysql(props.targetData?.group)
       case DIALECT.Sqlserver:
@@ -1064,6 +1064,8 @@ export namespace NodeCustomForm {
       jobSelectDefaultParams.dialect = 'FlinkSql'
     } else if (type === DIALECT.HIVE) {
       jobSelectDefaultParams.dialect = 'Hive'
+    } else if (type ===DIALECT.StarRocks) {
+      jobSelectDefaultParams.dialect = 'StarRocks'
     }
     return (
       <>

@@ -76,6 +76,7 @@ public class AppConfiguration implements WebMvcConfigurer {
                 .excludePathPatterns("/openapi/**");
 
         registry.addInterceptor(new TenantInterceptor())
+                .addPathPatterns("/api/current")
                 .addPathPatterns("/api/alertGroup/**")
                 .addPathPatterns("/api/alertHistory/**")
                 .addPathPatterns("/api/alertInstance/**")
@@ -89,10 +90,14 @@ public class AppConfiguration implements WebMvcConfigurer {
                 .addPathPatterns("/api/savepoints/**")
                 .addPathPatterns("/api/statement/**")
                 .addPathPatterns("/api/task/**")
-                .addPathPatterns("/api/role/**")
                 .addPathPatterns("/api/fragment/**")
                 .addPathPatterns("/api/jar/*")
                 .addPathPatterns("/api/metadata/**")
-                .addPathPatterns("/api/workflow/task/**");
+                .addPathPatterns("/api/workflow/catalogue/**")
+                .addPathPatterns("/api/workflow/task/**")
+                .addPathPatterns("/api/dataservice/**")
+                .addPathPatterns("/api/accesslog/**")
+                .addPathPatterns("/api/app/**")
+                .addPathPatterns("/api/asset/**");
     }
 }

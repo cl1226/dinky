@@ -1,6 +1,8 @@
 package com.dlink.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -9,6 +11,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.dlink.assertion.Assert;
 import com.dlink.common.result.Result;
 import com.dlink.context.TenantContextHolder;
+import com.dlink.context.WorkspaceContextHolder;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.DsSearchCondition;
 import com.dlink.dto.WorkflowEdge;
@@ -23,6 +26,7 @@ import com.dlink.scheduler.enums.Flag;
 import com.dlink.scheduler.enums.ReleaseState;
 import com.dlink.scheduler.model.*;
 import com.dlink.service.*;
+import com.dlink.utils.CommonUtil;
 import com.dlink.utils.SparkUtil;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +66,10 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     private TaskService taskService;
     @Autowired
     private SparkUtil sparkUtil;
+    @Autowired
+    private WorkspaceService workspaceService;
+    @Autowired
+    private CommonUtil commonUtil;
 
     @Override
     public WorkflowTaskDTO getTaskInfoById(Integer id) {
@@ -103,29 +111,30 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         task.setStatus(WorkflowLifeCycle.CREATE.getValue());
         String graphData = task.getGraphData();
         WorkflowTaskDTO workflowTaskDTO = JSONUtil.toBean(graphData, WorkflowTaskDTO.class);
-        workflowTaskDTO.getNodes().stream().forEach(x -> {
-            String nodeType = x.getNodeType();
-            String nodeInfo = x.getNodeInfo();
-            String nodeGroup = x.getGroup();
-            if ("compute".equals(nodeGroup) && "Spark".equals(nodeType)) {
-                String nodeId = x.getId();
+        if (workflowTaskDTO != null && workflowTaskDTO.getNodes() != null && workflowTaskDTO.getNodes().size() > 0) {
+            workflowTaskDTO.getNodes().stream().forEach(x -> {
+                String nodeType = x.getNodeType();
+                String nodeInfo = x.getNodeInfo();
+                String nodeGroup = x.getGroup();
+                if ("compute".equals(nodeGroup) && "Spark".equals(nodeType)) {
+                    String nodeId = x.getId();
 
-                Task nodeTask = taskService.getOne(Wrappers.<Task>lambdaQuery().eq(Task::getNodeId, nodeId));
-                if (nodeTask == null) {
-                    nodeTask = new Task();
+                    Task nodeTask = taskService.getOne(Wrappers.<Task>lambdaQuery().eq(Task::getNodeId, nodeId));
+                    if (nodeTask == null) {
+                        nodeTask = new Task();
+                    }
+                    nodeTask.setEnabled(true);
+                    Integer tenantId = (Integer) TenantContextHolder.get();
+                    nodeTask.setTenantId(tenantId);
+                    nodeTask.setName(x.getLabel());
+                    nodeTask.setNodeId(nodeId);
+                    nodeTask.setDialect(nodeType);
+                    nodeTask.setNodeInfo(nodeInfo);
+                    taskService.saveOrUpdate(nodeTask);
                 }
-                nodeTask.setEnabled(true);
-                Integer tenantId = (Integer) TenantContextHolder.get();
-                nodeTask.setTenantId(tenantId);
-                nodeTask.setName(x.getLabel());
-                nodeTask.setNodeId(nodeId);
-                nodeTask.setDialect(nodeType);
-                nodeTask.setNodeInfo(nodeInfo);
-                taskService.saveOrUpdate(nodeTask);
-            }
-        });
-
-        this.updateById(task);
+            });
+        }
+        this.saveOrUpdate(task);
         return true;
     }
 
@@ -149,16 +158,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             this.saveOrUpdate(taskInfo);
             return Result.succeed(taskInfo, "部署成功");
         }
-        // 获取根目录
-        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
-        if (catalogue == null) {
-            return Result.failed("节点获取失败");
-        }
-        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
-        if (root == null) {
-            return Result.failed("根节点获取失败");
-        }
-        long projectCode = Long.valueOf(root.getProjectCode());
+        // 获取海豚调度项目code
+        long projectCode = Long.parseLong(commonUtil.getCurrentWorkspace().getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process != null) {
@@ -180,7 +181,6 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             // 每一个节点生成一个taskRequest
             TaskRequest taskRequest = new TaskRequest();
             DlinkTaskParams dlinkTaskParams = new DlinkTaskParams();
-//            Catalogue catalogue1 = service.getById(x.getJobId());
             String nodeType = x.getNodeType();
             String nodeInfo = x.getNodeInfo();
             if (nodeType.equals("Spark")) {
@@ -214,27 +214,24 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         workflowTaskDTO.getNodes().stream().forEach(x -> {
             List<WorkflowEdge> filterEdges = workflowTaskDTO.getEdges().stream().
                     filter(y -> y.getTarget().equals(x.getId())).collect(Collectors.toList());
-            // 每一个节点生成一个relation
-            ProcessTaskRelation processTaskRelation = new ProcessTaskRelation();
+            // 每一个节点生成一个或多个relation
             if (filterEdges.size() > 0) {
-                Long dependenceCodes = 0L;
-                if (filterEdges.size() > 0) {
-                    dependenceCodes = map.get(filterEdges.get(0).getSource());
-                }
-                processTaskRelation.setPreTaskCode(dependenceCodes);
-                processTaskRelation.setPostTaskCode(map.get(x.getId()));
-                processTaskRelation.setProjectCode(projectCode);
+                filterEdges.stream().forEach(edge -> {
+                    ProcessTaskRelation processTaskRelation = new ProcessTaskRelation();
+                    Long dependenceCodes = map.get(edge.getSource());
+                    processTaskRelation.setPreTaskCode(dependenceCodes);
+                    processTaskRelation.setPostTaskCode(map.get(x.getId()));
+                    processTaskRelation.setProjectCode(projectCode);
+                    taskRelations.add(processTaskRelation);
+                });
             } else {
+                ProcessTaskRelation processTaskRelation = new ProcessTaskRelation();
                 processTaskRelation.setPreTaskCode(0);
                 processTaskRelation.setPostTaskCode(map.get(x.getId()));
                 processTaskRelation.setProjectCode(projectCode);
+                taskRelations.add(processTaskRelation);
             }
-            taskRelations.add(processTaskRelation);
 
-//            String taskDefinitionJsonObj = JSONUtil.toJsonStr(taskRequest);
-
-//            TaskDefinitionLog taskDefinition = taskClient.createTaskDefinition(projectCode, processDefinition.getCode(), dependenceCodes, taskDefinitionJsonObj);
-//            map.put(x.getId(), taskDefinition.getCode());
         });
         // 创建流程
         ProcessDefinition processDefinition = processClient.createProcessDefinitionV2(
@@ -271,21 +268,13 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.succeed(taskInfo, "上线成功");
         }
 
-        // 获取根目录
-        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
-        if (catalogue == null) {
-            return Result.failed("节点获取失败");
-        }
-        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
-        if (root == null) {
-            return Result.failed("根节点获取失败");
-        }
-        long projectCode = Long.valueOf(root.getProjectCode());
+        // 获取海豚调度项目code
+        long projectCode = Long.parseLong(commonUtil.getCurrentWorkspace().getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
         if (process == null) {
             return Result.failed("工作流不存在：" + taskInfo.getName());
         }
-        JSONObject entries = processClient.onlineProcessDefinition(projectCode, process, "ONLINE");
+        processClient.onlineProcessDefinition(projectCode, process, "ONLINE");
 
         // 设置周期调度，且上线
         if (taskInfo.getSchedulerType().equals("CYCLE") && StringUtils.isNotBlank(taskInfo.getCron())) {
@@ -325,16 +314,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.succeed(taskInfo, "下线成功");
         }
 
-        // 获取根目录
-        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
-        if (catalogue == null) {
-            return Result.failed("节点获取失败");
-        }
-        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
-        if (root == null) {
-            return Result.failed("根节点获取失败");
-        }
-        long projectCode = Long.valueOf(root.getProjectCode());
+        // 获取海豚调度项目code
+        long projectCode = Long.parseLong(commonUtil.getCurrentWorkspace().getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
         if (process == null) {
             return Result.failed("工作流不存在：" + taskInfo.getName());
@@ -368,18 +349,12 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         taskInfo.setLockUser(StpUtil.getLoginIdAsString());
         this.updateById(taskInfo);
         WorkflowTaskDTO taskDTO = new WorkflowTaskDTO();
-        try {
-            BeanUtils.copyProperties(taskDTO, taskInfo);
-            String loginId = StpUtil.getLoginIdAsString();
-            if (loginId.equals(taskInfo.getLockUser())) {
-                taskDTO.setLockStatus(true);
-            } else {
-                taskDTO.setLockStatus(false);
-            }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        BeanUtil.copyProperties(taskInfo, taskDTO, CopyOptions.create(null, true));
+        String loginId = StpUtil.getLoginIdAsString();
+        if (loginId.equals(taskInfo.getLockUser())) {
+            taskDTO.setLockStatus(true);
+        } else {
+            taskDTO.setLockStatus(false);
         }
         return Result.succeed(taskDTO, "抢锁成功");
     }
@@ -400,17 +375,11 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
         taskInfo.setLockUser("");
         this.updateById(taskInfo);
         WorkflowTaskDTO taskDTO = new WorkflowTaskDTO();
-        try {
-            BeanUtils.copyProperties(taskDTO, taskInfo);
-            if (loginId.equals(taskInfo.getLockUser())) {
-                taskDTO.setLockStatus(true);
-            } else {
-                taskDTO.setLockStatus(false);
-            }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        BeanUtil.copyProperties(taskInfo, taskDTO, CopyOptions.create(null, true));
+        if (loginId.equals(taskInfo.getLockUser())) {
+            taskDTO.setLockStatus(true);
+        } else {
+            taskDTO.setLockStatus(false);
         }
         return Result.succeed(taskDTO, "解锁成功");
     }
@@ -428,16 +397,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             Result result = sparkUtil.submitSparkTask(taskInfo);
             return result;
         }
-        // 获取根目录
-        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
-        if (catalogue == null) {
-            return Result.failed("节点获取失败");
-        }
-        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
-        if (root == null) {
-            return Result.failed("根节点获取失败");
-        }
-        long projectCode = Long.valueOf(root.getProjectCode());
+        // 获取海豚调度项目code
+        long projectCode = Long.parseLong(commonUtil.getCurrentWorkspace().getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
         if (process == null) {
             return Result.failed("工作流不存在：" + taskInfo.getName());
@@ -454,16 +415,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        // 获取根目录
-        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
-        if (catalogue == null) {
-            return Result.failed("节点获取失败");
-        }
-        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
-        if (root == null) {
-            return Result.failed("根节点获取失败");
-        }
-        long projectCode = Long.valueOf(root.getProjectCode());
+        // 获取海豚调度项目code
+        long projectCode = Long.parseLong(commonUtil.getCurrentWorkspace().getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process == null) {
@@ -491,16 +444,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        // 获取根目录
-        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
-        if (catalogue == null) {
-            return Result.failed("节点获取失败");
-        }
-        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
-        if (root == null) {
-            return Result.failed("根节点获取失败");
-        }
-        long projectCode = Long.valueOf(root.getProjectCode());
+        // 获取海豚调度项目code
+        long projectCode = Long.parseLong(commonUtil.getCurrentWorkspace().getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process == null) {
@@ -527,16 +472,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        // 获取根目录
-        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
-        if (catalogue == null) {
-            return Result.failed("节点获取失败");
-        }
-        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
-        if (root == null) {
-            return Result.failed("根节点获取失败");
-        }
-        long projectCode = Long.valueOf(root.getProjectCode());
+        // 获取海豚调度项目code
+        long projectCode = Long.parseLong(commonUtil.getCurrentWorkspace().getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process == null) {
@@ -564,16 +501,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        // 获取根目录
-        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
-        if (catalogue == null) {
-            return Result.failed("节点获取失败");
-        }
-        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
-        if (root == null) {
-            return Result.failed("根节点获取失败");
-        }
-        long projectCode = Long.valueOf(root.getProjectCode());
+        // 获取海豚调度项目code
+        long projectCode = Long.parseLong(commonUtil.getCurrentWorkspace().getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process == null) {
@@ -598,16 +527,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
             return Result.failed("工作流程中缺少节点");
         }
 
-        // 获取根目录
-        WorkflowCatalogue catalogue = catalogueService.getOne(new LambdaQueryWrapper<WorkflowCatalogue>().eq(WorkflowCatalogue::getTaskId, id));
-        if (catalogue == null) {
-            return Result.failed("节点获取失败");
-        }
-        WorkflowCatalogue root = getRootCatalogueByCatalogue(catalogue);
-        if (root == null) {
-            return Result.failed("根节点获取失败");
-        }
-        long projectCode = Long.valueOf(root.getProjectCode());
+        // 获取海豚调度项目code
+        long projectCode = Long.parseLong(commonUtil.getCurrentWorkspace().getProjectCode());
         ProcessDefinition process = processClient.getProcessDefinitionInfo(projectCode, taskInfo.getName());
 
         if (process == null) {
@@ -655,6 +576,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     @Override
     public JSONObject pageFlowInstance(DsSearchCondition condition) {
         JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        Workspace currentWorkspace = commonUtil.getCurrentWorkspace();
+        conditionJSON.set("projectCode", currentWorkspace.getProjectCode());
         JSONObject jsonObject = processClient.pageFlowInstance(conditionJSON);
         JSONArray totalList = jsonObject.getJSONArray("totalList");
         List<String> taskNames = new ArrayList<>();
@@ -683,6 +606,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     @Override
     public JSONObject pageTaskInstance(DsSearchCondition condition) {
         JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        Workspace currentWorkspace = commonUtil.getCurrentWorkspace();
+        conditionJSON.set("projectCode", currentWorkspace.getProjectCode());
         JSONObject jsonObject = processClient.pageTaskInstance(conditionJSON);
         JSONArray totalList = jsonObject.getJSONArray("totalList");
         if (totalList != null && totalList.size() > 0) {
@@ -716,6 +641,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     @Override
     public JSONObject getProcessStateCount(DsSearchCondition condition) {
         JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        Workspace currentWorkspace = commonUtil.getCurrentWorkspace();
+        conditionJSON.set("projectCode", currentWorkspace.getProjectCode());
         JSONObject jsonObject = processClient.getProcessStateCount(conditionJSON);
         return jsonObject;
     }
@@ -723,6 +650,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     @Override
     public JSONObject getTaskStateCount(DsSearchCondition condition) {
         JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        Workspace currentWorkspace = commonUtil.getCurrentWorkspace();
+        conditionJSON.set("projectCode", currentWorkspace.getProjectCode());
         JSONObject jsonObject = processClient.getTaskStateCount(conditionJSON);
         return jsonObject;
     }
@@ -730,6 +659,8 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     @Override
     public JSONObject getTaskDefineCount(DsSearchCondition condition) {
         JSONObject conditionJSON = JSONUtil.parseObj(condition);
+        Workspace currentWorkspace = commonUtil.getCurrentWorkspace();
+        conditionJSON.set("projectCode", currentWorkspace.getProjectCode());
         JSONObject jsonObject = processClient.getTaskDefineCount(conditionJSON);
         return jsonObject;
     }

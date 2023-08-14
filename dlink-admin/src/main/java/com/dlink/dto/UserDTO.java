@@ -25,6 +25,7 @@ import com.dlink.model.User;
 
 import java.util.List;
 
+import com.dlink.model.Workspace;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,9 +34,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
+    private Integer id;
     private User user;
     private List<Role> roleList;
-    private List<Tenant> tenantList;
-    private Tenant currentTenant;
 
 }

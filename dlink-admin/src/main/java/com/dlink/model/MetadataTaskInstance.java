@@ -42,4 +42,6 @@ public class MetadataTaskInstance extends SuperEntity {
 
     private String errorLog;
 
+    private String logPath;
+
 }

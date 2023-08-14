@@ -38,6 +38,7 @@ import com.dlink.constant.FlinkRestResultConstant;
 import com.dlink.constant.NetConstant;
 import com.dlink.context.RowLevelPermissionsContext;
 import com.dlink.context.TenantContextHolder;
+import com.dlink.context.WorkspaceContextHolder;
 import com.dlink.daemon.task.DaemonFactory;
 import com.dlink.daemon.task.DaemonTaskConfig;
 import com.dlink.db.service.impl.SuperServiceImpl;
@@ -399,6 +400,7 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
         JobResult result = new JobResult();
         result.setStatement(sqlDTO.getStatement());
         result.setStartTime(LocalDateTime.now());
+        result.setJobInstanceId(-1);
         if (Asserts.isNull(sqlDTO.getDatabaseId())) {
             result.setSuccess(false);
             result.setError("请指定数据源");
@@ -499,6 +501,13 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
         Integer tenantId = baseMapper.getTenantByTaskId(id);
         Asserts.checkNull(tenantId, Tips.TASK_NOT_EXIST);
         TenantContextHolder.set(tenantId);
+    }
+
+    @Override
+    public void initWorkspaceByTaskId(Integer id) {
+        Integer workspaceId = baseMapper.getWorkspaceByTaskId(id);
+        Asserts.checkNull(workspaceId, Tips.TASK_NOT_EXIST);
+        WorkspaceContextHolder.set(workspaceId);
     }
 
     @Override
@@ -1063,16 +1072,19 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
             JobInstance jobInstance = jobInstanceService.getByIdWithoutTenant(id);
             Asserts.checkNull(jobInstance, "The job instance does not exist.");
             TenantContextHolder.set(jobInstance.getTenantId());
+            WorkspaceContextHolder.set(jobInstance.getWorkspaceId());
             jobInfoDetail.setInstance(jobInstance);
             Cluster cluster = clusterService.getById(jobInstance.getClusterId());
             jobInfoDetail.setCluster(cluster);
             History history = historyService.getById(jobInstance.getHistoryId());
-            history.setConfig(JSONUtil.parseObject(history.getConfigJson()));
+
             if (Asserts.isNotNull(history) && Asserts.isNotNull(history.getClusterConfigurationId())) {
+                history.setConfig(JSONUtil.parseObject(history.getConfigJson()));
                 jobInfoDetail.setClusterConfiguration(
                         clusterConfigurationService.getClusterConfigById(history.getClusterConfigurationId()));
+                jobInfoDetail.setHistory(history);
             }
-            jobInfoDetail.setHistory(history);
+
             jobInfoDetail.setJobHistory(jobHistoryService.getJobHistory(id));
             pool.push(key, jobInfoDetail);
         }

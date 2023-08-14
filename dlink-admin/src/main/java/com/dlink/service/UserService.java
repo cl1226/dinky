@@ -48,6 +48,8 @@ public interface UserService extends ISuperService<User> {
 
     Result loginUser(LoginUTO loginUTO);
 
+    Result current();
+
     User getUserByUsername(String username);
 
     Result grantRole(JsonNode para);

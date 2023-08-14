@@ -224,7 +224,7 @@ const ProcessInstance: React.FC = () => {
         style={{ marginBottom: 20 }}
       >
         <Row>
-          <Col span={8}>
+          <Col span={8} style={{"display": "none"}}>
             <Form.Item name="projectCode" label="项目">
               <SelectHelp
                 placeholder="请选择"

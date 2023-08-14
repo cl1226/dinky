@@ -102,7 +102,7 @@ public class SparkUtil {
                         buffer.append(parameter.trim()).append(" ");
                     });
             StringBuffer jarPath= new StringBuffer();
-            jarPath.append("," + minioUrl + "/" + bucket + "/octopus/dependencies/hutool-all-5.8.11.jar");
+            jarPath.append("," + minioUrl + "/" + bucket + "/jar/octopus/dependencies/hutool-all-5.8.11.jar");
             StringBuffer filePath= new StringBuffer();
             if (jsonObject.getJSONArray("resourcePaths") != null) {
                 jsonObject.getJSONArray("resourcePaths").stream().forEach(path -> {
@@ -142,7 +142,7 @@ public class SparkUtil {
                 stepMap.get(edge.getTarget()).set("preTask", stepMap.get(edge.getSource()).getStr("name"));
             });
 
-            buffer.append(minioUrl + "/" + bucket + "/octopus/octopus-1.0.0.jar").append(" ")
+            buffer.append(minioUrl + "/" + bucket + "/jar/octopus/octopus-1.0.0.jar").append(" ")
                     .append("\"" + params.toString().replaceAll("\\\"", "\\\\\"").replaceAll("}}", "}^}") + "\"");
             String cmd = "source /etc/profile && export HADOOP_USER_NAME=" + tenantName + " && " + buffer;
             instance.execute(cmd);

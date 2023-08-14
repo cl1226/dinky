@@ -27,6 +27,7 @@ import com.dlink.dto.APIExplainSqlDTO;
 import com.dlink.dto.APISavePointDTO;
 import com.dlink.dto.APISavePointTaskDTO;
 import com.dlink.job.JobResult;
+import com.dlink.model.JobInstance;
 import com.dlink.model.Task;
 import com.dlink.service.APIService;
 import com.dlink.service.JobInstanceService;
@@ -42,6 +43,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDateTime;
 
 /**
  * APIController
@@ -65,7 +68,7 @@ public class APIController {
 
     @GetMapping("/submitTask")
     public Result submitTask(@RequestParam Integer id) {
-        taskService.initTenantByTaskId(id);
+        taskService.initWorkspaceByTaskId(id);
         Task task = taskService.getById(id);
         if (task == null) {
             return Result.failed("任务不存在, id = " + id);
@@ -109,7 +112,7 @@ public class APIController {
 
     @GetMapping("/getTaskLineage")
     public Result getTaskLineage(@RequestParam Integer id) {
-        taskService.initTenantByTaskId(id);
+        taskService.initWorkspaceByTaskId(id);
         return Result.succeed(taskService.getTaskLineage(id), "获取成功");
     }
 
@@ -144,7 +147,7 @@ public class APIController {
      */
     @GetMapping("/restartTask")
     public Result restartTask(@RequestParam Integer id) {
-        taskService.initTenantByTaskId(id);
+        taskService.initWorkspaceByTaskId(id);
         return Result.succeed(taskService.restartTask(id, null), "重启成功");
     }
 
@@ -153,7 +156,7 @@ public class APIController {
      */
     @GetMapping("/selectSavePointRestartTask")
     public Result restartTask(@RequestParam Integer id, @RequestParam String savePointPath) {
-        taskService.initTenantByTaskId(id);
+        taskService.initWorkspaceByTaskId(id);
         return Result.succeed(taskService.restartTask(id, savePointPath), "重启成功");
     }
 
@@ -162,7 +165,7 @@ public class APIController {
      */
     @GetMapping("/onLineTask")
     public Result onLineTask(@RequestParam Integer id) {
-        taskService.initTenantByTaskId(id);
+        taskService.initWorkspaceByTaskId(id);
         return taskService.onLineTask(id);
     }
 
@@ -171,7 +174,7 @@ public class APIController {
      */
     @GetMapping("/offLineTask")
     public Result offLineTask(@RequestParam Integer id) {
-        taskService.initTenantByTaskId(id);
+        taskService.initWorkspaceByTaskId(id);
         return taskService.offLineTask(id, null);
     }
 
@@ -180,7 +183,7 @@ public class APIController {
      */
     @GetMapping("/reOnLineTask")
     public Result reOnLineTask(@RequestParam Integer id) {
-        taskService.initTenantByTaskId(id);
+        taskService.initWorkspaceByTaskId(id);
         return taskService.reOnLineTask(id, null);
     }
 
@@ -189,7 +192,7 @@ public class APIController {
      */
     @GetMapping("/selectSavePointReOnLineTask")
     public Result selectSavePointReOnLineTask(@RequestParam Integer id, @RequestParam String savePointPath) {
-        taskService.initTenantByTaskId(id);
+        taskService.initWorkspaceByTaskId(id);
         return taskService.reOnLineTask(id, savePointPath);
     }
 
@@ -198,8 +201,16 @@ public class APIController {
      */
     @GetMapping("/getJobInstance")
     public Result getJobInstance(@RequestParam Integer id) {
-        jobInstanceService.initTenantByJobInstanceId(id);
-        return Result.succeed(jobInstanceService.getById(id), "获取成功");
+        if (id > 0) {
+            jobInstanceService.initWorkspaceByJobInstanceId(id);
+            return Result.succeed(jobInstanceService.getById(id), "获取成功");
+        } else {
+            JobInstance jobInstance = new JobInstance();
+            jobInstance.setStatus("FINISHED");
+            jobInstance.setFinishTime(LocalDateTime.now());
+            return Result.succeed(jobInstance, "获取成功");
+        }
+
     }
 
     /**
@@ -207,7 +218,7 @@ public class APIController {
      */
     @GetMapping("/getJobInstanceByTaskId")
     public Result getJobInstanceByTaskId(@RequestParam Integer id) {
-        taskService.initTenantByTaskId(id);
+        taskService.initWorkspaceByTaskId(id);
         return Result.succeed(jobInstanceService.getJobInstanceByTaskId(id), "获取成功");
     }
 }

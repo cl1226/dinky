@@ -19,10 +19,12 @@
 
 package com.dlink.controller;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.dlink.assertion.Asserts;
 import com.dlink.common.result.ProTableResult;
 import com.dlink.common.result.Result;
 import com.dlink.dto.ModifyPasswordDTO;
+import com.dlink.model.Role;
 import com.dlink.model.User;
 import com.dlink.model.UserTenant;
 import com.dlink.service.UserService;
@@ -63,6 +65,14 @@ public class UserController {
 
     @Autowired
     private UserTenantService userTenantService;
+
+    @GetMapping
+    public Result list() throws Exception {
+        List<User> list = userService.list(Wrappers.<User>lambdaQuery()
+                .ne(User::getIsDelete, true)
+                .ne(User::getSa, true));
+        return Result.succeed(list, "获取成功");
+    }
 
     /**
      * 新增或者更新

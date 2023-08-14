@@ -19,9 +19,11 @@
 
 package com.dlink.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.ProTableResult;
 import com.dlink.common.result.Result;
 import com.dlink.db.service.ISuperService;
+import com.dlink.dto.SearchCondition;
 import com.dlink.model.Role;
 
 import java.util.List;
@@ -30,6 +32,8 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public interface RoleService extends ISuperService<Role> {
+
+    Page<Role> page(SearchCondition searchCondition);
 
     /**
      * delete role

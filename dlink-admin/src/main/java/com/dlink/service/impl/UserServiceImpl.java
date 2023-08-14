@@ -19,25 +19,18 @@
 
 package com.dlink.service.impl;
 
+import cn.hutool.json.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.dlink.assertion.Asserts;
 import com.dlink.common.result.Result;
+import com.dlink.context.ClusterContextHolder;
 import com.dlink.context.TenantContextHolder;
 import com.dlink.db.service.impl.SuperServiceImpl;
 import com.dlink.dto.LoginUTO;
 import com.dlink.dto.UserDTO;
 import com.dlink.mapper.UserMapper;
-import com.dlink.model.Role;
-import com.dlink.model.RoleSelectPermissions;
-import com.dlink.model.Tenant;
-import com.dlink.model.User;
-import com.dlink.model.UserRole;
-import com.dlink.model.UserTenant;
-import com.dlink.service.RoleSelectPermissionsService;
-import com.dlink.service.RoleService;
-import com.dlink.service.TenantService;
-import com.dlink.service.UserRoleService;
-import com.dlink.service.UserService;
-import com.dlink.service.UserTenantService;
+import com.dlink.model.*;
+import com.dlink.service.*;
 import com.dlink.utils.MessageResolverUtils;
 
 import java.util.ArrayList;
@@ -82,6 +75,12 @@ public class UserServiceImpl extends SuperServiceImpl<UserMapper, User> implemen
 
     @Autowired
     private RoleSelectPermissionsService roleSelectPermissionsService;
+
+    @Autowired
+    private ClusterUserRoleService clusterUserRoleService;
+
+    @Autowired
+    private HadoopClusterService hadoopClusterService;
 
     @Override
     public Result registerUser(User user) {
@@ -152,30 +151,38 @@ public class UserServiceImpl extends SuperServiceImpl<UserMapper, User> implemen
                 return Result.failed(MessageResolverUtils.getMessage("login.user.disabled"));
             }
 
-            // 将前端入参 租户id 放入上下文
-            TenantContextHolder.set(loginUTO.getTenantId());
-
-            // get user tenants and roles
-            UserDTO userDTO = getUserALLBaseInfo(loginUTO, user);
-
             StpUtil.login(user.getId(), loginUTO.isAutoLogin());
-            StpUtil.getSession().set("user", userDTO);
-            return Result.succeed(userDTO, MessageResolverUtils.getMessage("login.success"));
+            StpUtil.getSession().set("user", user);
+            return Result.succeed(user, MessageResolverUtils.getMessage("login.success"));
         } else {
             return Result.failed(MessageResolverUtils.getMessage("login.fail"));
         }
     }
 
+    @Override
+    public Result current() {
+        User user = (User) StpUtil.getSession().get("user");
+        Integer clusterId = (Integer) ClusterContextHolder.get();
+        ClusterUserRole clusterUserRole = clusterUserRoleService.getOne(Wrappers.<ClusterUserRole>lambdaQuery().eq(ClusterUserRole::getUserId, user.getId())
+                .eq(ClusterUserRole::getClusterId, clusterId));
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.set("user", user);
+        if (clusterUserRole != null) {
+            Role role = roleService.getById(clusterUserRole.getRoleId());
+            List<Role> roles = new ArrayList<>();
+            roles.add(role);
+            jsonObject.set("roleList", roles);
+            HadoopCluster hadoopCluster = hadoopClusterService.getById(clusterId);
+            jsonObject.set("cluster", hadoopCluster);
+        }
+        return Result.succeed(jsonObject, "获取成功");
+    }
+
     private UserDTO getUserALLBaseInfo(LoginUTO loginUTO, User user) {
         UserDTO userDTO = new UserDTO();
         List<Role> roleList = new LinkedList<>();
-        List<Tenant> tenantList = new LinkedList<>();
 
         List<UserRole> userRoles = userRoleService.getUserRoleByUserId(user.getId());
-        List<UserTenant> userTenants = userTenantService.getUserTenantByUserId(user.getId());
-
-        Tenant currentTenant = tenantService.getBaseMapper().selectById(loginUTO.getTenantId());
-
         userRoles.forEach(userRole -> {
             Role role = roleService.getBaseMapper().selectById(userRole.getRoleId());
             if (Asserts.isNotNull(role)) {
@@ -183,18 +190,8 @@ public class UserServiceImpl extends SuperServiceImpl<UserMapper, User> implemen
             }
         });
 
-        userTenants.forEach(userTenant -> {
-            Tenant tenant = tenantService.getBaseMapper()
-                    .selectOne(new QueryWrapper<Tenant>().eq("id", userTenant.getTenantId()));
-            if (Asserts.isNotNull(tenant)) {
-                tenantList.add(tenant);
-            }
-        });
-
         userDTO.setUser(user);
         userDTO.setRoleList(roleList);
-        userDTO.setTenantList(tenantList);
-        userDTO.setCurrentTenant(currentTenant);
         return userDTO;
     }
 

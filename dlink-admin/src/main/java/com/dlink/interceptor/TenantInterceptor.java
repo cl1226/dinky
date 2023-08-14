@@ -19,6 +19,7 @@
 
 package com.dlink.interceptor;
 
+import com.dlink.context.ClusterContextHolder;
 import com.dlink.context.TenantContextHolder;
 
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.dlink.context.WorkspaceContextHolder;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,10 +40,20 @@ public class TenantInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+//        Arrays.stream(request.getCookies())
+//            .filter(t -> "tenantId".equals(t.getName()))
+//            .findFirst()
+//            .ifPresent(t -> TenantContextHolder.set(Integer.valueOf(t.getValue())));
+
         Arrays.stream(request.getCookies())
-            .filter(t -> "tenantId".equals(t.getName()))
-            .findFirst()
-            .ifPresent(t -> TenantContextHolder.set(Integer.valueOf(t.getValue())));
+                .filter(t -> "clusterId".equals(t.getName()))
+                .findFirst()
+                .ifPresent(t -> ClusterContextHolder.set(Integer.valueOf(t.getValue())));
+
+        Arrays.stream(request.getCookies())
+                .filter(t -> "workspaceId".equals(t.getName()))
+                .findFirst()
+                .ifPresent(t -> WorkspaceContextHolder.set(Integer.valueOf(t.getValue())));
 
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }

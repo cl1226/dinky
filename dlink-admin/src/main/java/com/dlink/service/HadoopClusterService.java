@@ -2,6 +2,8 @@ package com.dlink.service;
 
 import com.dlink.common.result.Result;
 import com.dlink.db.service.ISuperService;
+import com.dlink.dto.UserDTO;
+import com.dlink.model.ClusterUserRole;
 import com.dlink.model.HadoopCluster;
 import com.dlink.model.HadoopClusterModel;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +21,14 @@ public interface HadoopClusterService extends ISuperService<HadoopCluster> {
     Result save(HadoopClusterModel model);
 
     List<HadoopClusterModel> listAll();
+
+    List<UserDTO> listBindUser(Integer clusterId);
+
+    Result bindUserRole(ClusterUserRole clusterUserRole);
+
+    Result unbindUserRole(ClusterUserRole clusterUserRole);
+
+    List<HadoopClusterModel> listByUser();
 
     Result detail(Integer id);
 

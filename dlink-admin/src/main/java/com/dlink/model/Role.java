@@ -49,11 +49,6 @@ public class Role implements Serializable {
     private Integer id;
 
     /**
-     * tenant id
-     */
-    private Integer tenantId;
-
-    /**
      * role code
      */
     private String roleCode;

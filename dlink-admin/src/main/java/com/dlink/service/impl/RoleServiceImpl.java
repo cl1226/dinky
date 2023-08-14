@@ -19,16 +19,14 @@
 
 package com.dlink.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.assertion.Asserts;
 import com.dlink.common.result.ProTableResult;
 import com.dlink.common.result.Result;
 import com.dlink.db.service.impl.SuperServiceImpl;
+import com.dlink.dto.SearchCondition;
 import com.dlink.mapper.RoleMapper;
-import com.dlink.model.Namespace;
-import com.dlink.model.Role;
-import com.dlink.model.RoleNamespace;
-import com.dlink.model.Tenant;
-import com.dlink.model.UserRole;
+import com.dlink.model.*;
 import com.dlink.service.NamespaceService;
 import com.dlink.service.RoleNamespaceService;
 import com.dlink.service.RoleService;
@@ -40,6 +38,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +68,20 @@ public class RoleServiceImpl extends SuperServiceImpl<RoleMapper, Role> implemen
     private TenantService tenantService;
     @Autowired
     private NamespaceService namespaceService;
+
+    @Override
+    public Page<Role> page(SearchCondition searchCondition) {
+        Page<Role> page = new Page<>(searchCondition.getPageIndex(), searchCondition.getPageSize());
+
+        QueryWrapper<Role> queryWrapper = new QueryWrapper<Role>();
+        if (StringUtils.isNotBlank(searchCondition.getName())) {
+            queryWrapper.eq("name", searchCondition.getName());
+        }
+
+        queryWrapper.orderByDesc("create_time");
+
+        return this.baseMapper.selectPage(page, queryWrapper);
+    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -153,21 +166,6 @@ public class RoleServiceImpl extends SuperServiceImpl<RoleMapper, Role> implemen
     @Override
     public ProTableResult<Role> selectForProTable(JsonNode para, boolean isDelete) {
         ProTableResult<Role> roleProTableResult = super.selectForProTable(para, isDelete);
-        roleProTableResult.getData().forEach(role -> {
-            List<Namespace> namespaceArrayList = new ArrayList<>();
-            List<Integer> idsList = new ArrayList<>();
-            Tenant tenant = tenantService.getBaseMapper().selectById(role.getTenantId());
-            roleNamespaceService.list(new QueryWrapper<RoleNamespace>().eq("role_id", role.getId()))
-                    .forEach(roleNamespace -> {
-                        Namespace namespaceServiceById = namespaceService.getById(roleNamespace.getNamespaceId());
-                        namespaceArrayList.add(namespaceServiceById);
-                        idsList.add(roleNamespace.getNamespaceId());
-                    });
-            role.setTenant(tenant);
-            role.setNamespaces(namespaceArrayList);
-            String result = idsList.stream().map(Object::toString).collect(Collectors.joining(","));
-            role.setNamespaceIds(result);
-        });
         return roleProTableResult;
     }
 }

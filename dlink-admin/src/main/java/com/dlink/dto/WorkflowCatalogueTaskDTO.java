@@ -40,5 +40,6 @@ public class WorkflowCatalogueTaskDTO {
     private boolean isLeaf;
     private String name;
     private String alias;
+    private String type;
     private Map<String,String> config = new HashMap<>();
 }

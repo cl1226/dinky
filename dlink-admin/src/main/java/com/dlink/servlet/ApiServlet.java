@@ -94,7 +94,7 @@ public class ApiServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return Result.failed(path + ": api路径不存在");
         }
-        if (config.getStatus() != 1) {
+        if (config.getStatus() == null || config.getStatus() != 1) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return Result.failed(path + ": api未上线");
         }

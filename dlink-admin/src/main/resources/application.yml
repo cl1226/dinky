@@ -113,7 +113,7 @@ dinky:
     # dolphinscheduler 中指定的项目名不区分大小写
     project-name: Dinky
     # Dolphinscheduler DinkyTask Address
-    address: http://127.0.0.1:8888
+    address: http://10.46.100.127:8888
 
   # python udf 需要用到的 python 执行环境
   python:

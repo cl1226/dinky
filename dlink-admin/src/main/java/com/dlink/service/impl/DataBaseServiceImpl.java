@@ -76,7 +76,7 @@ public class DataBaseServiceImpl extends SuperServiceImpl<DataBaseMapper, DataBa
     @Override
     public String testConnect(DataBase dataBase) {
         // hive数据库，根据URL判断是否进行kerberos认证
-        if (dataBase.getKerberos()) {
+        if (dataBase.getKerberos() != null && dataBase.getKerberos()) {
             initKerberos(dataBase);
         }
         return Driver.buildUnconnected(dataBase.getDriverConfig()).test();

@@ -1,5 +1,6 @@
 package com.dlink.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.lang.UUID;
@@ -11,19 +12,17 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.cloudera.api.ClouderaManagerClientBuilder;
 import com.cloudera.api.DataView;
 import com.cloudera.api.model.*;
+import com.cloudera.api.model.ApiConfig;
 import com.cloudera.api.v33.ClustersResourceV33;
 import com.cloudera.api.v33.RootResourceV33;
 import com.cloudera.api.v33.ServicesResourceV33;
 import com.dlink.common.result.Result;
 import com.dlink.db.service.impl.SuperServiceImpl;
+import com.dlink.dto.UserDTO;
 import com.dlink.mapper.HadoopClusterMapper;
 import com.dlink.minio.MinioStorageService;
-import com.dlink.model.HadoopCluster;
-import com.dlink.model.HadoopClusterModel;
-import com.dlink.model.YarnQueue;
-import com.dlink.model.YarnQueueModel;
-import com.dlink.service.HadoopClusterService;
-import com.dlink.service.YarnQueueService;
+import com.dlink.model.*;
+import com.dlink.service.*;
 import io.minio.errors.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -44,11 +43,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * HadoopClusterServiceImpl
@@ -64,6 +61,14 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
     private YarnQueueService yarnQueueService;
     @Autowired
     private MinioStorageService minioStorageService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ClusterUserService clusterUserService;
+    @Autowired
+    private ClusterUserRoleService clusterUserRoleService;
+    @Autowired
+    private RoleService roleService;
 
     @Override
     @Transactional
@@ -114,6 +119,108 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
             }
         }
         return res;
+    }
+
+    @Override
+    public List<UserDTO> listBindUser(Integer clusterId) {
+        List<ClusterUserRole> clusterUserRoles = clusterUserRoleService.list(Wrappers.<ClusterUserRole>lambdaQuery().eq(ClusterUserRole::getClusterId, clusterId));
+        List<Integer> userIds = new ArrayList<>();
+        List<Integer> roleIds = new ArrayList<>();
+        if (clusterUserRoles == null || clusterUserRoles.size() == 0) {
+            return new ArrayList<UserDTO>();
+        }
+        for (ClusterUserRole clusterUserRole : clusterUserRoles) {
+            userIds.add(clusterUserRole.getUserId());
+            roleIds.add(clusterUserRole.getRoleId());
+        }
+        // 查询用户
+        List<User> users = new ArrayList<>();
+        if (userIds.size() > 0) {
+            users = userService.list(Wrappers.<User>lambdaQuery().in(User::getId, userIds));
+        }
+        // 查询角色
+        List<Role> roles = new ArrayList<>();
+        if (roleIds.size() > 0) {
+            roles = roleService.list(Wrappers.<Role>lambdaQuery().in(Role::getId, roleIds));
+        }
+
+        // 绑定用户角色
+        Map<Integer, User> userMap = new HashMap<>();
+        Map<Integer, Role> roleMap = new HashMap<>();
+        for (User user : users) {
+            userMap.put(user.getId(), user);
+        }
+        for (Role role : roles) {
+            roleMap.put(role.getId(), role);
+        }
+        List<UserDTO> userDTOS = new ArrayList<>();
+        for (ClusterUserRole userRole : clusterUserRoles) {
+            UserDTO userDTO = new UserDTO();
+            userDTO.setUser(userMap.get(userRole.getUserId()));
+            List<Role> roleList = new ArrayList<>();
+            roleList.add(roleMap.get(userRole.getRoleId()));
+            userDTO.setRoleList(roleList);
+            userDTO.setId(userRole.getId());
+            userDTOS.add(userDTO);
+        }
+        return userDTOS;
+    }
+
+    @Override
+    public Result bindUserRole(ClusterUserRole clusterUserRole) {
+        LambdaQueryWrapper<ClusterUserRole> wrapper = Wrappers.<ClusterUserRole>lambdaQuery()
+                .eq(ClusterUserRole::getClusterId, clusterUserRole.getClusterId())
+                .eq(ClusterUserRole::getUserId, clusterUserRole.getUserId())
+                .eq(ClusterUserRole::getRoleId, clusterUserRole.getRoleId());
+        List<ClusterUserRole> clusterUserRoles = clusterUserRoleService.list(wrapper);
+        if (clusterUserRoles != null && clusterUserRoles.size() > 0) {
+            return Result.failed("关系已存在，无法重复绑定");
+        }
+        boolean save = clusterUserRoleService.save(clusterUserRole);
+        if (save) {
+            return Result.succeed(clusterUserRole, "绑定成功");
+        }
+        return Result.failed("绑定失败");
+    }
+
+    @Override
+    public Result unbindUserRole(ClusterUserRole clusterUserRole) {
+        ClusterUserRole userRole = clusterUserRoleService.getById(clusterUserRole.getId());
+        if (userRole == null) {
+            return Result.failed("关系不存在，无法解绑");
+        }
+        boolean save = clusterUserRoleService.removeById(clusterUserRole.getId());
+        if (save) {
+            return Result.succeed(clusterUserRole, "解绑成功");
+        }
+        return Result.failed("解绑失败");
+    }
+
+    @Override
+    public List<HadoopClusterModel> listByUser() {
+        List<HadoopCluster> clusters = this.list();
+        List<YarnQueue> queues = yarnQueueService.list();
+        List<HadoopClusterModel> res = new ArrayList<>();
+        if (clusters != null) {
+            for (HadoopCluster cluster : clusters) {
+                HadoopClusterModel hadoopClusterModel = new HadoopClusterModel();
+                BeanUtil.copyProperties(cluster, hadoopClusterModel, CopyOptions.create(null, true));
+                List<YarnQueue> yarnQueues = new ArrayList<>();
+                for (YarnQueue queue : queues) {
+                    if (cluster.getId().intValue() == queue.getClusterId().intValue()) {
+                        yarnQueues.add(queue);
+                    }
+                }
+                List<YarnQueueModel> yarnQueueModels = BeanUtil.copyToList(yarnQueues, YarnQueueModel.class);
+                hadoopClusterModel.setYarnQueueModels(yarnQueueModels);
+                res.add(hadoopClusterModel);
+            }
+        }
+        int userId = StpUtil.getLoginIdAsInt();
+        List<ClusterUserRole> clusterUserRoles = clusterUserRoleService.list(Wrappers.<ClusterUserRole>lambdaQuery().eq(ClusterUserRole::getUserId, userId));
+        List<Integer> clusterIds = clusterUserRoles.stream().map(x -> x.getClusterId()).collect(Collectors.toList());
+        List<HadoopClusterModel> filters = res.stream().filter(r -> clusterIds.contains(r.getId())).collect(Collectors.toList());
+        return filters;
     }
 
     @Override

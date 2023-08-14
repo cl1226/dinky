@@ -25,6 +25,7 @@ import com.dlink.context.TenantContextHolder;
 
 import java.util.List;
 
+import com.dlink.context.WorkspaceContextHolder;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,11 +49,8 @@ import net.sf.jsqlparser.expression.NullValue;
 public class MybatisPlusConfig {
 
     private static final List<String> IGNORE_TABLE_NAMES = Lists.newArrayList(
-            "dlink_namespace", "dlink_alert_group", "dlink_alert_history", "dlink_alert_instance", "dlink_catalogue",
-            "dlink_cluster", "dlink_cluster_configuration"
-             ,"dlink_fragment"
-            , "dlink_history", "dlink_jar", "dlink_job_history", "dlink_job_instance", "dlink_role", "dlink_savepoints",
-            "dlink_task", "dlink_task_statement", "dlink_task_version");
+            "dlink_hadoop_cluster", "dlink_user", "dlink_role", "dlink_cluster_user_role",
+            "dlink_workspace");
 
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
@@ -60,20 +58,24 @@ public class MybatisPlusConfig {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
+            @Override
+            public String getTenantIdColumn() {
+                return "workspace_id";
+            }
 
             @Override
             public Expression getTenantId() {
-                Integer tenantId = (Integer) TenantContextHolder.get();
-                if (tenantId == null) {
-                    // log.warn("request context tenant id is null");
+                Integer workspaceId = (Integer) WorkspaceContextHolder.get();
+                if (workspaceId == null) {
+                    // log.warn("request context workspace id is null");
                     return new NullValue();
                 }
-                return new LongValue(tenantId);
+                return new LongValue(workspaceId);
             }
 
             @Override
             public boolean ignoreTable(String tableName) {
-                return !IGNORE_TABLE_NAMES.contains(tableName);
+                return IGNORE_TABLE_NAMES.contains(tableName);
             }
         }));
 

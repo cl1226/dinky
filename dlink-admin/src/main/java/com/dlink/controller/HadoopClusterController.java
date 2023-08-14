@@ -3,10 +3,10 @@ package com.dlink.controller;
 import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.dlink.common.result.Result;
-import com.dlink.model.HadoopCluster;
-import com.dlink.model.HadoopClusterModel;
-import com.dlink.model.YarnQueue;
+import com.dlink.dto.UserDTO;
+import com.dlink.model.*;
 import com.dlink.service.HadoopClusterService;
+import com.dlink.service.UserService;
 import com.dlink.service.YarnQueueService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +31,35 @@ public class HadoopClusterController {
     private HadoopClusterService hadoopClusterService;
     @Autowired
     private YarnQueueService yarnQueueService;
+    @Autowired
+    private UserService userService;
 
     @GetMapping
     public Result listAll() {
         List<HadoopClusterModel> list =  hadoopClusterService.listAll();
         return Result.succeed(list, "获取成功");
+    }
+
+    @GetMapping(value = "listByUser")
+    public Result listByUser() {
+        List<HadoopClusterModel> list = hadoopClusterService.listByUser();
+        return Result.succeed(list, "获取成功");
+    }
+
+    @GetMapping(value = "listBindUser")
+    public Result listBindUser(@RequestParam Integer clusterId) {
+        List<UserDTO> userDTOS = hadoopClusterService.listBindUser(clusterId);
+        return Result.succeed(userDTOS, "获取成功");
+    }
+
+    @PostMapping(value = "bindUser")
+    public Result bindUser(@RequestBody ClusterUserRole clusterUserRole) {
+        return hadoopClusterService.bindUserRole(clusterUserRole);
+    }
+
+    @PostMapping(value = "unbindUser")
+    public Result unbinduser(@RequestBody ClusterUserRole clusterUserRole) {
+        return hadoopClusterService.unbindUserRole(clusterUserRole);
     }
 
     @GetMapping("detail")

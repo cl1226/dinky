@@ -11,16 +11,20 @@ import com.alibaba.druid.sql.parser.SQLStatementParser;
 import com.dlink.service.DataBaseService;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.ExtractExpression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.parser.ParseException;
-import net.sf.jsqlparser.statement.select.Limit;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.*;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.*;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -37,14 +41,14 @@ public class JdbcTest {
 
     @Test
     public void test() throws ClassNotFoundException, InstantiationException, IllegalAccessException, ParseException, JSQLParserException {
-        String sql = "select count(1) from dlink.dlink_task where id=";
-        Class clazz = Class.forName("com.mysql.cj.jdbc.Driver");
-        Driver driver = (Driver) clazz.newInstance();
-        Properties info = new Properties();
-        info.setProperty("user", "fanglei");
-        info.setProperty("password", "FangLei@2023");
-        Connection connection = null;
-        PreparedStatement statement = null;
+//        String sql = "select id from dlink.dlink_task where id=1";
+//        Class clazz = Class.forName("com.mysql.cj.jdbc.Driver");
+//        Driver driver = (Driver) clazz.newInstance();
+//        Properties info = new Properties();
+//        info.setProperty("user", "fanglei");
+//        info.setProperty("password", "FangLei@2023");
+//        Connection connection = null;
+//        PreparedStatement statement = null;
 
 //        SQLStatement sqlStatement = SQLUtils.parseSingleStatement(sql, DbType.mysql, true);
 //        SQLStatementParser sqlStatementParser = SQLParserUtils.createSQLStatementParser(sql, DbType.mysql);
@@ -58,10 +62,13 @@ public class JdbcTest {
 //            System.out.println("偏移量:"+limit.getOffset());
 //        }
 
+        String sql = "select distinct id from test where 1=1 limit 1,10";
         Select select = (Select) CCJSqlParserUtil.parse(sql);
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
-        System.out.println(plainSelect.toString());
+        plainSelect.setLimit(null);
+        String countSQL = "select count(1) from (" + plainSelect.toString() + ") tmp";
 
+        System.out.println(countSQL);
 
 
 //        try {

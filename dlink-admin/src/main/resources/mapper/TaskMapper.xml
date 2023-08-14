@@ -69,6 +69,12 @@
         where id = #{id}
     </select>
 
+    <select id="getWorkspaceByTaskId" resultType="java.lang.Integer">
+        select workspace_id
+        from dlink_task
+        where id = #{id}
+    </select>
+
     <select id="queryOnLineTaskByDoneStatus" resultType="com.dlink.model.Task">
         select t.id as id, t.name as name
         from dlink_task t

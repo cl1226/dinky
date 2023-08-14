@@ -60,6 +60,9 @@ public class SuperEntity<T extends Model<?>> extends Model<T> implements Seriali
     @NotNull(message = "是否启用不能为空", groups = {Save.class})
     private Boolean enabled;
 
+    @NotNull(message = "工作空间不能为空", groups = {Save.class})
+    private Integer workspaceId;
+
     @TableField(fill = FieldFill.INSERT)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
