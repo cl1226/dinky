@@ -50,7 +50,7 @@ public class MybatisPlusConfig {
 
     private static final List<String> IGNORE_TABLE_NAMES = Lists.newArrayList(
             "dlink_hadoop_cluster", "dlink_user", "dlink_role", "dlink_cluster_user_role",
-            "dlink_workspace");
+            "dlink_workspace", "dlink_hadoop_client");
 
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {

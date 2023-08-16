@@ -19,5 +19,7 @@ public class WorkflowNode {
     private String nodeType;
     private String nodeInfo;
     private String group;
+    private String result_table_name;
+    private String source_table_name;
 
 }

@@ -75,18 +75,12 @@ public class WorkflowTaskServiceImpl extends SuperServiceImpl<WorkflowTaskMapper
     public WorkflowTaskDTO getTaskInfoById(Integer id) {
         WorkflowTask task = this.getById(id);
         WorkflowTaskDTO taskDTO = new WorkflowTaskDTO();
-        try {
-            BeanUtils.copyProperties(taskDTO, task);
-            String loginId = StpUtil.getLoginIdAsString();
-            if (loginId.equals(task.getLockUser())) {
-                taskDTO.setLockStatus(true);
-            } else {
-                taskDTO.setLockStatus(false);
-            }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        BeanUtil.copyProperties(task, taskDTO, CopyOptions.create(null, true));
+        String loginId = StpUtil.getLoginIdAsString();
+        if (loginId.equals(task.getLockUser())) {
+            taskDTO.setLockStatus(true);
+        } else {
+            taskDTO.setLockStatus(false);
         }
 
         return taskDTO;

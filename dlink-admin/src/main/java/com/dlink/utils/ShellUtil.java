@@ -162,6 +162,7 @@ public class ShellUtil {
             if (channel != null && channel.isConnected()) {
                 channel.disconnect();
             }
+            closeConnect();
         }
 
     }

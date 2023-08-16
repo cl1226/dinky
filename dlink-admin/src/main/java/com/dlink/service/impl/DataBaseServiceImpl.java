@@ -89,8 +89,8 @@ public class DataBaseServiceImpl extends SuperServiceImpl<DataBaseMapper, DataBa
         }
         String krb5Path = "/hadoop/" + hadoopCluster.getUuid() + "/keytab/krb5.conf";
         String keytabPath =  "/hadoop/" + hadoopCluster.getUuid() + "/keytab/" + dataBase.getKeytabName();
-        InputStream krb5in = minioStorageService.downloadFile(krb5Path);
-        InputStream keytabin = minioStorageService.downloadFile(keytabPath);
+        InputStream krb5in = minioStorageService.downloadFile(bucketName, krb5Path);
+        InputStream keytabin = minioStorageService.downloadFile(bucketName, keytabPath);
         FileUtil.writeFromStream(krb5in, new File(krb5Path));
         FileUtil.writeFromStream(keytabin, new File(keytabPath));
         System.setProperty("java.security.krb5.conf", krb5Path);

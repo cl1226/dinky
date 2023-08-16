@@ -69,6 +69,8 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
     private ClusterUserRoleService clusterUserRoleService;
     @Autowired
     private RoleService roleService;
+    @Value("${dinky.minio.bucket-name}")
+    private String bucketName;
 
     @Override
     @Transactional
@@ -241,24 +243,8 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
     public Result upload(MultipartFile file, String path) {
         String res = null;
         try {
-            res = minioStorageService.uploadFile(file.getBytes(), path + "/" + file.getOriginalFilename());
+            res = minioStorageService.uploadFile(bucketName, file.getBytes(), path + "/" + file.getOriginalFilename());
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ServerException e) {
-            e.printStackTrace();
-        } catch (InsufficientDataException e) {
-            e.printStackTrace();
-        } catch (ErrorResponseException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (InvalidResponseException e) {
-            e.printStackTrace();
-        } catch (XmlParserException e) {
-            e.printStackTrace();
-        } catch (InternalException e) {
             e.printStackTrace();
         }
         return Result.succeed(res, "上传成功");
@@ -283,7 +269,7 @@ public class HadoopClusterServiceImpl extends SuperServiceImpl<HadoopClusterMapp
         }
         JSONArray ja = JSONUtil.parseArray(xmlUrls);
         for (int i = 0; i < ja.size(); i++) {
-            InputStream inputStream = minioStorageService.downloadFile(ja.get(i).toString());
+            InputStream inputStream = minioStorageService.downloadFile(bucketName, ja.get(i).toString());
             configuration.addResource(inputStream);
         }
 

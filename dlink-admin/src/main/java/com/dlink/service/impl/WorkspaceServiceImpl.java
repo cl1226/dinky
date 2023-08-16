@@ -101,9 +101,9 @@ public class WorkspaceServiceImpl extends SuperServiceImpl<WorkspaceMapper, Work
         // 对应海豚调度的项目
         Project project = null;
         if (StringUtils.isNotBlank(workspace.getProjectCode())) {
-            project = projectClient.updateProjectByName(workspace.getProjectCode(), workspace.getName());
+            project = projectClient.updateProjectByName(workspace.getProjectCode(), cluster.getName() + "_" + workspace.getName());
         } else {
-            project = projectClient.createProjectByName(workspace.getName());
+            project = projectClient.createProjectByName(cluster.getName() + "_" + workspace.getName());
         }
         if (project != null) {
             ws.setProjectCode(String.valueOf(project.getCode()));

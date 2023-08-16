@@ -27,6 +27,7 @@ import com.dlink.common.result.Result;
 import com.dlink.dto.CatalogueTaskDTO;
 import com.dlink.dto.WorkflowCatalogueTaskDTO;
 import com.dlink.model.WorkflowCatalogue;
+import com.dlink.model.WorkflowCatalogueDTO;
 import com.dlink.service.WorkflowCatalogueService;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
@@ -209,7 +210,7 @@ public class WorkflowCatalogueController {
      */
     @PostMapping("/getCatalogueTreeData")
     public Result getCatalogueTreeData() throws Exception {
-        List<WorkflowCatalogue> catalogues = catalogueService.getAllData();
+        List<WorkflowCatalogueDTO> catalogues = catalogueService.getAllData();
         return Result.succeed(catalogues, "获取成功");
     }
 

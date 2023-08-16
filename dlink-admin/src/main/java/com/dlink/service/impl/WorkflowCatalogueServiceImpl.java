@@ -1,5 +1,8 @@
 package com.dlink.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -55,10 +58,35 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
     private AlertHistoryService alertHistoryService;
     @Autowired
     private WorkspaceService workspaceService;
+    @Autowired
+    private UserService userService;
 
     @Override
-    public List<WorkflowCatalogue> getAllData() {
-        return this.list();
+    public List<WorkflowCatalogueDTO> getAllData() {
+        List<WorkflowCatalogue> catalogues = this.list();
+        List<WorkflowCatalogueDTO> workflowCatalogueDTOS = BeanUtil.copyToList(catalogues, WorkflowCatalogueDTO.class, CopyOptions.create(null, true));
+        List<WorkflowTask> tasks = taskService.list();
+        for (WorkflowCatalogueDTO catalogue : workflowCatalogueDTOS) {
+            if (!catalogue.getIsLeaf()) {
+                continue;
+            }
+            for (WorkflowTask task : tasks) {
+                if (catalogue.getTaskId().intValue() == task.getId().intValue()) {
+                    String lockUser = task.getLockUser();
+                    String loginId = StpUtil.getLoginIdAsString();
+                    if (lockUser.equals(loginId)) {
+                        catalogue.setLockInfo("我锁定");
+                        break;
+                    }
+                    User user = userService.getById(lockUser);
+                    if (user != null) {
+                        catalogue.setLockInfo(user.getNickname() + "锁定");
+                    }
+                    break;
+                }
+            }
+        }
+        return workflowCatalogueDTOS;
     }
 
     @Override
@@ -133,7 +161,8 @@ public class WorkflowCatalogueServiceImpl extends SuperServiceImpl<WorkflowCatal
                 if (count > 0) {
                     errors.add("该目录下存在子目录或者作业，不允许删除");
                 } else {
-                    List<WorkflowCatalogue> all = this.getAllData();
+                    List<WorkflowCatalogueDTO> catalogueDTOS = this.getAllData();
+                    List<WorkflowCatalogue> all = BeanUtil.copyToList(catalogueDTOS, WorkflowCatalogue.class, CopyOptions.create(null, true));
                     Set<WorkflowCatalogue> del = new HashSet<>();
                     this.findAllCatalogueInDir(id, all, del);
                     List<String> actives = this.analysisActiveCatalogues(del);

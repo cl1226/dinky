@@ -19,6 +19,7 @@
 
 package com.dlink.service.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -65,9 +66,11 @@ import com.dlink.job.Job;
 import com.dlink.job.JobConfig;
 import com.dlink.job.JobManager;
 import com.dlink.job.JobResult;
+import com.dlink.mapper.HadoopClusterMapper;
 import com.dlink.mapper.TaskMapper;
 import com.dlink.metadata.driver.Driver;
 import com.dlink.metadata.result.JdbcSelectResult;
+import com.dlink.minio.MinioStorageService;
 import com.dlink.model.*;
 import com.dlink.process.context.ProcessContextHolder;
 import com.dlink.process.model.ProcessEntity;
@@ -84,9 +87,7 @@ import com.jcraft.jsch.JSchException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -101,6 +102,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.spark.launcher.SparkLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -187,6 +190,10 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
     private String bucket;
     @Autowired
     private UDFService udfService;
+    @Autowired
+    private HadoopClusterMapper hadoopClusterMapper;
+    @Autowired
+    private MinioStorageService minioStorageService;
 
     private String buildParas(Integer id) {
         return buildParas(id, StrUtil.NULL);
@@ -396,6 +403,30 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
         }
     }
 
+    private boolean initKerberos(DataBase dataBase) {
+        HadoopCluster hadoopCluster = hadoopClusterMapper.getOneByAddress(dataBase.getUrl());
+        if (hadoopCluster == null) {
+            return false;
+        }
+        String krb5Path = "/hadoop/" + hadoopCluster.getUuid() + "/keytab/krb5.conf";
+        String keytabPath =  "/hadoop/" + hadoopCluster.getUuid() + "/keytab/" + dataBase.getKeytabName();
+        InputStream krb5in = minioStorageService.downloadFile(bucket, krb5Path);
+        InputStream keytabin = minioStorageService.downloadFile(bucket, keytabPath);
+        FileUtil.writeFromStream(krb5in, new File(krb5Path));
+        FileUtil.writeFromStream(keytabin, new File(keytabPath));
+        System.setProperty("java.security.krb5.conf", krb5Path);
+        Configuration configuration = new Configuration();
+        configuration.set("hadoop.security.authentication" , "Kerberos");
+        configuration.setBoolean("hadoop.security.authorization", true);
+        UserGroupInformation.setConfiguration(configuration);
+        try {
+            UserGroupInformation.loginUserFromKeytab(dataBase.getPrincipalName() , keytabPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
     private JobResult executeCommonSql(SqlDTO sqlDTO) {
         JobResult result = new JobResult();
         result.setStatement(sqlDTO.getStatement());
@@ -413,6 +444,9 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
                 result.setError("数据源不存在");
                 result.setEndTime(LocalDateTime.now());
                 return result;
+            }
+            if (dataBase.getKerberos() != null && dataBase.getKerberos()) {
+                initKerberos(dataBase);
             }
             Driver driver = Driver.build(dataBase.getDriverConfig());
             JdbcSelectResult selectResult = driver.executeSql(sqlDTO.getStatement(), sqlDTO.getMaxRowNum());

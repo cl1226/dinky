@@ -26,6 +26,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -69,6 +70,8 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
     private MinioStorageService minioStorageService;
     @Autowired
     private HadoopClusterMapper hadoopClusterMapper;
+    @Value("${dinky.minio.bucket-name}")
+    private String bucketName;
 
     @Override
     public Page<MetadataTask> page(SearchCondition searchCondition) {
@@ -199,8 +202,8 @@ public class MetadataTaskServiceImpl extends SuperServiceImpl<MetadataTaskMapper
         }
         String krb5Path = "/hadoop/" + hadoopCluster.getUuid() + "/keytab/krb5.conf";
         String keytabPath =  "/hadoop/" + hadoopCluster.getUuid() + "/keytab/" + dataBase.getKeytabName();
-        InputStream krb5in = minioStorageService.downloadFile(krb5Path);
-        InputStream keytabin = minioStorageService.downloadFile(keytabPath);
+        InputStream krb5in = minioStorageService.downloadFile(bucketName, krb5Path);
+        InputStream keytabin = minioStorageService.downloadFile(bucketName, keytabPath);
         FileUtil.writeFromStream(krb5in, new File(krb5Path));
         FileUtil.writeFromStream(keytabin, new File(keytabPath));
         System.setProperty("java.security.krb5.conf", krb5Path);

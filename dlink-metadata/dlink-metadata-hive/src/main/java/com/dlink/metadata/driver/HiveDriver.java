@@ -397,14 +397,14 @@ public class HiveDriver extends AbstractJdbcDriver implements Driver {
     @Override
     public int executeUpdate(String sql) throws Exception {
 
-        if (config.getUrl().contains("principal")) {
-            System.setProperty("java.security.krb5.conf", "/etc/krb5.conf");
-            Configuration configuration = new Configuration();
-            configuration.set("hadoop.security.authentication" , "Kerberos");
-            configuration.setBoolean("hadoop.security.authorization", true);
-            UserGroupInformation.setConfiguration(configuration);
-            UserGroupInformation.loginUserFromKeytab("svolt@SVOLT.COM" , "/opt/keytab/svolt.keytab");
-        }
+//        if (config.getUrl().contains("principal")) {
+//            System.setProperty("java.security.krb5.conf", "/etc/krb5.conf");
+//            Configuration configuration = new Configuration();
+//            configuration.set("hadoop.security.authentication" , "Kerberos");
+//            configuration.setBoolean("hadoop.security.authorization", true);
+//            UserGroupInformation.setConfiguration(configuration);
+//            UserGroupInformation.loginUserFromKeytab("svolt@SVOLT.COM" , "/opt/keytab/svolt.keytab");
+//        }
 
         Asserts.checkNullString(sql, "Sql 语句为空");
         String querySQL = sql.trim().replaceAll(";$", "");

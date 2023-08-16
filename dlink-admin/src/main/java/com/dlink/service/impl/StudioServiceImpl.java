@@ -78,6 +78,7 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -110,6 +111,8 @@ public class StudioServiceImpl implements StudioService {
     private HadoopClusterMapper hadoopClusterMapper;
     @Autowired
     private MinioStorageService minioStorageService;
+    @Value("${dinky.minio.bucket-name}")
+    private String bucketName;
 
     public StudioServiceImpl(ClusterService clusterService,
             ClusterConfigurationService clusterConfigurationService,
@@ -235,6 +238,9 @@ public class StudioServiceImpl implements StudioService {
             return result;
         }
         DataBase dataBase = dataBaseService.getById(sqlDTO.getDatabaseId());
+        if (dataBase.getKerberos() != null && dataBase.getKerberos()) {
+            initKerberos(dataBase);
+        }
         if (Asserts.isNull(dataBase)) {
             process.error("The database does not exist.");
             result.setSuccess(false);
@@ -395,8 +401,8 @@ public class StudioServiceImpl implements StudioService {
         }
         String krb5Path = "/hadoop/" + hadoopCluster.getUuid() + "/keytab/krb5.conf";
         String keytabPath =  "/hadoop/" + hadoopCluster.getUuid() + "/keytab/" + dataBase.getKeytabName();
-        InputStream krb5in = minioStorageService.downloadFile(krb5Path);
-        InputStream keytabin = minioStorageService.downloadFile(keytabPath);
+        InputStream krb5in = minioStorageService.downloadFile(bucketName, krb5Path);
+        InputStream keytabin = minioStorageService.downloadFile(bucketName, keytabPath);
         FileUtil.writeFromStream(krb5in, new File(krb5Path));
         FileUtil.writeFromStream(keytabin, new File(keytabPath));
         System.setProperty("java.security.krb5.conf", krb5Path);

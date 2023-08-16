@@ -89,7 +89,7 @@ public class FileController {
             return Result.succeed(searchCondition.getIds(), "删除成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return Result.failed("删失败");
+            return Result.failed("删除失败");
         }
     }
 

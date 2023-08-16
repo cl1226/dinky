@@ -94,6 +94,7 @@ public class UserServiceImpl extends SuperServiceImpl<UserMapper, User> implemen
         user.setPassword(SaSecureUtil.md5(user.getPassword()));
         user.setEnabled(true);
         user.setIsDelete(false);
+        user.setSa(false);
         if (save(user)) {
             return Result.succeed(MessageResolverUtils.getMessage("user.register.success"));
         } else {

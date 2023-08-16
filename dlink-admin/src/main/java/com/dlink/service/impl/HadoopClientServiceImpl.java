@@ -2,6 +2,7 @@ package com.dlink.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import com.baomidou.mybatisplus.annotation.InterceptorIgnore;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dlink.common.result.Result;
@@ -31,6 +32,7 @@ public class HadoopClientServiceImpl extends SuperServiceImpl<ClusterInstanceMap
     private HadoopClusterService hadoopClusterService;
 
     @Override
+    @InterceptorIgnore(tenantLine = "true")
     public Page<HadoopClient> page(SearchCondition searchCondition) {
         Page<HadoopClient> page = new Page<>(searchCondition.getPageIndex(), searchCondition.getPageSize());
 

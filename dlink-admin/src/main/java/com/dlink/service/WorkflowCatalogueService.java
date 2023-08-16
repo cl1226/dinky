@@ -6,6 +6,7 @@ import com.dlink.db.service.ISuperService;
 import com.dlink.dto.CatalogueTaskDTO;
 import com.dlink.dto.WorkflowCatalogueTaskDTO;
 import com.dlink.model.WorkflowCatalogue;
+import com.dlink.model.WorkflowCatalogueDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
@@ -19,7 +20,7 @@ import java.util.List;
  **/
 public interface WorkflowCatalogueService extends ISuperService<WorkflowCatalogue> {
 
-    List<WorkflowCatalogue> getAllData();
+    List<WorkflowCatalogueDTO> getAllData();
 
     List<WorkflowCatalogue> getAllRootData();
 
